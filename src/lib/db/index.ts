@@ -6,9 +6,9 @@ import * as schema from './schema';
 const connectionString = process.env.DATABASE_URL!;
 
 // Cliente postgres para queries
-const client = postgres(connectionString, { 
+const client = postgres(connectionString, {
   max: 1,
-  ssl: process.env.NODE_ENV === 'production' ? 'require' : false 
+  ssl: process.env.NODE_ENV === 'production' ? 'require' : false,
 });
 
 // Instância do Drizzle
