@@ -34,7 +34,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         try {
           // Validar entrada
           const { email, password } = loginSchema.parse(credentials);
-          
+
           // TODO: Implementar busca no banco quando adapter estiver configurado
           // const user = await db.query.users.findFirst({
           //   where: (users, { eq }) => eq(users.email, email),
