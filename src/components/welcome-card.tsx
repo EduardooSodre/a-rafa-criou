@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 export function WelcomeCard() {
   return (
@@ -36,11 +37,15 @@ export function WelcomeCard() {
         </div>
         
         <div className='flex gap-3'>
-          <Button className='bg-primary hover:bg-secondary'>
-            Começar Desenvolvimento
+          <Button asChild className='bg-primary hover:bg-secondary'>
+            <Link href='/auth/login'>
+              Fazer Login
+            </Link>
           </Button>
-          <Button variant='outline'>
-            Ver Documentação
+          <Button asChild variant='outline'>
+            <Link href='/auth/register'>
+              Criar Conta
+            </Link>
           </Button>
         </div>
       </div>

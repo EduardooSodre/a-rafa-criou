@@ -1,4 +1,8 @@
 import { defineConfig } from 'drizzle-kit';
+import { config } from 'dotenv';
+
+// Carregar variáveis de ambiente do .env.local
+config({ path: '.env.local' });
 
 export default defineConfig({
   schema: './src/lib/db/schema.ts',

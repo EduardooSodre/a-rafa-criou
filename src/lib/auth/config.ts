@@ -1,7 +1,6 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import EmailProvider from 'next-auth/providers/email';
-// Comentado temporariamente para evitar conflitos de tipos
 // import { DrizzleAdapter } from '@auth/drizzle-adapter';
 // import { db } from '@/lib/db';
 // import { users, accounts, sessions, verificationTokens } from '@/lib/db/schema';
@@ -15,7 +14,8 @@ const loginSchema = z.object({
 });
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  // Adapter será configurado após resolver conflitos de tipos
+  // Adapter temporariamente desabilitado devido a conflitos de tipos
+  // Será reconfigurado na próxima iteração
   // adapter: DrizzleAdapter(db, {
   //   usersTable: users,
   //   accountsTable: accounts,
