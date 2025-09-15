@@ -11,7 +11,10 @@ const authOptions = {
       },
       async authorize(credentials) {
         // Temporary hardcoded user for testing
-        if (credentials?.email === 'admin@arafacriou.com.br' && credentials?.password === 'admin123') {
+        if (
+          credentials?.email === 'admin@arafacriou.com.br' &&
+          credentials?.password === 'admin123'
+        ) {
           return {
             id: '1',
             email: 'admin@arafacriou.com.br',

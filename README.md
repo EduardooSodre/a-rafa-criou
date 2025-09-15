@@ -1,14 +1,8 @@
 # A Rafa Criou - E-commerce de PDFs# 🚀 A Rafa Criou - E-commerce de PDFs
 
-
-
 E-commerce moderno para venda de produtos digitais em PDF, desenvolvido com Next.js 15, TypeScript, Tailwind CSS e Shadcn UI.E-commerce moderno para venda de produtos digitais (PDFs) com foco em acessibilidade, migração do WooCommerce e experiência otimizada para público 25-70 anos.
 
-
-
 ## 🚀 Status do Projeto## 🎨 Identidade Visual
-
-
 
 ✅ **Base do E-commerce Completamente Funcional**- **Background:** `#F4F4F4`
 
@@ -74,8 +68,6 @@ cd a-rafa-criou
 
 - **Estado:** React Context API + localStorage### 2. Configuração do Ambiente
 
-
-
 ## 🎨 Design System```bash
 
 # Copie o arquivo de exemplo
@@ -97,8 +89,6 @@ cd a-rafa-criou
 - **Fonte:** Poppins (weights: 400, 500, 600, 700)```bash
 
 - **Tamanho mínimo:** 16px (acessibilidade)# Configure seu PostgreSQL e atualize DATABASE_URL no .env.local
-
-
 
 ## 📱 Funcionalidades# Gere e execute as migrations
 
@@ -142,61 +132,57 @@ Acesse [http://localhost:3000](http://localhost:3000) para ver o resultado.
 
 - ✅ Contador no headersrc/
 
-- ✅ Resumo de preços├── app/                    # App Router (Next.js 15)
+- ✅ Resumo de preços├── app/ # App Router (Next.js 15)
 
-│   ├── api/               # API Routes
+│ ├── api/ # API Routes
 
-### Checkout│   ├── auth/              # Páginas de autenticação
+### Checkout│ ├── auth/ # Páginas de autenticação
 
-- ✅ Formulário de dados pessoais│   ├── admin/             # Painel administrativo
+- ✅ Formulário de dados pessoais│ ├── admin/ # Painel administrativo
 
-- ✅ Seleção de forma de pagamento│   ├── produtos/          # Catálogo e PDPs
+- ✅ Seleção de forma de pagamento│ ├── produtos/ # Catálogo e PDPs
 
-- ✅ Resumo do pedido│   └── globals.css        # Estilos globais
+- ✅ Resumo do pedido│ └── globals.css # Estilos globais
 
-- ✅ Validação de campos├── components/            # Componentes React
+- ✅ Validação de campos├── components/ # Componentes React
 
-- ✅ Simulação de processamento│   └── ui/               # Componentes Shadcn UI
+- ✅ Simulação de processamento│ └── ui/ # Componentes Shadcn UI
 
-├── lib/                   # Utilitários e configurações
+├── lib/ # Utilitários e configurações
 
-### Pós-Compra│   ├── auth/             # Configuração Auth.js
+### Pós-Compra│ ├── auth/ # Configuração Auth.js
 
-- ✅ Página de confirmação│   ├── db/               # Drizzle ORM e schemas
+- ✅ Página de confirmação│ ├── db/ # Drizzle ORM e schemas
 
-- ✅ Detalhes do pedido│   └── utils.ts          # Funções utilitárias
+- ✅ Detalhes do pedido│ └── utils.ts # Funções utilitárias
 
-- ✅ Links de download (simulados)├── hooks/                 # Custom React Hooks
+- ✅ Links de download (simulados)├── hooks/ # Custom React Hooks
 
-- ✅ Informações importantes└── types/                 # Definições TypeScript
+- ✅ Informações importantes└── types/ # Definições TypeScript
 
 - ✅ Próximos passos```
 
-
-
 ## 🏃‍♂️ Como Executar## 🔧 Scripts Disponíveis
 
-
-
-```bash```bash
+`bash`bash
 
 # Instalar dependências# Desenvolvimento
 
-npm installnpm run dev              # Servidor de desenvolvimento
+npm installnpm run dev # Servidor de desenvolvimento
 
-npm run build            # Build de produção
+npm run build # Build de produção
 
-# Iniciar servidor de desenvolvimentonpm run start            # Servidor de produção
+# Iniciar servidor de desenvolvimentonpm run start # Servidor de produção
 
 npm run dev
 
 # Qualidade de código
 
-# Abrir no navegadornpm run lint             # ESLint
+# Abrir no navegadornpm run lint # ESLint
 
-http://localhost:3000npm run lint:fix         # ESLint com correção automática
+http://localhost:3000npm run lint:fix # ESLint com correção automática
 
-```npm run format           # Prettier
+````npm run format           # Prettier
 
 npm run format:check     # Verificar formatação
 
@@ -311,3 +297,4 @@ Para questões técnicas ou suporte, entre em contato através dos canais oficia
 ---
 
 **Desenvolvido com ❤️ para A Rafa Criou**
+````

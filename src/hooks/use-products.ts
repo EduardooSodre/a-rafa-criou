@@ -41,12 +41,14 @@ export function useProducts() {
         name: 'Guia Completo de Marketing Digital',
         slug: 'guia-marketing-digital',
         shortDescription: 'Aprenda as melhores estratégias de marketing digital para 2024',
-        description: 'Um guia completo com mais de 100 páginas sobre marketing digital, incluindo SEO, redes sociais, e-mail marketing e muito mais.',
-        price: 47.90,
+        description:
+          'Um guia completo com mais de 100 páginas sobre marketing digital, incluindo SEO, redes sociais, e-mail marketing e muito mais.',
+        price: 47.9,
         isFeatured: true,
         isActive: true,
         seoTitle: 'Guia de Marketing Digital - A Rafa Criou',
-        seoDescription: 'Baixe o guia completo de marketing digital e aprenda as estratégias que realmente funcionam.',
+        seoDescription:
+          'Baixe o guia completo de marketing digital e aprenda as estratégias que realmente funcionam.',
         createdAt: new Date(),
         updatedAt: new Date(),
         variations: [
@@ -55,7 +57,7 @@ export function useProducts() {
             productId: '1',
             name: 'Versão Básica',
             slug: 'basica',
-            price: 47.90,
+            price: 47.9,
             isActive: true,
             sortOrder: 1,
           },
@@ -64,19 +66,20 @@ export function useProducts() {
             productId: '1',
             name: 'Versão Premium (com bônus)',
             slug: 'premium',
-            price: 97.90,
+            price: 97.9,
             isActive: true,
             sortOrder: 2,
-          }
-        ]
+          },
+        ],
       },
       {
         id: '2',
         name: 'Planejador Financeiro Pessoal',
         slug: 'planejador-financeiro',
         shortDescription: 'Organize suas finanças de forma simples e eficaz',
-        description: 'Planejador em PDF editável para controlar gastos, definir metas e alcançar a liberdade financeira.',
-        price: 27.90,
+        description:
+          'Planejador em PDF editável para controlar gastos, definir metas e alcançar a liberdade financeira.',
+        price: 27.9,
         isFeatured: false,
         isActive: true,
         createdAt: new Date(),
@@ -87,13 +90,14 @@ export function useProducts() {
         name: 'E-book: Receitas Saudáveis',
         slug: 'receitas-saudaveis',
         shortDescription: '50 receitas práticas e saudáveis para o dia a dia',
-        description: 'Coletânea de receitas testadas e aprovadas, com ingredientes fáceis de encontrar.',
-        price: 19.90,
+        description:
+          'Coletânea de receitas testadas e aprovadas, com ingredientes fáceis de encontrar.',
+        price: 19.9,
         isFeatured: true,
         isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
-      }
+      },
     ];
 
     // Simular loading
@@ -120,12 +124,14 @@ export function useProduct(slug: string) {
         name: 'Guia Completo de Marketing Digital',
         slug: 'guia-marketing-digital',
         shortDescription: 'Aprenda as melhores estratégias de marketing digital para 2024',
-        description: 'Um guia completo com mais de 100 páginas sobre marketing digital, incluindo SEO, redes sociais, e-mail marketing e muito mais.',
-        price: 47.90,
+        description:
+          'Um guia completo com mais de 100 páginas sobre marketing digital, incluindo SEO, redes sociais, e-mail marketing e muito mais.',
+        price: 47.9,
         isFeatured: true,
         isActive: true,
         seoTitle: 'Guia de Marketing Digital - A Rafa Criou',
-        seoDescription: 'Baixe o guia completo de marketing digital e aprenda as estratégias que realmente funcionam.',
+        seoDescription:
+          'Baixe o guia completo de marketing digital e aprenda as estratégias que realmente funcionam.',
         createdAt: new Date(),
         updatedAt: new Date(),
         variations: [
@@ -134,7 +140,7 @@ export function useProduct(slug: string) {
             productId: '1',
             name: 'Versão Básica',
             slug: 'basica',
-            price: 47.90,
+            price: 47.9,
             isActive: true,
             sortOrder: 1,
           },
@@ -143,19 +149,20 @@ export function useProduct(slug: string) {
             productId: '1',
             name: 'Versão Premium (com bônus)',
             slug: 'premium',
-            price: 97.90,
+            price: 97.9,
             isActive: true,
             sortOrder: 2,
-          }
-        ]
+          },
+        ],
       },
       {
         id: '2',
         name: 'Planejador Financeiro Pessoal',
         slug: 'planejador-financeiro',
         shortDescription: 'Organize suas finanças de forma simples e eficaz',
-        description: 'Planejador em PDF editável para controlar gastos, definir metas e alcançar a liberdade financeira.',
-        price: 27.90,
+        description:
+          'Planejador em PDF editável para controlar gastos, definir metas e alcançar a liberdade financeira.',
+        price: 27.9,
         isFeatured: false,
         isActive: true,
         createdAt: new Date(),
@@ -166,21 +173,22 @@ export function useProduct(slug: string) {
         name: 'E-book: Receitas Saudáveis',
         slug: 'receitas-saudaveis',
         shortDescription: '50 receitas práticas e saudáveis para o dia a dia',
-        description: 'Coletânea de receitas testadas e aprovadas, com ingredientes fáceis de encontrar.',
-        price: 19.90,
+        description:
+          'Coletânea de receitas testadas e aprovadas, com ingredientes fáceis de encontrar.',
+        price: 19.9,
         isFeatured: true,
         isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
-      }
+      },
     ];
-    
+
     // Simular busca por slug
     setTimeout(() => {
       const foundProduct = mockProducts.find(p => p.slug === slug);
       setProduct(foundProduct || null);
       setIsLoading(false);
-      
+
       if (!foundProduct) {
         setError('Produto não encontrado');
       }

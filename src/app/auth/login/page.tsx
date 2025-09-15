@@ -71,7 +71,7 @@ export default function LoginPage() {
                             <AlertDescription>{successMessage}</AlertDescription>
                         </Alert>
                     )}
-                    
+
                     {error && (
                         <Alert variant="destructive">
                             <AlertDescription>{error}</AlertDescription>
