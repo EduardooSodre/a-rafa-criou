@@ -1,0 +1,4 @@
+Contexto: e-commerce de PDFs (público 25–70 anos) em Next.js (App Router) + TypeScript + Tailwind + Shadcn UI + Drizzle (Postgres) + Auth.js.
+Cores: bg #F4F4F4, primária #FED466, secundária #FD9555.
+Requisitos: migração WooCommerce (clientes/pedidos/produtos/variações), compatibilidade de senha phpass (rehash), entrega automática de PDFs com storage privado no Cloudflare R2 (URLs assinadas, TTL curto), cupons, CMS embutido, notificações externas (e-mail obrigatório; WhatsApp/SMS/Web Push opcionais), afiliados, traduções de PDFs, SEO com 301 e canonical, PWA opcional, proteção extra (watermark, limites de re-download, logs), conversor de moeda (BRL/USD/EUR) e i18n da interface (PT/EN).
+Padrões: acessibilidade AA, idempotência em webhooks, rate limiting (login/reset/download/webhooks), testes mínimos por etapa, evitar dados sensíveis no cliente, validação com Zod, imports absolutos com "@/".

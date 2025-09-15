@@ -1,0 +1,17 @@
+node_modules
+.next
+.vercel
+.env
+.env.local
+.env.production.local
+.env.development.local
+dist
+build
+coverage
+.nyc_output
+.cache
+*.log
+*.tgz
+*.tar.gz
+.DS_Store
+Thumbs.db

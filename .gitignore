@@ -39,3 +39,25 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# A Rafa Criou - Specific
+.env
+.env.production
+.env.development
+
+# Database
+*.db
+*.sqlite
+
+# Drizzle migrations (keep folder structure)
+drizzle/migrations/
+!drizzle/.gitkeep
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# Cache
+.cache/
+.tmp/
+.temp/
