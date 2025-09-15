@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import Link from 'next/link';
 
 export default function LoginPage() {
@@ -14,12 +15,22 @@ export default function LoginPage() {
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
     const router = useRouter();
+    const searchParams = useSearchParams();
+
+    useEffect(() => {
+        const message = searchParams.get('message');
+        if (message) {
+            setSuccessMessage(message);
+        }
+    }, [searchParams]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
         setError('');
+        setSuccessMessage('');
 
         try {
             const result = await signIn('credentials', {
@@ -32,26 +43,11 @@ export default function LoginPage() {
                 setError('Credenciais inválidas. Tente novamente.');
             } else {
                 router.push('/'); // Redirect para homepage após login
+                router.refresh();
             }
         } catch (error) {
             console.error('Erro no login:', error);
             setError('Erro interno. Tente novamente.');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleMagicLink = async () => {
-        setIsLoading(true);
-        setError('');
-
-        try {
-            await signIn('email', { email, redirect: false });
-            // TODO: Mostrar mensagem de sucesso
-            alert('Link mágico enviado! Verifique seu e-mail.');
-        } catch (error) {
-            console.error('Erro no magic link:', error);
-            setError('Erro ao enviar link mágico. Tente novamente.');
         } finally {
             setIsLoading(false);
         }
@@ -70,10 +66,16 @@ export default function LoginPage() {
                 </CardHeader>
 
                 <CardContent className='space-y-6'>
+                    {successMessage && (
+                        <Alert>
+                            <AlertDescription>{successMessage}</AlertDescription>
+                        </Alert>
+                    )}
+                    
                     {error && (
-                        <div className='rounded-md bg-destructive/10 p-4 text-sm text-destructive'>
-                            {error}
-                        </div>
+                        <Alert variant="destructive">
+                            <AlertDescription>{error}</AlertDescription>
+                        </Alert>
                     )}
 
                     <form onSubmit={handleSubmit} className='space-y-4'>
@@ -117,7 +119,7 @@ export default function LoginPage() {
                             <div className='w-full border-t border-muted' />
                         </div>
                         <div className='relative flex justify-center text-xs uppercase'>
-                            <span className='bg-card px-2 text-muted-foreground'>ou</span>
+                            <span className='bg-card px-2 text-muted-foreground'>Em breve</span>
                         </div>
                     </div>
 
@@ -125,10 +127,9 @@ export default function LoginPage() {
                         type='button'
                         variant='outline'
                         className='w-full'
-                        onClick={handleMagicLink}
-                        disabled={!email || isLoading}
+                        disabled={true}
                     >
-                        Receber link por e-mail
+                        Link Mágico (Em desenvolvimento)
                     </Button>
 
                     <div className='text-center text-sm text-muted-foreground'>

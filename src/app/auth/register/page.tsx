@@ -58,7 +58,7 @@ export default function RegisterPage() {
                 router.push('/auth/login?message=Conta criada com sucesso!');
             } else {
                 const data = await response.json();
-                setError(data.message || 'Erro ao criar conta.');
+                setError(data.error || 'Erro ao criar conta.');
             }
         } catch (error) {
             console.error('Erro no registro:', error);

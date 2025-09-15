@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
+import { Header } from "@/components/header";
 
 /**
  * Contexto do Copilot:
@@ -31,7 +32,10 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body className={`${poppins.variable} font-sans antialiased`}>
         <Providers>
-          {children}
+          <Header />
+          <main>
+            {children}
+          </main>
         </Providers>
       </body>
     </html>

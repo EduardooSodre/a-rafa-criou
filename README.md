@@ -1,124 +1,244 @@
-# 🚀 A Rafa Criou - E-commerce de PDFs
+# A Rafa Criou - E-commerce de PDFs# 🚀 A Rafa Criou - E-commerce de PDFs
 
-E-commerce moderno para venda de produtos digitais (PDFs) com foco em acessibilidade, migração do WooCommerce e experiência otimizada para público 25-70 anos.
 
-## 🎨 Identidade Visual
 
-- **Background:** `#F4F4F4`
+E-commerce moderno para venda de produtos digitais em PDF, desenvolvido com Next.js 15, TypeScript, Tailwind CSS e Shadcn UI.E-commerce moderno para venda de produtos digitais (PDFs) com foco em acessibilidade, migração do WooCommerce e experiência otimizada para público 25-70 anos.
+
+
+
+## 🚀 Status do Projeto## 🎨 Identidade Visual
+
+
+
+✅ **Base do E-commerce Completamente Funcional**- **Background:** `#F4F4F4`
+
 - **Cor Primária:** `#FED466` (Amarelo)
-- **Cor Secundária:** `#FD9555` (Laranja)
+
+### ✅ Implementado- **Cor Secundária:** `#FD9555` (Laranja)
+
 - **Tipografia:** ≥16px para acessibilidade
-- **Componentes:** Tailwind CSS + Shadcn UI
 
-## 🛠️ Stack Tecnológica
+- **Interface completa** com design responsivo e acessível- **Componentes:** Tailwind CSS + Shadcn UI
 
-- **Framework:** Next.js 15 (App Router)
-- **Linguagem:** TypeScript
-- **Estilização:** Tailwind CSS + Shadcn UI
-- **Banco de Dados:** PostgreSQL + Drizzle ORM
-- **Autenticação:** Auth.js (NextAuth v5)
+- **Catálogo de produtos** com busca, filtros e paginação
+
+- **Sistema de carrinho** com localStorage e gerenciamento de estado## 🛠️ Stack Tecnológica
+
+- **Checkout funcional** com formulários e validação
+
+- **Páginas de produto** individuais com variações e galeria- **Framework:** Next.js 15 (App Router)
+
+- **Sistema de navegação** com header responsivo e menu mobile- **Linguagem:** TypeScript
+
+- **Páginas de confirmação** pós-compra- **Estilização:** Tailwind CSS + Shadcn UI
+
+- **Design system** com cores da marca (#FED466, #FD9555, #F4F4F4)- **Banco de Dados:** PostgreSQL + Drizzle ORM
+
+- **Tipografia acessível** (Poppins, ≥16px)- **Autenticação:** Auth.js (NextAuth v5)
+
 - **Storage:** Cloudflare R2 (S3-compatible)
-- **Pagamentos:** Stripe + PayPal + PIX
+
+### 🔄 Em Desenvolvimento- **Pagamentos:** Stripe + PayPal + PIX
+
 - **E-mail:** Resend
-- **Validação:** Zod
 
-## 🚀 Quick Start
+- Sistema de autenticação completo- **Validação:** Zod
 
-### 1. Instalação
+- Integração com banco de dados PostgreSQL
 
-```bash
+- Gateway de pagamentos real (PIX, cartão, boleto)## 🚀 Quick Start
+
+- Painel administrativo
+
+- Sistema de cupons### 1. Instalação
+
+- Notificações por e-mail
+
+- Downloads seguros com Cloudflare R2```bash
+
 # Clone o repositório
-git clone <repository-url>
+
+## 🛠️ Tecnologiasgit clone <repository-url>
+
 cd a-rafa-criou
 
-# Instale as dependências
-npm install
-```
+- **Framework:** Next.js 15 (App Router)
 
-### 2. Configuração do Ambiente
+- **Linguagem:** TypeScript# Instale as dependências
 
-```bash
+- **Estilização:** Tailwind CSS + Shadcn UInpm install
+
+- **Banco:** PostgreSQL (Neon) + Drizzle ORM```
+
+- **Autenticação:** Auth.js (em desenvolvimento)
+
+- **Estado:** React Context API + localStorage### 2. Configuração do Ambiente
+
+
+
+## 🎨 Design System```bash
+
 # Copie o arquivo de exemplo
-cp .env.example .env.local
 
-# Configure as variáveis necessárias no .env.local
-```
+### Corescp .env.example .env.local
+
+- **Background:** #F4F4F4
+
+- **Primária:** #FED466 (Amarelo)# Configure as variáveis necessárias no .env.local
+
+- **Secundária:** #FD9555 (Laranja)```
+
+- **Texto:** Tons de cinza
 
 ### 3. Banco de Dados
 
-```bash
-# Configure seu PostgreSQL e atualize DATABASE_URL no .env.local
+### Tipografia
 
-# Gere e execute as migrations
+- **Fonte:** Poppins (weights: 400, 500, 600, 700)```bash
+
+- **Tamanho mínimo:** 16px (acessibilidade)# Configure seu PostgreSQL e atualize DATABASE_URL no .env.local
+
+
+
+## 📱 Funcionalidades# Gere e execute as migrations
+
 npm run db:generate
-npm run db:migrate
 
-# (Opcional) Abra o Drizzle Studio
-npm run db:studio
-```
+### Catálogonpm run db:migrate
+
+- ✅ Listagem de produtos com imagens
+
+- ✅ Busca por nome/descrição# (Opcional) Abra o Drizzle Studio
+
+- ✅ Filtros por categoria e preçonpm run db:studio
+
+- ✅ Ordenação (preço, nome, popularidade)```
+
+- ✅ Paginação responsiva
 
 ### 4. Desenvolvimento
 
-```bash
-# Inicie o servidor de desenvolvimento
-npm run dev
-```
+### Produto
+
+- ✅ Galeria de imagens```bash
+
+- ✅ Seleção de variações# Inicie o servidor de desenvolvimento
+
+- ✅ Informações detalhadasnpm run dev
+
+- ✅ Avaliações (interface pronta)```
+
+- ✅ Especificações técnicas
 
 Acesse [http://localhost:3000](http://localhost:3000) para ver o resultado.
 
-## 📁 Estrutura do Projeto
+### Carrinho
 
-```
-src/
-├── app/                    # App Router (Next.js 15)
+- ✅ Adicionar/remover produtos## 📁 Estrutura do Projeto
+
+- ✅ Atualizar quantidades
+
+- ✅ Persistência com localStorage```
+
+- ✅ Contador no headersrc/
+
+- ✅ Resumo de preços├── app/                    # App Router (Next.js 15)
+
 │   ├── api/               # API Routes
-│   ├── auth/              # Páginas de autenticação
-│   ├── admin/             # Painel administrativo
-│   ├── produtos/          # Catálogo e PDPs
-│   └── globals.css        # Estilos globais
-├── components/            # Componentes React
-│   └── ui/               # Componentes Shadcn UI
+
+### Checkout│   ├── auth/              # Páginas de autenticação
+
+- ✅ Formulário de dados pessoais│   ├── admin/             # Painel administrativo
+
+- ✅ Seleção de forma de pagamento│   ├── produtos/          # Catálogo e PDPs
+
+- ✅ Resumo do pedido│   └── globals.css        # Estilos globais
+
+- ✅ Validação de campos├── components/            # Componentes React
+
+- ✅ Simulação de processamento│   └── ui/               # Componentes Shadcn UI
+
 ├── lib/                   # Utilitários e configurações
-│   ├── auth/             # Configuração Auth.js
-│   ├── db/               # Drizzle ORM e schemas
-│   └── utils.ts          # Funções utilitárias
-├── hooks/                 # Custom React Hooks
-└── types/                 # Definições TypeScript
-```
 
-## 🔧 Scripts Disponíveis
+### Pós-Compra│   ├── auth/             # Configuração Auth.js
 
-```bash
-# Desenvolvimento
-npm run dev              # Servidor de desenvolvimento
+- ✅ Página de confirmação│   ├── db/               # Drizzle ORM e schemas
+
+- ✅ Detalhes do pedido│   └── utils.ts          # Funções utilitárias
+
+- ✅ Links de download (simulados)├── hooks/                 # Custom React Hooks
+
+- ✅ Informações importantes└── types/                 # Definições TypeScript
+
+- ✅ Próximos passos```
+
+
+
+## 🏃‍♂️ Como Executar## 🔧 Scripts Disponíveis
+
+
+
+```bash```bash
+
+# Instalar dependências# Desenvolvimento
+
+npm installnpm run dev              # Servidor de desenvolvimento
+
 npm run build            # Build de produção
-npm run start            # Servidor de produção
+
+# Iniciar servidor de desenvolvimentonpm run start            # Servidor de produção
+
+npm run dev
 
 # Qualidade de código
-npm run lint             # ESLint
-npm run lint:fix         # ESLint com correção automática
-npm run format           # Prettier
+
+# Abrir no navegadornpm run lint             # ESLint
+
+http://localhost:3000npm run lint:fix         # ESLint com correção automática
+
+```npm run format           # Prettier
+
 npm run format:check     # Verificar formatação
-npm run type-check       # Verificação TypeScript
 
-# Banco de dados
-npm run db:generate      # Gerar migrations
-npm run db:migrate       # Executar migrations
-npm run db:studio        # Drizzle Studio
-npm run db:push          # Push schema direto (dev)
-```
+## 📋 Próximos Passosnpm run type-check       # Verificação TypeScript
 
-## 🌟 Funcionalidades Principais
 
-### ✅ Implementado (Base)
+
+1. **Autenticação completa** (Auth.js + Drizzle)# Banco de dados
+
+2. **Integração com banco** (CRUD completo)npm run db:generate      # Gerar migrations
+
+3. **Gateway de pagamentos** (Stripe/PagSeguro/PIX)npm run db:migrate       # Executar migrations
+
+4. **Painel administrativo** (gestão de produtos/pedidos)npm run db:studio        # Drizzle Studio
+
+5. **Sistema de e-mails** (confirmações/notificações)npm run db:push          # Push schema direto (dev)
+
+6. **Downloads seguros** (Cloudflare R2 + URLs assinadas)```
+
+7. **Migração WooCommerce** (importação de dados)
+
+8. **Internacionalização** (PT/EN)## 🌟 Funcionalidades Principais
+
+9. **PWA** (app instalável)
+
+10. **Testes automatizados** (Jest/Cypress)### ✅ Implementado (Base)
+
 - [x] Configuração Next.js + TypeScript
-- [x] Tailwind CSS + Shadcn UI com cores customizadas
+
+## 🎯 Público-Alvo- [x] Tailwind CSS + Shadcn UI com cores customizadas
+
 - [x] Drizzle ORM + PostgreSQL
-- [x] Auth.js com Credentials e Magic Link
+
+Pessoas de 25-70 anos interessadas em produtos digitais educacionais, com foco em acessibilidade e experiência intuitiva.- [x] Auth.js com Credentials e Magic Link
+
 - [x] Estrutura de pastas organizada
-- [x] ESLint + Prettier
+
+## 📝 Licença- [x] ESLint + Prettier
+
 - [x] Variáveis de ambiente documentadas
 
+Projeto proprietário - A Rafa Criou
 ### 🔄 Em Desenvolvimento
 - [ ] Esquemas completos do banco (produtos, pedidos, cupons)
 - [ ] Páginas de autenticação (login, cadastro, reset)
