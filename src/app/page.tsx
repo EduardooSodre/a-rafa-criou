@@ -94,7 +94,7 @@ export default function HomePage() {
           <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">
             Produtos em Destaque
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {/* Placeholder para produtos - será substituído por componente real */}
             {Array.from({ length: 4 }).map((_, i) => (
@@ -115,7 +115,7 @@ export default function HomePage() {
               </div>
             ))}
           </div>
-          
+
           <div className="text-center mt-12">
             <Button asChild variant="outline" size="lg" className="border-[#FD9555] text-[#FD9555] hover:bg-[#FD9555] hover:text-white">
               <Link href="/produtos">
