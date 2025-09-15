@@ -21,7 +21,7 @@ const authOptions = {
 
         try {
           console.log('🔍 Buscando usuário:', credentials.email);
-          
+
           // Buscar usuário no banco
           const user = await db
             .select()
@@ -37,7 +37,11 @@ const authOptions = {
           }
 
           const dbUser = user[0];
-          console.log('✅ Usuário encontrado:', { id: dbUser.id, email: dbUser.email, hasPassword: !!dbUser.password });
+          console.log('✅ Usuário encontrado:', {
+            id: dbUser.id,
+            email: dbUser.email,
+            hasPassword: !!dbUser.password,
+          });
 
           // Verificar senha
           if (!dbUser.password) {
@@ -46,10 +50,7 @@ const authOptions = {
           }
 
           console.log('🔐 Verificando senha...');
-          const isPasswordValid = await bcrypt.compare(
-            credentials.password,
-            dbUser.password
-          );
+          const isPasswordValid = await bcrypt.compare(credentials.password, dbUser.password);
 
           console.log('✅ Senha válida:', isPasswordValid);
 
