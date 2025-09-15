@@ -9,6 +9,7 @@ import {
   boolean,
   json,
   primaryKey,
+  unique,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -254,7 +255,7 @@ export const contentPages = pgTable(
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
   table => ({
-    pk: primaryKey({ columns: [table.slug, table.lang] }),
+    uniqueSlugLang: unique().on(table.slug, table.lang),
   })
 );
 

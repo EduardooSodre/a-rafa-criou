@@ -1,5 +1,9 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import { db } from '@/lib/db';
+import { users } from '@/lib/db/schema';
+import { eq } from 'drizzle-orm';
+import bcrypt from 'bcryptjs';
 
 const authOptions = {
   providers: [
@@ -10,19 +14,61 @@ const authOptions = {
         password: { label: 'Senha', type: 'password' },
       },
       async authorize(credentials) {
-        // Temporary hardcoded user for testing
-        if (
-          credentials?.email === 'admin@arafacriou.com.br' &&
-          credentials?.password === 'admin123'
-        ) {
-          return {
-            id: '1',
-            email: 'admin@arafacriou.com.br',
-            name: 'Admin',
-            role: 'admin',
-          };
+        if (!credentials?.email || !credentials?.password) {
+          console.log('❌ Credenciais não fornecidas');
+          return null;
         }
-        return null;
+
+        try {
+          console.log('🔍 Buscando usuário:', credentials.email);
+          
+          // Buscar usuário no banco
+          const user = await db
+            .select()
+            .from(users)
+            .where(eq(users.email, credentials.email))
+            .limit(1);
+
+          console.log('👤 Usuários encontrados:', user.length);
+
+          if (user.length === 0) {
+            console.log('❌ Usuário não encontrado');
+            return null;
+          }
+
+          const dbUser = user[0];
+          console.log('✅ Usuário encontrado:', { id: dbUser.id, email: dbUser.email, hasPassword: !!dbUser.password });
+
+          // Verificar senha
+          if (!dbUser.password) {
+            console.log('❌ Usuário sem senha no banco');
+            return null;
+          }
+
+          console.log('🔐 Verificando senha...');
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password,
+            dbUser.password
+          );
+
+          console.log('✅ Senha válida:', isPasswordValid);
+
+          if (!isPasswordValid) {
+            console.log('❌ Senha inválida');
+            return null;
+          }
+
+          console.log('🎉 Login bem-sucedido para:', dbUser.email);
+          return {
+            id: dbUser.id,
+            email: dbUser.email,
+            name: dbUser.name || undefined,
+            role: dbUser.role,
+          };
+        } catch (error) {
+          console.error('❌ Auth error:', error);
+          return null;
+        }
       },
     }),
   ],
@@ -34,14 +80,14 @@ const authOptions = {
     strategy: 'jwt' as const,
   },
   callbacks: {
-    async session({ session, token }) {
+    async session({ session, token }: any) {
       if (token?.sub && session.user) {
         session.user.id = token.sub;
         session.user.role = token.role as string;
       }
       return session;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user }: any) {
       if (user) {
         token.role = user.role;
       }
