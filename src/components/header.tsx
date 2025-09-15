@@ -53,7 +53,6 @@ export function Header() {
         { name: 'Início', href: '/', icon: Home },
         { name: 'Menu', href: '/produtos', icon: Package },
         { name: 'Favoritos', href: '/favoritos', icon: Heart },
-        { name: 'Minha conta', href: session ? '/conta' : '/auth/login', icon: User },
     ]
 
     return (

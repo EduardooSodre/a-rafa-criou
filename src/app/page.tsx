@@ -32,13 +32,13 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {/* Automático */}
             <div className="text-center group hover:transform hover:scale-105 transition-all duration-300">
-              <div className="w-24 h-24 bg-[#FD9555] rounded-full flex items-center justify-center mx-auto mb-6 group-hover:shadow-lg transition-shadow">
+              <div className="w-32 h-32 bg-[#FD9555] rounded-full flex items-center justify-center mx-auto mb-6 group-hover:shadow-lg transition-shadow">
                 <Image
                   src="/automatico.webp"
                   alt="Automático"
-                  width={48}
-                  height={48}
-                  className="filter brightness-0 invert"
+                  width={80}
+                  height={80}
+                  className="w-20 h-20 object-contain"
                 />
               </div>
               <h3 className="text-2xl font-bold text-gray-800 mb-4">AUTOMÁTICO</h3>
@@ -51,13 +51,13 @@ export default function HomePage() {
 
             {/* Prático */}
             <div className="text-center group hover:transform hover:scale-105 transition-all duration-300">
-              <div className="w-24 h-24 bg-[#FD9555] rounded-full flex items-center justify-center mx-auto mb-6 group-hover:shadow-lg transition-shadow">
+              <div className="w-32 h-32 bg-[#FD9555] rounded-full flex items-center justify-center mx-auto mb-6 group-hover:shadow-lg transition-shadow">
                 <Image
                   src="/pratico.webp"
                   alt="Prático"
-                  width={48}
-                  height={48}
-                  className="filter brightness-0 invert"
+                  width={80}
+                  height={80}
+                  className="w-20 h-20 object-contain"
                 />
               </div>
               <h3 className="text-2xl font-bold text-gray-800 mb-4">PRÁTICO</h3>
@@ -69,13 +69,13 @@ export default function HomePage() {
 
             {/* Econômico */}
             <div className="text-center group hover:transform hover:scale-105 transition-all duration-300">
-              <div className="w-24 h-24 bg-[#FD9555] rounded-full flex items-center justify-center mx-auto mb-6 group-hover:shadow-lg transition-shadow">
+              <div className="w-32 h-32 bg-[#FD9555] rounded-full flex items-center justify-center mx-auto mb-6 group-hover:shadow-lg transition-shadow">
                 <Image
                   src="/economico.webp"
                   alt="Econômico"
-                  width={48}
-                  height={48}
-                  className="filter brightness-0 invert"
+                  width={80}
+                  height={80}
+                  className="w-20 h-20 object-contain"
                 />
               </div>
               <h3 className="text-2xl font-bold text-gray-800 mb-4">ECONÔMICO</h3>
