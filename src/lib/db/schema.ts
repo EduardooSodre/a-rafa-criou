@@ -1,4 +1,15 @@
-import { pgTable, text, timestamp, uuid, varchar, integer, decimal, boolean, json, primaryKey } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+  varchar,
+  integer,
+  decimal,
+  boolean,
+  json,
+  primaryKey,
+} from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 // ============================================================================
@@ -17,37 +28,49 @@ export const users = pgTable('users', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-export const accounts = pgTable('accounts', {
-  userId: text('userId').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  type: text('type').notNull(),
-  provider: text('provider').notNull(),
-  providerAccountId: text('providerAccountId').notNull(),
-  refresh_token: text('refresh_token'),
-  access_token: text('access_token'),
-  expires_at: integer('expires_at'),
-  token_type: text('token_type'),
-  scope: text('scope'),
-  id_token: text('id_token'),
-  session_state: text('session_state'),
-}, (account) => ({
-  compoundKey: primaryKey({
-    columns: [account.provider, account.providerAccountId],
-  }),
-}));
+export const accounts = pgTable(
+  'accounts',
+  {
+    userId: text('userId')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    type: text('type').notNull(),
+    provider: text('provider').notNull(),
+    providerAccountId: text('providerAccountId').notNull(),
+    refresh_token: text('refresh_token'),
+    access_token: text('access_token'),
+    expires_at: integer('expires_at'),
+    token_type: text('token_type'),
+    scope: text('scope'),
+    id_token: text('id_token'),
+    session_state: text('session_state'),
+  },
+  account => ({
+    compoundKey: primaryKey({
+      columns: [account.provider, account.providerAccountId],
+    }),
+  })
+);
 
 export const sessions = pgTable('sessions', {
   sessionToken: text('sessionToken').primaryKey(),
-  userId: text('userId').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  userId: text('userId')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
   expires: timestamp('expires').notNull(),
 });
 
-export const verificationTokens = pgTable('verification_tokens', {
-  identifier: text('identifier').notNull(),
-  token: text('token').notNull(),
-  expires: timestamp('expires').notNull(),
-}, (vt) => ({
-  compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
-}));
+export const verificationTokens = pgTable(
+  'verification_tokens',
+  {
+    identifier: text('identifier').notNull(),
+    token: text('token').notNull(),
+    expires: timestamp('expires').notNull(),
+  },
+  vt => ({
+    compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
+  })
+);
 
 // ============================================================================
 // E-COMMERCE CORE
@@ -70,7 +93,9 @@ export const products = pgTable('products', {
 
 export const productVariations = pgTable('product_variations', {
   id: uuid('id').defaultRandom().primaryKey(),
-  productId: uuid('product_id').notNull().references(() => products.id, { onDelete: 'cascade' }),
+  productId: uuid('product_id')
+    .notNull()
+    .references(() => products.id, { onDelete: 'cascade' }),
   name: varchar('name', { length: 255 }).notNull(),
   slug: varchar('slug', { length: 255 }).notNull(),
   price: decimal('price', { precision: 10, scale: 2 }).notNull(),
@@ -116,8 +141,12 @@ export const orders = pgTable('orders', {
 
 export const orderItems = pgTable('order_items', {
   id: uuid('id').defaultRandom().primaryKey(),
-  orderId: uuid('order_id').notNull().references(() => orders.id, { onDelete: 'cascade' }),
-  productId: uuid('product_id').notNull().references(() => products.id),
+  orderId: uuid('order_id')
+    .notNull()
+    .references(() => orders.id, { onDelete: 'cascade' }),
+  productId: uuid('product_id')
+    .notNull()
+    .references(() => products.id),
   variationId: uuid('variation_id').references(() => productVariations.id),
   name: varchar('name', { length: 255 }).notNull(), // snapshot do nome
   price: decimal('price', { precision: 10, scale: 2 }).notNull(), // snapshot do preço
@@ -133,8 +162,12 @@ export const orderItems = pgTable('order_items', {
 export const downloads = pgTable('downloads', {
   id: uuid('id').defaultRandom().primaryKey(),
   userId: text('user_id').references(() => users.id),
-  orderId: uuid('order_id').notNull().references(() => orders.id),
-  fileId: uuid('file_id').notNull().references(() => files.id),
+  orderId: uuid('order_id')
+    .notNull()
+    .references(() => orders.id),
+  fileId: uuid('file_id')
+    .notNull()
+    .references(() => files.id),
   ip: varchar('ip', { length: 45 }),
   userAgent: text('user_agent'),
   downloadedAt: timestamp('downloaded_at').defaultNow().notNull(),
@@ -163,25 +196,45 @@ export const coupons = pgTable('coupons', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-export const couponProducts = pgTable('coupon_products', {
-  couponId: uuid('coupon_id').notNull().references(() => coupons.id, { onDelete: 'cascade' }),
-  productId: uuid('product_id').notNull().references(() => products.id, { onDelete: 'cascade' }),
-}, (table) => ({
-  pk: primaryKey({ columns: [table.couponId, table.productId] }),
-}));
+export const couponProducts = pgTable(
+  'coupon_products',
+  {
+    couponId: uuid('coupon_id')
+      .notNull()
+      .references(() => coupons.id, { onDelete: 'cascade' }),
+    productId: uuid('product_id')
+      .notNull()
+      .references(() => products.id, { onDelete: 'cascade' }),
+  },
+  table => ({
+    pk: primaryKey({ columns: [table.couponId, table.productId] }),
+  })
+);
 
-export const couponVariations = pgTable('coupon_variations', {
-  couponId: uuid('coupon_id').notNull().references(() => coupons.id, { onDelete: 'cascade' }),
-  variationId: uuid('variation_id').notNull().references(() => productVariations.id, { onDelete: 'cascade' }),
-}, (table) => ({
-  pk: primaryKey({ columns: [table.couponId, table.variationId] }),
-}));
+export const couponVariations = pgTable(
+  'coupon_variations',
+  {
+    couponId: uuid('coupon_id')
+      .notNull()
+      .references(() => coupons.id, { onDelete: 'cascade' }),
+    variationId: uuid('variation_id')
+      .notNull()
+      .references(() => productVariations.id, { onDelete: 'cascade' }),
+  },
+  table => ({
+    pk: primaryKey({ columns: [table.couponId, table.variationId] }),
+  })
+);
 
 export const couponRedemptions = pgTable('coupon_redemptions', {
   id: uuid('id').defaultRandom().primaryKey(),
-  couponId: uuid('coupon_id').notNull().references(() => coupons.id),
+  couponId: uuid('coupon_id')
+    .notNull()
+    .references(() => coupons.id),
   userId: text('user_id').references(() => users.id),
-  orderId: uuid('order_id').notNull().references(() => orders.id),
+  orderId: uuid('order_id')
+    .notNull()
+    .references(() => orders.id),
   amountDiscounted: decimal('amount_discounted', { precision: 10, scale: 2 }).notNull(),
   usedAt: timestamp('used_at').defaultNow().notNull(),
 });
@@ -190,20 +243,26 @@ export const couponRedemptions = pgTable('coupon_redemptions', {
 // CMS EMBUTIDO
 // ============================================================================
 
-export const contentPages = pgTable('content_pages', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  slug: varchar('slug', { length: 100 }).notNull(), // home, sobre, contato, etc
-  lang: varchar('lang', { length: 2 }).notNull().default('pt'), // pt, en
-  isActive: boolean('is_active').default(true),
-  updatedBy: text('updated_by').references(() => users.id),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-}, (table) => ({
-  pk: primaryKey({ columns: [table.slug, table.lang] }),
-}));
+export const contentPages = pgTable(
+  'content_pages',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    slug: varchar('slug', { length: 100 }).notNull(), // home, sobre, contato, etc
+    lang: varchar('lang', { length: 2 }).notNull().default('pt'), // pt, en
+    isActive: boolean('is_active').default(true),
+    updatedBy: text('updated_by').references(() => users.id),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  table => ({
+    pk: primaryKey({ columns: [table.slug, table.lang] }),
+  })
+);
 
 export const contentBlocks = pgTable('content_blocks', {
   id: uuid('id').defaultRandom().primaryKey(),
-  pageId: uuid('page_id').notNull().references(() => contentPages.id, { onDelete: 'cascade' }),
+  pageId: uuid('page_id')
+    .notNull()
+    .references(() => contentPages.id, { onDelete: 'cascade' }),
   key: varchar('key', { length: 100 }).notNull(), // hero_title, hero_subtitle, etc
   type: varchar('type', { length: 20 }).notNull(), // text, richtext, image, list
   valueJson: json('value_json').notNull(),
@@ -213,7 +272,9 @@ export const contentBlocks = pgTable('content_blocks', {
 
 export const contentVersions = pgTable('content_versions', {
   id: uuid('id').defaultRandom().primaryKey(),
-  blockId: uuid('block_id').notNull().references(() => contentBlocks.id, { onDelete: 'cascade' }),
+  blockId: uuid('block_id')
+    .notNull()
+    .references(() => contentBlocks.id, { onDelete: 'cascade' }),
   valueJson: json('value_json').notNull(),
   savedBy: text('saved_by').references(() => users.id),
   savedAt: timestamp('saved_at').defaultNow().notNull(),
@@ -244,7 +305,9 @@ export const invites = pgTable('invites', {
   expiresAt: timestamp('expires_at').notNull(),
   usedAt: timestamp('used_at'),
   usedBy: text('used_by').references(() => users.id),
-  createdBy: text('created_by').notNull().references(() => users.id),
+  createdBy: text('created_by')
+    .notNull()
+    .references(() => users.id),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
@@ -285,12 +348,18 @@ export const ordersRelations = relations(orders, ({ one, many }) => ({
 export const orderItemsRelations = relations(orderItems, ({ one }) => ({
   order: one(orders, { fields: [orderItems.orderId], references: [orders.id] }),
   product: one(products, { fields: [orderItems.productId], references: [products.id] }),
-  variation: one(productVariations, { fields: [orderItems.variationId], references: [productVariations.id] }),
+  variation: one(productVariations, {
+    fields: [orderItems.variationId],
+    references: [productVariations.id],
+  }),
 }));
 
 export const filesRelations = relations(files, ({ one, many }) => ({
   product: one(products, { fields: [files.productId], references: [products.id] }),
-  variation: one(productVariations, { fields: [files.variationId], references: [productVariations.id] }),
+  variation: one(productVariations, {
+    fields: [files.variationId],
+    references: [productVariations.id],
+  }),
   downloads: many(downloads),
 }));
 
