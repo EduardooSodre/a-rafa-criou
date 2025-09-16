@@ -37,19 +37,19 @@ export function Header() {
 
     useEffect(() => {
         let ticking = false
-        
+
         const handleScroll = () => {
             if (!ticking) {
                 requestAnimationFrame(() => {
                     const scrollTop = window.scrollY
-                    
+
                     // Hysteresis: diferentes thresholds para evitar tremor
                     if (!isScrolled && scrollTop > 80) {
                         setIsScrolled(true)
                     } else if (isScrolled && scrollTop < 30) {
                         setIsScrolled(false)
                     }
-                    
+
                     ticking = false
                 })
                 ticking = true
