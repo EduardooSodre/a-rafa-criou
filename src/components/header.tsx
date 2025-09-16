@@ -6,7 +6,6 @@ import Image from 'next/image'
 import { useSession, signOut } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import {
     DropdownMenu,
@@ -19,7 +18,6 @@ import {
 import { useCart } from '@/contexts/cart-context'
 import {
     Search,
-    ShoppingCart,
     Menu,
     X,
     Home,
@@ -35,7 +33,6 @@ import {
 export function Header() {
     const [isOpen, setIsOpen] = useState(false)
     const [searchQuery, setSearchQuery] = useState('')
-    const { totalItems } = useCart()
     const { data: session, status } = useSession()
 
     const handleSearch = (e: React.FormEvent) => {
@@ -87,18 +84,8 @@ export function Header() {
                                     alt="A Rafa Criou"
                                     width={200}
                                     height={60}
-                                    className="h-8 sm:h-10 md:h-12 w-auto"
+                                    className="h-14 sm:h-16 md:h-18 w-auto"
                                 />
-                            </Link>
-
-                            {/* Instagram */}
-                            <Link
-                                href="https://instagram.com/arafacriou"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="bg-white/20 rounded-full p-1 sm:p-2 hover:bg-white/30 transition-colors"
-                            >
-                                <Instagram className="w-4 h-4 sm:w-5 sm:h-5 text-black" />
                             </Link>
                         </div>
 
@@ -122,21 +109,18 @@ export function Header() {
                             </form>
                         </div>
 
-                        {/* Carrinho e Mobile Menu */}
-                        <div className="flex items-center gap-1 sm:gap-2">
-                            <Button asChild variant="ghost" size="lg" className="relative bg-white/20 hover:bg-white/30 rounded-full p-2">
-                                <Link href="/carrinho">
-                                    <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-black" />
-                                    {totalItems > 0 && (
-                                        <Badge
-                                            variant="destructive"
-                                            className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 h-5 w-5 sm:h-6 sm:w-6 flex items-center justify-center p-0 text-xs bg-[#FD9555] text-white border-2 border-white rounded-full"
-                                        >
-                                            {totalItems}
-                                        </Badge>
-                                    )}
-                                </Link>
-                            </Button>
+
+                        <div className="flex items-center gap-2">
+                            {/* Instagram */}
+                            <Link
+                                href="https://instagram.com/arafacriou"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="bg-white/20 rounded-full p-1 sm:p-2 hover:bg-white/30 transition-colors"
+                            >
+                                <Instagram className="w-4 h-4 sm:w-5 sm:h-5 text-black" />
+                            </Link>
+
 
                             {/* Mobile Menu Button */}
                             <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -156,40 +140,6 @@ export function Header() {
                                             <X className="w-5 h-5" />
                                         </Button>
                                     </div>
-
-                                    {/* Mobile Search */}
-                                    <div className="mb-6">
-                                        <form onSubmit={handleSearch}>
-                                            <div className="relative">
-                                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                                                <Input
-                                                    type="search"
-                                                    placeholder="O que você procura?"
-                                                    value={searchQuery}
-                                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                                    className="pl-10 pr-4"
-                                                />
-                                            </div>
-                                        </form>
-                                    </div>
-
-                                    {/* Mobile Navigation */}
-                                    <nav className="space-y-2">
-                                        {navigation.map((item) => {
-                                            const Icon = item.icon
-                                            return (
-                                                <Link
-                                                    key={item.name}
-                                                    href={item.href}
-                                                    className="flex items-center gap-3 text-gray-700 hover:text-gray-900 hover:bg-gray-100 p-3 rounded-md transition-colors"
-                                                    onClick={() => setIsOpen(false)}
-                                                >
-                                                    <Icon className="w-5 h-5" />
-                                                    {item.name}
-                                                </Link>
-                                            )
-                                        })}
-                                    </nav>
 
                                     {/* Mobile Auth */}
                                     <div className="mt-6 pt-6 border-t">
@@ -229,7 +179,7 @@ export function Header() {
             {/* Menu verde */}
             <div className="bg-[#8FBC8F] shadow-md hidden md:block">
                 <div className="container mx-auto px-4">
-                    <nav className="flex items-center justify-center py-3">
+                    <nav className="flex items-center justify-center py-2">
                         <div className="flex items-center gap-8">
                             {navigation.map((item) => {
                                 const Icon = item.icon
@@ -314,15 +264,15 @@ export function Header() {
             </div>
 
             {/* Barra promocional */}
-            <div className="bg-[#FD9555] py-2 overflow-hidden">
+            <div className="bg-[#FD9555]  overflow-hidden">
                 <div className="animate-marquee whitespace-nowrap">
-                    <span className="text-white font-medium px-4">
+                    <span className="text-white font-medium text-xs lg:text-sm px-4">
                         USE O CUPOM &quot;PRIMEIRACOMPRA&quot; PARA TER 10% DE DESCONTO NA SUA PRIMEIRA COMPRA! ✨
                     </span>
-                    <span className="text-white font-medium px-4">
+                    <span className="text-white font-medium text-xs lg:text-sm px-4">
                         USE O CUPOM &quot;PRIMEIRACOMPRA&quot; PARA TER 10% DE DESCONTO NA SUA PRIMEIRA COMPRA! ✨
                     </span>
-                    <span className="text-white font-medium px-4">
+                    <span className="text-white font-medium text-xs lg:text-sm px-4">
                         USE O CUPOM &quot;PRIMEIRACOMPRA&quot; PARA TER 10% DE DESCONTO NA SUA PRIMEIRA COMPRA! ✨
                     </span>
                 </div>

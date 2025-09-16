@@ -1,30 +1,35 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import HeroSection from '@/components/sections/HeroSection';
 import BenefitsSection from '@/components/sections/BenefitsSection';
 import FeaturedProducts from '@/components/sections/FeaturedProducts';
 import MobileBottomMenu from '@/components/sections/MobileBottomMenu';
+import { useCart } from '@/contexts/cart-context';
 
 export default function HomePage() {
-  // Handlers para o menu mobile
+  const { totalItems } = useCart();
+  const router = useRouter();
+
+  // Handlers para o menu mobile conectados com as funcionalidades reais
   const handleMenuClick = () => {
-    // TODO: Implementar abertura do menu lateral
-    console.log('Menu clicked');
+    // Navegar para a página de produtos que funciona como menu principal
+    router.push('/produtos');
   };
 
   const handleHomeClick = () => {
-    // TODO: Implementar navegação para home
-    console.log('Home clicked');
+    // Scroll suave para o topo da página
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleCartClick = () => {
-    // TODO: Implementar abertura do carrinho
-    console.log('Cart clicked');
+    // Navegar para a página do carrinho que já existe
+    router.push('/carrinho');
   };
 
   const handleSearchClick = () => {
-    // TODO: Implementar abertura da busca
-    console.log('Search clicked');
+    // Navegar para a página de produtos com foco na busca
+    router.push('/produtos?focus=search');
   };
 
   return (
@@ -42,7 +47,7 @@ export default function HomePage() {
 
       {/* Menu fixo inferior apenas no mobile */}
       <MobileBottomMenu
-        cartItemCount={0}
+        cartItemCount={totalItems}
         onMenuClick={handleMenuClick}
         onHomeClick={handleHomeClick}
         onCartClick={handleCartClick}
