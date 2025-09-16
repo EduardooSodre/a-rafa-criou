@@ -23,10 +23,11 @@ export default function HeroSection() {
                 {/* Texto sobreposto ao GIF */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
                     <h1
-                        className="font-scripter text-2xl sm:text-3xl md:text-5xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-bold mb-3 sm:mb-4 md:mb-5 lg:mb-5 xl:mb-6 uppercase text-center"
+                        className="font-scripter text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-[4rem] 2xl:text-[5rem] font-bold mb-3 sm:mb-4 md:mb-5 lg:mb-5 xl:mb-6 uppercase text-center leading-none"
                         style={{
                             color: '#FD9555',
                             fontFamily: 'Scripter, sans-serif',
+                            fontSize: 'clamp(2rem, 6vw, 5rem)', // Backup responsivo mais moderado
                         }}
                     >
                         BEM-VINDA <br /> OVELHINHA!
