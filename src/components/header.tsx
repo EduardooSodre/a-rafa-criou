@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useSession, signOut } from 'next-auth/react'
@@ -31,8 +31,19 @@ import {
 
 export function Header() {
     const [searchQuery, setSearchQuery] = useState('')
+    const [isScrolled, setIsScrolled] = useState(false)
     const { totalItems } = useCart()
     const { data: session, status } = useSession()
+
+    useEffect(() => {
+        const handleScroll = () => {
+            const scrollTop = window.scrollY
+            setIsScrolled(scrollTop > 50) // Hide após 50px de scroll
+        }
+
+        window.addEventListener('scroll', handleScroll)
+        return () => window.removeEventListener('scroll', handleScroll)
+    }, [])
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault()
@@ -54,7 +65,7 @@ export function Header() {
     return (
         <header className="sticky top-0 z-50 w-full">
             {/* Barra superior de idiomas */}
-            <div className="bg-[#FED466] py-1 sm:py-2">
+            <div className={`bg-[#FED466] transition-all duration-300 ${isScrolled ? 'h-0 py-0 overflow-hidden opacity-0' : 'py-1 sm:py-2 opacity-100'}`}>
                 <div className="container mx-auto px-2 sm:px-4 flex justify-center items-center">
                     <span className="text-black font-medium mr-2 sm:mr-4 text-xs sm:text-sm">SELECIONE SEU IDIOMA</span>
                     <div className="flex gap-1 sm:gap-2">
@@ -256,7 +267,7 @@ export function Header() {
             </div>
 
             {/* Barra promocional */}
-            <div className="bg-[#FD9555]  overflow-hidden">
+            <div className={`bg-[#FD9555] overflow-hidden transition-all duration-300 ${isScrolled ? 'h-0 overflow-hidden opacity-0' : 'opacity-100'}`}>
                 <div className="animate-marquee whitespace-nowrap">
                     <span className="text-white font-medium text-xs lg:text-sm px-4">
                         USE O CUPOM &quot;PRIMEIRACOMPRA&quot; PARA TER 10% DE DESCONTO NA SUA PRIMEIRA COMPRA! ✨
