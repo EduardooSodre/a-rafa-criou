@@ -78,10 +78,10 @@ export function Header() {
                         {/* Mobile: User Icon - primeiro / Desktop: Logo + Espaço */}
                         <div className="flex items-center gap-2 sm:gap-4">
                             {/* Mobile: User Icon */}
-                            <Button asChild variant="ghost" size="sm" className="md:hidden bg-white/20 hover:bg-white/30 p-2 flex flex-col items-center gap-1">
+                            <Button asChild variant="ghost" size="sm" className="md:hidden hover:bg-white/10 p-6 flex flex-col items-center gap-1">
                                 <Link href="/auth/login" className="no-underline">
-                                    <User className="w-5 h-5 text-black" />
-                                    <span className="text-[10px] font-bold text-black">CONTA</span>
+                                    <User className="w-6 h-6 text-white" strokeWidth={2.5} />
+                                    <span className="text-[10px] font-bold text-white">CONTA</span>
                                 </Link>
                             </Button>
 
@@ -132,17 +132,17 @@ export function Header() {
                         {/* Mobile: Favoritos / Desktop: Carrinho + Instagram */}
                         <div className="flex items-center gap-2">
                             {/* Mobile: Favoritos Icon */}
-                            <Button asChild variant="ghost" size="sm" className="md:hidden bg-white/20 hover:bg-white/30 p-2 flex flex-col items-center gap-1">
+                            <Button asChild variant="ghost" size="sm" className="md:hidden hover:bg-white/10 p-6 flex flex-col items-center gap-1">
                                 <Link href="/favoritos" className="no-underline">
-                                    <Heart className="w-5 h-5 text-black" />
-                                    <span className="text-[10px] font-bold text-black">FAVORITOS</span>
+                                    <Heart className="w-6 h-6 text-white" strokeWidth={2.5} />
+                                    <span className="text-[10px] font-bold text-white">FAVORITOS</span>
                                 </Link>
                             </Button>
 
                             {/* Carrinho - apenas desktop */}
-                            <Button asChild variant="ghost" size="lg" className="relative bg-white/20 hover:bg-white/30 rounded-full p-2 hidden md:flex">
+                            <Button asChild variant="ghost" size="lg" className="relative bg-white/20 hover:bg-white/30 rounded-full p-6 hidden md:flex">
                                 <Link href="/carrinho" className="no-underline">
-                                    <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-black" />
+                                    <ShoppingCart className="w-5 h-5 text-black" />
                                     {totalItems > 0 && (
                                         <Badge
                                             variant="destructive"
@@ -159,9 +159,9 @@ export function Header() {
                                 href="https://instagram.com/arafacriou"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="bg-white/20 rounded-full p-1 sm:p-2 hover:bg-white/30 transition-colors hidden md:flex no-underline"
+                                className="bg-white/20 rounded-full p-3 hover:bg-white/30 transition-colors hidden md:flex no-underline"
                             >
-                                <Instagram className="w-4 h-4 sm:w-5 sm:h-5 text-black" />
+                                <Instagram className="w-5 h-5 text-black" />
                             </Link>
                         </div>
                     </div>
