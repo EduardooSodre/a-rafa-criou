@@ -58,17 +58,17 @@ export function Header() {
     return (
         <header className="sticky top-0 z-50 w-full">
             {/* Barra superior de idiomas */}
-            <div className="bg-[#FED466] py-2">
-                <div className="container mx-auto px-4 flex justify-center items-center">
-                    <span className="text-black font-medium mr-4">SELECIONE SEU IDIOMA</span>
-                    <div className="flex gap-2">
-                        <button className="w-8 h-6 bg-green-500 rounded flex items-center justify-center text-white text-xs font-bold">
+            <div className="bg-[#FED466] py-1 sm:py-2">
+                <div className="container mx-auto px-2 sm:px-4 flex justify-center items-center">
+                    <span className="text-black font-medium mr-2 sm:mr-4 text-xs sm:text-sm">SELECIONE SEU IDIOMA</span>
+                    <div className="flex gap-1 sm:gap-2">
+                        <button className="w-6 h-4 sm:w-8 sm:h-6 bg-green-500 rounded flex items-center justify-center text-white text-xs font-bold">
                             BR
                         </button>
-                        <button className="w-8 h-6 bg-red-500 rounded flex items-center justify-center text-white text-xs font-bold">
+                        <button className="w-6 h-4 sm:w-8 sm:h-6 bg-red-500 rounded flex items-center justify-center text-white text-xs font-bold">
                             MX
                         </button>
-                        <button className="w-8 h-6 bg-blue-500 rounded flex items-center justify-center text-white text-xs font-bold">
+                        <button className="w-6 h-4 sm:w-8 sm:h-6 bg-blue-500 rounded flex items-center justify-center text-white text-xs font-bold">
                             US
                         </button>
                     </div>
@@ -76,18 +76,18 @@ export function Header() {
             </div>
 
             {/* Header principal */}
-            <div className="bg-[#FED466] py-4">
-                <div className="container mx-auto px-4">
+            <div className="bg-[#FED466] py-2 sm:py-3 md:py-4">
+                <div className="container mx-auto px-2 sm:px-4">
                     <div className="flex items-center justify-between">
                         {/* Logo */}
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 sm:gap-4">
                             <Link href="/" className="flex items-center gap-2">
                                 <Image
                                     src="/logo.webp"
                                     alt="A Rafa Criou"
                                     width={200}
                                     height={60}
-                                    className="h-12 w-auto"
+                                    className="h-8 sm:h-10 md:h-12 w-auto"
                                 />
                             </Link>
 
@@ -96,41 +96,41 @@ export function Header() {
                                 href="https://instagram.com/arafacriou"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="bg-white/20 rounded-full p-2 hover:bg-white/30 transition-colors"
+                                className="bg-white/20 rounded-full p-1 sm:p-2 hover:bg-white/30 transition-colors"
                             >
-                                <Instagram className="w-5 h-5 text-black" />
+                                <Instagram className="w-4 h-4 sm:w-5 sm:h-5 text-black" />
                             </Link>
                         </div>
 
                         {/* Barra de busca central */}
-                        <div className="flex-1 max-w-2xl mx-8 hidden md:block">
+                        <div className="flex-1 max-w-md sm:max-w-lg md:max-w-2xl mx-4 sm:mx-6 md:mx-8 hidden md:block">
                             <form onSubmit={handleSearch} className="relative">
                                 <Input
                                     type="search"
                                     placeholder="O que você procura?"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full h-12 pl-4 pr-12 rounded-lg border-0 bg-white text-black placeholder:text-gray-500"
+                                    className="w-full h-10 md:h-12 pl-4 pr-12 rounded-lg border-0 bg-white text-black placeholder:text-gray-500"
                                 />
                                 <Button
                                     type="submit"
                                     size="sm"
-                                    className="absolute right-1 top-1 h-10 w-10 bg-[#FD9555] hover:bg-[#FD9555]/90 text-white rounded-lg"
+                                    className="absolute right-1 top-1 h-8 w-8 md:h-10 md:w-10 bg-[#FD9555] hover:bg-[#FD9555]/90 text-white rounded-lg"
                                 >
-                                    <Search className="w-4 h-4" />
+                                    <Search className="w-3 h-3 md:w-4 md:h-4" />
                                 </Button>
                             </form>
                         </div>
 
                         {/* Carrinho e Mobile Menu */}
-                        <div className="flex items-center gap-2">
-                            <Button asChild variant="ghost" size="lg" className="relative bg-white/20 hover:bg-white/30 rounded-full">
+                        <div className="flex items-center gap-1 sm:gap-2">
+                            <Button asChild variant="ghost" size="lg" className="relative bg-white/20 hover:bg-white/30 rounded-full p-2">
                                 <Link href="/carrinho">
-                                    <ShoppingCart className="w-6 h-6 text-black" />
+                                    <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-black" />
                                     {totalItems > 0 && (
                                         <Badge
                                             variant="destructive"
-                                            className="absolute -top-2 -right-2 h-6 w-6 flex items-center justify-center p-0 text-xs bg-[#FD9555] text-white border-2 border-white rounded-full"
+                                            className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 h-5 w-5 sm:h-6 sm:w-6 flex items-center justify-center p-0 text-xs bg-[#FD9555] text-white border-2 border-white rounded-full"
                                         >
                                             {totalItems}
                                         </Badge>
@@ -141,8 +141,8 @@ export function Header() {
                             {/* Mobile Menu Button */}
                             <Sheet open={isOpen} onOpenChange={setIsOpen}>
                                 <SheetTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="md:hidden bg-white/20 hover:bg-white/30">
-                                        <Menu className="w-5 h-5 text-black" />
+                                    <Button variant="ghost" size="sm" className="md:hidden bg-white/20 hover:bg-white/30 p-2">
+                                        <Menu className="w-4 h-4 sm:w-5 sm:h-5 text-black" />
                                     </Button>
                                 </SheetTrigger>
                                 <SheetContent side="right" className="w-72">
