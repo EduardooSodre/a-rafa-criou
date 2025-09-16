@@ -7,7 +7,6 @@ import { useSession, signOut } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -20,8 +19,6 @@ import { useCart } from '@/contexts/cart-context'
 import {
     Search,
     ShoppingCart,
-    Menu,
-    X,
     Home,
     Package,
     User,
@@ -33,7 +30,6 @@ import {
 } from 'lucide-react'
 
 export function Header() {
-    const [isOpen, setIsOpen] = useState(false)
     const [searchQuery, setSearchQuery] = useState('')
     const { totalItems } = useCart()
     const { data: session, status } = useSession()
@@ -79,9 +75,18 @@ export function Header() {
             <div className="bg-[#FED466] py-2 sm:py-3 md:py-4">
                 <div className="container mx-auto px-2 sm:px-4">
                     <div className="flex items-center justify-between">
-                        {/* Logo */}
+                        {/* Mobile: User Icon - primeiro / Desktop: Logo + Espaço */}
                         <div className="flex items-center gap-2 sm:gap-4">
-                            <Link href="/" className="flex items-center gap-2">
+                            {/* Mobile: User Icon */}
+                            <Button asChild variant="ghost" size="sm" className="md:hidden bg-white/20 hover:bg-white/30 p-2 flex flex-col items-center gap-1">
+                                <Link href="/auth/login" className="no-underline">
+                                    <User className="w-5 h-5 text-black" />
+                                    <span className="text-[10px] font-bold text-black">CONTA</span>
+                                </Link>
+                            </Button>
+
+                            {/* Desktop: Logo */}
+                            <Link href="/" className="hidden md:flex items-center gap-2">
                                 <Image
                                     src="/logo.webp"
                                     alt="A Rafa Criou"
@@ -92,9 +97,21 @@ export function Header() {
                             </Link>
                         </div>
 
-                        {/* Barra de busca central */}
-                        <div className="flex-1 max-w-md sm:max-w-lg md:max-w-2xl mx-4 sm:mx-6 md:mx-8 hidden md:block">
-                            <form onSubmit={handleSearch} className="relative">
+                        {/* Mobile: Logo - centro / Desktop: Barra de busca */}
+                        <div className="flex-1 max-w-md sm:max-w-lg md:max-w-2xl mx-4 sm:mx-6 md:mx-8">
+                            {/* Mobile: Logo centralizada */}
+                            <Link href="/" className="md:hidden flex items-center justify-center gap-2">
+                                <Image
+                                    src="/logo.webp"
+                                    alt="A Rafa Criou"
+                                    width={200}
+                                    height={60}
+                                    className="h-14 sm:h-16 w-auto"
+                                />
+                            </Link>
+
+                            {/* Desktop: Barra de busca central */}
+                            <form onSubmit={handleSearch} className="relative hidden md:block">
                                 <Input
                                     type="search"
                                     placeholder="O que você procura?"
@@ -112,8 +129,16 @@ export function Header() {
                             </form>
                         </div>
 
-
+                        {/* Mobile: Favoritos / Desktop: Carrinho + Instagram */}
                         <div className="flex items-center gap-2">
+                            {/* Mobile: Favoritos Icon */}
+                            <Button asChild variant="ghost" size="sm" className="md:hidden bg-white/20 hover:bg-white/30 p-2 flex flex-col items-center gap-1">
+                                <Link href="/favoritos" className="no-underline">
+                                    <Heart className="w-5 h-5 text-black" />
+                                    <span className="text-[10px] font-bold text-black">FAVORITOS</span>
+                                </Link>
+                            </Button>
+
                             {/* Carrinho - apenas desktop */}
                             <Button asChild variant="ghost" size="lg" className="relative bg-white/20 hover:bg-white/30 rounded-full p-2 hidden md:flex">
                                 <Link href="/carrinho">
@@ -129,66 +154,15 @@ export function Header() {
                                 </Link>
                             </Button>
 
-                            {/* Instagram */}
+                            {/* Instagram - apenas desktop */}
                             <Link
                                 href="https://instagram.com/arafacriou"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="bg-white/20 rounded-full p-1 sm:p-2 hover:bg-white/30 transition-colors"
+                                className="bg-white/20 rounded-full p-1 sm:p-2 hover:bg-white/30 transition-colors hidden md:flex"
                             >
                                 <Instagram className="w-4 h-4 sm:w-5 sm:h-5 text-black" />
                             </Link>
-
-
-                            {/* Mobile Menu Button */}
-                            <Sheet open={isOpen} onOpenChange={setIsOpen}>
-                                <SheetTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="md:hidden bg-white/20 hover:bg-white/30 p-2">
-                                        <Menu className="w-4 h-4 sm:w-5 sm:h-5 text-black" />
-                                    </Button>
-                                </SheetTrigger>
-                                <SheetContent side="right" className="w-72">
-                                    <div className="flex items-center justify-between mb-6">
-                                        <span className="font-bold text-lg">Menu</span>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => setIsOpen(false)}
-                                        >
-                                            <X className="w-5 h-5" />
-                                        </Button>
-                                    </div>
-
-                                    {/* Mobile Auth */}
-                                    <div className="mt-6 pt-6 border-t">
-                                        {session ? (
-                                            <div className="space-y-2">
-                                                <div className="p-3 bg-gray-50 rounded-md">
-                                                    <p className="font-medium text-sm">{session.user?.name}</p>
-                                                    <p className="text-xs text-gray-500">{session.user?.email}</p>
-                                                </div>
-                                                <Button
-                                                    onClick={handleSignOut}
-                                                    variant="outline"
-                                                    className="w-full justify-start text-red-600 border-red-200 hover:bg-red-50"
-                                                >
-                                                    <LogOut className="w-4 h-4 mr-2" />
-                                                    Sair
-                                                </Button>
-                                            </div>
-                                        ) : (
-                                            <div className="space-y-2">
-                                                <Button asChild variant="outline" className="w-full">
-                                                    <Link href="/auth/login">Entrar</Link>
-                                                </Button>
-                                                <Button asChild className="w-full bg-[#FD9555] hover:bg-[#FD9555]/90">
-                                                    <Link href="/auth/register">Cadastrar</Link>
-                                                </Button>
-                                            </div>
-                                        )}
-                                    </div>
-                                </SheetContent>
-                            </Sheet>
                         </div>
                     </div>
                 </div>
