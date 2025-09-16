@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+    qualities: [75, 90, 100], // Configuração de qualidades suportadas
   },
 };
 
