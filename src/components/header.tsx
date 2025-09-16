@@ -236,7 +236,7 @@ export function Header() {
                                     <Link
                                         key={item.name}
                                         href={item.href}
-                                        className="flex items-center gap-2 text-white hover:text-white/80 transition-colors font-medium px-4 py-2 rounded-md hover:bg-white/10"
+                                        className="flex items-center gap-2 text-white hover:text-white/80 transition-colors font-bold px-4 py-2 rounded-md hover:bg-white/10 cursor-pointer"
                                     >
                                         <Icon className="w-4 h-4" />
                                         {item.name}
@@ -248,8 +248,8 @@ export function Header() {
                             {status === 'loading' ? null : session ? (
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" className="text-white hover:text-white/80 hover:bg-white/10">
-                                            <User className="w-4 h-4 mr-2" />
+                                        <Button variant="ghost" className="flex items-center gap-2 text-white hover:text-white/80 transition-colors font-bold px-4 py-2 rounded-md hover:bg-white/10 cursor-pointer">
+                                            <User className="w-4 h-4" />
                                             {session.user?.name || 'Usuário'}
                                         </Button>
                                     </DropdownMenuTrigger>
@@ -284,14 +284,28 @@ export function Header() {
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             ) : (
-                                <div className="flex items-center gap-2">
-                                    <Button asChild variant="ghost" className="text-white hover:text-white/80 hover:bg-white/10">
-                                        <Link href="/auth/login">Entrar</Link>
-                                    </Button>
-                                    <Button asChild className="bg-[#FD9555] hover:bg-[#FD9555]/90 text-white">
-                                        <Link href="/auth/register">Cadastrar</Link>
-                                    </Button>
-                                </div>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" className="flex items-center gap-2 text-white hover:text-white/80 transition-colors font-bold px-4 py-2 rounded-md hover:bg-white/10 cursor-pointer">
+                                            <User className="w-4 h-4" />
+                                            Login
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="w-48">
+                                        <DropdownMenuItem asChild>
+                                            <Link href="/auth/login" className="flex items-center gap-2 w-full">
+                                                <LogOut className="w-4 h-4" />
+                                                Entrar
+                                            </Link>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem asChild>
+                                            <Link href="/auth/register" className="flex items-center gap-2 w-full">
+                                                <User className="w-4 h-4" />
+                                                Cadastrar
+                                            </Link>
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                             )}
                         </div>
                     </nav>
