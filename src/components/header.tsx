@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { useSession, signOut } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import {
     DropdownMenu,
@@ -18,6 +19,7 @@ import {
 import { useCart } from '@/contexts/cart-context'
 import {
     Search,
+    ShoppingCart,
     Menu,
     X,
     Home,
@@ -33,6 +35,7 @@ import {
 export function Header() {
     const [isOpen, setIsOpen] = useState(false)
     const [searchQuery, setSearchQuery] = useState('')
+    const { totalItems } = useCart()
     const { data: session, status } = useSession()
 
     const handleSearch = (e: React.FormEvent) => {
@@ -111,6 +114,21 @@ export function Header() {
 
 
                         <div className="flex items-center gap-2">
+                            {/* Carrinho - apenas desktop */}
+                            <Button asChild variant="ghost" size="lg" className="relative bg-white/20 hover:bg-white/30 rounded-full p-2 hidden md:flex">
+                                <Link href="/carrinho">
+                                    <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-black" />
+                                    {totalItems > 0 && (
+                                        <Badge
+                                            variant="destructive"
+                                            className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 h-5 w-5 sm:h-6 sm:w-6 flex items-center justify-center p-0 text-xs bg-[#FD9555] text-white border-2 border-white rounded-full"
+                                        >
+                                            {totalItems}
+                                        </Badge>
+                                    )}
+                                </Link>
+                            </Button>
+
                             {/* Instagram */}
                             <Link
                                 href="https://instagram.com/arafacriou"
