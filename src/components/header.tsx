@@ -86,7 +86,7 @@ export function Header() {
                             </Button>
 
                             {/* Desktop: Logo */}
-                            <Link href="/" className="hidden md:flex items-center gap-2">
+                            <Link href="/" className="hidden md:flex items-center gap-2 no-underline">
                                 <Image
                                     src="/logo.webp"
                                     alt="A Rafa Criou"
@@ -100,7 +100,7 @@ export function Header() {
                         {/* Mobile: Logo - centro / Desktop: Barra de busca */}
                         <div className="flex-1 max-w-md sm:max-w-lg md:max-w-2xl mx-4 sm:mx-6 md:mx-8">
                             {/* Mobile: Logo centralizada */}
-                            <Link href="/" className="md:hidden flex items-center justify-center gap-2">
+                            <Link href="/" className="md:hidden flex items-center justify-center gap-2 no-underline">
                                 <Image
                                     src="/logo.webp"
                                     alt="A Rafa Criou"
@@ -141,7 +141,7 @@ export function Header() {
 
                             {/* Carrinho - apenas desktop */}
                             <Button asChild variant="ghost" size="lg" className="relative bg-white/20 hover:bg-white/30 rounded-full p-2 hidden md:flex">
-                                <Link href="/carrinho">
+                                <Link href="/carrinho" className="no-underline">
                                     <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-black" />
                                     {totalItems > 0 && (
                                         <Badge
@@ -159,7 +159,7 @@ export function Header() {
                                 href="https://instagram.com/arafacriou"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="bg-white/20 rounded-full p-1 sm:p-2 hover:bg-white/30 transition-colors hidden md:flex"
+                                className="bg-white/20 rounded-full p-1 sm:p-2 hover:bg-white/30 transition-colors hidden md:flex no-underline"
                             >
                                 <Instagram className="w-4 h-4 sm:w-5 sm:h-5 text-black" />
                             </Link>
@@ -179,7 +179,7 @@ export function Header() {
                                     <Link
                                         key={item.name}
                                         href={item.href}
-                                        className="flex items-center gap-2 text-white hover:text-white/80 transition-colors font-bold px-4 py-2 rounded-md hover:bg-white/10 cursor-pointer"
+                                        className="flex items-center gap-2 text-white hover:text-white/80 transition-colors font-bold px-4 py-2 rounded-md hover:bg-white/10 cursor-pointer no-underline"
                                     >
                                         <Icon className="w-4 h-4" />
                                         {item.name}
@@ -205,13 +205,13 @@ export function Header() {
                                         </DropdownMenuLabel>
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem asChild>
-                                            <Link href="/conta" className="flex items-center gap-2">
+                                            <Link href="/conta" className="flex items-center gap-2 no-underline">
                                                 <Settings className="w-4 h-4" />
                                                 Minha Conta
                                             </Link>
                                         </DropdownMenuItem>
                                         <DropdownMenuItem asChild>
-                                            <Link href="/conta/pedidos" className="flex items-center gap-2">
+                                            <Link href="/conta/pedidos" className="flex items-center gap-2 no-underline">
                                                 <ShoppingBag className="w-4 h-4" />
                                                 Meus Pedidos
                                             </Link>
@@ -229,20 +229,20 @@ export function Header() {
                             ) : (
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" className="flex items-center gap-2 text-white hover:text-white/80 transition-colors font-bold px-4 py-2 rounded-md hover:bg-white/10 cursor-pointer">
+                                        <Button variant="ghost" className="text-md flex items-center gap-2 text-white hover:text-white/80 transition-colors font-bold px-4 py-2 rounded-md hover:bg-white/10 cursor-pointer">
                                             <User className="w-4 h-4" />
                                             Login
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end" className="w-48">
                                         <DropdownMenuItem asChild>
-                                            <Link href="/auth/login" className="flex items-center gap-2 w-full">
+                                            <Link href="/auth/login" className="flex items-center gap-2 w-full no-underline ">
                                                 <LogOut className="w-4 h-4" />
                                                 Entrar
                                             </Link>
                                         </DropdownMenuItem>
                                         <DropdownMenuItem asChild>
-                                            <Link href="/auth/register" className="flex items-center gap-2 w-full">
+                                            <Link href="/auth/register" className="flex items-center gap-2 w-full no-underline">
                                                 <User className="w-4 h-4" />
                                                 Cadastrar
                                             </Link>
