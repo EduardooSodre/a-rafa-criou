@@ -1,3 +1,11 @@
+@font-face {
+  font-family: 'Scripter';
+  src: url('/fonts/Scripter-Regular.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @import 'tailwindcss';
 
 :root {
@@ -150,4 +158,33 @@ a:hover {
 
 .animate-marquee {
   animation: marquee 25s linear infinite;
+}
+
+/* Hero section responsivo descontando header */
+.hero-section {
+  height: calc(100vh - 120px); /* Desconta altura do header */
+  width: 100vw;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Garantir que o main não tenha espaços */
+main {
+  margin: 0;
+  padding: 0;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .hero-section {
+    height: calc(100vh - 100px); /* Header menor no mobile */
+    min-height: 400px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-section {
+    height: calc(100vh - 80px); /* Header ainda menor em telas pequenas */
+    min-height: 350px;
+  }
 }

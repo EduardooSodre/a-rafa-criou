@@ -95,6 +95,7 @@ export function Header() {
                             <Link
                                 href="https://instagram.com/arafacriou"
                                 target="_blank"
+                                rel="noopener noreferrer"
                                 className="bg-white/20 rounded-full p-2 hover:bg-white/30 transition-colors"
                             >
                                 <Instagram className="w-5 h-5 text-black" />

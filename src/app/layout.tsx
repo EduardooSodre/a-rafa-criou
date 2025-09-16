@@ -3,6 +3,7 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Header } from "@/components/header";
+import { scripter } from "./fonts";
 
 /**
  * Contexto do Copilot:
@@ -30,7 +31,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body className={`${poppins.variable} font-sans antialiased`}>
+      <body className={`${poppins.variable} ${scripter.variable} font-sans antialiased`}>
         <Providers>
           <Header />
           <main>
