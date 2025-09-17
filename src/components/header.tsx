@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -32,10 +33,14 @@ import {
 export function Header() {
     const [searchQuery, setSearchQuery] = useState('')
     const [isScrolled, setIsScrolled] = useState(false)
+    const router = useRouter()
     const { totalItems } = useCart()
     const { data: session, status } = useSession()
 
     useEffect(() => {
+        // Só executar no lado do cliente
+        if (typeof window === 'undefined') return
+
         let ticking = false
 
         const handleScroll = () => {
@@ -63,7 +68,7 @@ export function Header() {
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault()
         if (searchQuery.trim()) {
-            window.location.href = `/produtos?search=${encodeURIComponent(searchQuery)}`
+            router.push(`/produtos?search=${encodeURIComponent(searchQuery)}`)
         }
     }
 

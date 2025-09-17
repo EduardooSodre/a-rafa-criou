@@ -27,9 +27,11 @@ const CartContext = createContext<CartContextType | undefined>(undefined)
 
 export function CartProvider({ children }: { children: ReactNode }) {
     const [items, setItems] = useState<CartItem[]>([])
+    const [isHydrated, setIsHydrated] = useState(false)
 
-    // Carregar carrinho do localStorage no lado do cliente
+    // Hidratar carrinho do localStorage apenas no cliente
     useEffect(() => {
+        setIsHydrated(true)
         const savedCart = localStorage.getItem('cart')
         if (savedCart) {
             try {
@@ -41,10 +43,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
         }
     }, [])
 
-    // Salvar carrinho no localStorage sempre que mudar
+    // Salvar carrinho no localStorage sempre que mudar (apenas após hidratação)
     useEffect(() => {
-        localStorage.setItem('cart', JSON.stringify(items))
-    }, [items])
+        if (isHydrated) {
+            localStorage.setItem('cart', JSON.stringify(items))
+        }
+    }, [items, isHydrated])
 
     const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
     const totalPrice = items.reduce((sum, item) => sum + (item.price * item.quantity), 0)

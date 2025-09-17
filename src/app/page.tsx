@@ -18,8 +18,10 @@ export default function HomePage() {
   };
 
   const handleHomeClick = () => {
-    // Scroll suave para o topo da página
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Scroll suave para o topo da página (apenas no cliente)
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const handleCartClick = () => {

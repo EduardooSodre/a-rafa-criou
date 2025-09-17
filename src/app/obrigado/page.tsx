@@ -27,8 +27,10 @@ export default function ObrigadoPage() {
     })
 
     useEffect(() => {
-        // Scroll to top when page loads
-        window.scrollTo(0, 0)
+        // Scroll to top when page loads (apenas no cliente)
+        if (typeof window !== 'undefined') {
+            window.scrollTo(0, 0)
+        }
     }, [])
 
     const formatPrice = (price: number) => {

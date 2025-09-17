@@ -30,7 +30,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body className={`${poppins.variable} font-sans antialiased`}>
+      <body 
+        className={`${poppins.variable} font-sans antialiased`}
+        suppressHydrationWarning={true}
+      >
         <Providers>
           <Header />
           <main>

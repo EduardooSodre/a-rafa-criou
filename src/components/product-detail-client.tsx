@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -40,6 +41,7 @@ interface ProductDetailClientProps {
 export function ProductDetailClient({ product }: ProductDetailClientProps) {
     const [selectedVariation, setSelectedVariation] = useState(product.variations[0]?.id || '')
     const [selectedImageIndex, setSelectedImageIndex] = useState(0)
+    const router = useRouter()
     const { addItem } = useCart()
 
     const currentVariation = product.variations.find(v => v.id === selectedVariation)
@@ -63,8 +65,8 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
 
     const handleBuyNow = () => {
         handleAddToCart()
-        // TODO: Redirecionar para checkout
-        window.location.href = '/carrinho'
+        // Redirecionar para carrinho
+        router.push('/carrinho')
     }
 
     return (
