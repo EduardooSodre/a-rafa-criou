@@ -33,6 +33,7 @@ import {
 export function Header() {
     const [searchQuery, setSearchQuery] = useState('')
     const [isScrolled, setIsScrolled] = useState(false)
+    const [selectedLanguage, setSelectedLanguage] = useState('Portuguese') // Estado para idioma selecionado
     const router = useRouter()
     const { totalItems } = useCart()
     const { data: session, status } = useSession()
@@ -85,18 +86,36 @@ export function Header() {
     return (
         <header className="sticky top-0 z-50 w-full">
             {/* Barra superior de idiomas */}
-            <div className={`bg-[#FED466] transition-all duration-300 ${isScrolled ? 'h-0 py-0 overflow-hidden opacity-0' : 'py-1 sm:py-2 opacity-100'}`}>
+            <div className={`bg-[#FED466] transition-all duration-300 ${isScrolled ? 'h-0 py-0 overflow-hidden opacity-0' : 'py-2 sm:py-3 opacity-100'}`}>
                 <div className="container mx-auto px-2 sm:px-4 flex justify-center items-center">
-                    <span className="text-black font-medium mr-2 sm:mr-4 text-xs sm:text-sm">SELECIONE SEU IDIOMA</span>
-                    <div className="flex gap-1 sm:gap-2">
-                        <button className="w-6 h-4 sm:w-8 sm:h-6 bg-green-500 rounded flex items-center justify-center text-white text-xs font-bold">
-                            BR
+                    <span className="text-black font-medium mr-3 sm:mr-4 text-xs sm:text-sm">Selecione seu idioma</span>
+                    <div className="flex bg-white/30 rounded-full p-1 backdrop-blur-sm border border-white/20 shadow-sm">
+                        <button
+                            onClick={() => setSelectedLanguage('Portuguese')}
+                            className={`px-4 py-1.5 text-xs sm:text-sm font-medium rounded-full transition-all duration-200 min-w-[70px] sm:min-w-[80px] cursor-pointer ${selectedLanguage === 'Portuguese'
+                                ? 'bg-white text-[#FD9555] shadow-md transform scale-105'
+                                : 'text-black hover:bg-white/40'
+                                }`}
+                        >
+                            Portuguese
                         </button>
-                        <button className="w-6 h-4 sm:w-8 sm:h-6 bg-red-500 rounded flex items-center justify-center text-white text-xs font-bold">
-                            MX
+                        <button
+                            onClick={() => setSelectedLanguage('Spanish')}
+                            className={`px-4 py-1.5 text-xs sm:text-sm font-medium rounded-full transition-all duration-200 min-w-[70px] sm:min-w-[80px] cursor-pointer ${selectedLanguage === 'Spanish'
+                                ? 'bg-white text-[#FD9555] shadow-md transform scale-105'
+                                : 'text-black hover:bg-white/40'
+                                }`}
+                        >
+                            Spanish
                         </button>
-                        <button className="w-6 h-4 sm:w-8 sm:h-6 bg-blue-500 rounded flex items-center justify-center text-white text-xs font-bold">
-                            US
+                        <button
+                            onClick={() => setSelectedLanguage('English')}
+                            className={`px-4 py-1.5 text-xs sm:text-sm font-medium rounded-full transition-all duration-200 min-w-[70px] sm:min-w-[80px] cursor-pointer ${selectedLanguage === 'English'
+                                ? 'bg-white text-[#FD9555] shadow-md transform scale-105'
+                                : 'text-black hover:bg-white/40'
+                                }`}
+                        >
+                            English
                         </button>
                     </div>
                 </div>
