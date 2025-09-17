@@ -68,7 +68,7 @@ export function DesktopNavigation() {
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" className="flex items-center gap-2 text-white hover:text-white/80 transition-colors font-bold px-4 py-2 rounded-md hover:bg-white/10 cursor-pointer">
-                                        <Avatar 
+                                        <Avatar
                                             imageUrl={(session.user as ExtendedUser)?.image}
                                             name={session.user?.name}
                                             size="sm"

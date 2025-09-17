@@ -71,7 +71,7 @@ export default function ContaPage() {
 
                     <div className="bg-primary/10 rounded-lg p-6 border border-primary/20">
                         <div className="flex items-center gap-4">
-                            <Avatar 
+                            <Avatar
                                 imageUrl={(session.user as ExtendedUser)?.image}
                                 name={session.user?.name}
                                 size="lg"
