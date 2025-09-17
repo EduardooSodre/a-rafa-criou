@@ -12,7 +12,7 @@ import { useState, useMemo } from 'react';
 import { Search } from 'lucide-react';
 
 export default function ProductsPage() {
-    const { products, isLoading, error } = useProducts();
+    const { products, isLoading } = useProducts();
     const [searchTerm, setSearchTerm] = useState('');
     const [sortBy, setSortBy] = useState('name');
     const [showFeaturedOnly, setShowFeaturedOnly] = useState(false);
@@ -44,16 +44,6 @@ export default function ProductsPage() {
 
         return filtered;
     }, [products, searchTerm, sortBy, showFeaturedOnly]);
-
-    if (error) {
-        return (
-            <div className='container mx-auto p-6'>
-                <div className='text-center text-destructive'>
-                    Erro ao carregar produtos: {error}
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className='container mx-auto p-6'>

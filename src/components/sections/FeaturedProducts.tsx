@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
+import { useCart } from '@/contexts/cart-context';
 
 interface Product {
     id: number;
@@ -19,6 +20,7 @@ export default function FeaturedProducts({
     products,
     showViewAll = true
 }: FeaturedProductsProps) {
+    const { addItem } = useCart();
     // Produtos placeholder se não fornecidos
     const defaultProducts: Product[] = Array.from({ length: 4 }, (_, i) => ({
         id: i + 1,
@@ -64,8 +66,15 @@ export default function FeaturedProducts({
                                         size="sm"
                                         className="bg-[#FD9555] hover:bg-[#FD9555]/90"
                                         onClick={() => {
-                                            // TODO: Implementar lógica de adicionar ao carrinho
-                                            console.log(`Adicionado ao carrinho: ${product.name}`);
+                                            addItem({
+                                                id: `product-${product.id}`,
+                                                productId: product.id.toString(),
+                                                variationId: 'default',
+                                                name: product.name,
+                                                price: parseFloat(product.price.replace('R$', '').replace(',', '.')),
+                                                variationName: 'Padrão',
+                                                image: product.image || ''
+                                            });
                                         }}
                                     >
                                         Comprar

@@ -34,8 +34,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
         if (savedCart) {
             try {
                 setItems(JSON.parse(savedCart))
-            } catch (error) {
-                console.error('Erro ao carregar carrinho:', error)
+            } catch {
+                // Silenciosamente resetar carrinho se houver dados corrompidos
+                setItems([])
             }
         }
     }, [])

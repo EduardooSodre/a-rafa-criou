@@ -31,7 +31,6 @@ export interface ProductVariation {
 export function useProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Simulando dados até implementarmos a API real
@@ -107,7 +106,7 @@ export function useProducts() {
     }, 1000);
   }, []);
 
-  return { products, isLoading, error };
+  return { products, isLoading };
 }
 
 // Hook para buscar produto individual

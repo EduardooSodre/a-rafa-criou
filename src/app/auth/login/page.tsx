@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import Link from 'next/link';
 
-export default function LoginPage() {
+function LoginContent() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -45,8 +45,7 @@ export default function LoginPage() {
                 router.push('/'); // Redirect para homepage após login
                 router.refresh();
             }
-        } catch (error) {
-            console.error('Erro no login:', error);
+        } catch {
             setError('Erro interno. Tente novamente.');
         } finally {
             setIsLoading(false);
@@ -150,5 +149,21 @@ export default function LoginPage() {
                 </CardContent>
             </Card>
         </div>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <div className='container mx-auto flex min-h-screen items-center justify-center p-6'>
+                <Card className='w-full max-w-md'>
+                    <CardContent className='p-6 text-center'>
+                        Carregando...
+                    </CardContent>
+                </Card>
+            </div>
+        }>
+            <LoginContent />
+        </Suspense>
     );
 }

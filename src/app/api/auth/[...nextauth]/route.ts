@@ -15,13 +15,10 @@ const handler = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          console.log('❌ Credenciais não fornecidas');
           return null;
         }
 
         try {
-          console.log('🔍 Buscando usuário:', credentials.email);
-
           // Buscar usuário no banco
           const user = await db
             .select()
@@ -29,37 +26,23 @@ const handler = NextAuth({
             .where(eq(users.email, credentials.email))
             .limit(1);
 
-          console.log('👤 Usuários encontrados:', user.length);
-
           if (user.length === 0) {
-            console.log('❌ Usuário não encontrado');
             return null;
           }
 
           const dbUser = user[0];
-          console.log('✅ Usuário encontrado:', {
-            id: dbUser.id,
-            email: dbUser.email,
-            hasPassword: !!dbUser.password,
-          });
 
           // Verificar senha
           if (!dbUser.password) {
-            console.log('❌ Usuário sem senha no banco');
             return null;
           }
 
-          console.log('🔐 Verificando senha...');
           const isPasswordValid = await bcrypt.compare(credentials.password, dbUser.password);
 
-          console.log('✅ Senha válida:', isPasswordValid);
-
           if (!isPasswordValid) {
-            console.log('❌ Senha inválida');
             return null;
           }
 
-          console.log('🎉 Login bem-sucedido para:', dbUser.email);
           return {
             id: dbUser.id,
             email: dbUser.email,
@@ -67,7 +50,7 @@ const handler = NextAuth({
             role: dbUser.role,
           };
         } catch (error) {
-          console.error('❌ Auth error:', error);
+          console.error('Auth error:', error);
           return null;
         }
       },
@@ -81,14 +64,16 @@ const handler = NextAuth({
     strategy: 'jwt' as const,
   },
   callbacks: {
-    async session({ session, token }: any) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async session({ session, token }: { session: any; token: any }) {
       if (token?.sub && session.user) {
         session.user.id = token.sub;
         session.user.role = token.role as string;
       }
       return session;
     },
-    async jwt({ token, user }: any) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async jwt({ token, user }: { token: any; user?: any }) {
       if (user) {
         token.role = user.role;
       }

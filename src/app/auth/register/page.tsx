@@ -60,8 +60,7 @@ export default function RegisterPage() {
                 const data = await response.json();
                 setError(data.error || 'Erro ao criar conta.');
             }
-        } catch (error) {
-            console.error('Erro no registro:', error);
+        } catch {
             setError('Erro interno. Tente novamente.');
         } finally {
             setIsLoading(false);
