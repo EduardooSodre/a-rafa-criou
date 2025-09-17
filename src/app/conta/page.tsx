@@ -13,6 +13,14 @@ export default function ContaPage() {
     const { data: session, status } = useSession()
     const router = useRouter()
 
+    // Função para exibir apenas primeiro e segundo nome
+    const getDisplayName = (fullName: string | null | undefined): string => {
+        if (!fullName) return 'Usuário'
+        const nameParts = fullName.trim().split(' ')
+        if (nameParts.length === 1) return nameParts[0]
+        return `${nameParts[0]} ${nameParts[1]}`
+    }
+
     useEffect(() => {
         if (status === 'loading') return // Ainda carregando
         if (!session) {
@@ -66,7 +74,7 @@ export default function ContaPage() {
                             </div>
                             <div>
                                 <h2 className="text-2xl font-semibold text-gray-900">
-                                    {session.user?.name || 'Usuário'}
+                                    {getDisplayName(session.user?.name)}
                                 </h2>
                                 <p className="text-gray-600">{session.user?.email}</p>
                                 <span className="inline-block mt-1 px-2 py-1 bg-primary/20 text-primary text-xs rounded-full">

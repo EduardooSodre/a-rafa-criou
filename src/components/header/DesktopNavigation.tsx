@@ -28,6 +28,14 @@ export function DesktopNavigation() {
         await signOut({ callbackUrl: '/' })
     }
 
+    // Função para exibir apenas primeiro e segundo nome
+    const getDisplayName = (fullName: string | null | undefined): string => {
+        if (!fullName) return 'Usuário'
+        const nameParts = fullName.trim().split(' ')
+        if (nameParts.length === 1) return nameParts[0]
+        return `${nameParts[0]} ${nameParts[1]}`
+    }
+
     const navigation = [
         { name: 'Início', href: '/', icon: Home },
         { name: 'Menu', href: '/produtos', icon: Package },
@@ -59,13 +67,13 @@ export function DesktopNavigation() {
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" className="flex items-center gap-2 text-white hover:text-white/80 transition-colors font-bold px-4 py-2 rounded-md hover:bg-white/10 cursor-pointer">
                                         <User className="w-4 h-4" />
-                                        {session.user?.name || 'Usuário'}
+                                        {getDisplayName(session.user?.name)}
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="w-56">
                                     <DropdownMenuLabel>
                                         <div className="flex flex-col space-y-1">
-                                            <p className="text-sm font-medium">{session.user?.name}</p>
+                                            <p className="text-sm font-medium">{getDisplayName(session.user?.name)}</p>
                                             <p className="text-xs text-muted-foreground">{session.user?.email}</p>
                                         </div>
                                     </DropdownMenuLabel>
