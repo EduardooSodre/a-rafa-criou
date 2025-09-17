@@ -24,7 +24,7 @@ export function Header() {
             if (!ticking) {
                 requestAnimationFrame(() => {
                     const scrollTop = window.scrollY
-                    
+
                     // Só atualizar se houver uma diferença significativa no scroll
                     if (Math.abs(scrollTop - lastScrollY) < 10) {
                         ticking = false
@@ -52,7 +52,7 @@ export function Header() {
     return (
         <header className="sticky top-0 z-50 w-full">
             {/* Barra superior de idiomas */}
-            <LanguageSelector 
+            <LanguageSelector
                 selectedLanguage={selectedLanguage}
                 setSelectedLanguage={setSelectedLanguage}
                 isScrolled={isScrolled}
