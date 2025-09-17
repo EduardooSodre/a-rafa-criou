@@ -39,3 +39,12 @@ export function getUserInitials(fullName: string | null | undefined): string {
 
   return `${nameParts[0].charAt(0)}${nameParts[1].charAt(0)}`.toUpperCase();
 }
+
+/**
+ * Verifica se o usuário tem uma imagem de perfil válida
+ * @param imageUrl - URL da imagem do usuário
+ * @returns true se há uma imagem válida
+ */
+export function hasUserImage(imageUrl: string | null | undefined): boolean {
+  return !!(imageUrl && imageUrl.trim() !== '');
+}

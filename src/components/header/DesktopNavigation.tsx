@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
+import { Avatar } from '@/components/ui/avatar'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -20,20 +21,21 @@ import {
     ShoppingBag,
     Heart,
 } from 'lucide-react'
+import { getDisplayName } from '@/lib/utils/user'
+
+interface ExtendedUser {
+    id: string
+    email: string
+    name?: string
+    role?: string
+    image?: string
+}
 
 export function DesktopNavigation() {
     const { data: session, status } = useSession()
 
     const handleSignOut = async () => {
         await signOut({ callbackUrl: '/' })
-    }
-
-    // Função para exibir apenas primeiro e segundo nome
-    const getDisplayName = (fullName: string | null | undefined): string => {
-        if (!fullName) return 'Usuário'
-        const nameParts = fullName.trim().split(' ')
-        if (nameParts.length === 1) return nameParts[0]
-        return `${nameParts[0]} ${nameParts[1]}`
     }
 
     const navigation = [
@@ -66,7 +68,11 @@ export function DesktopNavigation() {
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" className="flex items-center gap-2 text-white hover:text-white/80 transition-colors font-bold px-4 py-2 rounded-md hover:bg-white/10 cursor-pointer">
-                                        <User className="w-4 h-4" />
+                                        <Avatar 
+                                            imageUrl={(session.user as ExtendedUser)?.image}
+                                            name={session.user?.name}
+                                            size="sm"
+                                        />
                                         {getDisplayName(session.user?.name)}
                                     </Button>
                                 </DropdownMenuTrigger>

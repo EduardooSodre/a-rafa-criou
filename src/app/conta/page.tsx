@@ -6,20 +6,22 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { User, Package, Settings, Download, LogOut } from 'lucide-react'
+import { Avatar } from '@/components/ui/avatar'
+import { Package, Settings, Download, LogOut } from 'lucide-react'
 import { signOut } from 'next-auth/react'
+import { getDisplayName } from '@/lib/utils/user'
+
+interface ExtendedUser {
+    id: string
+    email: string
+    name?: string
+    role?: string
+    image?: string
+}
 
 export default function ContaPage() {
     const { data: session, status } = useSession()
     const router = useRouter()
-
-    // Função para exibir apenas primeiro e segundo nome
-    const getDisplayName = (fullName: string | null | undefined): string => {
-        if (!fullName) return 'Usuário'
-        const nameParts = fullName.trim().split(' ')
-        if (nameParts.length === 1) return nameParts[0]
-        return `${nameParts[0]} ${nameParts[1]}`
-    }
 
     useEffect(() => {
         if (status === 'loading') return // Ainda carregando
@@ -69,9 +71,13 @@ export default function ContaPage() {
 
                     <div className="bg-primary/10 rounded-lg p-6 border border-primary/20">
                         <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center">
-                                <User className="w-8 h-8 text-black" />
-                            </div>
+                            <Avatar 
+                                imageUrl={(session.user as ExtendedUser)?.image}
+                                name={session.user?.name}
+                                size="lg"
+                                className="w-16 h-16 bg-primary text-black"
+                                fallbackClassName="bg-primary text-black"
+                            />
                             <div>
                                 <h2 className="text-2xl font-semibold text-gray-900">
                                     {getDisplayName(session.user?.name)}
