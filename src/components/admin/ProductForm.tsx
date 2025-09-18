@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Upload, X, FileText, Loader2, Plus, Trash2, Package, FolderPlus, Image as ImageIcon, Star } from 'lucide-react'
+import { Upload, X, FileText, Loader2, Plus, Trash2, Package, FolderPlus, Image as ImageIcon, GripVertical } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,6 +12,25 @@ import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    DragEndEvent,
+} from '@dnd-kit/core'
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    rectSortingStrategy,
+} from '@dnd-kit/sortable'
+import {
+    useSortable,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 interface Category {
     id: string
@@ -21,15 +40,17 @@ interface Category {
 }
 
 interface UploadedImage {
+    id: string // ID único para drag and drop
     file: File
     uploading?: boolean
     uploaded?: boolean
-    r2Key?: string
+    data?: string // Base64 data
     error?: string
     url?: string
     preview?: string
     alt?: string
     isMain?: boolean
+    order: number
 }
 
 interface ProductVariation {
@@ -70,6 +91,96 @@ interface ProductFormProps {
     onSuccess?: () => void
 }
 
+// Componente para item de imagem arrastável
+interface SortableImageItemProps {
+    image: UploadedImage
+    index: number
+    isMain: boolean
+    onRemove: () => void
+}
+
+function SortableImageItem({ image, index, isMain, onRemove }: SortableImageItemProps) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: image.id })
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+    }
+
+    return (
+        <div ref={setNodeRef} style={style} className="relative group">
+            <div className="aspect-square rounded-lg border-2 border-gray-200 overflow-hidden bg-gray-50">
+                {image.uploading ? (
+                    <div className="flex items-center justify-center h-full">
+                        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+                    </div>
+                ) : (
+                    <img
+                        src={image.url || image.preview}
+                        alt={image.alt || `Imagem ${index + 1}`}
+                        className="w-full h-full object-cover"
+                    />
+                )}
+            </div>
+            
+            {/* Handle de drag - área bem visível */}
+            <div 
+                {...attributes} 
+                {...listeners}
+                className="absolute top-2 left-2 bg-white/90 hover:bg-white rounded p-2 cursor-grab active:cursor-grabbing shadow-sm border"
+                style={{ zIndex: 10 }}
+            >
+                <GripVertical className="w-4 h-4 text-gray-700" />
+            </div>
+
+            {/* Botão de excluir */}
+            <Button
+                type="button"
+                size="sm"
+                variant="destructive"
+                onClick={onRemove}
+                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity w-8 h-8 p-0 cursor-pointer shadow-sm"
+                style={{ zIndex: 10 }}
+            >
+                <X className="w-4 h-4" />
+            </Button>
+
+            {/* Indicador de Imagem Principal */}
+            {isMain && (
+                <div className="absolute top-2 left-12">
+                    <Badge className="bg-yellow-500 text-yellow-900 text-xs">
+                        Capa
+                    </Badge>
+                </div>
+            )}
+
+            {/* Indicador de Ordem */}
+            <div className="absolute bottom-2 left-2">
+                <Badge variant="secondary" className="text-xs">
+                    #{index + 1}
+                </Badge>
+            </div>
+
+            {/* Status do Upload */}
+            {image.error && (
+                <div className="absolute top-12 right-2">
+                    <Badge variant="destructive" className="text-xs">
+                        Erro
+                    </Badge>
+                </div>
+            )}
+        </div>
+    )
+}
+
 export default function ProductForm({ initialData, isEditing = false, onSuccess }: ProductFormProps) {
     const router = useRouter()
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -99,6 +210,14 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
             }
         ]
     })
+
+    // Configuração do DnD Kit
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    )
 
     // Carregar categorias
     useEffect(() => {
@@ -288,8 +407,8 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
     const removeFileFromVariation = (variationIndex: number, fileIndex: number) => {
         setFormData(prev => ({
             ...prev,
-            variations: prev.variations.map((variation, i) => 
-                i === variationIndex 
+            variations: prev.variations.map((variation, i) =>
+                i === variationIndex
                     ? { ...variation, files: variation.files.filter((_, fi) => fi !== fileIndex) }
                     : variation
             )
@@ -372,8 +491,10 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
 
         for (const file of validFiles) {
             const uploadImage: UploadedImage = {
+                id: `product-img-${Date.now()}-${Math.random()}`,
                 file,
-                uploading: true
+                uploading: true,
+                order: formData.images.length
             }
 
             // Adicionar imagem ao produto
@@ -383,35 +504,29 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
             }))
 
             try {
-                const formData = new FormData()
-                formData.append('file', file)
-
-                const response = await fetch('/api/r2/upload', {
-                    method: 'POST',
-                    body: formData,
+                // Converter arquivo para base64
+                const base64Data = await new Promise<string>((resolve, reject) => {
+                    const reader = new FileReader()
+                    reader.onload = () => resolve(reader.result as string)
+                    reader.onerror = reject
+                    reader.readAsDataURL(file)
                 })
 
-                if (response.ok) {
-                    const result = await response.json()
-                    
-                    // Atualizar imagem como uploaded
-                    setFormData(prev => ({
-                        ...prev,
-                        images: prev.images.map(img => 
-                            img.file === file 
-                                ? { ...img, uploading: false, uploaded: true, r2Key: result.key, url: result.url }
-                                : img
-                        )
-                    }))
-                } else {
-                    throw new Error('Falha no upload')
-                }
+                // Atualizar imagem como uploaded com dados base64
+                setFormData(prev => ({
+                    ...prev,
+                    images: prev.images.map(img =>
+                        img.file === file
+                            ? { ...img, uploading: false, uploaded: true, data: base64Data, url: base64Data }
+                            : img
+                    )
+                }))
             } catch {
                 // Marcar erro na imagem
                 setFormData(prev => ({
                     ...prev,
-                    images: prev.images.map(img => 
-                        img.file === file 
+                    images: prev.images.map(img =>
+                        img.file === file
                             ? { ...img, uploading: false, error: 'Erro no upload' }
                             : img
                     )
@@ -430,61 +545,57 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
 
         for (const file of validFiles) {
             const uploadImage: UploadedImage = {
+                id: `variation-${variationIndex}-img-${Date.now()}-${Math.random()}`,
                 file,
-                uploading: true
+                uploading: true,
+                order: formData.variations[variationIndex]?.images.length || 0
             }
 
             // Adicionar imagem à variação
             setFormData(prev => ({
                 ...prev,
-                variations: prev.variations.map((variation, i) => 
-                    i === variationIndex 
+                variations: prev.variations.map((variation, i) =>
+                    i === variationIndex
                         ? { ...variation, images: [...variation.images, uploadImage] }
                         : variation
                 )
             }))
 
             try {
-                const formDataUpload = new FormData()
-                formDataUpload.append('file', file)
-
-                const response = await fetch('/api/r2/upload', {
-                    method: 'POST',
-                    body: formDataUpload,
+                // Converter arquivo para base64
+                const base64Data = await new Promise<string>((resolve, reject) => {
+                    const reader = new FileReader()
+                    reader.onload = () => resolve(reader.result as string)
+                    reader.onerror = reject
+                    reader.readAsDataURL(file)
                 })
 
-                if (response.ok) {
-                    const result = await response.json()
-                    
-                    // Atualizar imagem como uploaded
-                    setFormData(prev => ({
-                        ...prev,
-                        variations: prev.variations.map((variation, i) => 
-                            i === variationIndex 
-                                ? {
-                                    ...variation,
-                                    images: variation.images.map(img => 
-                                        img.file === file 
-                                            ? { ...img, uploading: false, uploaded: true, r2Key: result.key, url: result.url }
-                                            : img
-                                    )
-                                }
-                                : variation
-                        )
-                    }))
-                } else {
-                    throw new Error('Falha no upload')
-                }
+                // Atualizar imagem como uploaded com dados base64
+                setFormData(prev => ({
+                    ...prev,
+                    variations: prev.variations.map((variation, i) =>
+                        i === variationIndex
+                            ? {
+                                ...variation,
+                                images: variation.images.map(img =>
+                                    img.file === file
+                                        ? { ...img, uploading: false, uploaded: true, data: base64Data, url: base64Data }
+                                        : img
+                                )
+                            }
+                            : variation
+                    )
+                }))
             } catch {
                 // Marcar erro na imagem
                 setFormData(prev => ({
                     ...prev,
-                    variations: prev.variations.map((variation, i) => 
-                        i === variationIndex 
+                    variations: prev.variations.map((variation, i) =>
+                        i === variationIndex
                             ? {
                                 ...variation,
-                                images: variation.images.map(img => 
-                                    img.file === file 
+                                images: variation.images.map(img =>
+                                    img.file === file
                                         ? { ...img, uploading: false, error: 'Erro no upload' }
                                         : img
                                 )
@@ -506,33 +617,68 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
     const removeVariationImage = (variationIndex: number, imageIndex: number) => {
         setFormData(prev => ({
             ...prev,
-            variations: prev.variations.map((variation, i) => 
-                i === variationIndex 
+            variations: prev.variations.map((variation, i) =>
+                i === variationIndex
                     ? { ...variation, images: variation.images.filter((_, ii) => ii !== imageIndex) }
                     : variation
             )
         }))
     }
 
-    const setMainProductImage = (imageIndex: number) => {
-        setFormData(prev => ({
-            ...prev,
-            images: prev.images.map((img, i) => ({ ...img, isMain: i === imageIndex }))
-        }))
+    // Funções de Drag and Drop para imagens do produto
+    const handleProductImageDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event
+
+        if (over && active.id !== over.id) {
+            const oldIndex = formData.images.findIndex(img => img.id === active.id)
+            const newIndex = formData.images.findIndex(img => img.id === over.id)
+
+            if (oldIndex !== -1 && newIndex !== -1) {
+                const reorderedImages = arrayMove(formData.images, oldIndex, newIndex)
+                
+                // Atualizar ordens
+                const updatedImages = reorderedImages.map((img, index) => ({
+                    ...img,
+                    order: index,
+                    isMain: index === 0 // Primeira imagem sempre é a capa
+                }))
+
+                setFormData(prev => ({
+                    ...prev,
+                    images: updatedImages
+                }))
+            }
+        }
     }
 
-    const setMainVariationImage = (variationIndex: number, imageIndex: number) => {
-        setFormData(prev => ({
-            ...prev,
-            variations: prev.variations.map((variation, i) => 
-                i === variationIndex 
-                    ? {
-                        ...variation,
-                        images: variation.images.map((img, ii) => ({ ...img, isMain: ii === imageIndex }))
-                    }
-                    : variation
-            )
-        }))
+    // Funções de Drag and Drop para imagens das variações
+    const handleVariationImageDragEnd = (variationIndex: number) => (event: DragEndEvent) => {
+        const { active, over } = event
+
+        if (over && active.id !== over.id) {
+            const variation = formData.variations[variationIndex]
+            const oldIndex = variation.images.findIndex(img => img.id === active.id)
+            const newIndex = variation.images.findIndex(img => img.id === over.id)
+
+            if (oldIndex !== -1 && newIndex !== -1) {
+                const reorderedImages = arrayMove(variation.images, oldIndex, newIndex)
+                
+                // Atualizar ordens
+                const updatedImages = reorderedImages.map((img, index) => ({
+                    ...img,
+                    order: index
+                }))
+
+                setFormData(prev => ({
+                    ...prev,
+                    variations: prev.variations.map((v, i) =>
+                        i === variationIndex
+                            ? { ...v, images: updatedImages }
+                            : v
+                    )
+                }))
+            }
+        }
     }
 
     // Validação
@@ -590,10 +736,26 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                 categoryId: formData.categoryId || null,
                 isActive: formData.isActive,
                 isFeatured: formData.isFeatured,
+                images: formData.images
+                    .filter(img => img.uploaded && img.data)
+                    .map(img => ({
+                        data: img.data!,
+                        alt: img.alt || formData.name,
+                        isMain: img.isMain || false,
+                        order: img.order
+                    })),
                 variations: formData.variations.map(variation => ({
                     name: variation.name,
                     price: parseFloat(variation.price),
                     isActive: variation.isActive,
+                    images: variation.images
+                        .filter(img => img.uploaded && img.data)
+                        .map(img => ({
+                            data: img.data!,
+                            alt: img.alt || variation.name,
+                            isMain: img.isMain || false,
+                            order: img.order
+                        })),
                     files: variation.files
                         .filter(f => f.uploaded)
                         .map(f => ({
@@ -704,7 +866,7 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                    
+
                                     <Dialog open={isNewCategoryOpen} onOpenChange={setIsNewCategoryOpen}>
                                         <DialogTrigger asChild>
                                             <Button
@@ -902,100 +1064,34 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                             {/* Grid de Imagens do Produto */}
                             {formData.images.length > 0 && (
                                 <div className="mt-4">
-                                    <div className="max-h-80 scroll-rounded grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                                        {formData.images.map((image, imageIndex) => (
-                                            <div key={imageIndex} className="relative group">
-                                                <div className="aspect-square rounded-lg border-2 border-gray-200 overflow-hidden bg-gray-50">
-                                                    {image.uploading ? (
-                                                        <div className="flex items-center justify-center h-full">
-                                                            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-                                                        </div>
-                                                    ) : (
-                                                        <img
-                                                            src={image.url || image.preview}
-                                                            alt={image.alt || `Imagem do produto ${imageIndex + 1}`}
-                                                            className="w-full h-full object-cover"
-                                                        />
-                                                    )}
-                                                </div>
-                                                
-                                                {/* Controles da Imagem */}
-                                                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-opacity rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
-                                                    <div className="flex space-x-2">
-                                                        <Button
-                                                            type="button"
-                                                            size="sm"
-                                                            variant="secondary"
-                                                            onClick={() => setMainProductImage(imageIndex)}
-                                                            className="cursor-pointer"
-                                                        >
-                                                            <Star className={`w-4 h-4 ${image.isMain ? 'text-yellow-500 fill-yellow-500' : 'text-white'}`} />
-                                                        </Button>
-                                                        <Button
-                                                            type="button"
-                                                            size="sm"
-                                                            variant="destructive"
-                                                            onClick={() => removeProductImage(imageIndex)}
-                                                            className="cursor-pointer"
-                                                        >
-                                                            <X className="w-4 h-4" />
-                                                        </Button>
-                                                    </div>
-                                                </div>
-
-                                                {/* Indicador de Imagem Principal */}
-                                                {image.isMain && (
-                                                    <div className="absolute top-2 left-2">
-                                                        <Badge className="bg-yellow-500 text-yellow-900">
-                                                            Principal
-                                                        </Badge>
-                                                    </div>
-                                                )}
-
-                                                {/* Status do Upload */}
-                                                {image.error && (
-                                                    <div className="absolute top-2 right-2">
-                                                        <Badge variant="destructive">
-                                                            Erro
-                                                        </Badge>
-                                                    </div>
-                                                )}
-                                                {image.uploaded && !image.error && (
-                                                    <div className="absolute top-2 right-2">
-                                                        <Badge className="bg-green-500">
-                                                            ✓
-                                                        </Badge>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ))}
+                                    <div className="mb-4">
+                                        <Label className="text-sm text-gray-600">
+                                            Arraste as imagens para reordenar. A primeira imagem será a capa.
+                                        </Label>
                                     </div>
-
-                                    {/* Campo de Alt Text para Imagens */}
-                                    <div className="mt-4 space-y-3">
-                                        {formData.images.map((image, imageIndex) => (
-                                            <div key={imageIndex} className="flex items-center space-x-3">
-                                                <div className="w-12 h-12 rounded border overflow-hidden bg-gray-100 flex-shrink-0">
-                                                    <img
-                                                        src={image.url || image.preview}
-                                                        alt=""
-                                                        className="w-full h-full object-cover"
+                                    
+                                    <DndContext 
+                                        sensors={sensors}
+                                        collisionDetection={closestCenter}
+                                        onDragEnd={handleProductImageDragEnd}
+                                    >
+                                        <SortableContext 
+                                            items={formData.images.map(img => img.id)}
+                                            strategy={rectSortingStrategy}
+                                        >
+                                            <div className="max-h-80 scroll-rounded grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                                {formData.images.map((image, imageIndex) => (
+                                                    <SortableImageItem
+                                                        key={image.id}
+                                                        image={image}
+                                                        index={imageIndex}
+                                                        isMain={imageIndex === 0}
+                                                        onRemove={() => removeProductImage(imageIndex)}
                                                     />
-                                                </div>
-                                                <div className="flex-1">
-                                                    <Input
-                                                        placeholder="Texto alternativo da imagem"
-                                                        value={image.alt || ''}
-                                                        onChange={(e) => {
-                                                            const updatedFormData = { ...formData };
-                                                            updatedFormData.images[imageIndex].alt = e.target.value;
-                                                            setFormData(updatedFormData);
-                                                        }}
-                                                    />
-                                                </div>
+                                                ))}
                                             </div>
-                                        ))}
-                                    </div>
+                                        </SortableContext>
+                                    </DndContext>
                                 </div>
                             )}
                         </div>
@@ -1167,104 +1263,34 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                                         {/* Grid de Imagens da Variação */}
                                         {variation.images.length > 0 && (
                                             <div className="mt-4">
-                                                <div className="max-h-64 scroll-rounded grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                                                    {variation.images.map((image, imageIndex) => (
-                                                        <div key={imageIndex} className="relative group">
-                                                            <div className="aspect-square rounded-lg border-2 border-gray-200 overflow-hidden bg-gray-50">
-                                                                {image.uploading ? (
-                                                                    <div className="flex items-center justify-center h-full">
-                                                                        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-                                                                    </div>
-                                                                ) : (
-                                                                    <img
-                                                                        src={image.preview}
-                                                                        alt={image.alt || `Imagem da variação ${imageIndex + 1}`}
-                                                                        className="w-full h-full object-cover"
-                                                                    />
-                                                                )}
-                                                            </div>
-                                                            
-                                                            {/* Controles da Imagem */}
-                                                            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-opacity rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
-                                                                <div className="flex space-x-2">
-                                                                    <Button
-                                                                        type="button"
-                                                                        size="sm"
-                                                                        variant="secondary"
-                                                                        onClick={() => {
-                                                                            const updatedFormData = { ...formData };
-                                                                            updatedFormData.variations[index].mainImageIndex = imageIndex;
-                                                                            setFormData(updatedFormData);
-                                                                        }}
-                                                                        className="cursor-pointer"
-                                                                    >
-                                                                        <Star className={`w-4 h-4 ${variation.mainImageIndex === imageIndex ? 'text-yellow-500 fill-yellow-500' : 'text-white'}`} />
-                                                                    </Button>
-                                                                    <Button
-                                                                        type="button"
-                                                                        size="sm"
-                                                                        variant="destructive"
-                                                                        onClick={() => removeVariationImage(index, imageIndex)}
-                                                                        className="cursor-pointer"
-                                                                    >
-                                                                        <X className="w-4 h-4" />
-                                                                    </Button>
-                                                                </div>
-                                                            </div>
-
-                                                            {/* Indicador de Imagem Principal */}
-                                                            {variation.mainImageIndex === imageIndex && (
-                                                                <div className="absolute top-2 left-2">
-                                                                    <Badge className="bg-yellow-500 text-yellow-900">
-                                                                        Principal
-                                                                    </Badge>
-                                                                </div>
-                                                            )}
-
-                                                            {/* Status do Upload */}
-                                                            {image.error && (
-                                                                <div className="absolute top-2 right-2">
-                                                                    <Badge variant="destructive">
-                                                                        Erro
-                                                                    </Badge>
-                                                                </div>
-                                                            )}
-                                                            {image.uploaded && !image.error && (
-                                                                <div className="absolute top-2 right-2">
-                                                                    <Badge className="bg-green-500">
-                                                                        ✓
-                                                                    </Badge>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    ))}
+                                                <div className="mb-4">
+                                                    <Label className="text-sm text-gray-600">
+                                                        Arraste as imagens para reordenar. A primeira imagem será a capa.
+                                                    </Label>
                                                 </div>
-
-                                                {/* Campo de Alt Text para Imagens */}
-                                                <div className="mt-4 space-y-3">
-                                                    {variation.images.map((image, imageIndex) => (
-                                                        <div key={imageIndex} className="flex items-center space-x-3">
-                                                            <div className="w-12 h-12 rounded border overflow-hidden bg-gray-100 flex-shrink-0">
-                                                                <img
-                                                                    src={image.preview}
-                                                                    alt=""
-                                                                    className="w-full h-full object-cover"
+                                                
+                                                <DndContext 
+                                                    sensors={sensors}
+                                                    collisionDetection={closestCenter}
+                                                    onDragEnd={handleVariationImageDragEnd(index)}
+                                                >
+                                                    <SortableContext 
+                                                        items={variation.images.map(img => img.id)}
+                                                        strategy={rectSortingStrategy}
+                                                    >
+                                                        <div className="max-h-64 scroll-rounded grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                                            {variation.images.map((image, imageIndex) => (
+                                                                <SortableImageItem
+                                                                    key={image.id}
+                                                                    image={image}
+                                                                    index={imageIndex}
+                                                                    isMain={variation.mainImageIndex === imageIndex}
+                                                                    onRemove={() => removeVariationImage(index, imageIndex)}
                                                                 />
-                                                            </div>
-                                                            <div className="flex-1">
-                                                                <Input
-                                                                    placeholder="Texto alternativo da imagem"
-                                                                    value={image.alt || ''}
-                                                                    onChange={(e) => {
-                                                                        const updatedFormData = { ...formData };
-                                                                        updatedFormData.variations[index].images[imageIndex].alt = e.target.value;
-                                                                        setFormData(updatedFormData);
-                                                                    }}
-                                                                />
-                                                            </div>
+                                                            ))}
                                                         </div>
-                                                    ))}
-                                                </div>
+                                                    </SortableContext>
+                                                </DndContext>
                                             </div>
                                         )}
                                     </div>

@@ -139,8 +139,7 @@ export const productImages = pgTable('product_images', {
   originalName: varchar('original_name', { length: 255 }).notNull(),
   mimeType: varchar('mime_type', { length: 100 }).notNull(),
   size: integer('size').notNull(), // bytes
-  path: text('path').notNull(), // caminho no R2
-  url: text('url'), // URL pública se necessário
+  data: text('data').notNull(), // imagem em base64
   alt: varchar('alt', { length: 255 }), // texto alternativo para acessibilidade
   sortOrder: integer('sort_order').default(0),
   isMain: boolean('is_main').default(false), // imagem principal do produto/variação

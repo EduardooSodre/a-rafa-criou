@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/lib/db';
-import { products, files } from '@/lib/db/schema';
+import { products, files, productImages, productVariations } from '@/lib/db/schema';
 import { eq, desc, like, or } from 'drizzle-orm';
 
 const createProductSchema = z.object({
@@ -15,6 +15,46 @@ const createProductSchema = z.object({
   isFeatured: z.boolean().default(false),
   seoTitle: z.string().optional(),
   seoDescription: z.string().optional(),
+  images: z
+    .array(
+      z.object({
+        data: z.string(), // Base64 data
+        alt: z.string().optional(),
+        isMain: z.boolean().default(false),
+        order: z.number().default(0)
+      })
+    )
+    .optional(),
+  variations: z
+    .array(
+      z.object({
+        name: z.string(),
+        price: z.number(),
+        isActive: z.boolean().default(true),
+        images: z
+          .array(
+            z.object({
+              data: z.string(), // Base64 data
+              alt: z.string().optional(),
+              isMain: z.boolean().default(false),
+              order: z.number().default(0)
+            })
+          )
+          .optional(),
+        files: z
+          .array(
+            z.object({
+              filename: z.string(),
+              originalName: z.string(),
+              fileSize: z.number(),
+              mimeType: z.string(),
+              r2Key: z.string()
+            })
+          )
+          .optional()
+      })
+    )
+    .optional(),
   files: z
     .array(
       z.object({
@@ -151,7 +191,79 @@ export async function POST(request: NextRequest) {
 
     const [insertedProduct] = await db.insert(products).values(newProduct).returning();
 
-    // Insert files if provided
+    // Insert product images if provided
+    if (validatedData.images && validatedData.images.length > 0) {
+      const imageData = validatedData.images.map(image => ({
+        productId: insertedProduct.id,
+        name: `image-${Date.now()}.jpg`, // Nome temporário
+        originalName: `product-image.jpg`, // Nome temporário
+        mimeType: 'image/jpeg', // Tipo temporário - poderia ser extraído do base64
+        size: Math.round(image.data.length * 0.75), // Estimativa do tamanho baseado no base64
+        data: image.data,
+        alt: image.alt || validatedData.name,
+        isMain: image.isMain,
+        sortOrder: image.order
+      }));
+
+      await db.insert(productImages).values(imageData);
+    }
+
+    // Insert variations if provided
+    if (validatedData.variations && validatedData.variations.length > 0) {
+      for (const variation of validatedData.variations) {
+        // Generate slug for variation
+        const variationSlug = variation.name
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^a-z0-9\s-]/g, '')
+          .replace(/\s+/g, '-')
+          .replace(/-+/g, '-')
+          .trim();
+
+        const [insertedVariation] = await db.insert(productVariations).values({
+          productId: insertedProduct.id,
+          name: variation.name,
+          slug: variationSlug,
+          price: variation.price.toString(),
+          isActive: variation.isActive
+        }).returning();
+
+        // Insert variation images if provided
+        if (variation.images && variation.images.length > 0) {
+          const variationImageData = variation.images.map(image => ({
+            variationId: insertedVariation.id,
+            name: `variation-image-${Date.now()}.jpg`,
+            originalName: `variation-image.jpg`,
+            mimeType: 'image/jpeg',
+            size: Math.round(image.data.length * 0.75),
+            data: image.data,
+            alt: image.alt || variation.name,
+            isMain: image.isMain,
+            sortOrder: image.order
+          }));
+
+          await db.insert(productImages).values(variationImageData);
+        }
+
+        // Insert variation files if provided
+        if (variation.files && variation.files.length > 0) {
+          const variationFileData = variation.files.map(file => ({
+            variationId: insertedVariation.id,
+            name: file.filename,
+            originalName: file.originalName,
+            mimeType: file.mimeType,
+            size: file.fileSize,
+            path: `products/${insertedProduct.id}/variations/${insertedVariation.id}/${file.filename}`,
+            r2Key: file.r2Key
+          }));
+
+          await db.insert(files).values(variationFileData);
+        }
+      }
+    }
+
+    // Insert files if provided (for the main product)
     if (validatedData.files && validatedData.files.length > 0) {
       const fileData = validatedData.files.map(file => ({
         productId: insertedProduct.id,
