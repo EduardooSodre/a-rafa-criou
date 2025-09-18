@@ -7,12 +7,12 @@ require('dotenv').config({ path: '.env.local' });
 // Schema simplificado para o script
 const users = {
   id: 'id',
-  email: 'email', 
+  email: 'email',
   name: 'name',
   password: 'password',
   role: 'role',
   createdAt: 'created_at',
-  updatedAt: 'updated_at'
+  updatedAt: 'updated_at',
 };
 
 async function createAdmin() {
@@ -22,7 +22,9 @@ async function createAdmin() {
 
   if (!email || !password) {
     console.error('❌ Uso: node scripts/create-admin.js <email> <senha> [nome]');
-    console.log('Exemplo: node scripts/create-admin.js admin@arafacriou.com.br admin123 "Administrador"');
+    console.log(
+      'Exemplo: node scripts/create-admin.js admin@arafacriou.com.br admin123 "Administrador"'
+    );
     process.exit(1);
   }
 
@@ -38,7 +40,7 @@ async function createAdmin() {
     const db = drizzle(client);
 
     console.log(`🔍 Verificando se usuário ${email} já existe...`);
-    
+
     // Verificar se usuário já existe
     const existingUsers = await client`
       SELECT * FROM users WHERE email = ${email} LIMIT 1
@@ -46,7 +48,7 @@ async function createAdmin() {
 
     if (existingUsers.length > 0) {
       const existingUser = existingUsers[0];
-      
+
       if (existingUser.role === 'admin') {
         console.log(`✅ ${email} já é admin`);
         await client.end();
@@ -91,7 +93,6 @@ async function createAdmin() {
     console.log(`🎉 Agora você pode fazer login em /admin`);
 
     await client.end();
-
   } catch (error) {
     console.error('❌ Erro ao criar/promover admin:', error);
     process.exit(1);

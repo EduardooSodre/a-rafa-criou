@@ -15,11 +15,13 @@ npx ts-node scripts/create-admin.ts usuario@example.com senha123
 ```
 
 **Parâmetros:**
+
 - `email`: Email do usuário (obrigatório)
 - `senha`: Senha para o usuário (obrigatório)
 - `nome`: Nome de exibição (opcional, padrão: "Administrador")
 
 **O que o script faz:**
+
 - ✅ Verifica se o usuário já existe
 - ✅ Se existir, promove a admin
 - ✅ Se não existir, cria novo usuário admin
@@ -36,6 +38,7 @@ Acesse `/admin/usuarios` para gerenciar usuários:
 4. **Clique em promover** usuário desejado
 
 **Recursos da interface:**
+
 - 🔍 Busca por nome/email
 - 🛡️ Confirmação por senha
 - 👥 Lista todos os usuários
@@ -47,6 +50,7 @@ Acesse `/admin/usuarios` para gerenciar usuários:
 **Endpoint:** `POST /api/admin/promote-user`
 
 **Payload:**
+
 ```json
 {
   "email": "usuario@example.com",
@@ -56,6 +60,7 @@ Acesse `/admin/usuarios` para gerenciar usuários:
 ```
 
 **Exemplo com curl:**
+
 ```bash
 curl -X POST http://localhost:3000/api/admin/promote-user \
   -H "Content-Type: application/json" \
@@ -107,6 +112,7 @@ npx ts-node scripts/create-admin.ts admin@arafacriou.com.br minhasenha123 "Super
 Para verificar se o admin foi criado com sucesso:
 
 ### Via Script
+
 ```bash
 # O script informa o resultado na execução
 npx ts-node scripts/create-admin.ts admin@arafacriou.com.br senha123
@@ -115,29 +121,34 @@ npx ts-node scripts/create-admin.ts admin@arafacriou.com.br senha123
 ```
 
 ### Via Interface
+
 1. Acesse `/admin/usuarios`
 2. Verifique a badge "Admin" ao lado do usuário
 3. Badge vermelha = Admin confirmado
 
 ### Via Banco de Dados
+
 ```sql
 -- Verificar diretamente no PostgreSQL
-SELECT email, name, role, created_at 
-FROM users 
+SELECT email, name, role, created_at
+FROM users
 WHERE role = 'admin';
 ```
 
 ## 🆘 Problemas Comuns
 
 ### "Usuário não encontrado"
+
 - O usuário precisa se cadastrar primeiro na plataforma
 - Use email exato (case-sensitive)
 
 ### "Unauthorized" na API
+
 - Verifique se você está logado como admin
 - Confirme a senha do admin atual
 
 ### Script não executa
+
 ```bash
 # Instalar ts-node se necessário
 npm install -g ts-node
@@ -147,6 +158,7 @@ npx ts-node scripts/create-admin.ts
 ```
 
 ### Esqueci a senha do admin
+
 ```bash
 # Resetar senha do admin
 npx ts-node scripts/create-admin.ts admin@arafacriou.com.br novasenha123
@@ -155,6 +167,7 @@ npx ts-node scripts/create-admin.ts admin@arafacriou.com.br novasenha123
 ## 📝 Logs
 
 Todas as operações de admin são logadas no console:
+
 - ✅ Criações bem-sucedidas
 - ❌ Erros e validações
 - 🔍 Tentativas de acesso

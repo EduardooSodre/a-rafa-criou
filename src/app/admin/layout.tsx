@@ -20,11 +20,11 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { signOut } from 'next-auth/react'
 
@@ -169,8 +169,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     <div className="p-4 border-t bg-gradient-to-r from-gray-50 to-white flex-shrink-0">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button 
-                                    variant="ghost" 
+                                <Button
+                                    variant="ghost"
                                     className="w-full flex items-center gap-3 h-auto p-3 hover:bg-gray-100 justify-start"
                                 >
                                     <div className="w-8 h-8 bg-[#FED466] rounded-full flex items-center justify-center">
@@ -197,7 +197,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                                     Configurações
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem 
+                                <DropdownMenuItem
                                     className="flex items-center gap-2 cursor-pointer text-red-600 focus:text-red-600"
                                     onClick={handleSignOut}
                                 >

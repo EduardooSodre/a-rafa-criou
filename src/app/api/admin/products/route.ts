@@ -1,11 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { z } from 'zod'
-import { db } from '@/lib/db'
-import { 
-  products, 
-  files
-} from '@/lib/db/schema'
-import { eq, desc, like, or } from 'drizzle-orm'
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+import { db } from '@/lib/db';
+import { products, files } from '@/lib/db/schema';
+import { eq, desc, like, or } from 'drizzle-orm';
 
 const createProductSchema = z.object({
   name: z.string().min(1).max(255),
@@ -17,13 +14,17 @@ const createProductSchema = z.object({
   isFeatured: z.boolean().default(false),
   seoTitle: z.string().optional(),
   seoDescription: z.string().optional(),
-  files: z.array(z.object({
-    filename: z.string(),
-    originalName: z.string(),
-    fileSize: z.number(),
-    mimeType: z.string()
-  })).optional()
-})
+  files: z
+    .array(
+      z.object({
+        filename: z.string(),
+        originalName: z.string(),
+        fileSize: z.number(),
+        mimeType: z.string(),
+      })
+    )
+    .optional(),
+});
 
 export async function GET(request: NextRequest) {
   try {
@@ -33,37 +34,36 @@ export async function GET(request: NextRequest) {
     //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     // }
 
-    const { searchParams } = new URL(request.url)
-    const search = searchParams.get('search') || ''
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '20')
-    const offset = (page - 1) * limit
+    const { searchParams } = new URL(request.url);
+    const search = searchParams.get('search') || '';
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '20');
+    const offset = (page - 1) * limit;
 
     // Query products
-    let allProducts
+    let allProducts;
 
     if (search) {
-      allProducts = await db.select().from(products)
-        .where(
-          or(
-            like(products.name, `%${search}%`),
-            like(products.description, `%${search}%`)
-          )
-        )
+      allProducts = await db
+        .select()
+        .from(products)
+        .where(or(like(products.name, `%${search}%`), like(products.description, `%${search}%`)))
         .orderBy(desc(products.createdAt))
         .limit(limit)
-        .offset(offset)
+        .offset(offset);
     } else {
-      allProducts = await db.select().from(products)
+      allProducts = await db
+        .select()
+        .from(products)
         .orderBy(desc(products.createdAt))
         .limit(limit)
-        .offset(offset)
+        .offset(offset);
     }
 
     // Get related files for each product
     const productsWithFiles = await Promise.all(
-      allProducts.map(async (product) => {
-        const productFiles = await db.select().from(files).where(eq(files.productId, product.id))
+      allProducts.map(async product => {
+        const productFiles = await db.select().from(files).where(eq(files.productId, product.id));
 
         return {
           ...product,
@@ -73,26 +73,22 @@ export async function GET(request: NextRequest) {
           digitalProduct: true,
           category: 'digital',
           images: [],
-          tags: []
-        }
+          tags: [],
+        };
       })
-    )
+    );
 
     return NextResponse.json({
       products: productsWithFiles,
       pagination: {
         page,
         limit,
-        total: allProducts.length
-      }
-    })
-
+        total: allProducts.length,
+      },
+    });
   } catch (error) {
-    console.error('Error fetching products:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    console.error('Error fetching products:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -104,32 +100,38 @@ export async function POST(request: NextRequest) {
     //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     // }
 
-    const body = await request.json()
-    const validatedData = createProductSchema.parse(body)
+    const body = await request.json();
+    const validatedData = createProductSchema.parse(body);
 
     // Generate base slug from name (ou usar o slug enviado se estiver editando)
-    const baseSlug = validatedData.slug || validatedData.name
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '') // Remove accents
-      .replace(/[^a-z0-9\s-]/g, '') // Remove special chars
-      .replace(/\s+/g, '-') // Replace spaces with hyphens
-      .replace(/-+/g, '-') // Replace multiple hyphens with single
-      .trim()
+    const baseSlug =
+      validatedData.slug ||
+      validatedData.name
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // Remove accents
+        .replace(/[^a-z0-9\s-]/g, '') // Remove special chars
+        .replace(/\s+/g, '-') // Replace spaces with hyphens
+        .replace(/-+/g, '-') // Replace multiple hyphens with single
+        .trim();
 
     // Ensure unique slug by checking database and incrementing if needed
-    let slug = baseSlug
-    let counter = 1
-    
+    let slug = baseSlug;
+    let counter = 1;
+
     while (true) {
-      const existingProduct = await db.select().from(products).where(eq(products.slug, slug)).limit(1)
-      
+      const existingProduct = await db
+        .select()
+        .from(products)
+        .where(eq(products.slug, slug))
+        .limit(1);
+
       if (existingProduct.length === 0) {
-        break // Slug is unique
+        break; // Slug is unique
       }
-      
-      slug = `${baseSlug}-${counter}`
-      counter++
+
+      slug = `${baseSlug}-${counter}`;
+      counter++;
     }
 
     // Create product - using all schema fields
@@ -142,27 +144,30 @@ export async function POST(request: NextRequest) {
       isActive: validatedData.isActive,
       isFeatured: validatedData.isFeatured,
       seoTitle: validatedData.seoTitle || validatedData.name,
-      seoDescription: validatedData.seoDescription || validatedData.description || null
-    }
+      seoDescription: validatedData.seoDescription || validatedData.description || null,
+    };
 
-    const [insertedProduct] = await db.insert(products).values(newProduct).returning()
+    const [insertedProduct] = await db.insert(products).values(newProduct).returning();
 
     // Insert files if provided
     if (validatedData.files && validatedData.files.length > 0) {
-      const fileData = validatedData.files.map((file) => ({
+      const fileData = validatedData.files.map(file => ({
         productId: insertedProduct.id,
         name: file.filename,
         originalName: file.originalName,
         mimeType: file.mimeType,
         size: file.fileSize,
-        path: `products/${insertedProduct.id}/${file.filename}`
-      }))
+        path: `products/${insertedProduct.id}/${file.filename}`,
+      }));
 
-      await db.insert(files).values(fileData)
+      await db.insert(files).values(fileData);
     }
 
     // Fetch the complete product with files
-    const productFiles = await db.select().from(files).where(eq(files.productId, insertedProduct.id))
+    const productFiles = await db
+      .select()
+      .from(files)
+      .where(eq(files.productId, insertedProduct.id));
 
     const completeProduct = {
       ...insertedProduct,
@@ -171,24 +176,20 @@ export async function POST(request: NextRequest) {
       digitalProduct: true,
       category: 'digital',
       images: [],
-      tags: []
-    }
+      tags: [],
+    };
 
-    return NextResponse.json(completeProduct, { status: 201 })
-
+    return NextResponse.json(completeProduct, { status: 201 });
   } catch (error) {
-    console.error('Error creating product:', error)
-    
+    console.error('Error creating product:', error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Validation error', details: error.issues },
         { status: 400 }
-      )
+      );
     }
 
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

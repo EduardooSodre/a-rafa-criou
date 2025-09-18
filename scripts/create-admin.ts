@@ -10,19 +10,17 @@ async function createAdmin() {
 
   if (!email || !password) {
     console.error('❌ Uso: npx ts-node scripts/create-admin.ts <email> <senha> [nome]');
-    console.log('Exemplo: npx ts-node scripts/create-admin.ts admin@arafacriou.com.br admin123 "Administrador"');
+    console.log(
+      'Exemplo: npx ts-node scripts/create-admin.ts admin@arafacriou.com.br admin123 "Administrador"'
+    );
     process.exit(1);
   }
 
   try {
     console.log(`🔍 Verificando se usuário ${email} já existe...`);
-    
+
     // Verificar se usuário já existe
-    const [existingUser] = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, email))
-      .limit(1);
+    const [existingUser] = await db.select().from(users).where(eq(users.email, email)).limit(1);
 
     if (existingUser) {
       if (existingUser.role === 'admin') {
@@ -33,9 +31,9 @@ async function createAdmin() {
       // Promover usuário existente a admin
       await db
         .update(users)
-        .set({ 
+        .set({
           role: 'admin',
-          updatedAt: new Date()
+          updatedAt: new Date(),
         })
         .where(eq(users.email, email));
 
@@ -57,7 +55,7 @@ async function createAdmin() {
         password: hashedPassword,
         role: 'admin',
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .returning();
 
@@ -66,7 +64,6 @@ async function createAdmin() {
     console.log(`👤 Nome: ${result[0].name}`);
     console.log(`🔑 Role: ${result[0].role}`);
     console.log(`🎉 Agora você pode fazer login em /admin`);
-
   } catch (error) {
     console.error('❌ Erro ao criar/promover admin:', error);
     process.exit(1);

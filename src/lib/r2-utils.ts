@@ -1,6 +1,6 @@
-import { PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { r2, R2_BUCKET } from "./r2";
+import { PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { r2, R2_BUCKET } from './r2';
 
 /**
  * Faz upload de um arquivo para o Cloudflare R2
@@ -21,7 +21,7 @@ export async function uploadToR2(
         Key: key,
         Body: body,
         ContentType: contentType,
-        ACL: "private", // Sempre privado para segurança
+        ACL: 'private', // Sempre privado para segurança
       })
     );
     console.log(`✅ Upload successful: ${key}`);
@@ -50,7 +50,7 @@ export async function getR2SignedUrl(
       }),
       { expiresIn: expiresInSeconds }
     );
-    
+
     console.log(`✅ Signed URL generated for: ${key} (expires in ${expiresInSeconds}s)`);
     return url;
   } catch (error) {
@@ -86,14 +86,14 @@ export async function deleteFromR2(key: string): Promise<void> {
  * @returns string - Chave única para o arquivo
  */
 export function generateFileKey(originalName: string, productId?: string): string {
-  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const randomId = Math.random().toString(36).substring(2, 8);
-  const sanitizedName = originalName.replace(/[^a-zA-Z0-9.-]/g, "_");
-  
+  const sanitizedName = originalName.replace(/[^a-zA-Z0-9.-]/g, '_');
+
   if (productId) {
     return `pdfs/produto-${productId}/${timestamp}-${randomId}-${sanitizedName}`;
   }
-  
+
   return `pdfs/${timestamp}-${randomId}-${sanitizedName}`;
 }
 
@@ -103,7 +103,7 @@ export function generateFileKey(originalName: string, productId?: string): strin
  * @returns boolean
  */
 export function isValidPDF(file: File): boolean {
-  return file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+  return file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
 }
 
 /**

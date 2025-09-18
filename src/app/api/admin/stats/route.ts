@@ -1,18 +1,13 @@
-import { NextResponse } from 'next/server'
-import { db } from '@/lib/db'
-import { 
-  products, 
-  users, 
-  orders, 
-  files
-} from '@/lib/db/schema'
-import { eq, gte, count, sum, and } from 'drizzle-orm'
+import { NextResponse } from 'next/server';
+import { db } from '@/lib/db';
+import { products, users, orders, files } from '@/lib/db/schema';
+import { eq, gte, count, sum, and } from 'drizzle-orm';
 
 export async function GET() {
   try {
     // Get current month start date
-    const now = new Date()
-    const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+    const now = new Date();
+    const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
     // Get stats in parallel
     const [
@@ -21,7 +16,7 @@ export async function GET() {
       ordersThisMonthResult,
       totalFilesResult,
       revenueThisMonthResult,
-      recentOrdersResult
+      recentOrdersResult,
     ] = await Promise.all([
       // Total products
       db.select({ count: count() }).from(products).where(eq(products.isActive, true)),
@@ -30,40 +25,37 @@ export async function GET() {
       db.select({ count: count() }).from(users),
 
       // Orders this month
-      db.select({ count: count() }).from(orders)
-        .where(gte(orders.createdAt, currentMonthStart)),
+      db.select({ count: count() }).from(orders).where(gte(orders.createdAt, currentMonthStart)),
 
       // Total files
       db.select({ count: count() }).from(files),
 
       // Revenue this month
-      db.select({ 
-        total: sum(orders.total) 
-      }).from(orders)
-        .where(
-          and(
-            gte(orders.createdAt, currentMonthStart),
-            eq(orders.status, 'completed')
-          )
-        ),
+      db
+        .select({
+          total: sum(orders.total),
+        })
+        .from(orders)
+        .where(and(gte(orders.createdAt, currentMonthStart), eq(orders.status, 'completed'))),
 
       // Recent orders (last 10)
-      db.select({
-        id: orders.id,
-        customerName: users.name,
-        customerEmail: users.email,
-        total: orders.total,
-        status: orders.status,
-        createdAt: orders.createdAt
-      })
-      .from(orders)
-      .leftJoin(users, eq(orders.userId, users.id))
-      .orderBy(orders.createdAt)
-      .limit(10)
-    ])
+      db
+        .select({
+          id: orders.id,
+          customerName: users.name,
+          customerEmail: users.email,
+          total: orders.total,
+          status: orders.status,
+          createdAt: orders.createdAt,
+        })
+        .from(orders)
+        .leftJoin(users, eq(orders.userId, users.id))
+        .orderBy(orders.createdAt)
+        .limit(10),
+    ]);
 
     // Calculate downloads this month (assuming each completed order = 1 download)
-    const downloadsThisMonth = ordersThisMonthResult[0]?.count || 0
+    const downloadsThisMonth = ordersThisMonthResult[0]?.count || 0;
 
     const stats = {
       totalProdutos: totalProductsResult[0]?.count || 0,
@@ -77,16 +69,19 @@ export async function GET() {
         cliente: order.customerName || order.customerEmail || 'Cliente',
         produto: 'Produto Digital', // TODO: Get actual product names from order items
         valor: parseFloat(order.total),
-        status: order.status === 'completed' ? 'Concluído' : 
-                order.status === 'processing' ? 'Processando' : 'Pendente'
-      }))
-    }
+        status:
+          order.status === 'completed'
+            ? 'Concluído'
+            : order.status === 'processing'
+              ? 'Processando'
+              : 'Pendente',
+      })),
+    };
 
-    return NextResponse.json(stats)
-
+    return NextResponse.json(stats);
   } catch (error) {
-    console.error('Error fetching dashboard stats:', error)
-    
+    console.error('Error fetching dashboard stats:', error);
+
     // Return mock data on error to prevent dashboard breaking
     return NextResponse.json({
       totalProdutos: 0,
@@ -95,7 +90,7 @@ export async function GET() {
       arquivosUpload: 0,
       receitaMes: 0,
       downloadsMes: 0,
-      recentOrders: []
-    })
+      recentOrders: [],
+    });
   }
 }

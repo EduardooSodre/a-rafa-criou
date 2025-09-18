@@ -184,8 +184,8 @@ export default function AdminDashboard() {
                                 <div className="text-left sm:text-right">
                                     <p className="font-medium">R$ {order.total.toFixed(2).replace('.', ',')}</p>
                                     <span className={`inline-block text-xs px-2 py-1 rounded-full mt-1 ${order.status === 'completed' ? 'bg-green-100 text-green-800' :
-                                            order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                                'bg-red-100 text-red-800'
+                                        order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                            'bg-red-100 text-red-800'
                                         }`}>
                                         {order.status === 'completed' ? 'Concluído' :
                                             order.status === 'pending' ? 'Pendente' : 'Cancelado'}
