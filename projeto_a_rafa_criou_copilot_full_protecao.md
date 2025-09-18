@@ -1,5 +1,126 @@
 # 🚀 Projeto A Rafa Criou — Replatform WordPress → Next.js (App Router) + Drizzle + Auth.js
 
+## ✅ Status de Implementação
+
+### 0) Setup inicial ✅
+- ✅ Next.js (App Router) + TS + Tailwind + Shadcn
+- ✅ Drizzle + Postgres configurado
+- ✅ Auth.js (Credentials + Email Provider)
+- ⚠️ Providers: e-mail (precisa configurar Resend), **storage (falta Cloudflare R2)**, pagamentos (falta Stripe/PayPal/Pix)
+- ⚠️ `.env` documentado (parcial)
+
+### 1) Banco & Migrations ✅
+- ✅ **Tabelas principais criadas**: `users`, `products`, `product_variations`, `files`, `orders`, `order_items`, `downloads`, `invites`, `url_map`
+- ✅ **Cupons**: `coupons`, `coupon_products`, `coupon_variations`, `coupon_redemptions`
+- ✅ **CMS**: `content_pages`, `content_blocks`, `content_versions`
+- ✅ **Auth extra**: Estrutura para `password_reset_tokens`, `legacy_credentials`
+- ❌ **Notificações**: `notifications`, `notification_settings` (faltam)
+- ❌ **Afiliação**: `affiliates`, `affiliate_links`, `affiliate_commissions` (faltam)
+- ❌ **Traduções**: `product_translations` (falta)
+
+### 2) Migração WooCommerce ❌
+- ❌ Scripts de import/export (clientes, pedidos, produtos, variações)
+- ❌ Senhas: validar phpass → rehash moderno ou magic link
+- ❌ Histórico de pedidos aparece no painel do cliente
+- ❌ Admin pode mesclar contas em caso de e-mails diferentes
+- ❌ Relatório de pendências para correções pré-go-live
+
+### 3) Autenticação ⚠️
+- ✅ Login moderno com Auth.js
+- ✅ Estrutura para reset por token
+- ⚠️ phpass → rehash automático (falta implementar)
+- ⚠️ Magic link opcional (falta implementar)
+
+### 4) CMS embutido ❌
+- ❌ Editor TipTap/Editor.js, upload de imagens
+- ❌ Preview e publicar com revalidate
+
+### 5) Catálogo e PDP ⚠️
+- ✅ `/produtos` e `/produtos/[slug]` estrutura criada
+- ⚠️ Variações (estrutura no banco, falta implementar UI)
+- ⚠️ SEO por produto/variação (falta implementar)
+- ❌ Suporte a **traduções de PDFs** na PDP
+
+### 6) Checkout & Pagamentos ⚠️
+- ✅ Estrutura `/checkout` criada
+- ❌ Stripe (Payment Intent) + PayPal + Pix
+- ❌ Webhooks idempotentes
+- ❌ Campo cupom → validação backend → recalcular totais
+
+### 7) Entrega do PDF ❌
+- ❌ PDFs no **Cloudflare R2** (bucket privado)
+- ❌ **URL assinada temporária** (TTL curto)
+- ❌ E-mail + página de obrigado + área do cliente
+- ❌ Aviso de direitos autorais antes do download
+
+### 8) Cupons ❌
+- ✅ Estrutura no banco criada
+- ❌ CRUD no painel
+- ❌ Validação backend
+- ❌ Registro em `coupon_redemptions`
+
+### 9) Notificações externas ❌
+- ❌ E-mail admin
+- ❌ Opcional: WhatsApp, SMS, Web Push
+- ❌ Preferências + DND + logs
+
+### 10) Afiliação ❌
+- ❌ CRUD de afiliados, links e comissões
+- ❌ Registro automático na compra via link
+- ❌ Painel do afiliado com saldo/relatórios
+- ❌ Rotina de pagamento de comissão (export/registro)
+
+### 11) SEO & Redirecionamentos ❌
+- ❌ Middleware 301 via `url_map`
+- ❌ next-sitemap + robots.txt
+- ❌ Canonical tags
+
+### 12) Proteção de PDFs ❌
+- ❌ Watermark dinâmica (e-mail + data)
+- ❌ Limite de downloads configurável
+- ❌ Logs em `downloads`
+- ❌ Fingerprint invisível (metadata)
+
+### 13) PWA (opcional) ❌
+- ❌ Manifest + Service Worker
+- ❌ Add to Home (iOS/Android)
+- ❌ Push notifications
+
+### 14) Cutover & Pós-go-live ❌
+- ❌ Staging (`beta.`) para validação
+- ❌ Trocar DNS + ativar 301
+- ❌ Monitoramento 72h (erros, uptime, pedidos reais)
+- ❌ Plano de rollback
+
+---
+
+## 🎯 **PRÓXIMOS PASSOS PRIORITÁRIOS**
+
+### **FASE 1: Completar Fundações (1-2 semanas)**
+1. **Configurar Storage Cloudflare R2** - Para uploads de PDFs
+2. **Implementar sistema de pagamentos** - Stripe/PayPal/Pix básico
+3. **Completar schemas do banco** - Notificações, Afiliação, Traduções
+4. **Sistema de upload de arquivos** - Para produtos e variações
+
+### **FASE 2: Funcionalidades Core (2-3 semanas)**
+5. **CMS embutido básico** - Editor de conteúdo
+6. **Cupons funcionais** - CRUD + validação no checkout
+7. **Entrega automática de PDFs** - Webhook + e-mail + área cliente
+8. **Área administrativa** - Gestão de produtos, pedidos, clientes
+
+### **FASE 3: Recursos Avançados (2-3 semanas)**
+9. **Sistema de notificações** - E-mail + canais opcionais
+10. **Migração WooCommerce** - Scripts + validação
+11. **Sistema de afiliação** - Links + comissões
+12. **Proteção de PDFs** - Watermark + limites
+
+### **FASE 4: SEO & Go-Live (1-2 semanas)**
+13. **SEO + Redirecionamentos** - 301s + sitemap
+14. **Testes finais** - Staging + validação
+15. **Deploy produção** - DNS + monitoramento
+
+---
+
 ## 🎨 Identidade Visual (UI Kit)
 
 - **Background:** `#F4F4F4`

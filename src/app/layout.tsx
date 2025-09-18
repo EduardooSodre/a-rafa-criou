@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
-import { Header } from "@/components/header";
+import { ConditionalHeader } from "@/components/ConditionalHeader";
 
 /**
  * Contexto do Copilot:
@@ -35,7 +35,7 @@ export default function RootLayout({
         suppressHydrationWarning={true}
       >
         <Providers>
-          <Header />
+          <ConditionalHeader />
           <main>
             {children}
           </main>
