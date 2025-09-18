@@ -77,6 +77,17 @@ export const verificationTokens = pgTable(
 // E-COMMERCE CORE
 // ============================================================================
 
+export const categories = pgTable('categories', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  name: varchar('name', { length: 255 }).notNull(),
+  slug: varchar('slug', { length: 255 }).notNull().unique(),
+  description: text('description'),
+  sortOrder: integer('sort_order').default(0),
+  isActive: boolean('is_active').default(true).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
 export const products = pgTable('products', {
   id: uuid('id').defaultRandom().primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
@@ -84,6 +95,7 @@ export const products = pgTable('products', {
   description: text('description'),
   shortDescription: text('short_description'),
   price: decimal('price', { precision: 10, scale: 2 }).notNull(),
+  categoryId: uuid('category_id').references(() => categories.id),
   isActive: boolean('is_active').default(true).notNull(),
   isFeatured: boolean('is_featured').default(false).notNull(),
   seoTitle: varchar('seo_title', { length: 255 }),
@@ -116,6 +128,22 @@ export const files = pgTable('files', {
   size: integer('size').notNull(), // bytes
   path: text('path').notNull(), // caminho no R2
   hash: varchar('hash', { length: 64 }), // SHA-256 para verificação
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const productImages = pgTable('product_images', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  productId: uuid('product_id').references(() => products.id, { onDelete: 'cascade' }),
+  variationId: uuid('variation_id').references(() => productVariations.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 255 }).notNull(),
+  originalName: varchar('original_name', { length: 255 }).notNull(),
+  mimeType: varchar('mime_type', { length: 100 }).notNull(),
+  size: integer('size').notNull(), // bytes
+  path: text('path').notNull(), // caminho no R2
+  url: text('url'), // URL pública se necessário
+  alt: varchar('alt', { length: 255 }), // texto alternativo para acessibilidade
+  sortOrder: integer('sort_order').default(0),
+  isMain: boolean('is_main').default(false), // imagem principal do produto/variação
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
@@ -325,16 +353,23 @@ export const usersRelations = relations(users, ({ many }) => ({
   inviteUsed: many(invites, { relationName: 'inviteUser' }),
 }));
 
-export const productsRelations = relations(products, ({ many }) => ({
+export const productsRelations = relations(products, ({ one, many }) => ({
+  category: one(categories, { fields: [products.categoryId], references: [categories.id] }),
   variations: many(productVariations),
   files: many(files),
+  images: many(productImages),
   orderItems: many(orderItems),
   couponProducts: many(couponProducts),
+}));
+
+export const categoriesRelations = relations(categories, ({ many }) => ({
+  products: many(products),
 }));
 
 export const productVariationsRelations = relations(productVariations, ({ one, many }) => ({
   product: one(products, { fields: [productVariations.productId], references: [products.id] }),
   files: many(files),
+  images: many(productImages),
   orderItems: many(orderItems),
   couponVariations: many(couponVariations),
 }));
@@ -362,6 +397,14 @@ export const filesRelations = relations(files, ({ one, many }) => ({
     references: [productVariations.id],
   }),
   downloads: many(downloads),
+}));
+
+export const productImagesRelations = relations(productImages, ({ one }) => ({
+  product: one(products, { fields: [productImages.productId], references: [products.id] }),
+  variation: one(productVariations, {
+    fields: [productImages.variationId],
+    references: [productVariations.id],
+  }),
 }));
 
 export const couponsRelations = relations(coupons, ({ many }) => ({

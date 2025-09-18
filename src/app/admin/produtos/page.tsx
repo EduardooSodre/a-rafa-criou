@@ -130,7 +130,7 @@ export default function ProductsPage() {
                             Novo Produto
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                    <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto rounded-lg">
                         <DialogHeader>
                             <DialogTitle className="flex items-center gap-2">
                                 <Package className="w-5 h-5" />

@@ -10,6 +10,7 @@ const createProductSchema = z.object({
   description: z.string().optional(),
   shortDescription: z.string().optional(),
   price: z.number().min(0.01),
+  categoryId: z.string().optional().nullable(),
   isActive: z.boolean().default(true),
   isFeatured: z.boolean().default(false),
   seoTitle: z.string().optional(),
@@ -141,6 +142,7 @@ export async function POST(request: NextRequest) {
       description: validatedData.description || null,
       shortDescription: validatedData.shortDescription || null,
       price: validatedData.price.toString(), // Convert to string for decimal field
+      categoryId: validatedData.categoryId || null,
       isActive: validatedData.isActive,
       isFeatured: validatedData.isFeatured,
       seoTitle: validatedData.seoTitle || validatedData.name,
