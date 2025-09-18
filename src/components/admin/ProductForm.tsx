@@ -35,9 +35,10 @@ interface UploadedFile {
 interface ProductFormProps {
     initialData?: Partial<ProductFormData & { id: string }>
     isEditing?: boolean
+    onSuccess?: () => void
 }
 
-export default function ProductForm({ initialData, isEditing = false }: ProductFormProps) {
+export default function ProductForm({ initialData, isEditing = false, onSuccess }: ProductFormProps) {
     const router = useRouter()
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
@@ -208,7 +209,13 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
                 throw new Error('Erro ao salvar produto')
             }
 
-            router.push('/admin/products')
+            // Chamar callback se fornecido, senão navegar
+            if (onSuccess) {
+                onSuccess()
+                alert('Produto salvo com sucesso!')
+            } else {
+                router.push('/admin/produtos')
+            }
         } catch {
             alert('Erro ao salvar produto')
         } finally {
