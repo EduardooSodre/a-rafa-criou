@@ -24,13 +24,13 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
-} from '@/components/ui/sheet'
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog'
 import ProductsTable from '@/components/admin/ProductsTable'
 import ProductForm from '@/components/admin/ProductForm'
 
@@ -123,23 +123,23 @@ export default function ProductsPage() {
                     </div>
                 </div>
 
-                <Sheet open={isNewProductOpen} onOpenChange={setIsNewProductOpen}>
-                    <SheetTrigger asChild>
+                <Dialog open={isNewProductOpen} onOpenChange={setIsNewProductOpen}>
+                    <DialogTrigger asChild>
                         <Button className="bg-[#FED466] hover:bg-[#FD9555] text-gray-800 font-medium shadow-sm">
                             <Plus className="w-4 h-4 mr-2" />
                             Novo Produto
                         </Button>
-                    </SheetTrigger>
-                    <SheetContent side="right" className="w-full sm:max-w-4xl overflow-y-auto">
-                        <SheetHeader>
-                            <SheetTitle className="flex items-center gap-2">
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2">
                                 <Package className="w-5 h-5" />
                                 Criar Novo Produto
-                            </SheetTitle>
-                            <SheetDescription>
+                            </DialogTitle>
+                            <DialogDescription>
                                 Preencha as informações abaixo para adicionar um novo produto ao catálogo
-                            </SheetDescription>
-                        </SheetHeader>
+                            </DialogDescription>
+                        </DialogHeader>
                         <div className="mt-6">
                             <ProductForm onSuccess={() => {
                                 setIsNewProductOpen(false)
@@ -147,8 +147,8 @@ export default function ProductsPage() {
                                 fetch('/api/admin/products/stats').then(res => res.json()).then(setStats)
                             }} />
                         </div>
-                    </SheetContent>
-                </Sheet>
+                    </DialogContent>
+                </Dialog>
             </div>
 
             {/* Cards de Estatísticas */}

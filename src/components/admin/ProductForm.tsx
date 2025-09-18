@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Upload, X, FileText, Loader2 } from 'lucide-react'
+import { Upload, X, FileText, Loader2, Plus, Trash2, Package } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -11,21 +11,27 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 
+interface ProductVariation {
+    id?: string
+    name: string
+    price: string
+    files: UploadedFile[]
+    isActive: boolean
+}
+
 interface ProductFormData {
     name: string
     slug: string
     description: string
-    shortDescription: string
-    price: string
+    basePrice: string
     isActive: boolean
     isFeatured: boolean
-    seoTitle: string
-    seoDescription: string
+    variations: ProductVariation[]
 }
 
 interface UploadedFile {
     file: File
-    type: 'pdf'
+    type: 'pdf' | 'image'
     uploading?: boolean
     uploaded?: boolean
     r2Key?: string
@@ -41,34 +47,36 @@ interface ProductFormProps {
 export default function ProductForm({ initialData, isEditing = false, onSuccess }: ProductFormProps) {
     const router = useRouter()
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
-    const [errors, setErrors] = useState<Partial<ProductFormData>>({})
 
     const [formData, setFormData] = useState<ProductFormData>({
         name: initialData?.name || '',
         slug: initialData?.slug || '',
         description: initialData?.description || '',
-        shortDescription: initialData?.shortDescription || '',
-        price: initialData?.price || '0.00',
+        basePrice: initialData?.basePrice || '0.00',
         isActive: initialData?.isActive ?? true,
         isFeatured: initialData?.isFeatured ?? false,
-        seoTitle: initialData?.seoTitle || '',
-        seoDescription: initialData?.seoDescription || '',
+        variations: initialData?.variations || [
+            {
+                name: 'Padrão',
+                price: '0.00',
+                files: [],
+                isActive: true
+            }
+        ]
     })
 
-    // Gerar slug automaticamente baseado no nome
+    // Gerar slug automaticamente
     const generateSlug = (name: string) => {
         return name
             .toLowerCase()
             .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '') // Remove acentos
-            .replace(/[^a-z0-9\s-]/g, '') // Remove caracteres especiais
-            .replace(/\s+/g, '-') // Substitui espaços por hífens
-            .replace(/-+/g, '-') // Remove hífens duplos
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
             .trim()
     }
 
-    // Atualizar slug quando o nome mudar
     const handleNameChange = (name: string) => {
         setFormData(prev => ({
             ...prev,
@@ -78,95 +86,163 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
     }
 
     const handleInputChange = (field: keyof ProductFormData, value: string | boolean) => {
+        setFormData(prev => ({ ...prev, [field]: value }))
+    }
+
+    // Funções para gerenciar variações
+    const addVariation = () => {
         setFormData(prev => ({
             ...prev,
-            [field]: value
+            variations: [...prev.variations, {
+                name: `Variação ${prev.variations.length + 1}`,
+                price: prev.basePrice,
+                files: [],
+                isActive: true
+            }]
         }))
-        // Limpar erro do campo
-        if (errors[field]) {
-            setErrors(prev => ({
+    }
+
+    const removeVariation = (index: number) => {
+        if (formData.variations.length > 1) {
+            setFormData(prev => ({
                 ...prev,
-                [field]: undefined
+                variations: prev.variations.filter((_, i) => i !== index)
             }))
         }
     }
 
-    const validateForm = (): boolean => {
-        const newErrors: Partial<ProductFormData> = {}
-
-        if (!formData.name.trim()) {
-            newErrors.name = 'Nome é obrigatório'
-        }
-        if (!formData.slug.trim()) {
-            newErrors.slug = 'Slug é obrigatório'
-        }
-        if (!formData.price || parseFloat(formData.price) <= 0) {
-            newErrors.price = 'Preço deve ser maior que R$ 0,00'
-        }
-
-        setErrors(newErrors)
-        return Object.keys(newErrors).length === 0
+    const updateVariation = (index: number, field: keyof ProductVariation, value: string | boolean) => {
+        setFormData(prev => ({
+            ...prev,
+            variations: prev.variations.map((variation, i) =>
+                i === index ? { ...variation, [field]: value } : variation
+            )
+        }))
     }
 
-    const handleFileUpload = async (files: FileList) => {
-        const fileArray = Array.from(files)
+    // Upload de arquivos para variação específica
+    const handleFileUpload = async (variationIndex: number, files: FileList) => {
+        const validFiles = Array.from(files).filter(file => {
+            const isValidType = file.type === 'application/pdf' || file.type.startsWith('image/')
+            const isValidSize = file.size <= 50 * 1024 * 1024 // 50MB
+            return isValidType && isValidSize
+        })
 
-        for (const file of fileArray) {
-            if (file.type !== 'application/pdf') {
-                alert('Apenas arquivos PDF são permitidos')
-                continue
-            }
-
-            if (file.size > 100 * 1024 * 1024) { // 100MB
-                alert('Arquivo muito grande. Máximo 100MB')
-                continue
-            }
-
+        for (const file of validFiles) {
             const uploadFile: UploadedFile = {
                 file,
-                type: 'pdf',
+                type: file.type === 'application/pdf' ? 'pdf' : 'image',
                 uploading: true
             }
 
-            setUploadedFiles(prev => [...prev, uploadFile])
+            // Adicionar arquivo à variação
+            setFormData(prev => ({
+                ...prev,
+                variations: prev.variations.map((variation, i) =>
+                    i === variationIndex
+                        ? { ...variation, files: [...variation.files, uploadFile] }
+                        : variation
+                )
+            }))
 
             try {
                 const formDataUpload = new FormData()
                 formDataUpload.append('file', file)
-                formDataUpload.append('folder', 'products')
 
                 const response = await fetch('/api/r2/upload', {
                     method: 'POST',
-                    body: formDataUpload
+                    body: formDataUpload,
                 })
 
-                if (!response.ok) {
-                    throw new Error('Erro no upload')
+                if (response.ok) {
+                    const result = await response.json()
+
+                    // Atualizar arquivo como uploaded
+                    setFormData(prev => ({
+                        ...prev,
+                        variations: prev.variations.map((variation, i) =>
+                            i === variationIndex
+                                ? {
+                                    ...variation,
+                                    files: variation.files.map(f =>
+                                        f.file === file
+                                            ? { ...f, uploading: false, uploaded: true, r2Key: result.key }
+                                            : f
+                                    )
+                                }
+                                : variation
+                        )
+                    }))
+                } else {
+                    throw new Error('Falha no upload')
                 }
-
-                const result = await response.json()
-
-                setUploadedFiles(prev =>
-                    prev.map(f =>
-                        f.file === file
-                            ? { ...f, uploading: false, uploaded: true, r2Key: result.key }
-                            : f
-                    )
-                )
             } catch {
-                setUploadedFiles(prev =>
-                    prev.map(f =>
-                        f.file === file
-                            ? { ...f, uploading: false, error: 'Erro no upload' }
-                            : f
+                // Marcar erro no arquivo
+                setFormData(prev => ({
+                    ...prev,
+                    variations: prev.variations.map((variation, i) =>
+                        i === variationIndex
+                            ? {
+                                ...variation,
+                                files: variation.files.map(f =>
+                                    f.file === file
+                                        ? { ...f, uploading: false, error: 'Erro no upload' }
+                                        : f
+                                )
+                            }
+                            : variation
                     )
-                )
+                }))
             }
         }
     }
 
-    const removeFile = (fileToRemove: UploadedFile) => {
-        setUploadedFiles(prev => prev.filter(f => f !== fileToRemove))
+    const removeFileFromVariation = (variationIndex: number, fileIndex: number) => {
+        setFormData(prev => ({
+            ...prev,
+            variations: prev.variations.map((variation, i) =>
+                i === variationIndex
+                    ? { ...variation, files: variation.files.filter((_, fi) => fi !== fileIndex) }
+                    : variation
+            )
+        }))
+    }
+
+    // Validação
+    const validateForm = () => {
+        if (!formData.name.trim()) {
+            alert('Nome do produto é obrigatório')
+            return false
+        }
+
+        if (!formData.description.trim()) {
+            alert('Descrição é obrigatória')
+            return false
+        }
+
+        if (parseFloat(formData.basePrice) < 0) {
+            alert('Preço base deve ser maior ou igual a R$ 0,00')
+            return false
+        }
+
+        // Validar variações
+        for (let i = 0; i < formData.variations.length; i++) {
+            const variation = formData.variations[i]
+            if (!variation.name.trim()) {
+                alert(`Nome da variação ${i + 1} é obrigatório`)
+                return false
+            }
+            if (parseFloat(variation.price) <= 0) {
+                alert(`Preço da variação ${i + 1} deve ser maior que R$ 0,00`)
+                return false
+            }
+            if (variation.files.length === 0) {
+                alert(`Variação ${i + 1} deve ter pelo menos um arquivo`)
+                return false
+            }
+        }
+
+        return true
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -180,19 +256,27 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
 
         try {
             const productData = {
-                ...formData,
-                price: parseFloat(formData.price), // Converter para number
-                files: uploadedFiles
-                    .filter(f => f.uploaded)
-                    .map(f => ({
-                        filename: f.file.name, // Usar 'filename' em vez de 'name'
-                        originalName: f.file.name,
-                        fileSize: f.file.size, // Usar 'fileSize' em vez de 'size'
-                        mimeType: f.file.type
-                    }))
+                name: formData.name,
+                slug: formData.slug,
+                description: formData.description,
+                price: parseFloat(formData.basePrice),
+                isActive: formData.isActive,
+                isFeatured: formData.isFeatured,
+                variations: formData.variations.map(variation => ({
+                    name: variation.name,
+                    price: parseFloat(variation.price),
+                    isActive: variation.isActive,
+                    files: variation.files
+                        .filter(f => f.uploaded)
+                        .map(f => ({
+                            filename: f.file.name,
+                            originalName: f.file.name,
+                            fileSize: f.file.size,
+                            mimeType: f.file.type,
+                            r2Key: f.r2Key
+                        }))
+                }))
             }
-
-            console.log('Sending product data:', productData)
 
             const url = isEditing ? `/api/admin/products/${initialData?.id}` : '/api/admin/products'
             const method = isEditing ? 'PUT' : 'POST'
@@ -209,7 +293,6 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                 throw new Error('Erro ao salvar produto')
             }
 
-            // Chamar callback se fornecido, senão navegar
             if (onSuccess) {
                 onSuccess()
                 alert('Produto salvo com sucesso!')
@@ -224,256 +307,243 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
     }
 
     return (
-        <div className="max-w-4xl mx-auto space-y-8">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold">
-                        {isEditing ? 'Editar Produto' : 'Novo Produto'}
-                    </h1>
-                    <p className="text-gray-600 mt-2">
-                        {isEditing ? 'Atualize as informações do produto' : 'Crie um novo produto digital'}
-                    </p>
-                </div>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-8">
+        <div className="max-w-4xl mx-auto space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Informações Básicas */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>Informações Básicas</CardTitle>
+                        <CardTitle className="flex items-center gap-2">
+                            <Package className="w-5 h-5" />
+                            Informações do Produto
+                        </CardTitle>
                         <CardDescription>
-                            Configure as informações principais do produto
+                            Dados básicos do produto
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="name">Nome do Produto</Label>
-                            <Input
-                                id="name"
-                                value={formData.name}
-                                onChange={(e) => handleNameChange(e.target.value)}
-                                placeholder="Digite o nome do produto"
-                            />
-                            {errors.name && (
-                                <p className="text-sm text-red-600">{errors.name}</p>
-                            )}
+                    <CardContent className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <Label htmlFor="name">Nome do Produto *</Label>
+                                <Input
+                                    id="name"
+                                    value={formData.name}
+                                    onChange={(e) => handleNameChange(e.target.value)}
+                                    placeholder="Ex: Planner 2024 Digital"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <Label htmlFor="slug">Slug (URL)</Label>
+                                <Input
+                                    id="slug"
+                                    value={formData.slug}
+                                    onChange={(e) => handleInputChange('slug', e.target.value)}
+                                    placeholder="planner-2024-digital"
+                                />
+                            </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="slug">Slug (URL)</Label>
-                            <Input
-                                id="slug"
-                                value={formData.slug}
-                                onChange={(e) => handleInputChange('slug', e.target.value)}
-                                placeholder="slug-do-produto"
-                                disabled={!isEditing}
-                            />
-                            {errors.slug && (
-                                <p className="text-sm text-red-600">{errors.slug}</p>
-                            )}
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="shortDescription">Descrição Curta</Label>
-                            <Textarea
-                                id="shortDescription"
-                                value={formData.shortDescription}
-                                onChange={(e) => handleInputChange('shortDescription', e.target.value)}
-                                placeholder="Breve descrição do produto"
-                                rows={2}
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="description">Descrição Completa</Label>
+                        <div>
+                            <Label htmlFor="description">Descrição *</Label>
                             <Textarea
                                 id="description"
                                 value={formData.description}
                                 onChange={(e) => handleInputChange('description', e.target.value)}
-                                placeholder="Descrição detalhada do produto"
+                                placeholder="Descreva o produto..."
                                 rows={4}
+                                required
                             />
                         </div>
-                    </CardContent>
-                </Card>
 
-                {/* Preço e Status */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Preço e Status</CardTitle>
-                        <CardDescription>
-                            Configure o preço e visibilidade do produto
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="price">Preço (R$)</Label>
-                            <Input
-                                id="price"
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                value={formData.price}
-                                onChange={(e) => handleInputChange('price', e.target.value)}
-                                placeholder="0.00"
-                            />
-                            {errors.price && (
-                                <p className="text-sm text-red-600">{errors.price}</p>
-                            )}
-                        </div>
-
-                        <div className="flex items-center space-x-8">
-                            <div className="flex items-center space-x-2">
-                                <Switch
-                                    id="isActive"
-                                    checked={formData.isActive}
-                                    onCheckedChange={(checked) => handleInputChange('isActive', checked)}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <Label htmlFor="basePrice">Preço Base (R$)</Label>
+                                <Input
+                                    id="basePrice"
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    value={formData.basePrice}
+                                    onChange={(e) => handleInputChange('basePrice', e.target.value)}
+                                    placeholder="0.00"
                                 />
-                                <Label htmlFor="isActive" className="text-sm font-normal">
-                                    Produto Ativo
-                                </Label>
                             </div>
-
-                            <div className="flex items-center space-x-2">
-                                <Switch
-                                    id="isFeatured"
-                                    checked={formData.isFeatured}
-                                    onCheckedChange={(checked) => handleInputChange('isFeatured', checked)}
-                                />
-                                <Label htmlFor="isFeatured" className="text-sm font-normal">
-                                    Produto em Destaque
-                                </Label>
+                            <div className="space-y-3">
+                                <div className="flex items-center space-x-2">
+                                    <Switch
+                                        id="isActive"
+                                        checked={formData.isActive}
+                                        onCheckedChange={(checked) => handleInputChange('isActive', checked)}
+                                    />
+                                    <Label htmlFor="isActive" className="text-sm">Produto Ativo</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <Switch
+                                        id="isFeatured"
+                                        checked={formData.isFeatured}
+                                        onCheckedChange={(checked) => handleInputChange('isFeatured', checked)}
+                                    />
+                                    <Label htmlFor="isFeatured" className="text-sm">Produto em Destaque</Label>
+                                </div>
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
-                {/* SEO */}
+                {/* Variações */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>SEO</CardTitle>
-                        <CardDescription>
-                            Otimize o produto para mecanismos de busca
-                        </CardDescription>
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <CardTitle>Variações do Produto</CardTitle>
+                                <CardDescription>
+                                    Crie diferentes versões do produto com preços e arquivos específicos
+                                </CardDescription>
+                            </div>
+                            <Button type="button" onClick={addVariation} variant="outline" size="sm">
+                                <Plus className="w-4 h-4 mr-2" />
+                                Nova Variação
+                            </Button>
+                        </div>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="seoTitle">Título SEO</Label>
-                            <Input
-                                id="seoTitle"
-                                value={formData.seoTitle}
-                                onChange={(e) => handleInputChange('seoTitle', e.target.value)}
-                                placeholder="Título otimizado para SEO"
-                                maxLength={60}
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="seoDescription">Descrição SEO</Label>
-                            <Textarea
-                                id="seoDescription"
-                                value={formData.seoDescription}
-                                onChange={(e) => handleInputChange('seoDescription', e.target.value)}
-                                placeholder="Descrição otimizada para SEO"
-                                rows={2}
-                                maxLength={160}
-                            />
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Upload de Arquivos */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Arquivos do Produto</CardTitle>
-                        <CardDescription>
-                            Faça upload dos arquivos PDF que serão entregues aos clientes
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                            <input
-                                type="file"
-                                accept=".pdf"
-                                multiple
-                                onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
-                                className="hidden"
-                                id="file-upload"
-                            />
-                            <label
-                                htmlFor="file-upload"
-                                className="cursor-pointer flex flex-col items-center space-y-2"
-                            >
-                                <Upload className="w-12 h-12 text-gray-400" />
-                                <span className="text-lg font-medium text-gray-700">
-                                    Clique para fazer upload
-                                </span>
-                                <span className="text-sm text-gray-500">
-                                    Apenas arquivos PDF (máximo 100MB cada)
-                                </span>
-                            </label>
-                        </div>
-
-                        {/* Lista de arquivos */}
-                        {uploadedFiles.length > 0 && (
-                            <div className="space-y-2">
-                                <Label>Arquivos Carregados:</Label>
-                                {uploadedFiles.map((file, index) => (
-                                    <div
-                                        key={index}
-                                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                                    >
-                                        <div className="flex items-center space-x-3">
-                                            <FileText className="w-5 h-5 text-red-600" />
-                                            <div>
-                                                <p className="font-medium">{file.file.name}</p>
-                                                <p className="text-sm text-gray-500">
-                                                    {(file.file.size / 1024 / 1024).toFixed(2)} MB
-                                                </p>
-                                            </div>
-                                            {file.uploading && (
-                                                <Loader2 className="w-4 h-4 animate-spin" />
+                        {formData.variations.map((variation, index) => (
+                            <Card key={index} className="border-l-4 border-l-blue-500">
+                                <CardHeader>
+                                    <div className="flex justify-between items-center">
+                                        <CardTitle className="text-lg">
+                                            Variação {index + 1}
+                                            {!variation.isActive && (
+                                                <Badge variant="secondary" className="ml-2">Inativa</Badge>
                                             )}
-                                            {file.uploaded && (
-                                                <Badge variant="default" className="bg-green-100 text-green-800">
-                                                    Enviado
-                                                </Badge>
-                                            )}
-                                            {file.error && (
-                                                <Badge variant="destructive">
-                                                    {file.error}
-                                                </Badge>
-                                            )}
-                                        </div>
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => removeFile(file)}
-                                            className="text-red-600 hover:text-red-700"
-                                        >
-                                            <X className="w-4 h-4" />
-                                        </Button>
+                                        </CardTitle>
+                                        {formData.variations.length > 1 && (
+                                            <Button
+                                                type="button"
+                                                onClick={() => removeVariation(index)}
+                                                variant="outline"
+                                                size="sm"
+                                                className="text-red-600 hover:text-red-700"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        )}
                                     </div>
-                                ))}
-                            </div>
-                        )}
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-end">
+                                        <div className="lg:col-span-2">
+                                            <Label>Nome da Variação</Label>
+                                            <Input
+                                                value={variation.name}
+                                                onChange={(e) => updateVariation(index, 'name', e.target.value)}
+                                                placeholder="Ex: PDF Simples"
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label>Preço (R$)</Label>
+                                            <Input
+                                                type="number"
+                                                step="0.01"
+                                                min="0.01"
+                                                value={variation.price}
+                                                onChange={(e) => updateVariation(index, 'price', e.target.value)}
+                                                placeholder="0.00"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <Switch
+                                                checked={variation.isActive}
+                                                onCheckedChange={(checked) => updateVariation(index, 'isActive', checked)}
+                                            />
+                                            <Label className="text-sm">Ativa</Label>
+                                        </div>
+                                    </div>
+
+                                    {/* Upload de Arquivos */}
+                                    <div>
+                                        <Label>Arquivos da Variação *</Label>
+                                        <div className="mt-2">
+                                            <label className="block w-full border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 cursor-pointer">
+                                                <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                                                <span className="mt-2 block text-sm font-medium text-gray-900">
+                                                    Clique para fazer upload ou arraste arquivos aqui
+                                                </span>
+                                                <span className="mt-1 block text-xs text-gray-500">
+                                                    PDF, PNG, JPG até 50MB cada
+                                                </span>
+                                                <input
+                                                    type="file"
+                                                    multiple
+                                                    accept=".pdf,image/*"
+                                                    onChange={(e) => e.target.files && handleFileUpload(index, e.target.files)}
+                                                    className="hidden"
+                                                />
+                                            </label>
+                                        </div>
+
+                                        {/* Lista de Arquivos */}
+                                        {variation.files.length > 0 && (
+                                            <div className="mt-4 space-y-2">
+                                                {variation.files.map((file, fileIndex) => (
+                                                    <div key={fileIndex} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                                        <div className="flex items-center space-x-3">
+                                                            <FileText className="w-5 h-5 text-gray-400" />
+                                                            <div>
+                                                                <p className="text-sm font-medium text-gray-900">
+                                                                    {file.file.name}
+                                                                </p>
+                                                                <p className="text-xs text-gray-500">
+                                                                    {(file.file.size / 1024 / 1024).toFixed(2)} MB
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center space-x-2">
+                                                            {file.uploading && (
+                                                                <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+                                                            )}
+                                                            {file.uploaded && (
+                                                                <Badge variant="default" className="bg-green-500">
+                                                                    Uploaded
+                                                                </Badge>
+                                                            )}
+                                                            {file.error && (
+                                                                <Badge variant="destructive">
+                                                                    Erro
+                                                                </Badge>
+                                                            )}
+                                                            <Button
+                                                                type="button"
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => removeFileFromVariation(index, fileIndex)}
+                                                            >
+                                                                <X className="w-4 h-4" />
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
                     </CardContent>
                 </Card>
 
                 {/* Botões de Ação */}
-                <div className="flex items-center justify-end space-x-4">
+                <div className="flex justify-end space-x-4">
                     <Button
                         type="button"
                         variant="outline"
-                        onClick={() => router.back()}
+                        onClick={() => onSuccess ? onSuccess() : router.push('/admin/produtos')}
                     >
                         Cancelar
                     </Button>
-                    <Button
-                        type="submit"
-                        disabled={isSubmitting || uploadedFiles.some(f => f.uploading)}
-                    >
+                    <Button type="submit" disabled={isSubmitting}>
                         {isSubmitting ? (
                             <>
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
