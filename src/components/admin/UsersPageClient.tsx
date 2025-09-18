@@ -1,13 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { 
-    Users, 
-    Shield, 
-    UserCheck, 
-    UserPlus, 
-    Search, 
-    Filter, 
+import {
+    Users,
+    Shield,
+    UserCheck,
+    UserPlus,
+    Search,
+    Filter,
     MoreVertical,
     Eye,
     UserX,
@@ -22,13 +22,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { 
-    Table, 
-    TableBody, 
-    TableCell, 
-    TableHead, 
-    TableHeader, 
-    TableRow 
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow
 } from '@/components/ui/table'
 import {
     DropdownMenu,
@@ -95,19 +95,19 @@ export default function UsersPageClient() {
             try {
                 setLoading(true)
                 const response = await fetch('/api/admin/users')
-                
+
                 if (!response.ok) {
                     throw new Error('Falha ao carregar usuários')
                 }
 
                 const data = await response.json()
                 setUsers(data.users || [])
-                
+
                 // Calcular estatísticas
                 const adminCount = data.users?.filter((u: User) => u.role === 'admin').length || 0
                 const userCount = data.users?.filter((u: User) => u.role === 'user').length || 0
                 const currentMonth = new Date().getMonth()
-                const newThisMonth = data.users?.filter((u: User) => 
+                const newThisMonth = data.users?.filter((u: User) =>
                     new Date(u.createdAt).getMonth() === currentMonth
                 ).length || 0
 
@@ -124,7 +124,7 @@ export default function UsersPageClient() {
                 setLoading(false)
             }
         }
-        
+
         loadUsers()
     }, [])
 
@@ -159,12 +159,12 @@ export default function UsersPageClient() {
             if (response2.ok) {
                 const data = await response2.json()
                 setUsers(data.users || [])
-                
+
                 // Recalcular estatísticas
                 const adminCount = data.users?.filter((u: User) => u.role === 'admin').length || 0
                 const userCount = data.users?.filter((u: User) => u.role === 'user').length || 0
                 const currentMonth = new Date().getMonth()
-                const newThisMonth = data.users?.filter((u: User) => 
+                const newThisMonth = data.users?.filter((u: User) =>
                     new Date(u.createdAt).getMonth() === currentMonth
                 ).length || 0
 
@@ -185,7 +185,7 @@ export default function UsersPageClient() {
     // Filtrar usuários
     const filteredUsers = users.filter(user => {
         const matchesSearch = user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                             user.email.toLowerCase().includes(searchTerm.toLowerCase())
+            user.email.toLowerCase().includes(searchTerm.toLowerCase())
         const matchesRole = roleFilter === 'all' || user.role === roleFilter
         return matchesSearch && matchesRole
     })
@@ -246,7 +246,7 @@ export default function UsersPageClient() {
                         <p className="text-gray-600 mt-1">Controle total sobre permissões e roles da plataforma</p>
                     </div>
                 </div>
-                
+
                 <Button className="bg-[#FED466] hover:bg-[#FD9555] text-gray-800 font-medium">
                     <UserPlus className="w-4 h-4 mr-2" />
                     Novo Usuário
@@ -334,7 +334,7 @@ export default function UsersPageClient() {
                             <TabsTrigger value="users">👥 Usuários</TabsTrigger>
                             <TabsTrigger value="security">🔐 Segurança</TabsTrigger>
                         </TabsList>
-                        
+
                         <TabsContent value="users" className="space-y-4">
                             {/* Filtros */}
                             <div className="flex flex-col sm:flex-row gap-4">
@@ -423,11 +423,11 @@ export default function UsersPageClient() {
                                                                 Editar
                                                             </DropdownMenuItem>
                                                             <DropdownMenuSeparator />
-                                                            
+
                                                             {user.role !== 'admin' && (
                                                                 <AlertDialog>
                                                                     <AlertDialogTrigger asChild>
-                                                                        <DropdownMenuItem 
+                                                                        <DropdownMenuItem
                                                                             onSelect={(e) => e.preventDefault()}
                                                                             className="text-green-600 focus:text-green-600"
                                                                             disabled={!adminPassword || actionLoading === user.email}
@@ -468,7 +468,7 @@ export default function UsersPageClient() {
                                                             {user.role === 'admin' && user.email !== 'admin@arafacriou.com.br' && (
                                                                 <AlertDialog>
                                                                     <AlertDialogTrigger asChild>
-                                                                        <DropdownMenuItem 
+                                                                        <DropdownMenuItem
                                                                             onSelect={(e) => e.preventDefault()}
                                                                             className="text-red-600 focus:text-red-600"
                                                                             disabled={!adminPassword || actionLoading === user.email}
@@ -524,7 +524,7 @@ export default function UsersPageClient() {
                                 </div>
                             )}
                         </TabsContent>
-                        
+
                         <TabsContent value="security" className="space-y-4">
                             <Card className="border-amber-200 bg-amber-50">
                                 <CardHeader>
@@ -553,7 +553,7 @@ export default function UsersPageClient() {
                                                 Necessária para promover/rebaixar usuários
                                             </p>
                                         </div>
-                                        
+
                                         {adminPassword && (
                                             <div className="p-3 bg-green-100 border border-green-200 rounded-lg">
                                                 <p className="text-sm text-green-800 flex items-center gap-2">

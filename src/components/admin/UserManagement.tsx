@@ -211,7 +211,7 @@ export default function UserManagement() {
                                 className="pl-10"
                             />
                         </div>
-                        
+
                         {/* Senha de confirmação */}
                         <div className="lg:w-80">
                             <div className="relative">
