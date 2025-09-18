@@ -300,13 +300,13 @@ export default function ProductsTable({ search: externalSearch = '', page = 1, c
                 />
 
                 <Select value={statusFilter} onValueChange={(value: 'all' | 'active' | 'inactive') => setStatusFilter(value)}>
-                    <SelectTrigger className="w-full sm:w-48">
+                    <SelectTrigger className="w-full sm:w-48 bg-white border-gray-300 shadow-sm hover:border-gray-400 focus:border-[#FED466] focus:ring-2 focus:ring-[#FED466]/20">
                         <SelectValue placeholder="Filtrar por status" />
                     </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">Todos os status</SelectItem>
-                        <SelectItem value="active">Ativos</SelectItem>
-                        <SelectItem value="inactive">Inativos</SelectItem>
+                    <SelectContent className="bg-white border border-gray-200 shadow-lg">
+                        <SelectItem value="all" className="hover:bg-gray-50 focus:bg-[#FED466]/10">Todos os status</SelectItem>
+                        <SelectItem value="active" className="hover:bg-gray-50 focus:bg-[#FED466]/10">Ativos</SelectItem>
+                        <SelectItem value="inactive" className="hover:bg-gray-50 focus:bg-[#FED466]/10">Inativos</SelectItem>
                     </SelectContent>
                 </Select>
 
@@ -315,16 +315,16 @@ export default function ProductsTable({ search: externalSearch = '', page = 1, c
                     setSortBy(field)
                     setSortOrder(order)
                 }}>
-                    <SelectTrigger className="w-full sm:w-48">
+                    <SelectTrigger className="w-full sm:w-48 bg-white border-gray-300 shadow-sm hover:border-gray-400 focus:border-[#FED466] focus:ring-2 focus:ring-[#FED466]/20">
                         <SelectValue placeholder="Ordenar por" />
                     </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="name-asc">Nome (A-Z)</SelectItem>
-                        <SelectItem value="name-desc">Nome (Z-A)</SelectItem>
-                        <SelectItem value="price-asc">Preço (Menor)</SelectItem>
-                        <SelectItem value="price-desc">Preço (Maior)</SelectItem>
-                        <SelectItem value="created-desc">Mais recentes</SelectItem>
-                        <SelectItem value="created-asc">Mais antigos</SelectItem>
+                    <SelectContent className="bg-white border border-gray-200 shadow-lg">
+                        <SelectItem value="name-asc" className="hover:bg-gray-50 focus:bg-[#FED466]/10">Nome (A-Z)</SelectItem>
+                        <SelectItem value="name-desc" className="hover:bg-gray-50 focus:bg-[#FED466]/10">Nome (Z-A)</SelectItem>
+                        <SelectItem value="price-asc" className="hover:bg-gray-50 focus:bg-[#FED466]/10">Preço (Menor)</SelectItem>
+                        <SelectItem value="price-desc" className="hover:bg-gray-50 focus:bg-[#FED466]/10">Preço (Maior)</SelectItem>
+                        <SelectItem value="created-desc" className="hover:bg-gray-50 focus:bg-[#FED466]/10">Mais recentes</SelectItem>
+                        <SelectItem value="created-asc" className="hover:bg-gray-50 focus:bg-[#FED466]/10">Mais antigos</SelectItem>
                     </SelectContent>
                 </Select>
             </div>

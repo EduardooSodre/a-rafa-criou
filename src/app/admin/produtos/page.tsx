@@ -20,7 +20,7 @@ export default function ProductsPage() {
     const router = useRouter()
     const searchParams = useSearchParams()
 
-    const [search, setSearch] = useState(searchParams.get('search') || '')
+    const [search] = useState(searchParams.get('search') || '')
     const [category, setCategory] = useState(searchParams.get('category') || 'all')
 
     // Auto-aplicar filtros quando mudarem
@@ -35,14 +35,6 @@ export default function ProductsPage() {
 
         router.push(newURL, { scroll: false })
     }, [search, category, router])
-
-    // Enter no input de busca para recarregar
-    const handleSearchKeyPress = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') {
-            // Força um recarregamento da tabela
-            window.location.reload()
-        }
-    }
 
     return (
         <>
@@ -73,16 +65,16 @@ export default function ProductsPage() {
                         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
 
                             <Select value={category} onValueChange={setCategory}>
-                                <SelectTrigger className="w-full sm:w-[180px]">
+                                <SelectTrigger className="w-full sm:w-[180px] bg-white border-gray-300 shadow-sm hover:border-gray-400 focus:border-[#FED466] focus:ring-2 focus:ring-[#FED466]/20">
                                     <SelectValue placeholder="Categoria" />
                                 </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">Todas</SelectItem>
-                                    <SelectItem value="planner">Planners</SelectItem>
-                                    <SelectItem value="adesivos">Adesivos</SelectItem>
-                                    <SelectItem value="etiquetas">Etiquetas</SelectItem>
-                                    <SelectItem value="agenda">Agendas</SelectItem>
-                                    <SelectItem value="organizacao">Organização</SelectItem>
+                                <SelectContent className="bg-white border border-gray-200 shadow-lg">
+                                    <SelectItem value="all" className="hover:bg-gray-50 focus:bg-[#FED466]/10">Todas</SelectItem>
+                                    <SelectItem value="planner" className="hover:bg-gray-50 focus:bg-[#FED466]/10">Planners</SelectItem>
+                                    <SelectItem value="adesivos" className="hover:bg-gray-50 focus:bg-[#FED466]/10">Adesivos</SelectItem>
+                                    <SelectItem value="etiquetas" className="hover:bg-gray-50 focus:bg-[#FED466]/10">Etiquetas</SelectItem>
+                                    <SelectItem value="agenda" className="hover:bg-gray-50 focus:bg-[#FED466]/10">Agendas</SelectItem>
+                                    <SelectItem value="organizacao" className="hover:bg-gray-50 focus:bg-[#FED466]/10">Organização</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>

@@ -1,10 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Shield, UserCheck, UserX, Eye, Search } from 'lucide-react'
+import { Shield, UserCheck, UserX, Eye, Search, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -172,27 +171,37 @@ export default function UserManagement() {
 
     return (
         <div className="space-y-6">
-            {/* Cartão de Aviso de Segurança */}
-            <Card className="border-amber-200 bg-amber-50">
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-amber-800">
-                        <Shield className="w-5 h-5" />
-                        Área de Alta Segurança
-                    </CardTitle>
-                    <CardDescription className="text-amber-700">
-                        Alterar permissões de usuário requer sua senha de administrador para confirmar a ação.
-                        Seja cuidadoso ao promover usuários a administradores.
-                    </CardDescription>
-                </CardHeader>
+            {/* Cartão de Aviso de Segurança - Redesenhado */}
+            <Card className="border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50">
+                <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                        <div className="p-2 bg-amber-100 rounded-lg flex-shrink-0">
+                            <Shield className="w-5 h-5 text-amber-600" />
+                        </div>
+                        <div>
+                            <h3 className="font-semibold text-amber-800 mb-1">⚠️ Área de Alta Segurança</h3>
+                            <p className="text-sm text-amber-700">
+                                Alterar permissões requer sua senha de admin. Seja criterioso ao promover usuários.
+                            </p>
+                        </div>
+                    </div>
+                </CardContent>
             </Card>
 
-            {/* Filtros */}
+            {/* Interface integrada - Busca + Senha */}
             <Card>
                 <CardHeader>
-                    <CardTitle>Buscar Usuários</CardTitle>
+                    <CardTitle className="flex items-center gap-2">
+                        <Search className="w-5 h-5" />
+                        Controle de Usuários
+                    </CardTitle>
+                    <CardDescription>
+                        Busque usuários e gerencie permissões com segurança
+                    </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="flex gap-4">
+                    <div className="flex flex-col lg:flex-row gap-4">
+                        {/* Busca */}
                         <div className="flex-1 relative">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                             <Input
@@ -202,146 +211,167 @@ export default function UserManagement() {
                                 className="pl-10"
                             />
                         </div>
+                        
+                        {/* Senha de confirmação */}
+                        <div className="lg:w-80">
+                            <div className="relative">
+                                <Shield className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                <Input
+                                    type="password"
+                                    placeholder="Senha de admin para ações..."
+                                    value={adminPassword}
+                                    onChange={(e) => setAdminPassword(e.target.value)}
+                                    className="pl-10"
+                                />
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1">
+                                {adminPassword ? '🔓 Ações habilitadas' : '🔒 Digite sua senha para habilitar ações'}
+                            </p>
+                        </div>
                     </div>
                 </CardContent>
             </Card>
 
-            {/* Confirmação de Senha Admin */}
+            {/* Lista de Usuários - Redesenhada */}
             <Card>
                 <CardHeader>
-                    <CardTitle>Senha de Confirmação</CardTitle>
-                    <CardDescription>
-                        Digite sua senha de admin para habilitar ações de promoção/demoção
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="max-w-md">
-                        <Label htmlFor="adminPassword">Sua senha de admin</Label>
-                        <Input
-                            id="adminPassword"
-                            type="password"
-                            placeholder="Digite sua senha..."
-                            value={adminPassword}
-                            onChange={(e) => setAdminPassword(e.target.value)}
-                        />
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <CardTitle className="flex items-center gap-2">
+                                👥 Todos os Usuários
+                                <Badge variant="secondary" className="ml-2">{filteredUsers.length}</Badge>
+                            </CardTitle>
+                            <CardDescription>
+                                Gerencie permissões e roles dos usuários da plataforma
+                            </CardDescription>
+                        </div>
                     </div>
-                </CardContent>
-            </Card>
-
-            {/* Lista de Usuários */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Todos os Usuários ({filteredUsers.length})</CardTitle>
-                    <CardDescription>
-                        Gerencie permissões e roles dos usuários da plataforma
-                    </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Usuário</TableHead>
-                                <TableHead>Role</TableHead>
-                                <TableHead>Cadastrado em</TableHead>
-                                <TableHead className="text-right">Ações</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {filteredUsers.map((user) => (
-                                <TableRow key={user.id}>
-                                    <TableCell>
-                                        <div>
-                                            <p className="font-medium text-gray-900">{user.name || 'Sem nome'}</p>
-                                            <p className="text-sm text-gray-600">{user.email}</p>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        {getRoleBadge(user.role)}
-                                    </TableCell>
-                                    <TableCell>
-                                        {new Date(user.createdAt).toLocaleDateString('pt-BR')}
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <div className="flex justify-end gap-1">
-                                            <Button variant="ghost" size="sm">
-                                                <Eye className="w-4 h-4" />
-                                            </Button>
-
-                                            {user.role !== 'admin' && (
-                                                <AlertDialog>
-                                                    <AlertDialogTrigger asChild>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="text-green-600 hover:text-green-700"
-                                                            disabled={!adminPassword || actionLoading === user.email}
-                                                        >
-                                                            <UserCheck className="w-4 h-4" />
-                                                        </Button>
-                                                    </AlertDialogTrigger>
-                                                    <AlertDialogContent>
-                                                        <AlertDialogHeader>
-                                                            <AlertDialogTitle>Promover a Admin</AlertDialogTitle>
-                                                            <AlertDialogDescription>
-                                                                Tem certeza que deseja promover &ldquo;{user.name || user.email}&rdquo; a administrador?
-                                                                Esta ação dará acesso completo à área administrativa.
-                                                            </AlertDialogDescription>
-                                                        </AlertDialogHeader>
-                                                        <AlertDialogFooter>
-                                                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                                            <AlertDialogAction
-                                                                onClick={() => handlePromoteUser(user.email, 'promote')}
-                                                                className="bg-green-600 hover:bg-green-700"
-                                                            >
-                                                                Promover
-                                                            </AlertDialogAction>
-                                                        </AlertDialogFooter>
-                                                    </AlertDialogContent>
-                                                </AlertDialog>
-                                            )}
-
-                                            {user.role === 'admin' && user.email !== 'admin@arafacriou.com.br' && (
-                                                <AlertDialog>
-                                                    <AlertDialogTrigger asChild>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="text-red-600 hover:text-red-700"
-                                                            disabled={!adminPassword || actionLoading === user.email}
-                                                        >
-                                                            <UserX className="w-4 h-4" />
-                                                        </Button>
-                                                    </AlertDialogTrigger>
-                                                    <AlertDialogContent>
-                                                        <AlertDialogHeader>
-                                                            <AlertDialogTitle>Remover Admin</AlertDialogTitle>
-                                                            <AlertDialogDescription>
-                                                                Tem certeza que deseja remover &ldquo;{user.name || user.email}&rdquo; do cargo de administrador?
-                                                                O usuário perderá acesso à área administrativa.
-                                                            </AlertDialogDescription>
-                                                        </AlertDialogHeader>
-                                                        <AlertDialogFooter>
-                                                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                                            <AlertDialogAction
-                                                                onClick={() => handlePromoteUser(user.email, 'demote')}
-                                                                className="bg-red-600 hover:bg-red-700"
-                                                            >
-                                                                Remover Admin
-                                                            </AlertDialogAction>
-                                                        </AlertDialogFooter>
-                                                    </AlertDialogContent>
-                                                </AlertDialog>
-                                            )}
-                                        </div>
-                                    </TableCell>
+                    <div className="rounded-lg border overflow-hidden">
+                        <Table>
+                            <TableHeader>
+                                <TableRow className="bg-gray-50">
+                                    <TableHead className="font-semibold">Usuário</TableHead>
+                                    <TableHead className="font-semibold">Role</TableHead>
+                                    <TableHead className="font-semibold">Cadastrado em</TableHead>
+                                    <TableHead className="text-right font-semibold">Ações</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {filteredUsers.map((user) => (
+                                    <TableRow key={user.id} className="hover:bg-gray-50/50 transition-colors">
+                                        <TableCell>
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 bg-[#FED466] rounded-full flex items-center justify-center">
+                                                    <span className="text-sm font-bold text-gray-800">
+                                                        {(user.name || user.email).charAt(0).toUpperCase()}
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <p className="font-medium text-gray-900">{user.name || 'Sem nome'}</p>
+                                                    <p className="text-sm text-gray-600">{user.email}</p>
+                                                </div>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            {getRoleBadge(user.role)}
+                                        </TableCell>
+                                        <TableCell>
+                                            <span className="text-sm text-gray-600">
+                                                {new Date(user.createdAt).toLocaleDateString('pt-BR')}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <div className="flex justify-end gap-1">
+                                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                                    <Eye className="w-4 h-4" />
+                                                </Button>
+
+                                                {user.role !== 'admin' && (
+                                                    <AlertDialog>
+                                                        <AlertDialogTrigger asChild>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
+                                                                disabled={!adminPassword || actionLoading === user.email}
+                                                                title="Promover a Admin"
+                                                            >
+                                                                <UserCheck className="w-4 h-4" />
+                                                            </Button>
+                                                        </AlertDialogTrigger>
+                                                        <AlertDialogContent>
+                                                            <AlertDialogHeader>
+                                                                <AlertDialogTitle>🚀 Promover a Admin</AlertDialogTitle>
+                                                                <AlertDialogDescription>
+                                                                    Tem certeza que deseja promover <strong>&ldquo;{user.name || user.email}&rdquo;</strong> a administrador?
+                                                                    <br />
+                                                                    <span className="text-amber-600">⚠️ Esta ação dará acesso completo à área administrativa.</span>
+                                                                </AlertDialogDescription>
+                                                            </AlertDialogHeader>
+                                                            <AlertDialogFooter>
+                                                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                                                <AlertDialogAction
+                                                                    onClick={() => handlePromoteUser(user.email, 'promote')}
+                                                                    className="bg-green-600 hover:bg-green-700"
+                                                                >
+                                                                    ✅ Promover
+                                                                </AlertDialogAction>
+                                                            </AlertDialogFooter>
+                                                        </AlertDialogContent>
+                                                    </AlertDialog>
+                                                )}
+
+                                                {user.role === 'admin' && user.email !== 'admin@arafacriou.com.br' && (
+                                                    <AlertDialog>
+                                                        <AlertDialogTrigger asChild>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                                disabled={!adminPassword || actionLoading === user.email}
+                                                                title="Remover Admin"
+                                                            >
+                                                                <UserX className="w-4 h-4" />
+                                                            </Button>
+                                                        </AlertDialogTrigger>
+                                                        <AlertDialogContent>
+                                                            <AlertDialogHeader>
+                                                                <AlertDialogTitle>❌ Remover Admin</AlertDialogTitle>
+                                                                <AlertDialogDescription>
+                                                                    Tem certeza que deseja remover <strong>&ldquo;{user.name || user.email}&rdquo;</strong> do cargo de administrador?
+                                                                    <br />
+                                                                    <span className="text-amber-600">⚠️ O usuário perderá acesso à área administrativa.</span>
+                                                                </AlertDialogDescription>
+                                                            </AlertDialogHeader>
+                                                            <AlertDialogFooter>
+                                                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                                                <AlertDialogAction
+                                                                    onClick={() => handlePromoteUser(user.email, 'demote')}
+                                                                    className="bg-red-600 hover:bg-red-700"
+                                                                >
+                                                                    🗑️ Remover Admin
+                                                                </AlertDialogAction>
+                                                            </AlertDialogFooter>
+                                                        </AlertDialogContent>
+                                                    </AlertDialog>
+                                                )}
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
 
                     {filteredUsers.length === 0 && (
-                        <div className="text-center py-8">
-                            <p className="text-gray-600">Nenhum usuário encontrado com os filtros aplicados.</p>
+                        <div className="text-center py-12">
+                            <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                                <Users className="w-8 h-8 text-gray-400" />
+                            </div>
+                            <p className="text-gray-600 font-medium">Nenhum usuário encontrado</p>
+                            <p className="text-sm text-gray-500">Tente ajustar os filtros de busca</p>
                         </div>
                     )}
                 </CardContent>
