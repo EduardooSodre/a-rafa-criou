@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { 
-    Plus, 
-    Search, 
-    Filter, 
-    Package, 
-    ShoppingBag, 
+import {
+    Plus,
+    Search,
+    Filter,
+    Package,
+    ShoppingBag,
     DollarSign,
     Trash2
 } from 'lucide-react'
@@ -66,7 +66,7 @@ export default function ProductsPage() {
                 setLoading(false)
             }
         }
-        
+
         fetchStats()
     }, [])
 
@@ -122,7 +122,7 @@ export default function ProductsPage() {
                         <p className="text-gray-600 mt-1">Gerencie todo o catálogo da sua loja</p>
                     </div>
                 </div>
-                
+
                 <Sheet open={isNewProductOpen} onOpenChange={setIsNewProductOpen}>
                     <SheetTrigger asChild>
                         <Button className="bg-[#FED466] hover:bg-[#FD9555] text-gray-800 font-medium shadow-sm">
@@ -227,7 +227,7 @@ export default function ProductsPage() {
                             </CardDescription>
                         </div>
                     </div>
-                    
+
                     {/* Filtros */}
                     <div className="flex flex-col sm:flex-row gap-4 pt-4">
                         <div className="relative flex-1">
