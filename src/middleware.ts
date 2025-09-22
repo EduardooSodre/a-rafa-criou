@@ -6,7 +6,7 @@ export async function middleware(request: NextRequest) {
   try {
     // Rotas que precisam de autenticação de admin
     if (request.nextUrl.pathname.startsWith('/admin')) {
-      const token = await getToken({ 
+      const token = await getToken({
         req: request,
         secret: process.env.AUTH_SECRET,
       });
@@ -23,7 +23,7 @@ export async function middleware(request: NextRequest) {
 
     // Rotas que precisam de autenticação básica
     if (request.nextUrl.pathname.startsWith('/conta')) {
-      const token = await getToken({ 
+      const token = await getToken({
         req: request,
         secret: process.env.AUTH_SECRET,
       });
