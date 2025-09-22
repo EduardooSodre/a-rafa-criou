@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Edit, Trash2, Eye, FileText, ChevronDown, ChevronRight, Package2 } from 'lucide-react'
+import { Edit, Trash2, Eye, FileText, ChevronDown, ChevronRight, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -23,7 +23,6 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import Link from 'next/link'
 
@@ -77,18 +76,8 @@ interface ProductsTableProps {
 
 export default function ProductsTable({ search: externalSearch = '', page = 1, category = '' }: ProductsTableProps) {
     const [products, setProducts] = useState<Product[]>([])
-    const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
-    const [search, setSearch] = useState(externalSearch)
-    const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all')
-    const [sortBy, setSortBy] = useState<'name' | 'price' | 'created'>('created')
-    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
     const [loading, setLoading] = useState(true)
     const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
-
-    // Sincronizar busca externa com estado interno
-    useEffect(() => {
-        setSearch(externalSearch)
-    }, [externalSearch])
 
     useEffect(() => {
         // Buscar produtos reais da API com variações
@@ -120,50 +109,6 @@ export default function ProductsTable({ search: externalSearch = '', page = 1, c
 
         fetchProducts()
     }, [externalSearch, category, page]) // Recarregar quando os filtros mudarem
-
-    useEffect(() => {
-        const filtered = products.filter(product => {
-            const matchesSearch = product.name.toLowerCase().includes(search.toLowerCase()) ||
-                product.description?.toLowerCase().includes(search.toLowerCase())
-
-            const matchesStatus = statusFilter === 'all' ||
-                (statusFilter === 'active' && product.isActive) ||
-                (statusFilter === 'inactive' && !product.isActive)
-
-            return matchesSearch && matchesStatus
-        })
-
-        // Ordenação
-        filtered.sort((a, b) => {
-            let aValue: string | number | Date, bValue: string | number | Date
-
-            switch (sortBy) {
-                case 'name':
-                    aValue = a.name.toLowerCase()
-                    bValue = b.name.toLowerCase()
-                    break
-                case 'price':
-                    aValue = parseFloat(a.price)
-                    bValue = parseFloat(b.price)
-                    break
-                case 'created':
-                    aValue = a.createdAt
-                    bValue = b.createdAt
-                    break
-                default:
-                    aValue = a.createdAt
-                    bValue = b.createdAt
-            }
-
-            if (sortOrder === 'asc') {
-                return aValue > bValue ? 1 : -1
-            } else {
-                return aValue < bValue ? 1 : -1
-            }
-        })
-
-        setFilteredProducts(filtered)
-    }, [products, search, statusFilter, sortBy, sortOrder])
 
     const handleDelete = async (id: string) => {
         try {
@@ -213,11 +158,11 @@ export default function ProductsTable({ search: externalSearch = '', page = 1, c
 
     const getStatusBadge = (isActive: boolean) => {
         return isActive ? (
-            <Badge variant="default" className="bg-green-100 text-green-800 hover:bg-green-200">
+            <Badge variant="default" className="bg-green-500 hover:bg-green-600 text-white border-green-500">
                 Ativo
             </Badge>
         ) : (
-            <Badge variant="secondary" className="bg-red-100 text-red-800 hover:bg-red-200">
+            <Badge variant="secondary" className="bg-red-100 text-red-800 hover:bg-red-200 border-red-200">
                 Inativo
             </Badge>
         )
@@ -249,24 +194,44 @@ export default function ProductsTable({ search: externalSearch = '', page = 1, c
     if (loading) {
         return (
             <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                    <div className="h-10 bg-gray-200 rounded animate-pulse flex-1" />
-                    <div className="h-10 bg-gray-200 rounded animate-pulse w-full sm:w-48" />
-                    <div className="h-10 bg-gray-200 rounded animate-pulse w-full sm:w-32" />
-                </div>
-                <div className="border rounded-lg">
-                    <div className="h-12 bg-gray-100 border-b" />
-                    {[1, 2, 3].map(i => (
-                        <div key={i} className="h-16 border-b last:border-b-0 flex items-center px-4 gap-4">
-                            <div className="h-12 w-12 bg-gray-200 rounded animate-pulse" />
-                            <div className="flex-1 space-y-2">
-                                <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2" />
-                                <div className="h-3 bg-gray-200 rounded animate-pulse w-1/4" />
-                            </div>
-                            <div className="h-8 w-16 bg-gray-200 rounded animate-pulse" />
-                            <div className="h-8 w-24 bg-gray-200 rounded animate-pulse" />
-                        </div>
-                    ))}
+                <div className="border rounded-lg overflow-hidden">
+                    <Table>
+                        <TableHeader>
+                            <TableRow className="bg-gray-50">
+                                <TableHead className="w-12"></TableHead>
+                                <TableHead className="w-16">Produto</TableHead>
+                                <TableHead>Informações</TableHead>
+                                <TableHead className="w-24">Preço</TableHead>
+                                <TableHead className="w-20">Status</TableHead>
+                                <TableHead className="w-32">Arquivos</TableHead>
+                                <TableHead className="w-32 text-right">Ações</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {[...Array(5)].map((_, i) => (
+                                <TableRow key={i}>
+                                    <TableCell><div className="h-4 w-4 bg-gray-200 rounded animate-pulse" /></TableCell>
+                                    <TableCell><div className="h-12 w-12 bg-gray-200 rounded animate-pulse" /></TableCell>
+                                    <TableCell>
+                                        <div className="space-y-2">
+                                            <div className="h-4 w-48 bg-gray-200 rounded animate-pulse" />
+                                            <div className="h-3 w-32 bg-gray-200 rounded animate-pulse" />
+                                        </div>
+                                    </TableCell>
+                                    <TableCell><div className="h-4 w-20 bg-gray-200 rounded animate-pulse" /></TableCell>
+                                    <TableCell><div className="h-6 w-16 bg-gray-200 rounded animate-pulse" /></TableCell>
+                                    <TableCell><div className="h-4 w-24 bg-gray-200 rounded animate-pulse" /></TableCell>
+                                    <TableCell>
+                                        <div className="flex justify-end gap-2">
+                                            <div className="h-8 w-8 bg-gray-200 rounded animate-pulse" />
+                                            <div className="h-8 w-8 bg-gray-200 rounded animate-pulse" />
+                                            <div className="h-8 w-8 bg-gray-200 rounded animate-pulse" />
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
                 </div>
             </div>
         )
@@ -274,60 +239,6 @@ export default function ProductsTable({ search: externalSearch = '', page = 1, c
 
     return (
         <div className="space-y-6">
-            {/* Cabeçalho */}
-            <div className="flex justify-between items-center">
-                <div>
-                    <h2 className="text-2xl font-bold text-gray-900">Produtos</h2>
-                    <p className="text-sm text-gray-600">Gerencie produtos e suas variações</p>
-                </div>
-                <Button asChild>
-                    <Link href="/admin/products/new">
-                        <Package2 className="mr-2 h-4 w-4" />
-                        Novo Produto
-                    </Link>
-                </Button>
-            </div>
-
-            {/* Filtros */}
-            <div className="flex flex-col sm:flex-row gap-4">
-                <input
-                    type="text"
-                    placeholder="Buscar produtos..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-
-                <Select value={statusFilter} onValueChange={(value: 'all' | 'active' | 'inactive') => setStatusFilter(value)}>
-                    <SelectTrigger className="w-full sm:w-48 bg-white border-gray-300 shadow-sm hover:border-gray-400 focus:border-[#FED466] focus:ring-2 focus:ring-[#FED466]/20">
-                        <SelectValue placeholder="Filtrar por status" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white border border-gray-200 shadow-lg">
-                        <SelectItem value="all" className="hover:bg-gray-50 focus:bg-[#FED466]/10">Todos os status</SelectItem>
-                        <SelectItem value="active" className="hover:bg-gray-50 focus:bg-[#FED466]/10">Ativos</SelectItem>
-                        <SelectItem value="inactive" className="hover:bg-gray-50 focus:bg-[#FED466]/10">Inativos</SelectItem>
-                    </SelectContent>
-                </Select>
-
-                <Select value={`${sortBy}-${sortOrder}`} onValueChange={(value) => {
-                    const [field, order] = value.split('-') as [typeof sortBy, typeof sortOrder]
-                    setSortBy(field)
-                    setSortOrder(order)
-                }}>
-                    <SelectTrigger className="w-full sm:w-48 bg-white border-gray-300 shadow-sm hover:border-gray-400 focus:border-[#FED466] focus:ring-2 focus:ring-[#FED466]/20">
-                        <SelectValue placeholder="Ordenar por" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white border border-gray-200 shadow-lg">
-                        <SelectItem value="name-asc" className="hover:bg-gray-50 focus:bg-[#FED466]/10">Nome (A-Z)</SelectItem>
-                        <SelectItem value="name-desc" className="hover:bg-gray-50 focus:bg-[#FED466]/10">Nome (Z-A)</SelectItem>
-                        <SelectItem value="price-asc" className="hover:bg-gray-50 focus:bg-[#FED466]/10">Preço (Menor)</SelectItem>
-                        <SelectItem value="price-desc" className="hover:bg-gray-50 focus:bg-[#FED466]/10">Preço (Maior)</SelectItem>
-                        <SelectItem value="created-desc" className="hover:bg-gray-50 focus:bg-[#FED466]/10">Mais recentes</SelectItem>
-                        <SelectItem value="created-asc" className="hover:bg-gray-50 focus:bg-[#FED466]/10">Mais antigos</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
-
             {/* Tabela */}
             <div className="border rounded-lg overflow-hidden">
                 <Table>
@@ -343,14 +254,29 @@ export default function ProductsTable({ search: externalSearch = '', page = 1, c
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {filteredProducts.length === 0 ? (
+                        {products.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={7} className="text-center py-8 text-gray-500">
-                                    {search || statusFilter !== 'all' ? 'Nenhum produto encontrado com os filtros aplicados.' : 'Nenhum produto cadastrado ainda.'}
+                                <TableCell colSpan={7} className="text-center py-12">
+                                    <div className="flex flex-col items-center gap-3">
+                                        <div className="p-3 bg-gray-100 rounded-full">
+                                            <FileText className="w-8 h-8 text-gray-400" />
+                                        </div>
+                                        <div>
+                                            <p className="text-lg font-medium text-gray-900">
+                                                {externalSearch || category ? 'Nenhum produto encontrado' : 'Nenhum produto cadastrado'}
+                                            </p>
+                                            <p className="text-sm text-gray-500 mt-1">
+                                                {externalSearch || category 
+                                                    ? 'Tente ajustar os filtros para encontrar produtos.' 
+                                                    : 'Comece criando seu primeiro produto digital.'
+                                                }
+                                            </p>
+                                        </div>
+                                    </div>
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            filteredProducts.map((product) => (
+                            products.map((product) => (
                                 <Collapsible key={product.id} open={expandedRows.has(product.id)}>
                                     <TableRow className="hover:bg-gray-50">
                                         <TableCell className="p-4">
@@ -474,39 +400,66 @@ export default function ProductsTable({ search: externalSearch = '', page = 1, c
                                         <CollapsibleContent asChild>
                                             <TableRow>
                                                 <TableCell colSpan={7} className="p-0">
-                                                    <div className="bg-muted/50 p-4">
-                                                        <h4 className="font-semibold mb-3 text-sm">
-                                                            Variações ({product.variations.length})
-                                                        </h4>
-                                                        <div className="space-y-2">
+                                                    <div className="bg-slate-50 border-t p-6">
+                                                        <div className="flex items-center justify-between mb-4">
+                                                            <h4 className="font-semibold text-sm text-gray-900">
+                                                                Variações ({product.variations.length})
+                                                            </h4>
+                                                            <Button variant="outline" size="sm" asChild>
+                                                                <Link href={`/admin/products/${product.id}/variations/new`}>
+                                                                    <Plus className="h-3 w-3 mr-1" />
+                                                                    Nova Variação
+                                                                </Link>
+                                                            </Button>
+                                                        </div>
+                                                        <div className="grid gap-3">
                                                             {product.variations.map((variation) => (
                                                                 <div
                                                                     key={variation.id}
-                                                                    className="flex items-center justify-between p-3 bg-background rounded border"
+                                                                    className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
                                                                 >
-                                                                    <div className="flex-1 grid grid-cols-4 gap-4">
+                                                                    <div className="flex-1 grid grid-cols-4 gap-6">
                                                                         <div>
-                                                                            <span className="font-medium">{variation.name}</span>
-                                                                            <p className="text-sm text-muted-foreground font-mono">{variation.slug}</p>
+                                                                            <div className="font-medium text-gray-900">{variation.name}</div>
+                                                                            <div className="text-sm text-gray-500 font-mono">{variation.slug}</div>
                                                                         </div>
                                                                         <div>
-                                                                            <span className="font-medium">{formatPrice(variation.price)}</span>
+                                                                            <div className="font-semibold text-lg text-gray-900">{formatPrice(variation.price)}</div>
                                                                         </div>
                                                                         <div>
-                                                                            <Badge variant={variation.isActive ? "default" : "secondary"} className="text-xs">
+                                                                            <Badge 
+                                                                                variant={variation.isActive ? "default" : "secondary"} 
+                                                                                className={variation.isActive 
+                                                                                    ? "bg-green-500 text-white border-green-500" 
+                                                                                    : "bg-red-100 text-red-800 border-red-200"
+                                                                                }
+                                                                            >
                                                                                 {variation.isActive ? "Ativo" : "Inativo"}
                                                                             </Badge>
                                                                         </div>
                                                                         <div>
-                                                                            {variation.files && variation.files.length > 0 && (
+                                                                            {variation.files && variation.files.length > 0 ? (
                                                                                 <div className="text-sm">
-                                                                                    <FileText className="inline h-3 w-3 mr-1" />
-                                                                                    {variation.files.length} arquivo{variation.files.length > 1 ? 's' : ''}
-                                                                                    {variation.files.map((file) => (
-                                                                                        <div key={file.id} className="text-xs text-muted-foreground">
-                                                                                            {file.originalName} ({formatFileSize(file.size)})
-                                                                                        </div>
-                                                                                    ))}
+                                                                                    <div className="flex items-center gap-1 text-blue-600 font-medium">
+                                                                                        <FileText className="h-3 w-3" />
+                                                                                        {variation.files.length} arquivo{variation.files.length > 1 ? 's' : ''}
+                                                                                    </div>
+                                                                                    <div className="mt-1 space-y-1">
+                                                                                        {variation.files.slice(0, 2).map((file) => (
+                                                                                            <div key={file.id} className="text-xs text-gray-600">
+                                                                                                {file.originalName} ({formatFileSize(file.size)})
+                                                                                            </div>
+                                                                                        ))}
+                                                                                        {variation.files.length > 2 && (
+                                                                                            <div className="text-xs text-gray-400">
+                                                                                                +{variation.files.length - 2} mais
+                                                                                            </div>
+                                                                                        )}
+                                                                                    </div>
+                                                                                </div>
+                                                                            ) : (
+                                                                                <div className="text-sm text-gray-400">
+                                                                                    Nenhum arquivo
                                                                                 </div>
                                                                             )}
                                                                         </div>
@@ -519,7 +472,7 @@ export default function ProductsTable({ search: externalSearch = '', page = 1, c
                                                                         </Button>
                                                                         <AlertDialog>
                                                                             <AlertDialogTrigger asChild>
-                                                                                <Button variant="outline" size="sm">
+                                                                                <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200">
                                                                                     <Trash2 className="h-3 w-3" />
                                                                                 </Button>
                                                                             </AlertDialogTrigger>
@@ -558,9 +511,9 @@ export default function ProductsTable({ search: externalSearch = '', page = 1, c
             </div>
 
             {/* Resumo */}
-            {filteredProducts.length > 0 && (
+            {products.length > 0 && (
                 <div className="text-sm text-gray-600">
-                    Mostrando {filteredProducts.length} de {products.length} produto(s)
+                    Mostrando {products.length} produto(s)
                 </div>
             )}
         </div>

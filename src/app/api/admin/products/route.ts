@@ -78,6 +78,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const search = searchParams.get('search') || '';
+    const include = searchParams.get('include') || '';
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const offset = (page - 1) * limit;
@@ -102,14 +103,41 @@ export async function GET(request: NextRequest) {
         .offset(offset);
     }
 
-    // Get related files for each product
-    const productsWithFiles = await Promise.all(
+    // Get related files and variations for each product
+    const productsWithDetails = await Promise.all(
       allProducts.map(async product => {
         const productFiles = await db.select().from(files).where(eq(files.productId, product.id));
+        
+        let variations: object[] = [];
+        if (include.includes('variations')) {
+          const productVariationsList = await db
+            .select()
+            .from(productVariations)
+            .where(eq(productVariations.productId, product.id));
+          
+          // Get files for each variation if requested
+          if (include.includes('files')) {
+            variations = await Promise.all(
+              productVariationsList.map(async variation => {
+                const variationFiles = await db
+                  .select()
+                  .from(files)
+                  .where(eq(files.variationId, variation.id));
+                return {
+                  ...variation,
+                  files: variationFiles
+                };
+              })
+            );
+          } else {
+            variations = productVariationsList;
+          }
+        }
 
         return {
           ...product,
           files: productFiles,
+          variations,
           // Mock additional fields for compatibility
           status: product.isActive ? 'active' : 'draft',
           digitalProduct: true,
@@ -121,7 +149,7 @@ export async function GET(request: NextRequest) {
     );
 
     return NextResponse.json({
-      products: productsWithFiles,
+      products: productsWithDetails,
       pagination: {
         page,
         limit,
