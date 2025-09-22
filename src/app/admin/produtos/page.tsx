@@ -31,7 +31,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
-import ProductsTable from '@/components/admin/ProductsTable'
+import ProductsCards from '@/components/admin/ProductsCards'
 import ProductForm from '@/components/admin/ProductForm'
 
 interface ProductStats {
@@ -256,7 +256,7 @@ export default function ProductsPage() {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <ProductsTable
+                    <ProductsCards
                         search={search}
                         category={category === 'all' ? '' : category}
                     />

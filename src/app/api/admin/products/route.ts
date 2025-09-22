@@ -107,14 +107,14 @@ export async function GET(request: NextRequest) {
     const productsWithDetails = await Promise.all(
       allProducts.map(async product => {
         const productFiles = await db.select().from(files).where(eq(files.productId, product.id));
-        
+
         let variations: object[] = [];
         if (include.includes('variations')) {
           const productVariationsList = await db
             .select()
             .from(productVariations)
             .where(eq(productVariations.productId, product.id));
-          
+
           // Get files for each variation if requested
           if (include.includes('files')) {
             variations = await Promise.all(
@@ -125,7 +125,7 @@ export async function GET(request: NextRequest) {
                   .where(eq(files.variationId, variation.id));
                 return {
                   ...variation,
-                  files: variationFiles
+                  files: variationFiles,
                 };
               })
             );
