@@ -1,11 +1,12 @@
 import NextAuth from 'next-auth';
+import type { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { db } from '@/lib/db';
 import { users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 
-const authOptions = {
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'credentials',
@@ -83,5 +84,5 @@ const authOptions = {
   secret: process.env.AUTH_SECRET,
 };
 
-export { authOptions };
-export const { handlers, signIn, signOut, auth } = NextAuth(authOptions);
+const handler = NextAuth(authOptions);
+export { handler };
