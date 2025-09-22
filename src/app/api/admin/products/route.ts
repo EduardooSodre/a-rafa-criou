@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/lib/db';
-import { products, files, productImages, productVariations } from '@/lib/db/schema';
-import { eq, desc, like, or } from 'drizzle-orm';
+import { products, files, productImages, productVariations, categories } from '@/lib/db/schema';
+import { eq, desc, or, and, ilike, isNull } from 'drizzle-orm';
 
 const createProductSchema = z.object({
   name: z.string().min(1).max(255),
@@ -78,19 +78,56 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const search = searchParams.get('search') || '';
+    const category = searchParams.get('category') || '';
     const include = searchParams.get('include') || '';
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const offset = (page - 1) * limit;
 
-    // Query products
-    let allProducts;
-
+    // Build where conditions
+    const conditions = [];
+    
+    // Case-insensitive search
     if (search) {
+      conditions.push(
+        or(
+          ilike(products.name, `%${search}%`),
+          ilike(products.description, `%${search}%`),
+          ilike(products.slug, `%${search}%`)
+        )
+      );
+    }
+
+    // Category filter - check both slug and categoryId
+    if (category) {
+      if (category === 'sem-categoria' || category === 'uncategorized') {
+        // Show products without category
+        conditions.push(isNull(products.categoryId));
+      } else {
+        // First, try to find category by slug
+        const categoryRecord = await db
+          .select()
+          .from(categories)
+          .where(eq(categories.slug, category))
+          .limit(1);
+
+        if (categoryRecord.length > 0) {
+          conditions.push(eq(products.categoryId, categoryRecord[0].id));
+        } else {
+          // If no category found by slug, try as categoryId
+          conditions.push(eq(products.categoryId, category));
+        }
+      }
+    }
+
+    // Query products with conditions
+    let allProducts;
+    
+    if (conditions.length > 0) {
       allProducts = await db
         .select()
         .from(products)
-        .where(or(like(products.name, `%${search}%`), like(products.description, `%${search}%`)))
+        .where(and(...conditions))
         .orderBy(desc(products.createdAt))
         .limit(limit)
         .offset(offset);

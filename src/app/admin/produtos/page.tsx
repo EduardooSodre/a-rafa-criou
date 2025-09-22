@@ -246,7 +246,8 @@ export default function ProductsPage() {
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">Todas as Categorias</SelectItem>
-                                <SelectItem value="planner">📋 Planners</SelectItem>
+                                <SelectItem value="sem-categoria">❓ Sem Categoria</SelectItem>
+                                <SelectItem value="planners">📋 Planners</SelectItem>
                                 <SelectItem value="adesivos">🏷️ Adesivos</SelectItem>
                                 <SelectItem value="etiquetas">🏪 Etiquetas</SelectItem>
                                 <SelectItem value="agenda">📅 Agendas</SelectItem>
