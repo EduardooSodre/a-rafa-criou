@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Upload, X, FileText, Loader2, Plus, Trash2, Package, FolderPlus, Image as ImageIcon, GripVertical } from 'lucide-react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -119,14 +120,31 @@ function SortableImageItem({ image, index, isMain, onRemove }: SortableImageItem
         <div ref={setNodeRef} style={style} className="relative group">
             <div className="aspect-square rounded-lg border-2 border-gray-200 overflow-hidden bg-gray-50">
                 {image.uploading ? (
-                    <div className="flex items-center justify-center h-full">
-                        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-                    </div>
+                    <>
+                        <div className="flex items-center justify-center h-full">
+                            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+                        </div>
+                        <Image
+                            src={image.url || image.preview || '/placeholder.png'}
+                            alt={image.alt || `Imagem ${index + 1}`}
+                            className="w-full h-full object-cover"
+                            width={400}
+                            height={400}
+                            style={{ objectFit: 'cover' }}
+                            unoptimized={true}
+                            priority={index === 0}
+                        />
+                    </>
                 ) : (
-                    <img
-                        src={image.url || image.preview}
+                    <Image
+                        src={image.url || image.preview || '/placeholder.png'}
                         alt={image.alt || `Imagem ${index + 1}`}
                         className="w-full h-full object-cover"
+                        width={400}
+                        height={400}
+                        style={{ objectFit: 'cover' }}
+                        unoptimized={true}
+                        priority={index === 0}
                     />
                 )}
             </div>
@@ -1200,7 +1218,10 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                     <CardHeader>
                         <div className="flex justify-between items-center">
                             <div>
-                                <CardTitle>Variações do Produto</CardTitle>
+                                <CardTitle className="flex items-center gap-2">
+                                    <Package className="w-5 h-5" />
+                                    Variações do Produto
+                                </CardTitle>
                                 <CardDescription>
                                     Crie diferentes versões do produto com preços e arquivos específicos
                                 </CardDescription>
@@ -1213,68 +1234,105 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                     </CardHeader>
                     <CardContent className="space-y-6">
                         {formData.variations.map((variation, index) => (
-                            <Card key={index} className="border-l-4 border-l-blue-500">
-                                <CardHeader>
-                                    <div className="flex justify-between items-center">
-                                        <CardTitle className="text-lg">
-                                            Variação {index + 1}
-                                            {!variation.isActive && (
-                                                <Badge variant="secondary" className="ml-2">Inativa</Badge>
-                                            )}
-                                        </CardTitle>
+                            <Card key={index} className={`relative border-l-4 ${variation.isActive ? 'border-l-green-500' : 'border-l-gray-400'} transition-all duration-200`}>
+                                <CardHeader className="pb-4">
+                                    <div className="flex justify-between items-start">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                                                variation.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+                                            }`}>
+                                                {index + 1}
+                                            </div>
+                                            <div>
+                                                <CardTitle className="text-lg">
+                                                    {variation.name || `Variação ${index + 1}`}
+                                                </CardTitle>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <Badge variant={variation.isActive ? "default" : "secondary"} className="text-xs">
+                                                        {variation.isActive ? 'Ativa' : 'Inativa'}
+                                                    </Badge>
+                                                    <span className="text-sm text-gray-500">
+                                                        R$ {parseFloat(variation.price || '0').toFixed(2).replace('.', ',')}
+                                                    </span>
+                                                    <span className="text-xs text-gray-400">
+                                                        • {variation.files?.length || 0} arquivo(s)
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
                                         {formData.variations.length > 1 && (
                                             <Button
                                                 type="button"
                                                 onClick={() => removeVariation(index)}
-                                                variant="outline"
+                                                variant="ghost"
                                                 size="sm"
-                                                className="text-red-600 hover:text-red-700 cursor-pointer"
+                                                className="text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer"
                                             >
                                                 <Trash2 className="w-4 h-4" />
                                             </Button>
                                         )}
                                     </div>
                                 </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-end">
+                                <CardContent className="space-y-6">
+                                    {/* Informações Básicas */}
+                                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                                         <div className="lg:col-span-2">
-                                            <Label>Nome da Variação</Label>
+                                            <Label className="text-sm font-medium">Nome da Variação *</Label>
                                             <Input
                                                 value={variation.name}
                                                 onChange={(e) => updateVariation(index, 'name', e.target.value)}
-                                                placeholder="Ex: PDF Simples"
+                                                placeholder="Ex: PDF Premium, Kit Completo"
+                                                className="mt-1"
                                                 required
                                             />
                                         </div>
                                         <div>
-                                            <Label>Preço (R$)</Label>
+                                            <Label className="text-sm font-medium">Preço (R$) *</Label>
                                             <Input
                                                 type="number"
                                                 step="0.01"
                                                 min="0.01"
                                                 value={variation.price}
                                                 onChange={(e) => updateVariation(index, 'price', e.target.value)}
-                                                placeholder="0.00"
+                                                placeholder="0,00"
+                                                className="mt-1"
                                                 required
                                             />
                                         </div>
-                                        <div className="flex items-center space-x-2">
+                                    </div>
+
+                                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                        <div className="flex items-center space-x-3">
                                             <Switch
                                                 checked={variation.isActive}
                                                 onCheckedChange={(checked) => updateVariation(index, 'isActive', checked)}
                                             />
-                                            <Label className="text-sm">Ativa</Label>
+                                            <div>
+                                                <Label className="text-sm font-medium">Variação Ativa</Label>
+                                                <p className="text-xs text-gray-500">
+                                                    {variation.isActive ? 'Esta variação estará disponível para compra' : 'Esta variação ficará oculta na loja'}
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
 
                                     {/* Upload de Arquivos */}
-                                    <div>
-                                        <Label>Arquivos da Variação *</Label>
-                                        <div className="mt-2">
-                                            <label className="block w-full border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 cursor-pointer">
-                                                <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                                    <div className="space-y-4">
+                                        <div>
+                                            <Label className="text-sm font-medium flex items-center gap-2">
+                                                <FileText className="w-4 h-4" />
+                                                Arquivos da Variação *
+                                            </Label>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                Adicione os arquivos digitais que serão entregues ao cliente
+                                            </p>
+                                        </div>
+                                        
+                                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-gray-400 transition-colors">
+                                            <label className="cursor-pointer block text-center">
+                                                <Upload className="mx-auto h-10 w-10 text-gray-400" />
                                                 <span className="mt-2 block text-sm font-medium text-gray-900">
-                                                    Clique para fazer upload ou arraste arquivos aqui
+                                                    Clique para selecionar arquivos
                                                 </span>
                                                 <span className="mt-1 block text-xs text-gray-500">
                                                     PDF, PNG, JPG até 50MB cada
@@ -1289,48 +1347,70 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                                             </label>
                                         </div>
 
-                                        {/* Lista de Arquivos */}
+                                        {/* Lista de Arquivos Melhorada */}
                                         {variation.files.length > 0 && (
-                                            <div className="mt-4 max-h-48 scroll-rounded space-y-2">
-                                                {variation.files.map((file, fileIndex) => (
-                                                    <div key={fileIndex} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                                        <div className="flex items-center space-x-3">
-                                                            <FileText className="w-5 h-5 text-gray-400" />
-                                                            <div>
-                                                                <p className="text-sm font-medium text-gray-900">
-                                                                    {file.file.name}
-                                                                </p>
-                                                                <p className="text-xs text-gray-500">
-                                                                    {(file.file.size / 1024 / 1024).toFixed(2)} MB
-                                                                </p>
+                                            <div className="space-y-3">
+                                                <div className="flex items-center justify-between">
+                                                    <h4 className="text-sm font-medium text-gray-900">
+                                                        Arquivos ({variation.files.length})
+                                                    </h4>
+                                                </div>
+                                                <div className="max-h-48 overflow-y-auto space-y-2">
+                                                    {variation.files.map((file, fileIndex) => (
+                                                        <div key={fileIndex} className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                                                            <div className="flex items-center space-x-3 flex-1 min-w-0">
+                                                                <div className={`p-2 rounded-lg ${
+                                                                    file.file.type === 'application/pdf' 
+                                                                        ? 'bg-red-100 text-red-600' 
+                                                                        : 'bg-blue-100 text-blue-600'
+                                                                }`}>
+                                                                    <FileText className="w-4 h-4" />
+                                                                </div>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <p className="text-sm font-medium text-gray-900 truncate">
+                                                                        {file.file.name}
+                                                                    </p>
+                                                                    <div className="flex items-center gap-2 mt-1">
+                                                                        <p className="text-xs text-gray-500">
+                                                                            {(file.file.size / 1024 / 1024).toFixed(2)} MB
+                                                                        </p>
+                                                                        <span className="text-xs text-gray-300">•</span>
+                                                                        <p className="text-xs text-gray-500">
+                                                                            {file.file.type === 'application/pdf' ? 'PDF' : 'Imagem'}
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-center space-x-2 ml-4">
+                                                                {file.uploading && (
+                                                                    <div className="flex items-center gap-2">
+                                                                        <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+                                                                        <span className="text-xs text-blue-600">Enviando...</span>
+                                                                    </div>
+                                                                )}
+                                                                {file.uploaded && (
+                                                                    <Badge variant="default" className="bg-green-500 hover:bg-green-600">
+                                                                        ✓ Enviado
+                                                                    </Badge>
+                                                                )}
+                                                                {file.error && (
+                                                                    <Badge variant="destructive">
+                                                                        ✗ Erro
+                                                                    </Badge>
+                                                                )}
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    onClick={() => removeFileFromVariation(index, fileIndex)}
+                                                                    className="text-gray-400 hover:text-red-500 cursor-pointer p-1"
+                                                                >
+                                                                    <X className="w-4 h-4" />
+                                                                </Button>
                                                             </div>
                                                         </div>
-                                                        <div className="flex items-center space-x-2">
-                                                            {file.uploading && (
-                                                                <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
-                                                            )}
-                                                            {file.uploaded && (
-                                                                <Badge variant="default" className="bg-green-500">
-                                                                    Uploaded
-                                                                </Badge>
-                                                            )}
-                                                            {file.error && (
-                                                                <Badge variant="destructive">
-                                                                    Erro
-                                                                </Badge>
-                                                            )}
-                                                            <Button
-                                                                type="button"
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={() => removeFileFromVariation(index, fileIndex)}
-                                                                className="cursor-pointer"
-                                                            >
-                                                                <X className="w-4 h-4" />
-                                                            </Button>
-                                                        </div>
-                                                    </div>
-                                                ))}
+                                                    ))}
+                                                </div>
                                             </div>
                                         )}
                                     </div>
