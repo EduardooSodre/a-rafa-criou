@@ -1290,42 +1290,55 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                                 {/* Conteúdo da Variação */}
                                 <div className="p-6 space-y-6">
                                     {/* Informações Básicas */}
-                                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                                        <div className="lg:col-span-2">
-                                            <Label className="text-sm font-medium">Nome da Variação *</Label>
-                                            <Input
-                                                value={variation.name}
-                                                onChange={(e) => updateVariation(index, 'name', e.target.value)}
-                                                placeholder="Ex: PDF Premium, Kit Completo"
-                                                className="mt-1"
-                                                required
-                                            />
-                                        </div>
-                                        <div>
-                                            <Label className="text-sm font-medium">Preço (R$) *</Label>
-                                            <Input
-                                                type="number"
-                                                step="0.01"
-                                                min="0.01"
-                                                value={variation.price}
-                                                onChange={(e) => updateVariation(index, 'price', e.target.value)}
-                                                placeholder="0,00"
-                                                className="mt-1"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                        <div className="flex items-center space-x-3">
-                                            <Switch
-                                                checked={variation.isActive}
-                                                onCheckedChange={(checked) => updateVariation(index, 'isActive', checked)}
-                                            />
+                                    <div className="bg-gray-50 rounded-lg p-4">
+                                        <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                            <Package className="w-4 h-4" />
+                                            Informações Básicas
+                                        </h4>
+                                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                                            <div className="lg:col-span-2">
+                                                <Label className="text-sm font-medium text-gray-700">Nome da Variação *</Label>
+                                                <Input
+                                                    value={variation.name}
+                                                    onChange={(e) => updateVariation(index, 'name', e.target.value)}
+                                                    placeholder="Ex: PDF Premium, Kit Completo"
+                                                    className="mt-1 border-gray-300 focus:border-blue-500"
+                                                    required
+                                                />
+                                            </div>
                                             <div>
-                                                <Label className="text-sm font-medium">Variação Ativa</Label>
-                                                <p className="text-xs text-gray-500">
-                                                    {variation.isActive ? 'Esta variação estará disponível para compra' : 'Esta variação ficará oculta na loja'}
-                                                </p>
+                                                <Label className="text-sm font-medium text-gray-700">Preço (R$) *</Label>
+                                                <Input
+                                                    type="number"
+                                                    step="0.01"
+                                                    min="0.01"
+                                                    value={variation.price}
+                                                    onChange={(e) => updateVariation(index, 'price', e.target.value)}
+                                                    placeholder="0,00"
+                                                    className="mt-1 border-gray-300 focus:border-blue-500"
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-4 flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
+                                            <div className="flex items-center space-x-3">
+                                                <Switch
+                                                    checked={variation.isActive}
+                                                    onCheckedChange={(checked) => updateVariation(index, 'isActive', checked)}
+                                                    className="data-[state=checked]:bg-green-600"
+                                                />
+                                                <div>
+                                                    <Label className="text-sm font-medium text-gray-700">Variação Ativa</Label>
+                                                    <p className="text-xs text-gray-500">
+                                                        {variation.isActive ? 'Esta variação estará disponível para compra' : 'Esta variação ficará oculta na loja'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                                variation.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+                                            }`}>
+                                                {variation.isActive ? 'Visível' : 'Oculta'}
                                             </div>
                                         </div>
                                     </div>
