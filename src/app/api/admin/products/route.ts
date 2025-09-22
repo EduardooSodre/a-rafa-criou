@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
 
     // Build where conditions
     const conditions = [];
-    
+
     // Case-insensitive search
     if (search) {
       conditions.push(
@@ -122,7 +122,7 @@ export async function GET(request: NextRequest) {
 
     // Query products with conditions
     let allProducts;
-    
+
     if (conditions.length > 0) {
       allProducts = await db
         .select()

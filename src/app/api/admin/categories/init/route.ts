@@ -39,9 +39,9 @@ export async function POST() {
 
     // Return all categories
     const allCategories = await db.select().from(categories);
-    return NextResponse.json({ 
+    return NextResponse.json({
       message: `Categories initialized successfully. ${inserted} categories added.`,
-      categories: allCategories 
+      categories: allCategories,
     });
   } catch (error) {
     console.error('Error initializing categories:', error);
