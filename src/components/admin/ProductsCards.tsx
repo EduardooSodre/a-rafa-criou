@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { 
-    Edit, 
-    Eye, 
-    Trash2, 
-    ChevronDown, 
-    ChevronUp, 
-    FileText, 
+import {
+    Edit,
+    Eye,
+    Trash2,
+    ChevronDown,
+    ChevronUp,
+    FileText,
     Plus,
     Loader2,
     Package,
@@ -270,14 +270,14 @@ export default function ProductsCardsView({
                                         </p>
                                     </div>
                                 </div>
-                                
+
                                 {/* Status Badge */}
                                 <Badge
                                     variant={product.isActive ? "default" : "secondary"}
-                                    className={`ml-2 flex-shrink-0 ${product.isActive 
-                                        ? "bg-green-100 text-green-800 border-green-200" 
+                                    className={`ml-2 flex-shrink-0 ${product.isActive
+                                        ? "bg-green-100 text-green-800 border-green-200"
                                         : "bg-red-100 text-red-800 border-red-200"
-                                    }`}
+                                        }`}
                                 >
                                     {product.isActive ? "Ativo" : "Inativo"}
                                 </Badge>
@@ -308,7 +308,7 @@ export default function ProductsCardsView({
                                         {formatPrice(product.price)}
                                     </span>
                                 </div>
-                                
+
                                 {/* Files Info */}
                                 <div className="text-right">
                                     <div className="flex items-center justify-end space-x-1 text-blue-600">
@@ -340,9 +340,9 @@ export default function ProductsCardsView({
                                     </Button>
                                     <AlertDialog>
                                         <AlertDialogTrigger asChild>
-                                            <Button 
-                                                variant="outline" 
-                                                size="sm" 
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
                                                 className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
                                                 disabled={deletingProduct === product.id}
                                             >
@@ -417,7 +417,7 @@ export default function ProductsCardsView({
                                                     </Link>
                                                 </Button>
                                             </div>
-                                            
+
                                             <div className="space-y-2">
                                                 {product.variations.map((variation) => (
                                                     <div
@@ -445,7 +445,7 @@ export default function ProductsCardsView({
                                                                                 className={`text-xs ${variation.isActive
                                                                                     ? "bg-green-100 text-green-800 border-green-200"
                                                                                     : "bg-red-100 text-red-800 border-red-200"
-                                                                                }`}
+                                                                                    }`}
                                                                             >
                                                                                 {variation.isActive ? "Ativo" : "Inativo"}
                                                                             </Badge>
@@ -453,7 +453,7 @@ export default function ProductsCardsView({
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            
+
                                                             {/* Files for variation */}
                                                             {variation.files && variation.files.length > 0 && (
                                                                 <div className="mt-2 flex items-center space-x-2">
@@ -467,7 +467,7 @@ export default function ProductsCardsView({
                                                                 </div>
                                                             )}
                                                         </div>
-                                                        
+
                                                         {/* Variation Actions */}
                                                         <div className="flex space-x-1 ml-3">
                                                             <Button variant="outline" size="sm" className="h-7 w-7 p-0" asChild>
@@ -477,9 +477,9 @@ export default function ProductsCardsView({
                                                             </Button>
                                                             <AlertDialog>
                                                                 <AlertDialogTrigger asChild>
-                                                                    <Button 
-                                                                        variant="outline" 
-                                                                        size="sm" 
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        size="sm"
                                                                         className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
                                                                         disabled={deletingVariation === variation.id}
                                                                     >

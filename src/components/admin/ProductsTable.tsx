@@ -2,13 +2,13 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import Link from 'next/link'
-import { 
-    Edit, 
-    Eye, 
-    Trash2, 
-    ChevronDown, 
-    ChevronRight, 
-    FileText, 
+import {
+    Edit,
+    Eye,
+    Trash2,
+    ChevronDown,
+    ChevronRight,
+    FileText,
     Plus,
     Loader2
 } from 'lucide-react'
@@ -147,8 +147,8 @@ export default function ProductsTableClean({
     const getStatusBadge = (isActive: boolean) => (
         <Badge
             variant={isActive ? "default" : "secondary"}
-            className={isActive 
-                ? "bg-green-100 text-green-800 border-green-200" 
+            className={isActive
+                ? "bg-green-100 text-green-800 border-green-200"
                 : "bg-red-100 text-red-800 border-red-200"
             }
         >
@@ -389,9 +389,9 @@ export default function ProductsTableClean({
                                                 </Button>
                                                 <AlertDialog>
                                                     <AlertDialogTrigger asChild>
-                                                        <Button 
-                                                            variant="ghost" 
-                                                            size="sm" 
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
                                                             className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
                                                             disabled={deletingProduct === product.id}
                                                         >
@@ -507,9 +507,9 @@ export default function ProductsTableClean({
                                                                         </Button>
                                                                         <AlertDialog>
                                                                             <AlertDialogTrigger asChild>
-                                                                                <Button 
-                                                                                    variant="outline" 
-                                                                                    size="sm" 
+                                                                                <Button
+                                                                                    variant="outline"
+                                                                                    size="sm"
                                                                                     className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
                                                                                     disabled={deletingVariation === variation.id}
                                                                                 >
