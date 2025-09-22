@@ -178,7 +178,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           {
             error: 'Dados inválidos',
-            details: error.errors,
+            details: error.issues,
           },
           { status: 400 }
         );

@@ -1234,28 +1234,41 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                     </CardHeader>
                     <CardContent className="space-y-6">
                         {formData.variations.map((variation, index) => (
-                            <Card key={index} className={`relative border-l-4 ${variation.isActive ? 'border-l-green-500' : 'border-l-gray-400'} transition-all duration-200`}>
-                                <CardHeader className="pb-4">
+                            <div key={index} className={`border rounded-xl shadow-sm bg-white overflow-hidden transition-all duration-200 hover:shadow-md ${variation.isActive ? 'border-green-200' : 'border-gray-200'}`}>
+                                {/* Header da Variação */}
+                                <div className={`p-4 ${variation.isActive ? 'bg-gradient-to-r from-green-50 to-emerald-50' : 'bg-gray-50'} border-b`}>
                                     <div className="flex justify-between items-start">
                                         <div className="flex items-center gap-3">
-                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${variation.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold shadow-sm ${variation.isActive
+                                                ? 'bg-green-500 text-white'
+                                                : 'bg-gray-400 text-white'
                                                 }`}>
                                                 {index + 1}
                                             </div>
-                                            <div>
-                                                <CardTitle className="text-lg">
+                                            <div className="flex-1">
+                                                <h3 className="text-lg font-semibold text-gray-900">
                                                     {variation.name || `Variação ${index + 1}`}
-                                                </CardTitle>
-                                                <div className="flex items-center gap-2 mt-1">
-                                                    <Badge variant={variation.isActive ? "default" : "secondary"} className="text-xs">
+                                                </h3>
+                                                <div className="flex items-center gap-3 mt-1">
+                                                    <Badge
+                                                        variant={variation.isActive ? "default" : "secondary"}
+                                                        className={`text-xs font-medium ${variation.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}
+                                                    >
                                                         {variation.isActive ? 'Ativa' : 'Inativa'}
                                                     </Badge>
-                                                    <span className="text-sm text-gray-500">
-                                                        R$ {parseFloat(variation.price || '0').toFixed(2).replace('.', ',')}
-                                                    </span>
-                                                    <span className="text-xs text-gray-400">
-                                                        • {variation.files?.length || 0} arquivo(s)
-                                                    </span>
+                                                    <div className="flex items-center gap-1">
+                                                        <span className="text-lg font-bold text-green-600">
+                                                            R$ {parseFloat(variation.price || '0').toFixed(2).replace('.', ',')}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1 text-sm text-gray-500">
+                                                        <FileText className="w-4 h-4" />
+                                                        <span>{variation.files?.length || 0} arquivo(s)</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1 text-sm text-gray-500">
+                                                        <ImageIcon className="w-4 h-4" />
+                                                        <span>{variation.images?.length || 0} imagem(ns)</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -1265,14 +1278,17 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                                                 onClick={() => removeVariation(index)}
                                                 variant="ghost"
                                                 size="sm"
-                                                className="text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer"
+                                                className="text-red-600 hover:text-red-700 hover:bg-red-100 cursor-pointer transition-colors"
                                             >
                                                 <Trash2 className="w-4 h-4" />
+                                                <span className="ml-1 text-xs">Remover</span>
                                             </Button>
                                         )}
                                     </div>
-                                </CardHeader>
-                                <CardContent className="space-y-6">
+                                </div>
+
+                                {/* Conteúdo da Variação */}
+                                <div className="p-6 space-y-6">
                                     {/* Informações Básicas */}
                                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                                         <div className="lg:col-span-2">
@@ -1299,7 +1315,6 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                                             />
                                         </div>
                                     </div>
-
                                     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                         <div className="flex items-center space-x-3">
                                             <Switch
@@ -1487,8 +1502,8 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                                             </div>
                                         )}
                                     </div>
-                                </CardContent>
-                            </Card>
+                                </div>
+                            </div>
                         ))}
                     </CardContent>
                 </Card>
