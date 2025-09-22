@@ -76,7 +76,7 @@ export default function EditVariationDialog({
             console.log('Sending PUT request to:', url)
             console.log('Product ID:', productId)
             console.log('Variation ID:', variation.id)
-            
+
             const response = await fetch(url, {
                 method: 'PUT',
                 headers: {

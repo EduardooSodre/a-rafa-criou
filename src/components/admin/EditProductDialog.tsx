@@ -168,7 +168,7 @@ export default function EditProductDialog({
                     {/* Informações Básicas */}
                     <div className="space-y-4">
                         <h3 className="text-lg font-medium">Informações Básicas</h3>
-                        
+
                         <div className="grid gap-4 sm:grid-cols-2">
                             <div className="space-y-2">
                                 <Label htmlFor="name">Nome do Produto *</Label>
@@ -252,7 +252,7 @@ export default function EditProductDialog({
                     {/* SEO */}
                     <div className="space-y-4">
                         <h3 className="text-lg font-medium">SEO</h3>
-                        
+
                         <div className="space-y-2">
                             <Label htmlFor="seoTitle">Título SEO</Label>
                             <Input
@@ -278,7 +278,7 @@ export default function EditProductDialog({
                     {/* Configurações */}
                     <div className="space-y-4">
                         <h3 className="text-lg font-medium">Configurações</h3>
-                        
+
                         <div className="flex items-center justify-between">
                             <div className="space-y-1">
                                 <Label htmlFor="isActive">Produto Ativo</Label>

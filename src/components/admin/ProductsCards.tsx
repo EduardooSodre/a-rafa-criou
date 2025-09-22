@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { 
-    Eye, 
-    Trash2, 
-    ChevronDown, 
-    ChevronUp, 
-    FileText, 
+import {
+    Eye,
+    Trash2,
+    ChevronDown,
+    ChevronUp,
+    FileText,
     Plus,
     Loader2,
     Package,
