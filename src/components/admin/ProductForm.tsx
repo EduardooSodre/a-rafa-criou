@@ -1238,9 +1238,8 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                                 <CardHeader className="pb-4">
                                     <div className="flex justify-between items-start">
                                         <div className="flex items-center gap-3">
-                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                                                variation.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
-                                            }`}>
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${variation.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+                                                }`}>
                                                 {index + 1}
                                             </div>
                                             <div>
@@ -1327,7 +1326,7 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                                                 Adicione os arquivos digitais que serão entregues ao cliente
                                             </p>
                                         </div>
-                                        
+
                                         <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-gray-400 transition-colors">
                                             <label className="cursor-pointer block text-center">
                                                 <Upload className="mx-auto h-10 w-10 text-gray-400" />
@@ -1359,11 +1358,10 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                                                     {variation.files.map((file, fileIndex) => (
                                                         <div key={fileIndex} className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                                                             <div className="flex items-center space-x-3 flex-1 min-w-0">
-                                                                <div className={`p-2 rounded-lg ${
-                                                                    file.file.type === 'application/pdf' 
-                                                                        ? 'bg-red-100 text-red-600' 
+                                                                <div className={`p-2 rounded-lg ${file.file.type === 'application/pdf'
+                                                                        ? 'bg-red-100 text-red-600'
                                                                         : 'bg-blue-100 text-blue-600'
-                                                                }`}>
+                                                                    }`}>
                                                                     <FileText className="w-4 h-4" />
                                                                 </div>
                                                                 <div className="flex-1 min-w-0">
