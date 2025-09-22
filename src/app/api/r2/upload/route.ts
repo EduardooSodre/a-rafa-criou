@@ -44,8 +44,8 @@ export async function POST(request: NextRequest) {
       fileKey,
       originalName: file.name,
       size: file.size,
-      type: file.type
-    })
+      type: file.type,
+    });
 
     const response = {
       success: true,
@@ -56,14 +56,14 @@ export async function POST(request: NextRequest) {
         type: file.type,
         url: publicUrl,
       },
-    }
-    
+    };
+
     console.log('R2 Upload Success:', {
       key: fileKey,
       size: file.size,
       type: file.type,
-      url: publicUrl
-    })
+      url: publicUrl,
+    });
 
     return NextResponse.json(response);
   } catch (error) {

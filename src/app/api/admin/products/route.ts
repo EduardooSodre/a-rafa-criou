@@ -143,42 +143,47 @@ export async function POST(request: NextRequest) {
     // }
 
     const body = await request.json();
-    
-    console.log('=== RECEBIDO NA API ===')
+
+    console.log('=== RECEBIDO NA API ===');
     console.log('Product data:', {
-        name: body.name,
-        description: body.description,
-        price: body.price,
-        categoryId: body.categoryId,
-        filesCount: body.files?.length || 0,
-        imagesCount: body.images?.length || 0,
-        variationsCount: body.variations?.length || 0
-    })
-    console.log('Files:', body.files?.length || 0)
-    console.log('Variations:', body.variations?.length || 0)
+      name: body.name,
+      description: body.description,
+      price: body.price,
+      categoryId: body.categoryId,
+      filesCount: body.files?.length || 0,
+      imagesCount: body.images?.length || 0,
+      variationsCount: body.variations?.length || 0,
+    });
+    console.log('Files:', body.files?.length || 0);
+    console.log('Variations:', body.variations?.length || 0);
     if (body.variations) {
-        body.variations.forEach((v: { name: string; files?: { filename: string; r2Key: string }[] }, i: number) => {
-            console.log(`Variation ${i} (${v.name}): ${v.files?.length || 0} files`)
-            if (v.files) {
-                v.files.forEach((f: { filename: string; r2Key: string }, fi: number) => {
-                    console.log(`  File ${fi}: ${f.filename} -> r2Key: ${f.r2Key}`)
-                })
-            }
-        })
+      body.variations.forEach(
+        (v: { name: string; files?: { filename: string; r2Key: string }[] }, i: number) => {
+          console.log(`Variation ${i} (${v.name}): ${v.files?.length || 0} files`);
+          if (v.files) {
+            v.files.forEach((f: { filename: string; r2Key: string }, fi: number) => {
+              console.log(`  File ${fi}: ${f.filename} -> r2Key: ${f.r2Key}`);
+            });
+          }
+        }
+      );
     }
-    
+
     let validatedData;
     try {
-        validatedData = createProductSchema.parse(body);
+      validatedData = createProductSchema.parse(body);
     } catch (error) {
-        console.error('Validation error:', error);
-        if (error instanceof z.ZodError) {
-            return NextResponse.json({ 
-                error: 'Dados inválidos', 
-                details: error.errors 
-            }, { status: 400 });
-        }
-        return NextResponse.json({ error: 'Erro de validação' }, { status: 400 });
+      console.error('Validation error:', error);
+      if (error instanceof z.ZodError) {
+        return NextResponse.json(
+          {
+            error: 'Dados inválidos',
+            details: error.errors,
+          },
+          { status: 400 }
+        );
+      }
+      return NextResponse.json({ error: 'Erro de validação' }, { status: 400 });
     }
 
     // Generate base slug from name (ou usar o slug enviado se estiver editando)

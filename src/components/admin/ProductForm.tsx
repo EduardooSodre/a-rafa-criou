@@ -660,10 +660,10 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                     }))
                 }))
             })
-            
+
             // Fazer upload dos arquivos PDF para o R2 antes de salvar o produto
             const uploadedFiles: { file: UploadedFile; r2Key: string }[] = []
-            
+
             // Upload dos arquivos do produto principal
             for (const file of formData.files) {
                 if (!file.uploaded && !file.error && file.file) {
@@ -683,7 +683,7 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                                 hasData: !!result.data,
                                 hasKey: !!(result.data?.key || result.key)
                             })
-                            
+
                             // Tentar diferentes estruturas de resposta
                             let r2Key = null
                             if (result.data && result.data.key) {
@@ -691,7 +691,7 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                             } else if (result.key) {
                                 r2Key = result.key
                             }
-                            
+
                             if (r2Key) {
                                 uploadedFiles.push({ file, r2Key })
                                 console.log(`Successfully stored r2Key: ${r2Key}`)
@@ -713,15 +713,15 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
 
             // Upload dos arquivos das variações
             const uploadedVariationFiles: { variationIndex: number; file: UploadedFile; r2Key: string }[] = []
-            
+
             for (let variationIndex = 0; variationIndex < formData.variations.length; variationIndex++) {
                 const variation = formData.variations[variationIndex]
                 console.log(`Processing variation ${variationIndex} with ${variation.files.length} files`)
-                
+
                 for (let fileIndex = 0; fileIndex < variation.files.length; fileIndex++) {
                     const file = variation.files[fileIndex]
                     console.log(`File ${fileIndex}: uploaded=${file.uploaded}, r2Key=${file.r2Key}, hasFile=${!!file.file}`)
-                    
+
                     if (!file.uploaded && !file.error && file.file) {
                         try {
                             console.log(`Uploading variation file: ${file.file.name}`)
@@ -740,7 +740,7 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                                     hasData: !!result.data,
                                     hasKey: !!(result.data?.key || result.key)
                                 })
-                                
+
                                 // Tentar diferentes estruturas de resposta
                                 let r2Key = null
                                 if (result.data && result.data.key) {
@@ -748,7 +748,7 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                                 } else if (result.key) {
                                     r2Key = result.key
                                 }
-                                
+
                                 if (r2Key) {
                                     uploadedVariationFiles.push({ variationIndex, file, r2Key })
                                     console.log(`Successfully added variation file to uploadedVariationFiles: ${r2Key}`)
@@ -772,7 +772,7 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                     }
                 }
             }
-            
+
             console.log(`Total uploaded variation files: ${uploadedVariationFiles.length}`)
 
             const productData = {
@@ -810,10 +810,10 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                             mimeType: file.file.type,
                             r2Key: r2Key
                         }))
-                    
+
                     console.log(`Variation ${index} (${variation.name}): ${variationFiles.length} files with r2Key`)
                     variationFiles.forEach((f, i) => console.log(`  File ${i}: ${f.filename} -> ${f.r2Key}`))
-                    
+
                     return {
                         name: variation.name,
                         price: parseFloat(variation.price),
@@ -834,19 +834,19 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
             // Debug: Log para verificar se todos os arquivos têm r2Key
             console.log('Files to be sent:', productData.files.length)
             console.log('Variation files:', productData.variations.map(v => v.files.length))
-            
+
             // Log detailed info about all files
             console.log('Product files:', productData.files.map(f => ({ name: f.filename, r2Key: f.r2Key })))
             productData.variations.forEach((v, i) => {
                 console.log(`Variation ${i} files:`, v.files.map(f => ({ name: f.filename, r2Key: f.r2Key })))
             })
-            
+
             // Validação extra antes de enviar
             const allFiles = [
                 ...productData.files,
                 ...productData.variations.flatMap(v => v.files)
             ]
-            
+
             const filesWithoutR2Key = allFiles.filter(f => !f.r2Key || f.r2Key.trim() === '')
             if (filesWithoutR2Key.length > 0) {
                 console.error('Files without r2Key:', filesWithoutR2Key)
