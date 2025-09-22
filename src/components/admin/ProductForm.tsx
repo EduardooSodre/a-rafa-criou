@@ -1359,8 +1359,8 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                                                         <div key={fileIndex} className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                                                             <div className="flex items-center space-x-3 flex-1 min-w-0">
                                                                 <div className={`p-2 rounded-lg ${file.file.type === 'application/pdf'
-                                                                        ? 'bg-red-100 text-red-600'
-                                                                        : 'bg-blue-100 text-blue-600'
+                                                                    ? 'bg-red-100 text-red-600'
+                                                                    : 'bg-blue-100 text-blue-600'
                                                                     }`}>
                                                                     <FileText className="w-4 h-4" />
                                                                 </div>
@@ -1414,13 +1414,22 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                                     </div>
 
                                     {/* Upload de Imagens da Variação */}
-                                    <div>
-                                        <Label>Imagens da Variação</Label>
-                                        <div className="mt-2">
-                                            <label className="block w-full border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 cursor-pointer">
-                                                <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
-                                                <span className="mt-2 block text-sm font-medium text-gray-900">
-                                                    Clique para fazer upload ou arraste imagens aqui
+                                    <div className="space-y-4">
+                                        <div>
+                                            <Label className="text-sm font-medium flex items-center gap-2">
+                                                <ImageIcon className="w-4 h-4" />
+                                                Imagens da Variação
+                                            </Label>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                Adicione imagens de preview para esta variação (opcional)
+                                            </p>
+                                        </div>
+
+                                        <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 hover:border-gray-300 transition-colors">
+                                            <label className="cursor-pointer block text-center">
+                                                <ImageIcon className="mx-auto h-10 w-10 text-gray-400" />
+                                                <span className="mt-2 block text-sm font-medium text-gray-700">
+                                                    Clique para selecionar imagens
                                                 </span>
                                                 <span className="mt-1 block text-xs text-gray-500">
                                                     PNG, JPG, WebP até 10MB cada
@@ -1437,11 +1446,14 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
 
                                         {/* Grid de Imagens da Variação */}
                                         {variation.images.length > 0 && (
-                                            <div className="mt-4">
-                                                <div className="mb-4">
-                                                    <Label className="text-sm text-gray-600">
-                                                        Arraste as imagens para reordenar. A primeira imagem será a capa.
-                                                    </Label>
+                                            <div className="space-y-4">
+                                                <div className="flex items-center justify-between">
+                                                    <h4 className="text-sm font-medium text-gray-900">
+                                                        Imagens ({variation.images.length})
+                                                    </h4>
+                                                    <div className="text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded">
+                                                        Arraste para reordenar
+                                                    </div>
                                                 </div>
 
                                                 <DndContext
@@ -1453,15 +1465,21 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                                                         items={variation.images.map(img => img.id)}
                                                         strategy={rectSortingStrategy}
                                                     >
-                                                        <div className="max-h-64 scroll-rounded grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                                        <div className="max-h-64 overflow-y-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-2">
                                                             {variation.images.map((image, imageIndex) => (
-                                                                <SortableImageItem
-                                                                    key={image.id}
-                                                                    image={image}
-                                                                    index={imageIndex}
-                                                                    isMain={variation.mainImageIndex === imageIndex}
-                                                                    onRemove={() => removeVariationImage(index, imageIndex)}
-                                                                />
+                                                                <div key={image.id} className="relative group">
+                                                                    <SortableImageItem
+                                                                        image={image}
+                                                                        index={imageIndex}
+                                                                        isMain={variation.mainImageIndex === imageIndex}
+                                                                        onRemove={() => removeVariationImage(index, imageIndex)}
+                                                                    />
+                                                                    {imageIndex === 0 && (
+                                                                        <div className="absolute -top-2 -left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+                                                                            Principal
+                                                                        </div>
+                                                                    )}
+                                                                </div>
                                                             ))}
                                                         </div>
                                                     </SortableContext>
