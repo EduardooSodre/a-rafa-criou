@@ -21,7 +21,7 @@ const createProductSchema = z.object({
         data: z.string(), // Base64 data
         alt: z.string().optional(),
         isMain: z.boolean().default(false),
-        order: z.number().default(0)
+        order: z.number().default(0),
       })
     )
     .optional(),
@@ -37,7 +37,7 @@ const createProductSchema = z.object({
               data: z.string(), // Base64 data
               alt: z.string().optional(),
               isMain: z.boolean().default(false),
-              order: z.number().default(0)
+              order: z.number().default(0),
             })
           )
           .optional(),
@@ -48,10 +48,10 @@ const createProductSchema = z.object({
               originalName: z.string(),
               fileSize: z.number(),
               mimeType: z.string(),
-              r2Key: z.string()
+              r2Key: z.string(),
             })
           )
-          .optional()
+          .optional(),
       })
     )
     .optional(),
@@ -62,6 +62,7 @@ const createProductSchema = z.object({
         originalName: z.string(),
         fileSize: z.number(),
         mimeType: z.string(),
+        r2Key: z.string(),
       })
     )
     .optional(),
@@ -142,7 +143,43 @@ export async function POST(request: NextRequest) {
     // }
 
     const body = await request.json();
-    const validatedData = createProductSchema.parse(body);
+    
+    console.log('=== RECEBIDO NA API ===')
+    console.log('Product data:', {
+        name: body.name,
+        description: body.description,
+        price: body.price,
+        categoryId: body.categoryId,
+        filesCount: body.files?.length || 0,
+        imagesCount: body.images?.length || 0,
+        variationsCount: body.variations?.length || 0
+    })
+    console.log('Files:', body.files?.length || 0)
+    console.log('Variations:', body.variations?.length || 0)
+    if (body.variations) {
+        body.variations.forEach((v: { name: string; files?: { filename: string; r2Key: string }[] }, i: number) => {
+            console.log(`Variation ${i} (${v.name}): ${v.files?.length || 0} files`)
+            if (v.files) {
+                v.files.forEach((f: { filename: string; r2Key: string }, fi: number) => {
+                    console.log(`  File ${fi}: ${f.filename} -> r2Key: ${f.r2Key}`)
+                })
+            }
+        })
+    }
+    
+    let validatedData;
+    try {
+        validatedData = createProductSchema.parse(body);
+    } catch (error) {
+        console.error('Validation error:', error);
+        if (error instanceof z.ZodError) {
+            return NextResponse.json({ 
+                error: 'Dados inválidos', 
+                details: error.errors 
+            }, { status: 400 });
+        }
+        return NextResponse.json({ error: 'Erro de validação' }, { status: 400 });
+    }
 
     // Generate base slug from name (ou usar o slug enviado se estiver editando)
     const baseSlug =
@@ -202,7 +239,7 @@ export async function POST(request: NextRequest) {
         data: image.data,
         alt: image.alt || validatedData.name,
         isMain: image.isMain,
-        sortOrder: image.order
+        sortOrder: image.order,
       }));
 
       await db.insert(productImages).values(imageData);
@@ -221,13 +258,16 @@ export async function POST(request: NextRequest) {
           .replace(/-+/g, '-')
           .trim();
 
-        const [insertedVariation] = await db.insert(productVariations).values({
-          productId: insertedProduct.id,
-          name: variation.name,
-          slug: variationSlug,
-          price: variation.price.toString(),
-          isActive: variation.isActive
-        }).returning();
+        const [insertedVariation] = await db
+          .insert(productVariations)
+          .values({
+            productId: insertedProduct.id,
+            name: variation.name,
+            slug: variationSlug,
+            price: variation.price.toString(),
+            isActive: variation.isActive,
+          })
+          .returning();
 
         // Insert variation images if provided
         if (variation.images && variation.images.length > 0) {
@@ -240,7 +280,7 @@ export async function POST(request: NextRequest) {
             data: image.data,
             alt: image.alt || variation.name,
             isMain: image.isMain,
-            sortOrder: image.order
+            sortOrder: image.order,
           }));
 
           await db.insert(productImages).values(variationImageData);
@@ -255,7 +295,7 @@ export async function POST(request: NextRequest) {
             mimeType: file.mimeType,
             size: file.fileSize,
             path: `products/${insertedProduct.id}/variations/${insertedVariation.id}/${file.filename}`,
-            r2Key: file.r2Key
+            r2Key: file.r2Key,
           }));
 
           await db.insert(files).values(variationFileData);
@@ -272,6 +312,7 @@ export async function POST(request: NextRequest) {
         mimeType: file.mimeType,
         size: file.fileSize,
         path: `products/${insertedProduct.id}/${file.filename}`,
+        r2Key: file.r2Key,
       }));
 
       await db.insert(files).values(fileData);

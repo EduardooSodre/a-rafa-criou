@@ -130,10 +130,10 @@ function SortableImageItem({ image, index, isMain, onRemove }: SortableImageItem
                     />
                 )}
             </div>
-            
+
             {/* Handle de drag - área bem visível */}
-            <div 
-                {...attributes} 
+            <div
+                {...attributes}
                 {...listeners}
                 className="absolute top-2 left-2 bg-white/90 hover:bg-white rounded p-2 cursor-grab active:cursor-grabbing shadow-sm border"
                 style={{ zIndex: 10 }}
@@ -327,7 +327,7 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
         }))
     }
 
-    // Upload de arquivos para variação específica
+    // Upload de arquivos para variação específica (apenas armazenar localmente)
     const handleFileUpload = async (variationIndex: number, files: FileList) => {
         const validFiles = Array.from(files).filter(file => {
             const isValidType = file.type === 'application/pdf' || file.type.startsWith('image/')
@@ -339,10 +339,11 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
             const uploadFile: UploadedFile = {
                 file,
                 type: file.type === 'application/pdf' ? 'pdf' : 'image',
-                uploading: true
+                uploading: false, // Não fazemos upload imediato
+                uploaded: false   // Será marcado como true apenas após salvar o produto
             }
 
-            // Adicionar arquivo à variação
+            // Adicionar arquivo à variação (apenas localmente)
             setFormData(prev => ({
                 ...prev,
                 variations: prev.variations.map((variation, i) =>
@@ -351,56 +352,6 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                         : variation
                 )
             }))
-
-            try {
-                const formDataUpload = new FormData()
-                formDataUpload.append('file', file)
-
-                const response = await fetch('/api/r2/upload', {
-                    method: 'POST',
-                    body: formDataUpload,
-                })
-
-                if (response.ok) {
-                    const result = await response.json()
-
-                    // Atualizar arquivo como uploaded
-                    setFormData(prev => ({
-                        ...prev,
-                        variations: prev.variations.map((variation, i) =>
-                            i === variationIndex
-                                ? {
-                                    ...variation,
-                                    files: variation.files.map(f =>
-                                        f.file === file
-                                            ? { ...f, uploading: false, uploaded: true, r2Key: result.key }
-                                            : f
-                                    )
-                                }
-                                : variation
-                        )
-                    }))
-                } else {
-                    throw new Error('Falha no upload')
-                }
-            } catch {
-                // Marcar erro no arquivo
-                setFormData(prev => ({
-                    ...prev,
-                    variations: prev.variations.map((variation, i) =>
-                        i === variationIndex
-                            ? {
-                                ...variation,
-                                files: variation.files.map(f =>
-                                    f.file === file
-                                        ? { ...f, uploading: false, error: 'Erro no upload' }
-                                        : f
-                                )
-                            }
-                            : variation
-                    )
-                }))
-            }
         }
     }
 
@@ -416,6 +367,7 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
     }
 
     // Upload de arquivos para o produto principal
+    // Upload de arquivos para o produto principal (apenas armazenar localmente)
     const handleProductFileUpload = async (files: FileList) => {
         const validFiles = Array.from(files).filter(file => {
             const isValidType = file.type === 'application/pdf' || file.type.startsWith('image/')
@@ -427,50 +379,15 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
             const uploadFile: UploadedFile = {
                 file,
                 type: file.type === 'application/pdf' ? 'pdf' : 'image',
-                uploading: true
+                uploading: false, // Não fazemos upload imediato
+                uploaded: false   // Será marcado como true apenas após salvar o produto
             }
 
-            // Adicionar arquivo ao produto
+            // Adicionar arquivo ao produto (apenas localmente)
             setFormData(prev => ({
                 ...prev,
                 files: [...prev.files, uploadFile]
             }))
-
-            try {
-                const formDataUpload = new FormData()
-                formDataUpload.append('file', file)
-
-                const response = await fetch('/api/r2/upload', {
-                    method: 'POST',
-                    body: formDataUpload,
-                })
-
-                if (response.ok) {
-                    const result = await response.json()
-
-                    // Atualizar arquivo como uploaded
-                    setFormData(prev => ({
-                        ...prev,
-                        files: prev.files.map(f =>
-                            f.file === file
-                                ? { ...f, uploading: false, uploaded: true, r2Key: result.key }
-                                : f
-                        )
-                    }))
-                } else {
-                    throw new Error('Falha no upload')
-                }
-            } catch {
-                // Marcar erro no arquivo
-                setFormData(prev => ({
-                    ...prev,
-                    files: prev.files.map(f =>
-                        f.file === file
-                            ? { ...f, uploading: false, error: 'Erro no upload' }
-                            : f
-                    )
-                }))
-            }
         }
     }
 
@@ -635,7 +552,7 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
 
             if (oldIndex !== -1 && newIndex !== -1) {
                 const reorderedImages = arrayMove(formData.images, oldIndex, newIndex)
-                
+
                 // Atualizar ordens
                 const updatedImages = reorderedImages.map((img, index) => ({
                     ...img,
@@ -662,7 +579,7 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
 
             if (oldIndex !== -1 && newIndex !== -1) {
                 const reorderedImages = arrayMove(variation.images, oldIndex, newIndex)
-                
+
                 // Atualizar ordens
                 const updatedImages = reorderedImages.map((img, index) => ({
                     ...img,
@@ -728,6 +645,136 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
         setIsSubmitting(true)
 
         try {
+            console.log('=== INÍCIO DO SUBMIT ===')
+            console.log('FormData inicial:', {
+                mainFiles: formData.files.length,
+                variations: formData.variations.map((v, i) => ({
+                    index: i,
+                    name: v.name,
+                    files: v.files.length,
+                    filesDetail: v.files.map(f => ({
+                        name: f.file?.name || 'no-file',
+                        uploaded: f.uploaded,
+                        r2Key: f.r2Key,
+                        hasFile: !!f.file
+                    }))
+                }))
+            })
+            
+            // Fazer upload dos arquivos PDF para o R2 antes de salvar o produto
+            const uploadedFiles: { file: UploadedFile; r2Key: string }[] = []
+            
+            // Upload dos arquivos do produto principal
+            for (const file of formData.files) {
+                if (!file.uploaded && !file.error && file.file) {
+                    try {
+                        const formDataUpload = new FormData()
+                        formDataUpload.append('file', file.file)
+
+                        const response = await fetch('/api/r2/upload', {
+                            method: 'POST',
+                            body: formDataUpload,
+                        })
+
+                        if (response.ok) {
+                            const result = await response.json()
+                            console.log(`Upload response for ${file.file.name}:`, {
+                                success: result.success,
+                                hasData: !!result.data,
+                                hasKey: !!(result.data?.key || result.key)
+                            })
+                            
+                            // Tentar diferentes estruturas de resposta
+                            let r2Key = null
+                            if (result.data && result.data.key) {
+                                r2Key = result.data.key
+                            } else if (result.key) {
+                                r2Key = result.key
+                            }
+                            
+                            if (r2Key) {
+                                uploadedFiles.push({ file, r2Key })
+                                console.log(`Successfully stored r2Key: ${r2Key}`)
+                            } else {
+                                console.error('Upload response missing key in any expected location:', result)
+                                throw new Error(`Upload bem-sucedido mas sem chave R2 para ${file.file.name}`)
+                            }
+                        } else {
+                            throw new Error(`Erro no upload do arquivo ${file.file.name}`)
+                        }
+                    } catch (error) {
+                        throw new Error(`Falha no upload do arquivo ${file.file.name}: ${error}`)
+                    }
+                } else if (file.uploaded && file.r2Key) {
+                    // Arquivo já foi uploadado anteriormente
+                    uploadedFiles.push({ file, r2Key: file.r2Key })
+                }
+            }
+
+            // Upload dos arquivos das variações
+            const uploadedVariationFiles: { variationIndex: number; file: UploadedFile; r2Key: string }[] = []
+            
+            for (let variationIndex = 0; variationIndex < formData.variations.length; variationIndex++) {
+                const variation = formData.variations[variationIndex]
+                console.log(`Processing variation ${variationIndex} with ${variation.files.length} files`)
+                
+                for (let fileIndex = 0; fileIndex < variation.files.length; fileIndex++) {
+                    const file = variation.files[fileIndex]
+                    console.log(`File ${fileIndex}: uploaded=${file.uploaded}, r2Key=${file.r2Key}, hasFile=${!!file.file}`)
+                    
+                    if (!file.uploaded && !file.error && file.file) {
+                        try {
+                            console.log(`Uploading variation file: ${file.file.name}`)
+                            const formDataUpload = new FormData()
+                            formDataUpload.append('file', file.file)
+
+                            const response = await fetch('/api/r2/upload', {
+                                method: 'POST',
+                                body: formDataUpload,
+                            })
+
+                            if (response.ok) {
+                                const result = await response.json()
+                                console.log(`Upload response for variation file ${file.file.name}:`, {
+                                    success: result.success,
+                                    hasData: !!result.data,
+                                    hasKey: !!(result.data?.key || result.key)
+                                })
+                                
+                                // Tentar diferentes estruturas de resposta
+                                let r2Key = null
+                                if (result.data && result.data.key) {
+                                    r2Key = result.data.key
+                                } else if (result.key) {
+                                    r2Key = result.key
+                                }
+                                
+                                if (r2Key) {
+                                    uploadedVariationFiles.push({ variationIndex, file, r2Key })
+                                    console.log(`Successfully added variation file to uploadedVariationFiles: ${r2Key}`)
+                                } else {
+                                    console.error('Upload response missing key in any expected location:', result)
+                                    throw new Error(`Upload bem-sucedido mas sem chave R2 para ${file.file.name}`)
+                                }
+                            } else {
+                                throw new Error(`Erro no upload do arquivo ${file.file.name}`)
+                            }
+                        } catch (error) {
+                            console.error(`Error uploading variation file ${file.file.name}:`, error)
+                            throw new Error(`Falha no upload do arquivo ${file.file.name}: ${error}`)
+                        }
+                    } else if (file.uploaded && file.r2Key) {
+                        // Arquivo já foi uploadado anteriormente
+                        console.log(`Using previously uploaded file: ${file.r2Key}`)
+                        uploadedVariationFiles.push({ variationIndex, file, r2Key: file.r2Key })
+                    } else {
+                        console.warn(`Skipping file ${fileIndex} in variation ${variationIndex}: uploaded=${file.uploaded}, r2Key=${file.r2Key}, hasFile=${!!file.file}`)
+                    }
+                }
+            }
+            
+            console.log(`Total uploaded variation files: ${uploadedVariationFiles.length}`)
+
             const productData = {
                 name: formData.name,
                 slug: formData.slug,
@@ -744,32 +791,80 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                         isMain: img.isMain || false,
                         order: img.order
                     })),
-                variations: formData.variations.map(variation => ({
-                    name: variation.name,
-                    price: parseFloat(variation.price),
-                    isActive: variation.isActive,
-                    images: variation.images
-                        .filter(img => img.uploaded && img.data)
-                        .map(img => ({
-                            data: img.data!,
-                            alt: img.alt || variation.name,
-                            isMain: img.isMain || false,
-                            order: img.order
-                        })),
-                    files: variation.files
-                        .filter(f => f.uploaded)
-                        .map(f => ({
-                            filename: f.file.name,
-                            originalName: f.file.name,
-                            fileSize: f.file.size,
-                            mimeType: f.file.type,
-                            r2Key: f.r2Key
+                files: uploadedFiles
+                    .filter(({ r2Key }) => r2Key && r2Key.trim() !== '') // Garantir que r2Key existe
+                    .map(({ file, r2Key }) => ({
+                        filename: file.file.name,
+                        originalName: file.file.name,
+                        fileSize: file.file.size,
+                        mimeType: file.file.type,
+                        r2Key: r2Key
+                    })),
+                variations: formData.variations.map((variation, index) => {
+                    const variationFiles = uploadedVariationFiles
+                        .filter(({ variationIndex, r2Key }) => variationIndex === index && r2Key && r2Key.trim() !== '') // Garantir que r2Key existe
+                        .map(({ file, r2Key }) => ({
+                            filename: file.file.name,
+                            originalName: file.file.name,
+                            fileSize: file.file.size,
+                            mimeType: file.file.type,
+                            r2Key: r2Key
                         }))
-                }))
+                    
+                    console.log(`Variation ${index} (${variation.name}): ${variationFiles.length} files with r2Key`)
+                    variationFiles.forEach((f, i) => console.log(`  File ${i}: ${f.filename} -> ${f.r2Key}`))
+                    
+                    return {
+                        name: variation.name,
+                        price: parseFloat(variation.price),
+                        isActive: variation.isActive,
+                        images: variation.images
+                            .filter(img => img.uploaded && img.data)
+                            .map(img => ({
+                                data: img.data!,
+                                alt: img.alt || variation.name,
+                                isMain: img.isMain || false,
+                                order: img.order
+                            })),
+                        files: variationFiles
+                    }
+                })
+            }
+
+            // Debug: Log para verificar se todos os arquivos têm r2Key
+            console.log('Files to be sent:', productData.files.length)
+            console.log('Variation files:', productData.variations.map(v => v.files.length))
+            
+            // Log detailed info about all files
+            console.log('Product files:', productData.files.map(f => ({ name: f.filename, r2Key: f.r2Key })))
+            productData.variations.forEach((v, i) => {
+                console.log(`Variation ${i} files:`, v.files.map(f => ({ name: f.filename, r2Key: f.r2Key })))
+            })
+            
+            // Validação extra antes de enviar
+            const allFiles = [
+                ...productData.files,
+                ...productData.variations.flatMap(v => v.files)
+            ]
+            
+            const filesWithoutR2Key = allFiles.filter(f => !f.r2Key || f.r2Key.trim() === '')
+            if (filesWithoutR2Key.length > 0) {
+                console.error('Files without r2Key:', filesWithoutR2Key)
+                throw new Error(`Alguns arquivos não têm chave R2 válida: ${filesWithoutR2Key.map(f => f.filename).join(', ')}`)
             }
 
             const url = isEditing ? `/api/admin/products/${initialData?.id}` : '/api/admin/products'
             const method = isEditing ? 'PUT' : 'POST'
+
+            console.log('=== ENVIANDO PARA API ===')
+            console.log('URL:', url)
+            console.log('Method:', method)
+            console.log('Payload summary:', {
+                name: productData.name,
+                filesCount: productData.files.length,
+                variationsCount: productData.variations.length,
+                imagesCount: productData.images.length
+            })
 
             const response = await fetch(url, {
                 method,
@@ -780,7 +875,8 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
             })
 
             if (!response.ok) {
-                throw new Error('Erro ao salvar produto')
+                const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }))
+                throw new Error(`Erro ao salvar produto: ${errorData.error || 'Erro desconhecido'}`)
             }
 
             if (onSuccess) {
@@ -789,8 +885,9 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
             } else {
                 router.push('/admin/produtos')
             }
-        } catch {
-            alert('Erro ao salvar produto')
+        } catch (error) {
+            console.error('Erro completo:', error)
+            alert(`Erro ao salvar produto: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
         } finally {
             setIsSubmitting(false)
         }
@@ -1069,13 +1166,13 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                                             Arraste as imagens para reordenar. A primeira imagem será a capa.
                                         </Label>
                                     </div>
-                                    
-                                    <DndContext 
+
+                                    <DndContext
                                         sensors={sensors}
                                         collisionDetection={closestCenter}
                                         onDragEnd={handleProductImageDragEnd}
                                     >
-                                        <SortableContext 
+                                        <SortableContext
                                             items={formData.images.map(img => img.id)}
                                             strategy={rectSortingStrategy}
                                         >
@@ -1268,13 +1365,13 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                                                         Arraste as imagens para reordenar. A primeira imagem será a capa.
                                                     </Label>
                                                 </div>
-                                                
-                                                <DndContext 
+
+                                                <DndContext
                                                     sensors={sensors}
                                                     collisionDetection={closestCenter}
                                                     onDragEnd={handleVariationImageDragEnd(index)}
                                                 >
-                                                    <SortableContext 
+                                                    <SortableContext
                                                         items={variation.images.map(img => img.id)}
                                                         strategy={rectSortingStrategy}
                                                     >

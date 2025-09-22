@@ -40,7 +40,14 @@ export async function POST(request: NextRequest) {
     // URL pública do arquivo (será implementada quando necessário)
     const publicUrl = `${process.env.R2_PUBLIC_URL || ''}/${fileKey}`;
 
-    return NextResponse.json({
+    console.log('R2 Upload Success:', {
+      fileKey,
+      originalName: file.name,
+      size: file.size,
+      type: file.type
+    })
+
+    const response = {
       success: true,
       data: {
         key: fileKey,
@@ -49,7 +56,16 @@ export async function POST(request: NextRequest) {
         type: file.type,
         url: publicUrl,
       },
-    });
+    }
+    
+    console.log('R2 Upload Success:', {
+      key: fileKey,
+      size: file.size,
+      type: file.type,
+      url: publicUrl
+    })
+
+    return NextResponse.json(response);
   } catch (error) {
     console.error('Erro no upload para R2:', error);
 
