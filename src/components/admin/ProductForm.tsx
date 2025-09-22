@@ -1335,9 +1335,8 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                                                     </p>
                                                 </div>
                                             </div>
-                                            <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                                variation.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
-                                            }`}>
+                                            <div className={`px-2 py-1 rounded-full text-xs font-medium ${variation.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+                                                }`}>
                                                 {variation.isActive ? 'Visível' : 'Oculta'}
                                             </div>
                                         </div>
