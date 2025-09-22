@@ -2,13 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import {
-    Edit,
-    Eye,
-    Trash2,
-    ChevronDown,
-    ChevronUp,
-    FileText,
+import { 
+    Eye, 
+    Trash2, 
+    ChevronDown, 
+    ChevronUp, 
+    FileText, 
     Plus,
     Loader2,
     Package,
@@ -34,6 +33,8 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from '@/components/ui/collapsible'
+import EditProductDialog from '@/components/admin/EditProductDialog'
+import EditVariationDialog from '@/components/admin/EditVariationDialog'
 
 interface FileData {
     id: string
@@ -45,6 +46,7 @@ interface FileData {
 
 interface VariationData {
     id: string
+    productId: string
     name: string
     slug: string
     price: number
@@ -333,11 +335,10 @@ export default function ProductsCardsView({
                                             <Eye className="h-4 w-4 text-blue-600" />
                                         </Link>
                                     </Button>
-                                    <Button variant="outline" size="sm" className="h-8 w-8 p-0 hover:bg-gray-100" asChild>
-                                        <Link href={`/admin/products/${product.id}/edit`}>
-                                            <Edit className="h-4 w-4 text-gray-600" />
-                                        </Link>
-                                    </Button>
+                                    <EditProductDialog
+                                        product={product}
+                                        onSuccess={refreshProducts}
+                                    />
                                     <AlertDialog>
                                         <AlertDialogTrigger asChild>
                                             <Button
@@ -470,11 +471,11 @@ export default function ProductsCardsView({
 
                                                         {/* Variation Actions */}
                                                         <div className="flex space-x-1 ml-3">
-                                                            <Button variant="outline" size="sm" className="h-7 w-7 p-0" asChild>
-                                                                <Link href={`/admin/products/${product.id}/variations/${variation.id}/edit`}>
-                                                                    <Edit className="h-3 w-3" />
-                                                                </Link>
-                                                            </Button>
+                                                            <EditVariationDialog
+                                                                variation={variation}
+                                                                productId={product.id}
+                                                                onSuccess={refreshProducts}
+                                                            />
                                                             <AlertDialog>
                                                                 <AlertDialogTrigger asChild>
                                                                     <Button
