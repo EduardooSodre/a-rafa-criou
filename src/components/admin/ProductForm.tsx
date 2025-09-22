@@ -1343,25 +1343,27 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                                     </div>
 
                                     {/* Upload de Arquivos */}
-                                    <div className="space-y-4">
-                                        <div>
-                                            <Label className="text-sm font-medium flex items-center gap-2">
-                                                <FileText className="w-4 h-4" />
+                                    <div className="bg-blue-50 rounded-lg p-4">
+                                        <div className="mb-4">
+                                            <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                                <FileText className="w-4 h-4 text-blue-600" />
                                                 Arquivos da Variação *
-                                            </Label>
-                                            <p className="text-xs text-gray-500 mt-1">
-                                                Adicione os arquivos digitais que serão entregues ao cliente
+                                            </h4>
+                                            <p className="text-xs text-gray-600 mt-1">
+                                                Adicione os arquivos digitais que serão entregues ao cliente (PDF, PNG, JPG até 50MB cada)
                                             </p>
                                         </div>
 
-                                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-gray-400 transition-colors">
+                                        <div className="border-2 border-dashed border-blue-300 rounded-lg p-6 hover:border-blue-400 transition-all duration-200 bg-white hover:bg-blue-50">
                                             <label className="cursor-pointer block text-center">
-                                                <Upload className="mx-auto h-10 w-10 text-gray-400" />
-                                                <span className="mt-2 block text-sm font-medium text-gray-900">
-                                                    Clique para selecionar arquivos
+                                                <div className="w-12 h-12 mx-auto mb-3 bg-blue-100 rounded-full flex items-center justify-center">
+                                                    <Upload className="h-6 w-6 text-blue-600" />
+                                                </div>
+                                                <span className="block text-sm font-semibold text-gray-900 mb-1">
+                                                    Clique ou arraste arquivos aqui
                                                 </span>
-                                                <span className="mt-1 block text-xs text-gray-500">
-                                                    PDF, PNG, JPG até 50MB cada
+                                                <span className="block text-xs text-gray-500">
+                                                    Suporta múltiplos arquivos: PDF, PNG, JPG
                                                 </span>
                                                 <input
                                                     type="file"
