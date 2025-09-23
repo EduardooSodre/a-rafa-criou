@@ -27,7 +27,7 @@ export default function HeroSection() {
                         style={{
                             color: '#FD9555',
                             fontFamily: 'Scripter, sans-serif',
-                            fontSize: 'clamp(2rem, 6vw, 5rem)', // Backup responsivo mais moderado
+                            fontSize: 'clamp(3rem, 6vw, 6rem)', // Backup responsivo mais moderado
                         }}
                     >
                         BEM-VINDA <br /> OVELHINHA!

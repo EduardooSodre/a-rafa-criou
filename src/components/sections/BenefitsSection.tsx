@@ -5,19 +5,19 @@ const benefits = [
         id: 'automatico',
         title: 'AUTOMÁTICO',
         icon: '/automatico.webp',
-        desktopText: 'ARQUIVO LIBERADO\nAUTOMATICAMENTE APÓS\nCONFIRMAÇÃO DE PAGAMENTO'
+        desktopText: 'ARQUIVO LIBERADO\nAUTOMATICAMENTE\nAPÓS CONFIRMAÇÃO DE PAGAMENTO'
     },
     {
         id: 'pratico',
         title: 'PRÁTICO',
         icon: '/pratico.webp',
-        desktopText: 'BAIXE SEU ARQUIVO E MONTE EM CASA, NÃO PRECISA PAGAR FRETE'
+        desktopText: 'BAIXE SEU ARQUIVO E \n MONTE EM CASA, NÃO \nPRECISA PAGAR FRETE'
     },
     {
         id: 'economico',
         title: 'ECONÔMICO',
         icon: '/economico.webp',
-        desktopText: 'IMPRIMA O MESMO ARQUIVO QUANTAS VEZES QUISER'
+        desktopText: 'IMPRIMA O MESMO\n ARQUIVO QUANTAS\n VEZES QUISER'
     }
 ];
 

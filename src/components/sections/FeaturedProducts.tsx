@@ -227,7 +227,7 @@ export default function FeaturedProducts({
                                 {/* Categoria */}
                                 <div className="flex-grow-0 mb-2 md:mb-2 lg:mb-3 text-center">
                                     {product.category && (
-                                        <span className="text-xs bg-gray-100 text-gray-700 px-2 md:px-3 py-1 rounded-full font-medium">
+                                        <span className="text-xs bg-orange-200 text-gray-700 px-2 md:px-3 py-1 rounded-full font-medium">
                                             {product.category.name}
                                         </span>
                                     )}
