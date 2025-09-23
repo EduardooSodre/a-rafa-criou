@@ -70,19 +70,19 @@ export default function FeaturedProducts({
             try {
                 const limit = currentOffset === 0 ? initialLimit : loadMoreLimit;
                 const response = await fetch(`/api/products?limit=${limit}&offset=${currentOffset}&featured=true`);
-                
+
                 if (!response.ok) {
                     throw new Error('Failed to fetch products');
                 }
 
                 const data: ApiResponse = await response.json();
-                
+
                 if (append) {
                     setProducts(prev => [...prev, ...data.products]);
                 } else {
                     setProducts(data.products);
                 }
-                
+
                 setHasMore(data.pagination.hasMore);
                 setOffset(currentOffset + limit);
             } catch (error) {
@@ -97,17 +97,17 @@ export default function FeaturedProducts({
 
     const handleLoadMore = async () => {
         if (loading || !hasMore) return;
-        
+
         setLoading(true);
         try {
             const response = await fetch(`/api/products?limit=${loadMoreLimit}&offset=${offset}&featured=true`);
-            
+
             if (!response.ok) {
                 throw new Error('Failed to fetch products');
             }
 
             const data: ApiResponse = await response.json();
-            
+
             setProducts(prev => [...prev, ...data.products]);
             setHasMore(data.pagination.hasMore);
             setOffset(offset + loadMoreLimit);
@@ -121,7 +121,7 @@ export default function FeaturedProducts({
     const handleAddToCart = (product: Product) => {
         // Se tem variações, usa a primeira ativa
         const variation = product.variations.find(v => v.isActive);
-        
+
         addItem({
             id: variation ? `${product.id}-${variation.id}` : product.id,
             productId: product.id,
@@ -196,7 +196,7 @@ export default function FeaturedProducts({
                                     )}
                                 </div>
                             </div>
-                            
+
                             {/* Conteúdo do card com altura fixa para alinhamento */}
                             <div className="px-3 md:px-4 pb-3 md:pb-4 flex flex-col h-[200px] md:h-[220px]">
                                 {/* Nome do produto - título principal */}
@@ -210,7 +210,7 @@ export default function FeaturedProducts({
                                         {product.name}
                                     </h3>
                                 </div>
-                                
+
                                 {/* Categoria */}
                                 <div className="flex-grow-0 mb-3 text-center">
                                     {product.category && (
@@ -219,17 +219,17 @@ export default function FeaturedProducts({
                                         </span>
                                     )}
                                 </div>
-                                
+
                                 {/* Espaçador flexível para empurrar preço e botão para baixo */}
                                 <div className="flex-grow"></div>
-                                
+
                                 {/* Preço destacado */}
                                 <div className="flex-grow-0 mb-3 text-center">
                                     <span className="text-lg md:text-2xl font-bold text-[#FD9555] block">
                                         {product.priceDisplay}
                                     </span>
                                 </div>
-                                
+
                                 {/* Botão full-width sempre alinhado na base */}
                                 <div className="flex-grow-0">
                                     <Button
@@ -245,7 +245,7 @@ export default function FeaturedProducts({
                 </div>
 
                 {showViewAll && hasMore && (
-                    <div 
+                    <div
                         onClick={handleLoadMore}
                         className="bg-[#8FBC8F] mt-12 flex items-center justify-center p-3 sm:p-4 w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl mx-auto rounded-full gap-2 sm:gap-4 hover:bg-[#7DAB7D] transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer shadow-lg hover:shadow-xl"
                     >
@@ -274,7 +274,7 @@ export default function FeaturedProducts({
                         />
                     </div>
                 )}
-                
+
                 {showViewAll && !hasMore && !loading && (
                     <div className="mt-12 text-center">
                         <Button

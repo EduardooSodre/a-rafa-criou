@@ -15,21 +15,22 @@ async function seedProducts() {
       {
         name: 'Planners',
         slug: 'planners',
-        description: 'Planners para organização pessoal'
+        description: 'Planners para organização pessoal',
       },
       {
         name: 'Calendários',
         slug: 'calendarios',
-        description: 'Calendários organizacionais'
+        description: 'Calendários organizacionais',
       },
       {
         name: 'Templates',
         slug: 'templates',
-        description: 'Templates diversos para organização'
-      }
+        description: 'Templates diversos para organização',
+      },
     ];
 
-    const insertedCategories = await db.insert(categories)
+    const insertedCategories = await db
+      .insert(categories)
       .values(categoryData)
       .returning()
       .onConflictDoNothing();
@@ -41,12 +42,13 @@ async function seedProducts() {
       {
         name: 'Planner Digital 2024',
         slug: 'planner-digital-2024',
-        description: 'Planner completo para organização anual com páginas mensais, semanais e diárias.',
+        description:
+          'Planner completo para organização anual com páginas mensais, semanais e diárias.',
         shortDescription: 'Planner completo para organização anual',
         price: '29.90',
         categoryId: insertedCategories[0]?.id || null,
         isFeatured: true,
-        isActive: true
+        isActive: true,
       },
       {
         name: 'Calendário Minimalista',
@@ -56,17 +58,18 @@ async function seedProducts() {
         price: '15.90',
         categoryId: insertedCategories[1]?.id || null,
         isFeatured: true,
-        isActive: true
+        isActive: true,
       },
       {
         name: 'Kit Organização Pessoal',
         slug: 'kit-organizacao-pessoal',
-        description: 'Kit completo com diversos templates para organização da vida pessoal e profissional.',
+        description:
+          'Kit completo com diversos templates para organização da vida pessoal e profissional.',
         shortDescription: 'Kit completo para organização',
         price: '45.90',
         categoryId: insertedCategories[2]?.id || null,
         isFeatured: true,
-        isActive: true
+        isActive: true,
       },
       {
         name: 'Agenda Semanal Colorida',
@@ -76,7 +79,7 @@ async function seedProducts() {
         price: '19.90',
         categoryId: insertedCategories[0]?.id || null,
         isFeatured: false,
-        isActive: true
+        isActive: true,
       },
       {
         name: 'Template de Estudos',
@@ -86,21 +89,23 @@ async function seedProducts() {
         price: '24.90',
         categoryId: insertedCategories[2]?.id || null,
         isFeatured: true,
-        isActive: true
+        isActive: true,
       },
       {
         name: 'Calendário de Metas',
         slug: 'calendario-metas',
-        description: 'Calendário focado no acompanhamento e alcance de metas pessoais e profissionais.',
+        description:
+          'Calendário focado no acompanhamento e alcance de metas pessoais e profissionais.',
         shortDescription: 'Acompanhamento de metas',
         price: '22.90',
         categoryId: insertedCategories[1]?.id || null,
         isFeatured: false,
-        isActive: true
-      }
+        isActive: true,
+      },
     ];
 
-    const insertedProducts = await db.insert(products)
+    const insertedProducts = await db
+      .insert(products)
       .values(productData)
       .returning()
       .onConflictDoNothing();
@@ -116,20 +121,18 @@ async function seedProducts() {
             name: 'Versão Básica',
             slug: `${product.slug}-basica`,
             price: product.price,
-            isActive: true
+            isActive: true,
           },
           {
             productId: product.id,
             name: 'Versão Premium',
             slug: `${product.slug}-premium`,
             price: (parseFloat(product.price) + 10).toString(),
-            isActive: true
-          }
+            isActive: true,
+          },
         ];
 
-        await db.insert(productVariations)
-          .values(variationData)
-          .onConflictDoNothing();
+        await db.insert(productVariations).values(variationData).onConflictDoNothing();
       }
     }
 
@@ -146,12 +149,10 @@ async function seedProducts() {
         data: '/banner_categorias.webp', // Usando uma imagem existente como placeholder
         alt: `Imagem do ${product.name}`,
         sortOrder: 1,
-        isMain: true
+        isMain: true,
       };
 
-      await db.insert(productImages)
-        .values(imageData)
-        .onConflictDoNothing();
+      await db.insert(productImages).values(imageData).onConflictDoNothing();
     }
 
     console.log('✅ Imagens placeholder adicionadas');
