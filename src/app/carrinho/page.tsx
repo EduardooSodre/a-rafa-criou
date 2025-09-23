@@ -178,8 +178,6 @@ export default function CarrinhoPage() {
 
                                 <div className="text-xs text-gray-500 text-center space-y-1">
                                     <p>• Download imediato após pagamento</p>
-                                    <p>• Garantia de 30 dias</p>
-                                    <p>• Suporte técnico incluso</p>
                                 </div>
                             </CardContent>
                         </Card>
