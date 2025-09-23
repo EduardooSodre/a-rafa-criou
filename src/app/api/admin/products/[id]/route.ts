@@ -7,14 +7,14 @@ import { eq } from 'drizzle-orm';
 const updateProductSchema = z.object({
   name: z.string().min(1).max(255).optional(),
   slug: z.string().min(1).max(255).optional(),
-  description: z.string().optional(),
-  shortDescription: z.string().optional(),
+  description: z.string().optional().nullable(),
+  shortDescription: z.string().optional().nullable(),
   price: z.number().min(0.01).optional(),
   categoryId: z.string().optional().nullable(),
   isActive: z.boolean().optional(),
   isFeatured: z.boolean().optional(),
-  seoTitle: z.string().optional(),
-  seoDescription: z.string().optional(),
+  seoTitle: z.string().optional().nullable(),
+  seoDescription: z.string().optional().nullable(),
 });
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
