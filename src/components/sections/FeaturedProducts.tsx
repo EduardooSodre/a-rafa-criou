@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/cart-context';
@@ -275,17 +274,13 @@ export default function FeaturedProducts({
                     </div>
                 )}
 
-                {showViewAll && !hasMore && !loading && (
+                {showViewAll && !hasMore && !loading && products.length > 0 && (
                     <div className="mt-12 text-center">
-                        <Button
-                            asChild
-                            variant="link"
-                            className="text-gray-600 hover:text-[#FD9555]"
-                        >
-                            <Link href="/produtos">
-                                Ver todos os produtos na página completa
-                            </Link>
-                        </Button>
+                        <div className="bg-gray-100 inline-block px-6 py-3 rounded-full">
+                            <span className="text-gray-600 font-medium">
+                                ✨ Todos os arquivos foram exibidos! ✨
+                            </span>
+                        </div>
                     </div>
                 )}
             </div>
