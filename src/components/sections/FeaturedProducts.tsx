@@ -172,7 +172,7 @@ export default function FeaturedProducts({
                     style={{
                         color: '#FFFFFF',
                         fontFamily: 'Scripter, sans-serif',
-                        fontSize: 'clamp(2rem, 6vw, 4rem)', // Backup responsivo mais moderado
+                        fontSize: 'clamp(2rem, 6vw, 4rem)',
                     }}
                 >
                     TODOS OS ARQUIVOS
@@ -211,7 +211,7 @@ export default function FeaturedProducts({
                             </div>
 
                             {/* Conteúdo do card com altura fixa para alinhamento */}
-                            <div className="px-3 md:px-4 lg:px-4 pb-3 md:pb-4 lg:pb-4 flex flex-col h-[200px] md:h-[210px] lg:h-[220px]">
+                            <div className="px-3 md:px-4 lg:px-4 flex flex-col h-[170px] md:h-[185px] lg:h-[200px]">
                                 {/* Nome do produto - título principal */}
                                 <div className="flex-grow-0 mb-2 md:mb-3">
                                     <h3 className="font-bold text-gray-900 uppercase text-sm md:text-base lg:text-lg leading-tight text-center min-h-[2rem] md:min-h-[2.2rem] lg:min-h-[2.5rem] flex items-center justify-center" style={{
@@ -233,8 +233,6 @@ export default function FeaturedProducts({
                                     )}
                                 </div>
 
-                                {/* Espaçador flexível para empurrar preço e botão para baixo */}
-                                <div className="flex-grow"></div>
 
                                 {/* Preço destacado */}
                                 <div className="flex-grow-0 mb-3 md:mb-3 lg:mb-3 text-center">
