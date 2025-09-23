@@ -58,32 +58,24 @@ export default function FeaturedProducts({
     const [hasMore, setHasMore] = useState(false);
     const [offset, setOffset] = useState(0);
 
-    // Responsivo: Mobile 6 produtos (2 por linha), Desktop 8 produtos (4 por linha)
-    const isMobile = typeof window !== 'undefined' ? window.innerWidth < 768 : false;
-    const initialLimit = isMobile ? 6 : 8;
-    const loadMoreLimit = isMobile ? 6 : 8;
+    // Limite fixo para evitar problemas de hidratação
+    const initialLimit = 8;
+    const loadMoreLimit = 8;
 
     useEffect(() => {
-        const fetchProducts = async (currentOffset: number = 0, append: boolean = false) => {
+        const fetchProducts = async () => {
             setLoading(true);
             try {
-                const limit = currentOffset === 0 ? initialLimit : loadMoreLimit;
-                const response = await fetch(`/api/products?limit=${limit}&offset=${currentOffset}&featured=true`);
+                const response = await fetch(`/api/products?limit=${initialLimit}&offset=0&featured=true`);
 
                 if (!response.ok) {
                     throw new Error('Failed to fetch products');
                 }
 
                 const data: ApiResponse = await response.json();
-
-                if (append) {
-                    setProducts(prev => [...prev, ...data.products]);
-                } else {
-                    setProducts(data.products);
-                }
-
+                setProducts(data.products);
                 setHasMore(data.pagination.hasMore);
-                setOffset(currentOffset + limit);
+                setOffset(initialLimit);
             } catch (error) {
                 console.error('Error fetching products:', error);
             } finally {
@@ -91,8 +83,8 @@ export default function FeaturedProducts({
             }
         };
 
-        fetchProducts(0, false);
-    }, [initialLimit, loadMoreLimit]);
+        fetchProducts();
+    }, []);
 
     const handleLoadMore = async () => {
         if (loading || !hasMore) return;
@@ -132,23 +124,45 @@ export default function FeaturedProducts({
         });
     };
 
-    // Produtos de teste como fallback
-    const defaultProducts: Product[] = Array.from({ length: 12 }, (_, i) => ({
-        id: `test-${i + 1}`,
-        name: `PRODUTO DE TESTE ${i + 1}`,
-        slug: `produto-teste-${i + 1}`,
-        description: 'Descrição do produto de teste para demonstração.',
-        shortDescription: 'Descrição breve do produto.',
-        price: 19.90 + (i * 5),
-        priceDisplay: `R$ ${(19.90 + (i * 5)).toFixed(2).replace('.', ',')}`,
-        categoryId: null,
-        category: null,
-        isFeatured: true,
-        variations: [],
-        mainImage: null
-    }));
+    // Produtos fallback simples
+    const displayProducts = products.length > 0 ? products : [];
 
-    const displayProducts = products.length > 0 ? products : defaultProducts.slice(0, initialLimit);
+    // Loading skeleton para evitar flash
+    if (loading && products.length === 0) {
+        return (
+            <section className="py-8 bg-gray-50">
+                <div className="bg-[#8FBC8F] mb-12 flex items-center justify-center m-0 p-2">
+                    <h1
+                        className="font-scripter text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-[4rem] 2xl:text-[5rem] font-bold m-3 sm:m-4 md:m-5 lg:m-5 xl:m-6 uppercase text-center leading-none"
+                        style={{
+                            color: '#FFFFFF',
+                            fontFamily: 'Scripter, sans-serif',
+                            fontSize: 'clamp(2rem, 6vw, 4rem)',
+                        }}
+                    >
+                        TODOS OS ARQUIVOS
+                    </h1>
+                </div>
+                <div className="container mx-auto px-4 mb-22">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5 lg:gap-6 max-w-7xl mx-auto">
+                        {Array.from({ length: 8 }).map((_, i) => (
+                            <div key={i} className="bg-white rounded-lg shadow-md overflow-hidden animate-pulse">
+                                <div className="p-3 md:p-4">
+                                    <div className="aspect-square bg-gray-200 rounded-lg"></div>
+                                </div>
+                                <div className="px-3 md:px-4 lg:px-4 pb-3 md:pb-4 lg:pb-4">
+                                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                                    <div className="h-3 bg-gray-200 rounded mb-4"></div>
+                                    <div className="h-6 bg-gray-200 rounded mb-3"></div>
+                                    <div className="h-10 bg-gray-200 rounded"></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+        );
+    }
 
     return (
         <section className="py-8 bg-gray-50">
@@ -190,7 +204,7 @@ export default function FeaturedProducts({
                                     {/* Badge para produtos novos (IDs 14, 15, 16) */}
                                     {['14', '15', '16'].includes(product.id) && (
                                         <div className="absolute top-2 right-2 bg-[#FED466] text-xs font-bold px-2 py-1 md:px-3 md:py-1 rounded-full shadow-md">
-                                            🆕 NOVO
+                                            NOVO
                                         </div>
                                     )}
                                 </div>
@@ -256,7 +270,7 @@ export default function FeaturedProducts({
                             className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 transition-transform duration-300 group-hover:animate-pulse"
                         />
                         <div
-                            className="font-scripter uppercase text-center leading-none text-sm sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold transition-all duration-300 hover:text-yellow-100 px-2 sm:px-4"
+                            className="font-scripter uppercase text-center leading-none text-xl lg:text-2xl xl:text-3xl font-bold transition-all duration-300 hover:text-yellow-100 px-2 sm:px-4"
                             style={{
                                 color: '#FFFFFF',
                                 fontFamily: 'Scripter, sans-serif',
@@ -276,7 +290,7 @@ export default function FeaturedProducts({
 
                 {showViewAll && !hasMore && !loading && products.length > 0 && (
                     <div className="mt-12 text-center">
-                        <div className="bg-gray-100 inline-block px-6 py-3 rounded-full">
+                        <div className="bg-gray-200 inline-block px-6 py-3 rounded-full">
                             <span className="text-gray-600 font-medium">
                                 ✨ Todos os arquivos foram exibidos! ✨
                             </span>
