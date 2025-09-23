@@ -82,18 +82,18 @@ export function MobileHeader() {
                             </DropdownMenuContent>
                         </DropdownMenu>
                     ) : (
-                        <Button asChild variant="ghost" size="lg" className="hover:bg-white/25 hover:scale-105 active:scale-95 p-4 flex flex-col items-center gap-2 min-w-[85px] transition-all duration-200 ease-out rounded-lg">
-                            <Link href="/auth/login" className="no-underline">
+                        <div className="p-4 flex flex-col items-center gap-2 min-w-[85px] hover:scale-110 active:scale-95 transition-all duration-200">
+                            <Link href="/auth/login" className="no-underline flex flex-col items-center gap-2">
                                 <Image
                                     src="/user.png"
                                     alt="Ícone de usuário"
                                     width={32}
                                     height={32}
-                                    className="w-8 h-8 text-white drop-shadow-md"
+                                    className="w-8 h-8 text-white drop-shadow-md hover:scale-110 active:scale-95 transition-all duration-200"
                                 />
                                 <span className="text-xs font-bold text-white tracking-wide drop-shadow-md">CONTA</span>
                             </Link>
-                        </Button>
+                        </div>
                     )}
 
                     {/* Mobile: Logo centralizada */}
@@ -103,23 +103,23 @@ export function MobileHeader() {
                             alt="A Rafa Criou"
                             width={200}
                             height={60}
-                            className="h-14 sm:h-16 w-auto"
+                            className="h-22 sm:h-22 w-auto"
                         />
                     </Link>
 
                     {/* Mobile: Favoritos Icon */}
-                    <Button asChild variant="ghost" size="lg" className="hover:bg-white/25 hover:scale-105 active:scale-95 p-4 flex flex-col items-center gap-2 min-w-[85px] transition-all duration-200 ease-out rounded-lg">
-                        <Link href="/favoritos" className="no-underline">
+                    <div className="p-4 flex flex-col items-center gap-2 min-w-[85px] hover:scale-110 active:scale-95 transition-all duration-200">
+                        <Link href="/favoritos" className="no-underline flex flex-col items-center gap-2">
                             <Image
                                 src="/favorito.png"
                                 alt="Ícone de favoritos"
                                 width={48}
                                 height={48}
-                                className="w-8 h-8 text-white drop-shadow-md"
+                                className="w-8 h-8 text-white drop-shadow-md hover:scale-110 active:scale-95 transition-all duration-200"
                             />
-                            <span className="text-xs font-bold text-white tracking-wide drop-shadow-md">FAVORITOS</span>
+                            <span className="text-xs font-bold text-white tracking-wide drop-shadow-md ">FAVORITOS</span>
                         </Link>
-                    </Button>
+                    </div>
                 </div>
             </div>
         </div>
