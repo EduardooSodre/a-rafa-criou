@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/cart-context';
+import { useToast } from '@/components/ui/toast';
 
 interface ProductVariation {
     id: string;
@@ -53,6 +54,7 @@ export default function FeaturedProducts({
     showViewAll = true
 }: FeaturedProductsProps) {
     const { addItem } = useCart();
+    const { showToast } = useToast();
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(false);
@@ -122,6 +124,9 @@ export default function FeaturedProducts({
             variationName: variation?.name || 'Padrão',
             image: product.mainImage?.data || ''
         });
+
+        // Mostrar toast de confirmação
+        showToast(`${product.name} adicionado ao carrinho!`, 'success');
     };
 
     // Produtos fallback simples
@@ -183,7 +188,7 @@ export default function FeaturedProducts({
                     {displayProducts.map((product) => (
                         <div
                             key={product.id}
-                            className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100"
+                            className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 cursor-pointer"
                         >
                             {/* Imagem do produto com border-radius igual ao botão */}
                             <div className="p-3 md:p-4">
@@ -244,7 +249,7 @@ export default function FeaturedProducts({
                                 {/* Botão full-width sempre alinhado na base */}
                                 <div className="flex-grow-0">
                                     <Button
-                                        className="w-full bg-[#FD9555] hover:bg-[#FD9555]/90 text-white font-bold py-2 md:py-2 lg:py-3 text-xs md:text-xs lg:text-sm uppercase tracking-wide transition-all duration-200 hover:shadow-lg rounded-lg"
+                                        className="w-full bg-[#FD9555] hover:bg-[#FD9555]/90 text-white font-bold py-2 md:py-2 lg:py-3 text-xs md:text-xs lg:text-sm uppercase tracking-wide transition-all duration-200 hover:shadow-lg rounded-lg cursor-pointer"
                                         onClick={() => handleAddToCart(product)}
                                     >
                                         ADICIONAR AO CARRINHO

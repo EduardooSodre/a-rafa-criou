@@ -3,6 +3,7 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { ConditionalHeader } from "@/components/ConditionalHeader";
+import ToastProvider from "@/components/ToastProvider";
 
 /**
  * Contexto do Copilot:
@@ -39,6 +40,7 @@ export default function RootLayout({
           <main>
             {children}
           </main>
+          <ToastProvider />
         </Providers>
       </body>
     </html>
