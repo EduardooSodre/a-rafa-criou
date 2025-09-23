@@ -165,7 +165,7 @@ export default function FeaturedProducts({
                 </h1>
             </div>
             <div className="container mx-auto px-4">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-6xl mx-auto">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5 lg:gap-6 max-w-7xl mx-auto">
                     {displayProducts.map((product) => (
                         <div
                             key={product.id}
@@ -197,10 +197,10 @@ export default function FeaturedProducts({
                             </div>
 
                             {/* Conteúdo do card com altura fixa para alinhamento */}
-                            <div className="px-3 md:px-4 pb-3 md:pb-4 flex flex-col h-[200px] md:h-[220px]">
+                            <div className="px-3 md:px-4 lg:px-4 pb-3 md:pb-4 lg:pb-4 flex flex-col h-[200px] md:h-[210px] lg:h-[220px]">
                                 {/* Nome do produto - título principal */}
-                                <div className="flex-grow-0 mb-3">
-                                    <h3 className="font-bold text-gray-900 uppercase text-sm md:text-lg leading-tight text-center min-h-[2rem] md:min-h-[2.5rem] flex items-center justify-center" style={{
+                                <div className="flex-grow-0 mb-2 md:mb-3">
+                                    <h3 className="font-bold text-gray-900 uppercase text-sm md:text-base lg:text-lg leading-tight text-center min-h-[2rem] md:min-h-[2.2rem] lg:min-h-[2.5rem] flex items-center justify-center" style={{
                                         display: '-webkit-box',
                                         WebkitLineClamp: 2,
                                         WebkitBoxOrient: 'vertical',
@@ -211,7 +211,7 @@ export default function FeaturedProducts({
                                 </div>
 
                                 {/* Categoria */}
-                                <div className="flex-grow-0 mb-3 text-center">
+                                <div className="flex-grow-0 mb-2 md:mb-2 lg:mb-3 text-center">
                                     {product.category && (
                                         <span className="text-xs bg-gray-100 text-gray-700 px-2 md:px-3 py-1 rounded-full font-medium">
                                             {product.category.name}
@@ -223,8 +223,8 @@ export default function FeaturedProducts({
                                 <div className="flex-grow"></div>
 
                                 {/* Preço destacado */}
-                                <div className="flex-grow-0 mb-3 text-center">
-                                    <span className="text-lg md:text-2xl font-bold text-[#FD9555] block">
+                                <div className="flex-grow-0 mb-3 md:mb-3 lg:mb-3 text-center">
+                                    <span className="text-lg md:text-xl lg:text-2xl font-bold text-[#FD9555] block">
                                         {product.priceDisplay}
                                     </span>
                                 </div>
@@ -232,7 +232,7 @@ export default function FeaturedProducts({
                                 {/* Botão full-width sempre alinhado na base */}
                                 <div className="flex-grow-0">
                                     <Button
-                                        className="w-full bg-[#FD9555] hover:bg-[#FD9555]/90 text-white font-bold py-2 md:py-3 text-xs md:text-sm uppercase tracking-wide transition-all duration-200 hover:shadow-lg rounded-lg"
+                                        className="w-full bg-[#FD9555] hover:bg-[#FD9555]/90 text-white font-bold py-2 md:py-2 lg:py-3 text-xs md:text-xs lg:text-sm uppercase tracking-wide transition-all duration-200 hover:shadow-lg rounded-lg"
                                         onClick={() => handleAddToCart(product)}
                                     >
                                         ADICIONAR AO CARRINHO
