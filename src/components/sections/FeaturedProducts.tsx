@@ -32,12 +32,20 @@ export default function FeaturedProducts({
     const displayProducts = products || defaultProducts;
 
     return (
-        <section className="py-16 bg-gray-50">
+        <section className="py-8 bg-gray-50">
+            <div className="bg-[#8FBC8F] mb-12 flex items-center justify-center m-0 p-2">
+                <h1
+                    className="font-scripter text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-[4rem] 2xl:text-[5rem] font-bold m-3 sm:m-4 md:m-5 lg:m-5 xl:m-6 uppercase text-center leading-none"
+                    style={{
+                        color: '#FFFFFF',
+                        fontFamily: 'Scripter, sans-serif',
+                        fontSize: 'clamp(2rem, 6vw, 5rem)', // Backup responsivo mais moderado
+                    }}
+                >
+                    TODOS OS ARQUIVOS
+                </h1>
+            </div>
             <div className="container mx-auto px-4">
-                <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">
-                    Produtos em Destaque
-                </h2>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
                     {displayProducts.map((product) => (
                         <div

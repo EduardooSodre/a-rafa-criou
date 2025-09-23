@@ -13,7 +13,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { User, LogOut, Settings, ShoppingBag } from 'lucide-react'
+import { LogOut, Settings, ShoppingBag } from 'lucide-react'
 import { getDisplayName } from '@/lib/utils/user'
 
 interface ExtendedUser {
