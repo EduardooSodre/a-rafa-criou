@@ -39,7 +39,7 @@ export default function FeaturedProducts({
                     style={{
                         color: '#FFFFFF',
                         fontFamily: 'Scripter, sans-serif',
-                        fontSize: 'clamp(2rem, 6vw, 5rem)', // Backup responsivo mais moderado
+                        fontSize: 'clamp(2rem, 6vw, 4rem)', // Backup responsivo mais moderado
                     }}
                 >
                     TODOS OS ARQUIVOS
