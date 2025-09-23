@@ -1,0 +1,384 @@
+// Mock data para testar a interface enquanto não temos banco configurado
+export const mockProducts = [
+  {
+    id: '1',
+    name: 'Planner Digital 2024',
+    slug: 'planner-digital-2024',
+    description: 'Planner completo para organização anual com páginas mensais, semanais e diárias.',
+    shortDescription: 'Planner completo para organização anual',
+    price: 29.90,
+    priceDisplay: 'R$ 29,90',
+    categoryId: 'cat1',
+    category: {
+      id: 'cat1',
+      name: 'Planners',
+      slug: 'planners'
+    },
+    isFeatured: true,
+    variations: [
+      {
+        id: 'var1',
+        name: 'Versão Básica',
+        slug: 'planner-digital-2024-basica',
+        price: 29.90,
+        isActive: true
+      },
+      {
+        id: 'var2',
+        name: 'Versão Premium',
+        slug: 'planner-digital-2024-premium',
+        price: 39.90,
+        isActive: true
+      }
+    ],
+    mainImage: {
+      data: '/banner_categorias.webp',
+      alt: 'Planner Digital 2024'
+    }
+  },
+  {
+    id: '2',
+    name: 'Calendário Minimalista',
+    slug: 'calendario-minimalista',
+    description: 'Calendário com design limpo e minimalista para quem busca simplicidade.',
+    shortDescription: 'Design limpo e minimalista',
+    price: 15.90,
+    priceDisplay: 'R$ 15,90',
+    categoryId: 'cat2',
+    category: {
+      id: 'cat2',
+      name: 'Calendários',
+      slug: 'calendarios'
+    },
+    isFeatured: true,
+    variations: [],
+    mainImage: {
+      data: '/banner_carrinho.webp',
+      alt: 'Calendário Minimalista'
+    }
+  },
+  {
+    id: '3',
+    name: 'Kit Organização Pessoal',
+    slug: 'kit-organizacao-pessoal',
+    description: 'Kit completo com diversos templates para organização da vida pessoal e profissional.',
+    shortDescription: 'Kit completo para organização',
+    price: 45.90,
+    priceDisplay: 'R$ 39,90 - R$ 55,90',
+    categoryId: 'cat3',
+    category: {
+      id: 'cat3',
+      name: 'Templates',
+      slug: 'templates'
+    },
+    isFeatured: true,
+    variations: [
+      {
+        id: 'var3',
+        name: 'Kit Básico',
+        slug: 'kit-organizacao-pessoal-basico',
+        price: 39.90,
+        isActive: true
+      },
+      {
+        id: 'var4',
+        name: 'Kit Completo',
+        slug: 'kit-organizacao-pessoal-completo',
+        price: 55.90,
+        isActive: true
+      }
+    ],
+    mainImage: {
+      data: '/banner_contato.webp',
+      alt: 'Kit Organização Pessoal'
+    }
+  },
+  {
+    id: '4',
+    name: 'Agenda Semanal Colorida',
+    slug: 'agenda-semanal-colorida',
+    description: 'Agenda semanal com cores vibrantes para tornar o planejamento mais alegre.',
+    shortDescription: 'Agenda semanal com cores vibrantes',
+    price: 19.90,
+    priceDisplay: 'R$ 19,90',
+    categoryId: 'cat1',
+    category: {
+      id: 'cat1',
+      name: 'Planners',
+      slug: 'planners'
+    },
+    isFeatured: false,
+    variations: [],
+    mainImage: {
+      data: '/banner_minha_conta.webp',
+      alt: 'Agenda Semanal Colorida'
+    }
+  },
+  {
+    id: '5',
+    name: 'Template de Estudos',
+    slug: 'template-estudos',
+    description: 'Template especial para organização de estudos e cronogramas acadêmicos.',
+    shortDescription: 'Organização de estudos e cronogramas',
+    price: 24.90,
+    priceDisplay: 'R$ 24,90',
+    categoryId: 'cat3',
+    category: {
+      id: 'cat3',
+      name: 'Templates',
+      slug: 'templates'
+    },
+    isFeatured: true,
+    variations: [],
+    mainImage: {
+      data: '/automatico.webp',
+      alt: 'Template de Estudos'
+    }
+  },
+  {
+    id: '6',
+    name: 'Calendário de Metas',
+    slug: 'calendario-metas',
+    description: 'Calendário focado no acompanhamento e alcance de metas pessoais e profissionais.',
+    shortDescription: 'Acompanhamento de metas',
+    price: 22.90,
+    priceDisplay: 'R$ 22,90',
+    categoryId: 'cat2',
+    category: {
+      id: 'cat2',
+      name: 'Calendários',
+      slug: 'calendarios'
+    },
+    isFeatured: false,
+    variations: [],
+    mainImage: {
+      data: '/economico.webp',
+      alt: 'Calendário de Metas'
+    }
+  },
+  {
+    id: '7',
+    name: 'Planner Semanal Executivo',
+    slug: 'planner-semanal-executivo',
+    description: 'Planner semanal pensado para profissionais e executivos.',
+    shortDescription: 'Planner semanal para executivos',
+    price: 34.90,
+    priceDisplay: 'R$ 34,90',
+    categoryId: 'cat1',
+    category: {
+      id: 'cat1',
+      name: 'Planners',
+      slug: 'planners'
+    },
+    isFeatured: true,
+    variations: [],
+    mainImage: {
+      data: '/pratico.webp',
+      alt: 'Planner Semanal Executivo'
+    }
+  },
+  {
+    id: '8',
+    name: 'Template Controle Financeiro',
+    slug: 'template-controle-financeiro',
+    description: 'Template completo para organização e controle financeiro pessoal.',
+    shortDescription: 'Controle financeiro pessoal',
+    price: 27.90,
+    priceDisplay: 'R$ 27,90',
+    categoryId: 'cat3',
+    category: {
+      id: 'cat3',
+      name: 'Templates',
+      slug: 'templates'
+    },
+    isFeatured: true,
+    variations: [],
+    mainImage: {
+      data: '/banner_categorias.webp',
+      alt: 'Template Controle Financeiro'
+    }
+  },
+  {
+    id: '9',
+    name: 'Agenda de Hábitos',
+    slug: 'agenda-habitos',
+    description: 'Agenda especial para acompanhar e desenvolver novos hábitos.',
+    shortDescription: 'Desenvolvimento de hábitos',
+    price: 18.90,
+    priceDisplay: 'R$ 18,90',
+    categoryId: 'cat1',
+    category: {
+      id: 'cat1',
+      name: 'Planners',
+      slug: 'planners'
+    },
+    isFeatured: true,
+    variations: [],
+    mainImage: {
+      data: '/banner_carrinho.webp',
+      alt: 'Agenda de Hábitos'
+    }
+  },
+  {
+    id: '10',
+    name: 'Calendário Família',
+    slug: 'calendario-familia',
+    description: 'Calendário especial para organização familiar com todos os membros.',
+    shortDescription: 'Organização familiar',
+    price: 32.90,
+    priceDisplay: 'R$ 32,90',
+    categoryId: 'cat2',
+    category: {
+      id: 'cat2',
+      name: 'Calendários',
+      slug: 'calendarios'
+    },
+    isFeatured: false,
+    variations: [],
+    mainImage: {
+      data: '/banner_contato.webp',
+      alt: 'Calendário Família'
+    }
+  },
+  {
+    id: '11',
+    name: 'Planner de Viagem',
+    slug: 'planner-viagem',
+    description: 'Planner completo para organizar suas viagens e roteiros.',
+    shortDescription: 'Organização de viagens',
+    price: 25.90,
+    priceDisplay: 'R$ 25,90',
+    categoryId: 'cat1',
+    category: {
+      id: 'cat1',
+      name: 'Planners',
+      slug: 'planners'
+    },
+    isFeatured: true,
+    variations: [],
+    mainImage: {
+      data: '/banner_minha_conta.webp',
+      alt: 'Planner de Viagem'
+    }
+  },
+  {
+    id: '12',
+    name: 'Template Lista de Compras',
+    slug: 'template-lista-compras',
+    description: 'Template prático para organizar suas compras mensais.',
+    shortDescription: 'Lista de compras organizada',
+    price: 12.90,
+    priceDisplay: 'R$ 12,90',
+    categoryId: 'cat3',
+    category: {
+      id: 'cat3',
+      name: 'Templates',
+      slug: 'templates'
+    },
+    isFeatured: false,
+    variations: [],
+    mainImage: {
+      data: '/automatico.webp',
+      alt: 'Template Lista de Compras'
+    }
+  },
+  {
+    id: '13',
+    name: 'Calendário de Eventos',
+    slug: 'calendario-eventos',
+    description: 'Calendário especializado para organização de eventos e datas importantes.',
+    shortDescription: 'Organização de eventos',
+    price: 28.90,
+    priceDisplay: 'R$ 28,90',
+    categoryId: 'cat2',
+    category: {
+      id: 'cat2',
+      name: 'Calendários',
+      slug: 'calendarios'
+    },
+    isFeatured: true,
+    variations: [],
+    mainImage: {
+      data: '/economico.webp',
+      alt: 'Calendário de Eventos'
+    }
+  },
+  {
+    id: '14',
+    name: 'Planner de Negócios',
+    slug: 'planner-negocios',
+    description: 'Planner profissional para empreendedores e pequenos negócios.',
+    shortDescription: 'Planejamento de negócios',
+    price: 49.90,
+    priceDisplay: 'R$ 44,90 - R$ 59,90',
+    categoryId: 'cat1',
+    category: {
+      id: 'cat1',
+      name: 'Planners',
+      slug: 'planners'
+    },
+    isFeatured: true,
+    variations: [
+      {
+        id: 'var5',
+        name: 'Versão Básica',
+        slug: 'planner-negocios-basica',
+        price: 44.90,
+        isActive: true
+      },
+      {
+        id: 'var6',
+        name: 'Versão Premium',
+        slug: 'planner-negocios-premium',
+        price: 59.90,
+        isActive: true
+      }
+    ],
+    mainImage: {
+      data: '/pratico.webp',
+      alt: 'Planner de Negócios'
+    }
+  },
+  {
+    id: '15',
+    name: 'Template Menu Semanal',
+    slug: 'template-menu-semanal',
+    description: 'Template para planejamento de refeições da semana.',
+    shortDescription: 'Planejamento de refeições',
+    price: 16.90,
+    priceDisplay: 'R$ 16,90',
+    categoryId: 'cat3',
+    category: {
+      id: 'cat3',
+      name: 'Templates',
+      slug: 'templates'
+    },
+    isFeatured: false,
+    variations: [],
+    mainImage: {
+      data: '/banner_categorias.webp',
+      alt: 'Template Menu Semanal'
+    }
+  },
+  {
+    id: '16',
+    name: 'Calendário Fitness',
+    slug: 'calendario-fitness',
+    description: 'Calendário para acompanhar treinos e metas fitness.',
+    shortDescription: 'Acompanhamento fitness',
+    price: 23.90,
+    priceDisplay: 'R$ 23,90',
+    categoryId: 'cat2',
+    category: {
+      id: 'cat2',
+      name: 'Calendários',
+      slug: 'calendarios'
+    },
+    isFeatured: true,
+    variations: [],
+    mainImage: {
+      data: '/banner_carrinho.webp',
+      alt: 'Calendário Fitness'
+    }
+  }
+];

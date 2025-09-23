@@ -1,35 +1,155 @@
+'use client'
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/cart-context';
 
-interface Product {
-    id: number;
+interface ProductVariation {
+    id: string;
     name: string;
-    description: string;
-    price: string;
-    image?: string;
+    slug: string;
+    price: number;
+    isActive: boolean;
+}
+
+interface Product {
+    id: string;
+    name: string;
+    slug: string;
+    description: string | null;
+    shortDescription: string | null;
+    price: number;
+    priceDisplay: string;
+    categoryId: string | null;
+    category: {
+        id: string;
+        name: string;
+        slug: string;
+    } | null;
+    isFeatured: boolean;
+    variations: ProductVariation[];
+    mainImage: {
+        data: string;
+        alt: string | null;
+    } | null;
 }
 
 interface FeaturedProductsProps {
-    products?: Product[];
     showViewAll?: boolean;
 }
 
+interface ApiResponse {
+    products: Product[];
+    pagination: {
+        total: number;
+        limit: number;
+        offset: number;
+        hasMore: boolean;
+    };
+}
+
 export default function FeaturedProducts({
-    products,
     showViewAll = true
 }: FeaturedProductsProps) {
     const { addItem } = useCart();
-    // Produtos placeholder se não fornecidos
-    const defaultProducts: Product[] = Array.from({ length: 4 }, (_, i) => ({
-        id: i + 1,
-        name: 'Nome do Produto',
-        description: 'Descrição breve do produto...',
-        price: 'R$ 19,90'
+    const [products, setProducts] = useState<Product[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [hasMore, setHasMore] = useState(false);
+    const [offset, setOffset] = useState(0);
+
+    // Responsivo: Mobile 6 produtos (2 por linha), Desktop 8 produtos (4 por linha)
+    const isMobile = typeof window !== 'undefined' ? window.innerWidth < 768 : false;
+    const initialLimit = isMobile ? 6 : 8;
+    const loadMoreLimit = isMobile ? 6 : 8;
+
+    useEffect(() => {
+        const fetchProducts = async (currentOffset: number = 0, append: boolean = false) => {
+            setLoading(true);
+            try {
+                const limit = currentOffset === 0 ? initialLimit : loadMoreLimit;
+                const response = await fetch(`/api/products?limit=${limit}&offset=${currentOffset}&featured=true`);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch products');
+                }
+
+                const data: ApiResponse = await response.json();
+                
+                if (append) {
+                    setProducts(prev => [...prev, ...data.products]);
+                } else {
+                    setProducts(data.products);
+                }
+                
+                setHasMore(data.pagination.hasMore);
+                setOffset(currentOffset + limit);
+            } catch (error) {
+                console.error('Error fetching products:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProducts(0, false);
+    }, [initialLimit, loadMoreLimit]);
+
+    const handleLoadMore = async () => {
+        if (loading || !hasMore) return;
+        
+        setLoading(true);
+        try {
+            const response = await fetch(`/api/products?limit=${loadMoreLimit}&offset=${offset}&featured=true`);
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch products');
+            }
+
+            const data: ApiResponse = await response.json();
+            
+            setProducts(prev => [...prev, ...data.products]);
+            setHasMore(data.pagination.hasMore);
+            setOffset(offset + loadMoreLimit);
+        } catch (error) {
+            console.error('Error loading more products:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleAddToCart = (product: Product) => {
+        // Se tem variações, usa a primeira ativa
+        const variation = product.variations.find(v => v.isActive);
+        
+        addItem({
+            id: variation ? `${product.id}-${variation.id}` : product.id,
+            productId: product.id,
+            variationId: variation?.id || 'default',
+            name: product.name,
+            price: variation?.price || product.price,
+            variationName: variation?.name || 'Padrão',
+            image: product.mainImage?.data || ''
+        });
+    };
+
+    // Produtos de teste como fallback
+    const defaultProducts: Product[] = Array.from({ length: 12 }, (_, i) => ({
+        id: `test-${i + 1}`,
+        name: `PRODUTO DE TESTE ${i + 1}`,
+        slug: `produto-teste-${i + 1}`,
+        description: 'Descrição do produto de teste para demonstração.',
+        shortDescription: 'Descrição breve do produto.',
+        price: 19.90 + (i * 5),
+        priceDisplay: `R$ ${(19.90 + (i * 5)).toFixed(2).replace('.', ',')}`,
+        categoryId: null,
+        category: null,
+        isFeatured: true,
+        variations: [],
+        mainImage: null
     }));
 
-    const displayProducts = products || defaultProducts;
+    const displayProducts = products.length > 0 ? products : defaultProducts.slice(0, initialLimit);
 
     return (
         <section className="py-8 bg-gray-50">
@@ -46,46 +166,77 @@ export default function FeaturedProducts({
                 </h1>
             </div>
             <div className="container mx-auto px-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-6xl mx-auto">
                     {displayProducts.map((product) => (
                         <div
                             key={product.id}
-                            className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+                            className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100"
                         >
-                            <div className="aspect-square bg-gray-200 flex items-center justify-center">
-                                {product.image ? (
-                                    <Image
-                                        src={product.image}
-                                        alt={product.name}
-                                        width={300}
-                                        height={300}
-                                        className="w-full h-full object-cover"
-                                    />
-                                ) : (
-                                    <span className="text-gray-400">Produto {product.id}</span>
-                                )}
+                            {/* Imagem do produto com border-radius igual ao botão */}
+                            <div className="p-3 md:p-4">
+                                <div className="aspect-square bg-gray-100 relative overflow-hidden group rounded-lg">
+                                    {product.mainImage ? (
+                                        <Image
+                                            src={product.mainImage.data}
+                                            alt={product.name}
+                                            fill
+                                            sizes="(max-width: 768px) 50vw, 25vw"
+                                            className="object-cover group-hover:scale-105 transition-transform duration-300 rounded-lg"
+                                        />
+                                    ) : (
+                                        <div className="flex items-center justify-center h-full rounded-lg">
+                                            <span className="text-gray-400 text-sm">Sem imagem</span>
+                                        </div>
+                                    )}
+                                    {/* Badge para produtos novos (IDs 14, 15, 16) */}
+                                    {['14', '15', '16'].includes(product.id) && (
+                                        <div className="absolute top-2 right-2 bg-[#FED466] text-xs font-bold px-2 py-1 md:px-3 md:py-1 rounded-full shadow-md">
+                                            🆕 NOVO
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                            <div className="p-4">
-                                <h3 className="font-semibold mb-2">{product.name}</h3>
-                                <p className="text-gray-600 text-sm mb-3">{product.description}</p>
-                                <div className="flex items-center justify-between">
-                                    <span className="text-lg font-bold text-[#FD9555]">{product.price}</span>
+                            
+                            {/* Conteúdo do card com altura fixa para alinhamento */}
+                            <div className="px-3 md:px-4 pb-3 md:pb-4 flex flex-col h-[200px] md:h-[220px]">
+                                {/* Nome do produto - título principal */}
+                                <div className="flex-grow-0 mb-3">
+                                    <h3 className="font-bold text-gray-900 uppercase text-sm md:text-lg leading-tight text-center min-h-[2rem] md:min-h-[2.5rem] flex items-center justify-center" style={{
+                                        display: '-webkit-box',
+                                        WebkitLineClamp: 2,
+                                        WebkitBoxOrient: 'vertical',
+                                        overflow: 'hidden'
+                                    }}>
+                                        {product.name}
+                                    </h3>
+                                </div>
+                                
+                                {/* Categoria */}
+                                <div className="flex-grow-0 mb-3 text-center">
+                                    {product.category && (
+                                        <span className="text-xs bg-gray-100 text-gray-700 px-2 md:px-3 py-1 rounded-full font-medium">
+                                            {product.category.name}
+                                        </span>
+                                    )}
+                                </div>
+                                
+                                {/* Espaçador flexível para empurrar preço e botão para baixo */}
+                                <div className="flex-grow"></div>
+                                
+                                {/* Preço destacado */}
+                                <div className="flex-grow-0 mb-3 text-center">
+                                    <span className="text-lg md:text-2xl font-bold text-[#FD9555] block">
+                                        {product.priceDisplay}
+                                    </span>
+                                </div>
+                                
+                                {/* Botão full-width sempre alinhado na base */}
+                                <div className="flex-grow-0">
                                     <Button
-                                        size="sm"
-                                        className="bg-[#FD9555] hover:bg-[#FD9555]/90"
-                                        onClick={() => {
-                                            addItem({
-                                                id: `product-${product.id}`,
-                                                productId: product.id.toString(),
-                                                variationId: 'default',
-                                                name: product.name,
-                                                price: parseFloat(product.price.replace('R$', '').replace(',', '.')),
-                                                variationName: 'Padrão',
-                                                image: product.image || ''
-                                            });
-                                        }}
+                                        className="w-full bg-[#FD9555] hover:bg-[#FD9555]/90 text-white font-bold py-2 md:py-3 text-xs md:text-sm uppercase tracking-wide transition-all duration-200 hover:shadow-lg rounded-lg"
+                                        onClick={() => handleAddToCart(product)}
                                     >
-                                        Comprar
+                                        ADICIONAR AO CARRINHO
                                     </Button>
                                 </div>
                             </div>
@@ -93,8 +244,11 @@ export default function FeaturedProducts({
                     ))}
                 </div>
 
-                {showViewAll && (
-                    <div className="bg-[#8FBC8F] mt-12 flex items-center justify-center p-3 sm:p-4 w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl mx-auto rounded-full gap-2 sm:gap-4 hover:bg-[#7DAB7D] transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer shadow-lg hover:shadow-xl">
+                {showViewAll && hasMore && (
+                    <div 
+                        onClick={handleLoadMore}
+                        className="bg-[#8FBC8F] mt-12 flex items-center justify-center p-3 sm:p-4 w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl mx-auto rounded-full gap-2 sm:gap-4 hover:bg-[#7DAB7D] transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer shadow-lg hover:shadow-xl"
+                    >
                         <Image
                             src="/arrow.png"
                             alt="Seta esquerda"
@@ -102,23 +256,15 @@ export default function FeaturedProducts({
                             height={32}
                             className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 transition-transform duration-300 group-hover:animate-pulse"
                         />
-                        <Button
-                            asChild
-                            variant="link"
-                            size="lg"
-                            className="font-scripter uppercase text-center leading-none p-0 h-auto hover:no-underline"
+                        <div
+                            className="font-scripter uppercase text-center leading-none text-sm sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold transition-all duration-300 hover:text-yellow-100 px-2 sm:px-4"
                             style={{
                                 color: '#FFFFFF',
                                 fontFamily: 'Scripter, sans-serif',
                             }}
                         >
-                            <Link
-                                href="/produtos"
-                                className="text-sm sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold transition-all duration-300 hover:text-yellow-100 px-2 sm:px-4"
-                            >
-                                CLIQUE PARA VER MAIS ARQUIVOS
-                            </Link>
-                        </Button>
+                            {loading ? 'CARREGANDO...' : 'CLIQUE PARA VER MAIS ARQUIVOS'}
+                        </div>
                         <Image
                             src="/arrow.png"
                             alt="Seta direita"
@@ -126,6 +272,20 @@ export default function FeaturedProducts({
                             height={32}
                             className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 transition-transform duration-300 group-hover:animate-pulse"
                         />
+                    </div>
+                )}
+                
+                {showViewAll && !hasMore && !loading && (
+                    <div className="mt-12 text-center">
+                        <Button
+                            asChild
+                            variant="link"
+                            className="text-gray-600 hover:text-[#FD9555]"
+                        >
+                            <Link href="/produtos">
+                                Ver todos os produtos na página completa
+                            </Link>
+                        </Button>
                     </div>
                 )}
             </div>
