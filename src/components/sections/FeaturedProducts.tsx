@@ -112,7 +112,7 @@ export default function FeaturedProducts({
                                 fontFamily: 'Scripter, sans-serif',
                             }}
                         >
-                            <Link 
+                            <Link
                                 href="/produtos"
                                 className="text-sm sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold transition-all duration-300 hover:text-yellow-100 px-2 sm:px-4"
                             >
