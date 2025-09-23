@@ -164,7 +164,7 @@ export default function FeaturedProducts({
                     TODOS OS ARQUIVOS
                 </h1>
             </div>
-            <div className="container mx-auto px-4">
+            <div className="container mx-auto px-4 mb-22">
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5 lg:gap-6 max-w-7xl mx-auto">
                     {displayProducts.map((product) => (
                         <div
