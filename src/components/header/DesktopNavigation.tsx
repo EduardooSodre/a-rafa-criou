@@ -15,11 +15,11 @@ import {
 import {
     Home,
     Package,
-    User,
     LogOut,
     Settings,
     ShoppingBag,
     Heart,
+    CircleUserRound,
 } from 'lucide-react'
 import { getDisplayName } from '@/lib/utils/user'
 
@@ -110,7 +110,7 @@ export function DesktopNavigation() {
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" className="text-md flex items-center gap-2 text-white hover:text-white/80 transition-colors font-bold px-4 py-2 rounded-md hover:bg-white/10 cursor-pointer">
-                                        <User className="w-4 h-4" />
+                                        <CircleUserRound className="w-4 h-4" />
                                         Login
                                     </Button>
                                 </DropdownMenuTrigger>
@@ -123,7 +123,7 @@ export function DesktopNavigation() {
                                     </DropdownMenuItem>
                                     <DropdownMenuItem asChild>
                                         <Link href="/auth/register" className="flex items-center gap-2 w-full no-underline">
-                                            <User className="w-4 h-4" />
+                                            <CircleUserRound className="w-4 h-4" />
                                             Cadastrar
                                         </Link>
                                     </DropdownMenuItem>

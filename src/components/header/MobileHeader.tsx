@@ -13,7 +13,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { User, Heart, LogOut, Settings, ShoppingBag } from 'lucide-react'
+import { User, LogOut, Settings, ShoppingBag } from 'lucide-react'
 import { getDisplayName } from '@/lib/utils/user'
 
 interface ExtendedUser {
@@ -40,14 +40,14 @@ export function MobileHeader() {
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button
-                                    size="sm"
-                                    className="relative  transition-all duration-200  cursor-pointer"
+                                    size="lg"
+                                    className="relative transition-all duration-200 ease-out cursor-pointer p-4 rounded-lg"
                                 >
                                     <Avatar
                                         imageUrl={(session.user as ExtendedUser)?.image}
                                         name={session.user?.name}
-                                        size="md"
-                                        className="w-10 h-10 ring-2 ring-white/20 hover:ring-white/40 transition-all duration-200"
+                                        size="lg"
+                                        className="w-16 h-16 ring-3 ring-white/40 hover:ring-white/60 hover:scale-105 active:scale-95 transition-all duration-200 drop-shadow-lg"
                                     />
                                 </Button>
                             </DropdownMenuTrigger>
@@ -82,10 +82,16 @@ export function MobileHeader() {
                             </DropdownMenuContent>
                         </DropdownMenu>
                     ) : (
-                        <Button asChild variant="ghost" size="sm" className="hover:bg-white/10 p-6 flex flex-col items-center gap-1">
+                        <Button asChild variant="ghost" size="lg" className="hover:bg-white/25 hover:scale-105 active:scale-95 p-4 flex flex-col items-center gap-2 min-w-[85px] transition-all duration-200 ease-out rounded-lg">
                             <Link href="/auth/login" className="no-underline">
-                                <User className="w-6 h-6 text-white" strokeWidth={2.5} />
-                                <span className="text-[10px] font-bold text-white">CONTA</span>
+                                <Image
+                                    src="/user.png"
+                                    alt="Ícone de usuário"
+                                    width={32}
+                                    height={32}
+                                    className="w-8 h-8 text-white drop-shadow-md"
+                                />
+                                <span className="text-xs font-bold text-white tracking-wide drop-shadow-md">CONTA</span>
                             </Link>
                         </Button>
                     )}
@@ -102,10 +108,16 @@ export function MobileHeader() {
                     </Link>
 
                     {/* Mobile: Favoritos Icon */}
-                    <Button asChild variant="ghost" size="sm" className="hover:bg-white/10 p-6 flex flex-col items-center gap-1">
+                    <Button asChild variant="ghost" size="lg" className="hover:bg-white/25 hover:scale-105 active:scale-95 p-4 flex flex-col items-center gap-2 min-w-[85px] transition-all duration-200 ease-out rounded-lg">
                         <Link href="/favoritos" className="no-underline">
-                            <Heart className="w-6 h-6 text-white" strokeWidth={2.5} />
-                            <span className="text-[10px] font-bold text-white">FAVORITOS</span>
+                            <Image
+                                src="/favorito.png"
+                                alt="Ícone de favoritos"
+                                width={48}
+                                height={48}
+                                className="w-8 h-8 text-white drop-shadow-md"
+                            />
+                            <span className="text-xs font-bold text-white tracking-wide drop-shadow-md">FAVORITOS</span>
                         </Link>
                     </Button>
                 </div>
