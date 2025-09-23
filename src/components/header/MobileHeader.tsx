@@ -47,7 +47,7 @@ export function MobileHeader() {
                                         imageUrl={(session.user as ExtendedUser)?.image}
                                         name={session.user?.name}
                                         size="lg"
-                                        className="w-16 h-16 ring-3 ring-white/40 hover:ring-white/60 hover:scale-105 active:scale-95 transition-all duration-200 drop-shadow-lg"
+                                        className="w-12 h-12 ring-3 ring-white/40 hover:ring-white/60 hover:scale-105 active:scale-95 transition-all duration-200 drop-shadow-lg"
                                     />
                                 </Button>
                             </DropdownMenuTrigger>
