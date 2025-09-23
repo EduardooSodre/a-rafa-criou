@@ -7,20 +7,20 @@ export const mockProducts = [
     slug: 'calendario-fitness',
     description: 'Calendário para acompanhar treinos e metas fitness.',
     shortDescription: 'Acompanhamento fitness',
-    price: 23.90,
+    price: 23.9,
     priceDisplay: 'R$ 23,90',
     categoryId: 'cat2',
     category: {
       id: 'cat2',
       name: 'Calendários',
-      slug: 'calendarios'
+      slug: 'calendarios',
     },
     isFeatured: true,
     variations: [],
     mainImage: {
       data: '/banner_carrinho.webp',
-      alt: 'Calendário Fitness'
-    }
+      alt: 'Calendário Fitness',
+    },
   },
   {
     id: '15',
@@ -28,20 +28,20 @@ export const mockProducts = [
     slug: 'template-menu-semanal',
     description: 'Template para planejamento de refeições da semana.',
     shortDescription: 'Planejamento de refeições',
-    price: 16.90,
+    price: 16.9,
     priceDisplay: 'R$ 16,90',
     categoryId: 'cat3',
     category: {
       id: 'cat3',
       name: 'Templates',
-      slug: 'templates'
+      slug: 'templates',
     },
     isFeatured: false,
     variations: [],
     mainImage: {
       data: '/banner_categorias.webp',
-      alt: 'Template Menu Semanal'
-    }
+      alt: 'Template Menu Semanal',
+    },
   },
   {
     id: '14',
@@ -49,13 +49,13 @@ export const mockProducts = [
     slug: 'planner-negocios',
     description: 'Planner profissional para empreendedores e pequenos negócios.',
     shortDescription: 'Planejamento de negócios',
-    price: 49.90,
+    price: 49.9,
     priceDisplay: 'R$ 44,90 - R$ 59,90',
     categoryId: 'cat1',
     category: {
       id: 'cat1',
       name: 'Planners',
-      slug: 'planners'
+      slug: 'planners',
     },
     isFeatured: true,
     variations: [
@@ -63,21 +63,21 @@ export const mockProducts = [
         id: 'var5',
         name: 'Versão Básica',
         slug: 'planner-negocios-basica',
-        price: 44.90,
-        isActive: true
+        price: 44.9,
+        isActive: true,
       },
       {
         id: 'var6',
         name: 'Versão Premium',
         slug: 'planner-negocios-premium',
-        price: 59.90,
-        isActive: true
-      }
+        price: 59.9,
+        isActive: true,
+      },
     ],
     mainImage: {
       data: '/pratico.webp',
-      alt: 'Planner de Negócios'
-    }
+      alt: 'Planner de Negócios',
+    },
   },
   {
     id: '13',
@@ -85,20 +85,20 @@ export const mockProducts = [
     slug: 'calendario-eventos',
     description: 'Calendário especializado para organização de eventos e datas importantes.',
     shortDescription: 'Organização de eventos',
-    price: 28.90,
+    price: 28.9,
     priceDisplay: 'R$ 28,90',
     categoryId: 'cat2',
     category: {
       id: 'cat2',
       name: 'Calendários',
-      slug: 'calendarios'
+      slug: 'calendarios',
     },
     isFeatured: true,
     variations: [],
     mainImage: {
       data: '/economico.webp',
-      alt: 'Calendário de Eventos'
-    }
+      alt: 'Calendário de Eventos',
+    },
   },
   {
     id: '12',
@@ -106,20 +106,20 @@ export const mockProducts = [
     slug: 'template-lista-compras',
     description: 'Template prático para organizar suas compras mensais.',
     shortDescription: 'Lista de compras organizada',
-    price: 12.90,
+    price: 12.9,
     priceDisplay: 'R$ 12,90',
     categoryId: 'cat3',
     category: {
       id: 'cat3',
       name: 'Templates',
-      slug: 'templates'
+      slug: 'templates',
     },
     isFeatured: false,
     variations: [],
     mainImage: {
       data: '/automatico.webp',
-      alt: 'Template Lista de Compras'
-    }
+      alt: 'Template Lista de Compras',
+    },
   },
   {
     id: '11',
@@ -127,20 +127,20 @@ export const mockProducts = [
     slug: 'planner-viagem',
     description: 'Planner completo para organizar suas viagens e roteiros.',
     shortDescription: 'Organização de viagens',
-    price: 25.90,
+    price: 25.9,
     priceDisplay: 'R$ 25,90',
     categoryId: 'cat1',
     category: {
       id: 'cat1',
       name: 'Planners',
-      slug: 'planners'
+      slug: 'planners',
     },
     isFeatured: true,
     variations: [],
     mainImage: {
       data: '/banner_minha_conta.webp',
-      alt: 'Planner de Viagem'
-    }
+      alt: 'Planner de Viagem',
+    },
   },
   {
     id: '10',
@@ -148,20 +148,20 @@ export const mockProducts = [
     slug: 'calendario-familia',
     description: 'Calendário especial para organização familiar com todos os membros.',
     shortDescription: 'Organização familiar',
-    price: 32.90,
+    price: 32.9,
     priceDisplay: 'R$ 32,90',
     categoryId: 'cat2',
     category: {
       id: 'cat2',
       name: 'Calendários',
-      slug: 'calendarios'
+      slug: 'calendarios',
     },
     isFeatured: false,
     variations: [],
     mainImage: {
       data: '/banner_contato.webp',
-      alt: 'Calendário Família'
-    }
+      alt: 'Calendário Família',
+    },
   },
   {
     id: '9',
@@ -169,20 +169,20 @@ export const mockProducts = [
     slug: 'agenda-habitos',
     description: 'Agenda especial para acompanhar e desenvolver novos hábitos.',
     shortDescription: 'Desenvolvimento de hábitos',
-    price: 18.90,
+    price: 18.9,
     priceDisplay: 'R$ 18,90',
     categoryId: 'cat1',
     category: {
       id: 'cat1',
       name: 'Planners',
-      slug: 'planners'
+      slug: 'planners',
     },
     isFeatured: true,
     variations: [],
     mainImage: {
       data: '/banner_carrinho.webp',
-      alt: 'Agenda de Hábitos'
-    }
+      alt: 'Agenda de Hábitos',
+    },
   },
   {
     id: '8',
@@ -190,20 +190,20 @@ export const mockProducts = [
     slug: 'template-controle-financeiro',
     description: 'Template completo para organização e controle financeiro pessoal.',
     shortDescription: 'Controle financeiro pessoal',
-    price: 27.90,
+    price: 27.9,
     priceDisplay: 'R$ 27,90',
     categoryId: 'cat3',
     category: {
       id: 'cat3',
       name: 'Templates',
-      slug: 'templates'
+      slug: 'templates',
     },
     isFeatured: true,
     variations: [],
     mainImage: {
       data: '/banner_categorias.webp',
-      alt: 'Template Controle Financeiro'
-    }
+      alt: 'Template Controle Financeiro',
+    },
   },
   {
     id: '7',
@@ -211,20 +211,20 @@ export const mockProducts = [
     slug: 'planner-semanal-executivo',
     description: 'Planner semanal pensado para profissionais e executivos.',
     shortDescription: 'Planner semanal para executivos',
-    price: 34.90,
+    price: 34.9,
     priceDisplay: 'R$ 34,90',
     categoryId: 'cat1',
     category: {
       id: 'cat1',
       name: 'Planners',
-      slug: 'planners'
+      slug: 'planners',
     },
     isFeatured: true,
     variations: [],
     mainImage: {
       data: '/pratico.webp',
-      alt: 'Planner Semanal Executivo'
-    }
+      alt: 'Planner Semanal Executivo',
+    },
   },
   {
     id: '6',
@@ -232,20 +232,20 @@ export const mockProducts = [
     slug: 'calendario-metas',
     description: 'Calendário focado no acompanhamento e alcance de metas pessoais e profissionais.',
     shortDescription: 'Acompanhamento de metas',
-    price: 22.90,
+    price: 22.9,
     priceDisplay: 'R$ 22,90',
     categoryId: 'cat2',
     category: {
       id: 'cat2',
       name: 'Calendários',
-      slug: 'calendarios'
+      slug: 'calendarios',
     },
     isFeatured: false,
     variations: [],
     mainImage: {
       data: '/economico.webp',
-      alt: 'Calendário de Metas'
-    }
+      alt: 'Calendário de Metas',
+    },
   },
   {
     id: '5',
@@ -253,20 +253,20 @@ export const mockProducts = [
     slug: 'template-estudos',
     description: 'Template especial para organização de estudos e cronogramas acadêmicos.',
     shortDescription: 'Organização de estudos e cronogramas',
-    price: 24.90,
+    price: 24.9,
     priceDisplay: 'R$ 24,90',
     categoryId: 'cat3',
     category: {
       id: 'cat3',
       name: 'Templates',
-      slug: 'templates'
+      slug: 'templates',
     },
     isFeatured: true,
     variations: [],
     mainImage: {
       data: '/automatico.webp',
-      alt: 'Template de Estudos'
-    }
+      alt: 'Template de Estudos',
+    },
   },
   {
     id: '4',
@@ -274,34 +274,35 @@ export const mockProducts = [
     slug: 'agenda-semanal-colorida',
     description: 'Agenda semanal com cores vibrantes para tornar o planejamento mais alegre.',
     shortDescription: 'Agenda semanal com cores vibrantes',
-    price: 19.90,
+    price: 19.9,
     priceDisplay: 'R$ 19,90',
     categoryId: 'cat1',
     category: {
       id: 'cat1',
       name: 'Planners',
-      slug: 'planners'
+      slug: 'planners',
     },
     isFeatured: false,
     variations: [],
     mainImage: {
       data: '/banner_minha_conta.webp',
-      alt: 'Agenda Semanal Colorida'
-    }
+      alt: 'Agenda Semanal Colorida',
+    },
   },
   {
     id: '3',
     name: 'Kit Organização Pessoal',
     slug: 'kit-organizacao-pessoal',
-    description: 'Kit completo com diversos templates para organização da vida pessoal e profissional.',
+    description:
+      'Kit completo com diversos templates para organização da vida pessoal e profissional.',
     shortDescription: 'Kit completo para organização',
-    price: 45.90,
+    price: 45.9,
     priceDisplay: 'R$ 39,90 - R$ 55,90',
     categoryId: 'cat3',
     category: {
       id: 'cat3',
       name: 'Templates',
-      slug: 'templates'
+      slug: 'templates',
     },
     isFeatured: true,
     variations: [
@@ -309,21 +310,21 @@ export const mockProducts = [
         id: 'var3',
         name: 'Kit Básico',
         slug: 'kit-organizacao-pessoal-basico',
-        price: 39.90,
-        isActive: true
+        price: 39.9,
+        isActive: true,
       },
       {
         id: 'var4',
         name: 'Kit Completo',
         slug: 'kit-organizacao-pessoal-completo',
-        price: 55.90,
-        isActive: true
-      }
+        price: 55.9,
+        isActive: true,
+      },
     ],
     mainImage: {
       data: '/banner_contato.webp',
-      alt: 'Kit Organização Pessoal'
-    }
+      alt: 'Kit Organização Pessoal',
+    },
   },
   {
     id: '2',
@@ -331,20 +332,20 @@ export const mockProducts = [
     slug: 'calendario-minimalista',
     description: 'Calendário com design limpo e minimalista para quem busca simplicidade.',
     shortDescription: 'Design limpo e minimalista',
-    price: 15.90,
+    price: 15.9,
     priceDisplay: 'R$ 15,90',
     categoryId: 'cat2',
     category: {
       id: 'cat2',
       name: 'Calendários',
-      slug: 'calendarios'
+      slug: 'calendarios',
     },
     isFeatured: true,
     variations: [],
     mainImage: {
       data: '/banner_carrinho.webp',
-      alt: 'Calendário Minimalista'
-    }
+      alt: 'Calendário Minimalista',
+    },
   },
   {
     id: '1',
@@ -352,13 +353,13 @@ export const mockProducts = [
     slug: 'planner-digital-2024',
     description: 'Planner completo para organização anual com páginas mensais, semanais e diárias.',
     shortDescription: 'Planner completo para organização anual',
-    price: 29.90,
+    price: 29.9,
     priceDisplay: 'R$ 29,90',
     categoryId: 'cat1',
     category: {
       id: 'cat1',
       name: 'Planners',
-      slug: 'planners'
+      slug: 'planners',
     },
     isFeatured: true,
     variations: [
@@ -366,20 +367,20 @@ export const mockProducts = [
         id: 'var1',
         name: 'Versão Básica',
         slug: 'planner-digital-2024-basica',
-        price: 29.90,
-        isActive: true
+        price: 29.9,
+        isActive: true,
       },
       {
         id: 'var2',
         name: 'Versão Premium',
         slug: 'planner-digital-2024-premium',
-        price: 39.90,
-        isActive: true
-      }
+        price: 39.9,
+        isActive: true,
+      },
     ],
     mainImage: {
       data: '/banner_categorias.webp',
-      alt: 'Planner Digital 2024'
-    }
-  }
+      alt: 'Planner Digital 2024',
+    },
+  },
 ];
