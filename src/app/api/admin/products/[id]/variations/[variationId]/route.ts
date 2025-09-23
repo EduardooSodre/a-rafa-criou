@@ -13,16 +13,16 @@ const updateVariationSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ productId: string; id: string }> }
+  { params }: { params: Promise<{ id: string; variationId: string }> }
 ) {
   try {
-    const { productId, id } = await params;
+    const { id: productId, variationId } = await params;
 
     // Get variation
     const [variation] = await db
       .select()
       .from(productVariations)
-      .where(eq(productVariations.id, id))
+      .where(eq(productVariations.id, variationId))
       .limit(1);
 
     if (!variation) {
@@ -35,7 +35,7 @@ export async function GET(
     }
 
     // Get related files
-    const variationFiles = await db.select().from(files).where(eq(files.variationId, id));
+    const variationFiles = await db.select().from(files).where(eq(files.variationId, variationId));
 
     const completeVariation = {
       ...variation,
@@ -51,10 +51,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ productId: string; id: string }> }
+  { params }: { params: Promise<{ id: string; variationId: string }> }
 ) {
   try {
-    const { productId, id } = await params;
+    const { id: productId, variationId } = await params;
     const body = await request.json();
     const validatedData = updateVariationSchema.parse(body);
 
@@ -62,7 +62,7 @@ export async function PUT(
     const [existingVariation] = await db
       .select()
       .from(productVariations)
-      .where(eq(productVariations.id, id))
+      .where(eq(productVariations.id, variationId))
       .limit(1);
 
     if (!existingVariation) {
@@ -85,11 +85,11 @@ export async function PUT(
     const [updatedVariation] = await db
       .update(productVariations)
       .set(updateData)
-      .where(eq(productVariations.id, id))
+      .where(eq(productVariations.id, variationId))
       .returning();
 
     // Get updated variation with files
-    const variationFiles = await db.select().from(files).where(eq(files.variationId, id));
+    const variationFiles = await db.select().from(files).where(eq(files.variationId, variationId));
 
     const completeVariation = {
       ...updatedVariation,
@@ -113,16 +113,16 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ productId: string; id: string }> }
+  { params }: { params: Promise<{ id: string; variationId: string }> }
 ) {
   try {
-    const { productId, id } = await params;
+    const { id: productId, variationId } = await params;
 
     // Check if variation exists and belongs to the product
     const [existingVariation] = await db
       .select()
       .from(productVariations)
-      .where(eq(productVariations.id, id))
+      .where(eq(productVariations.id, variationId))
       .limit(1);
 
     if (!existingVariation) {
@@ -134,10 +134,10 @@ export async function DELETE(
     }
 
     // Delete related files first
-    await db.delete(files).where(eq(files.variationId, id));
+    await db.delete(files).where(eq(files.variationId, variationId));
 
     // Delete variation
-    await db.delete(productVariations).where(eq(productVariations.id, id));
+    await db.delete(productVariations).where(eq(productVariations.id, variationId));
 
     return NextResponse.json({ message: 'Variation deleted successfully' });
   } catch (error) {
