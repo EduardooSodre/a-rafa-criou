@@ -1,13 +1,6 @@
-
-import { db } from "./index";
-import { eq } from "drizzle-orm";
-import {
-  products,
-  productVariations,
-  productImages,
-  categories
-} from "./schema";
-
+import { db } from './index';
+import { eq } from 'drizzle-orm';
+import { products, productVariations, productImages, categories } from './schema';
 
 export async function getProductBySlug(slug: string) {
   // Busca produto principal
@@ -18,7 +11,11 @@ export async function getProductBySlug(slug: string) {
   // Busca categoria
   let category = null;
   if (product.categoryId) {
-    const catResult = await db.select().from(categories).where(eq(categories.id, product.categoryId)).limit(1);
+    const catResult = await db
+      .select()
+      .from(categories)
+      .where(eq(categories.id, product.categoryId))
+      .limit(1);
     category = catResult[0]?.name || null;
   }
 
@@ -34,19 +31,18 @@ export async function getProductBySlug(slug: string) {
     .from(productImages)
     .where(eq(productImages.productId, product.id));
   // Pega só o campo data (base64) ou path, ou monta url se necessário
-  const images = imagesResult.length > 0
-    ? imagesResult.map(img => img.data || "/file.svg")
-    : ["/file.svg"];
+  const images =
+    imagesResult.length > 0 ? imagesResult.map(img => img.data || '/file.svg') : ['/file.svg'];
 
   // Monta objeto final para o ProductDetailClient
   return {
     id: product.id,
     name: product.name,
     slug: product.slug,
-    description: product.shortDescription || product.description || "",
-    longDescription: product.description || "",
+    description: product.shortDescription || product.description || '',
+    longDescription: product.description || '',
     basePrice: Number(product.price),
-    category: category || "",
+    category: category || '',
     tags: [], // Adapte se houver tags
     images,
     variations: variations.map(v => ({
@@ -55,7 +51,7 @@ export async function getProductBySlug(slug: string) {
       price: Number(v.price),
       description: v.slug,
       downloadLimit: 10, // Adapte se houver campo
-      fileSize: "-" // Adapte se houver campo
-    }))
+      fileSize: '-', // Adapte se houver campo
+    })),
   };
 }

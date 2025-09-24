@@ -17,7 +17,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Buscar produtos do banco
-    const dbProducts = await db.select()
+    const dbProducts = await db
+      .select()
       .from(products)
       .where(whereClause)
       .limit(limit)
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
     const hasMore = offset + limit < total;
 
     // Buscar categorias para mapear nome
-  const categoryIds = dbProducts.map(p => p.categoryId).filter((id): id is string => !!id);
+    const categoryIds = dbProducts.map(p => p.categoryId).filter((id): id is string => !!id);
     const categoriesMap: Record<string, { id: string; name: string; slug: string }> = {};
     if (categoryIds.length > 0) {
       const cats = await db.select().from(categories).where(inArray(categories.id, categoryIds));
@@ -51,7 +52,7 @@ export async function GET(request: NextRequest) {
       category: p.categoryId ? categoriesMap[p.categoryId] || null : null,
       isFeatured: p.isFeatured,
       variations: [], // Adapte se quiser buscar variações
-      mainImage: null // Adapte se quiser buscar imagem
+      mainImage: null, // Adapte se quiser buscar imagem
     }));
 
     return NextResponse.json({
@@ -60,15 +61,11 @@ export async function GET(request: NextRequest) {
         total,
         limit,
         offset,
-        hasMore
-      }
+        hasMore,
+      },
     });
-
   } catch (error) {
     console.error('Error fetching products:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
