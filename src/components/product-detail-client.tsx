@@ -142,14 +142,14 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                     <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
                         <Button
                             onClick={handleBuyNow}
-                            className="flex-1 bg-primary hover:bg-secondary text-black font-semibold shadow-md"
+                            className="flex-1 min-h-[52px] bg-primary hover:bg-secondary text-black font-semibold shadow-md rounded-lg border-2 border-primary focus:ring-2 focus:ring-primary/60 transition-all"
                             size="lg"
                         >
                             Comprar Agora
                         </Button>
                         <Button
                             onClick={handleAddToCart}
-                            className="flex-1 bg-primary hover:bg-secondary text-black font-semibold shadow-md border-2 border-primary focus:ring-2 focus:ring-primary/60"
+                            className="flex-1 min-h-[52px] bg-secondary hover:bg-primary text-black font-semibold shadow-md rounded-lg border-2 border-secondary focus:ring-2 focus:ring-secondary/60 transition-all"
                             size="lg"
                         >
                             <ShoppingCart className="w-4 h-4 mr-2" />
