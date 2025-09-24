@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Upload, X, FileText, Loader2, Plus, Trash2, Package, FolderPlus, Image as ImageIcon, GripVertical } from 'lucide-react'
 import Image from 'next/image'
@@ -62,6 +62,7 @@ interface ProductVariation {
     images: UploadedImage[]
     mainImageIndex?: number
     isActive: boolean
+    idioma?: string // novo campo
 }
 
 interface ProductFormData {
@@ -312,18 +313,37 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
     }
 
     // Funções para gerenciar variações
+    // Ref para scroll automático
+    const variationRefs = useRef<(HTMLDivElement | null)[]>([]);
     const addVariation = () => {
-        setFormData(prev => ({
-            ...prev,
-            variations: [...prev.variations, {
-                name: `Variação ${prev.variations.length + 1}`,
-                price: '',
-                files: [],
-                images: [],
-                isActive: true
-            }]
-        }))
+        setFormData(prev => {
+            const newVariations = [
+                ...prev.variations,
+                {
+                    name: `Variação ${prev.variations.length + 1}`,
+                    price: '',
+                    files: [],
+                    images: [],
+                    isActive: true,
+                    idioma: ''
+                }
+            ];
+            setTimeout(() => {
+                const lastIdx = newVariations.length - 1;
+                variationRefs.current[lastIdx]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+            return {
+                ...prev,
+                variations: newVariations
+            };
+        });
     }
+    // Opções de idioma
+    const LANGUAGE_OPTIONS = [
+        { value: 'portugues', label: 'Português' },
+        { value: 'espanhol', label: 'Espanhol' },
+        { value: 'escreva', label: 'Escreva sua mensagem' },
+    ];
 
     const removeVariation = (index: number) => {
         if (formData.variations.length > 1) {
@@ -1061,7 +1081,11 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                     </CardHeader>
                     <CardContent className="space-y-6">
                         {formData.variations.map((variation, index) => (
-                            <div key={index} className={`border rounded-xl shadow-sm bg-white overflow-hidden transition-all duration-200 hover:shadow-md ${variation.isActive ? 'border-green-200' : 'border-gray-200'}`}>
+                            <div
+                                key={index}
+                                ref={el => { variationRefs.current[index] = el; }}
+                                className={`border rounded-xl shadow-sm bg-white overflow-hidden transition-all duration-200 hover:shadow-md ${variation.isActive ? 'border-green-200' : 'border-gray-200'}`}
+                            >
                                 {/* Header da Variação */}
                                 <div className={`p-4 ${variation.isActive ? 'bg-gradient-to-r from-green-50 to-emerald-50' : 'bg-gray-50'} border-b`}>
                                     <div className="flex justify-between items-start">
@@ -1122,7 +1146,7 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                                             <Package className="w-4 h-4" />
                                             Informações Básicas
                                         </h4>
-                                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                                        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
                                             <div className="lg:col-span-2">
                                                 <Label className="text-sm font-medium text-gray-700">Nome da Variação *</Label>
                                                 <Input
@@ -1145,6 +1169,27 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                                                     className="mt-1 border-gray-300 focus:border-blue-500"
                                                     required
                                                 />
+                                            </div>
+                                            <div>
+                                                <Label className="text-sm font-medium text-gray-700">Idioma *</Label>
+                                                <Select
+                                                    value={variation.idioma || ''}
+                                                    onValueChange={val => updateVariation(index, 'idioma', val)}
+                                                >
+                                                    <SelectTrigger className="mt-1 border-gray-300 focus:border-blue-500">
+                                                        <SelectValue placeholder="Selecione o idioma" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {LANGUAGE_OPTIONS.map(opt => (
+                                                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                {variation.idioma === 'escreva' && (
+                                                    <div className="bg-yellow-100 border-l-4 border-yellow-400 p-3 mt-2 rounded text-yellow-900 text-xs">
+                                                        Este idioma permite que o cliente escreva uma mensagem personalizada. Certifique-se de configurar corretamente os campos e instruções no produto e na página de detalhes.
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
 
