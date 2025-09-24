@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/cart-context';
 import { useToast } from '@/components/ui/toast';
@@ -188,73 +189,70 @@ export default function FeaturedProducts({
                     {displayProducts.map((product) => (
                         <div
                             key={product.id}
-                            className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 cursor-pointer"
+                            className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 flex flex-col justify-between"
                         >
-                            {/* Imagem do produto com border-radius igual ao botão */}
-                            <div className="p-3 md:p-4">
-                                <div className="aspect-square bg-gray-100 relative overflow-hidden group rounded-lg">
-                                    {product.mainImage ? (
-                                        <Image
-                                            src={product.mainImage.data}
-                                            alt={product.name}
-                                            fill
-                                            sizes="(max-width: 768px) 50vw, 25vw"
-                                            className="object-cover group-hover:scale-105 transition-transform duration-300 rounded-lg"
-                                        />
-                                    ) : (
-                                        <div className="flex items-center justify-center h-full rounded-lg">
-                                            <span className="text-gray-400 text-sm">Sem imagem</span>
+                            <div>
+                                <Link href={`/produtos/${product.slug}`} className="block group focus:outline-none focus:ring-2 focus:ring-primary">
+                                    <div className="p-3 md:p-4">
+                                        <div className="aspect-square bg-gray-100 relative overflow-hidden group rounded-lg">
+                                            {product.mainImage ? (
+                                                <Image
+                                                    src={product.mainImage.data}
+                                                    alt={product.name}
+                                                    fill
+                                                    sizes="(max-width: 768px) 50vw, 25vw"
+                                                    className="object-cover group-hover:scale-105 transition-transform duration-300 rounded-lg"
+                                                />
+                                            ) : (
+                                                <div className="flex items-center justify-center h-full rounded-lg">
+                                                    <span className="text-gray-400 text-sm">Sem imagem</span>
+                                                </div>
+                                            )}
+                                            {/* Badge para produtos novos (IDs 14, 15, 16) */}
+                                            {['14', '15', '16'].includes(product.id) && (
+                                                <div className="absolute top-2 right-2 bg-[#FED466] text-xs font-bold px-2 py-1 md:px-3 md:py-1 rounded-full shadow-md">
+                                                    NOVO
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
-                                    {/* Badge para produtos novos (IDs 14, 15, 16) */}
-                                    {['14', '15', '16'].includes(product.id) && (
-                                        <div className="absolute top-2 right-2 bg-[#FED466] text-xs font-bold px-2 py-1 md:px-3 md:py-1 rounded-full shadow-md">
-                                            NOVO
+                                    </div>
+                                    {/* Nome do produto - título principal */}
+                                    <div className="px-3 md:px-4 lg:px-4 flex flex-col">
+                                        <div className="flex-grow-0 mb-2 md:mb-3">
+                                            <h3 className="font-bold text-gray-900 uppercase text-sm md:text-base lg:text-lg leading-tight text-center min-h-[2rem] md:min-h-[2.2rem] lg:min-h-[2.5rem] flex items-center justify-center" style={{
+                                                display: '-webkit-box',
+                                                WebkitLineClamp: 2,
+                                                WebkitBoxOrient: 'vertical',
+                                                overflow: 'hidden'
+                                            }}>
+                                                {product.name}
+                                            </h3>
                                         </div>
-                                    )}
-                                </div>
+                                        {/* Categoria */}
+                                        <div className="flex-grow-0 mb-2 md:mb-2 lg:mb-3 text-center">
+                                            {product.category && (
+                                                <span className="text-xs bg-orange-200 text-gray-700 px-2 md:px-3 py-1 rounded-full font-medium">
+                                                    {product.category.name}
+                                                </span>
+                                            )}
+                                        </div>
+                                        {/* Preço destacado */}
+                                        <div className="flex-grow-0 mb-3 md:mb-3 lg:mb-3 text-center">
+                                            <span className="text-lg md:text-xl lg:text-2xl font-bold text-[#FD9555] block">
+                                                {product.priceDisplay}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </Link>
                             </div>
-
-                            {/* Conteúdo do card com altura fixa para alinhamento */}
-                            <div className="px-3 md:px-4 lg:px-4 flex flex-col h-[170px] md:h-[185px] lg:h-[200px]">
-                                {/* Nome do produto - título principal */}
-                                <div className="flex-grow-0 mb-2 md:mb-3">
-                                    <h3 className="font-bold text-gray-900 uppercase text-sm md:text-base lg:text-lg leading-tight text-center min-h-[2rem] md:min-h-[2.2rem] lg:min-h-[2.5rem] flex items-center justify-center" style={{
-                                        display: '-webkit-box',
-                                        WebkitLineClamp: 2,
-                                        WebkitBoxOrient: 'vertical',
-                                        overflow: 'hidden'
-                                    }}>
-                                        {product.name}
-                                    </h3>
-                                </div>
-
-                                {/* Categoria */}
-                                <div className="flex-grow-0 mb-2 md:mb-2 lg:mb-3 text-center">
-                                    {product.category && (
-                                        <span className="text-xs bg-orange-200 text-gray-700 px-2 md:px-3 py-1 rounded-full font-medium">
-                                            {product.category.name}
-                                        </span>
-                                    )}
-                                </div>
-
-
-                                {/* Preço destacado */}
-                                <div className="flex-grow-0 mb-3 md:mb-3 lg:mb-3 text-center">
-                                    <span className="text-lg md:text-xl lg:text-2xl font-bold text-[#FD9555] block">
-                                        {product.priceDisplay}
-                                    </span>
-                                </div>
-
-                                {/* Botão full-width sempre alinhado na base */}
-                                <div className="flex-grow-0">
-                                    <Button
-                                        className="w-full bg-[#FD9555] hover:bg-[#FD9555]/90 text-white font-bold py-2 md:py-2 lg:py-3 text-xs md:text-xs lg:text-sm uppercase tracking-wide transition-all duration-200 hover:shadow-lg rounded-lg cursor-pointer"
-                                        onClick={() => handleAddToCart(product)}
-                                    >
-                                        ADICIONAR AO CARRINHO
-                                    </Button>
-                                </div>
+                            {/* Botão full-width sempre alinhado na base, fora do link */}
+                            <div className="px-3 md:px-4 lg:px-4 pb-3 md:pb-4 lg:pb-4 mt-auto">
+                                <Button
+                                    className="w-full bg-[#FD9555] hover:bg-[#FD9555]/90 text-white font-bold py-2 md:py-2 lg:py-3 text-xs md:text-xs lg:text-sm uppercase tracking-wide transition-all duration-200 hover:shadow-lg rounded-lg cursor-pointer"
+                                    onClick={() => handleAddToCart(product)}
+                                >
+                                    ADICIONAR AO CARRINHO
+                                </Button>
                             </div>
                         </div>
                     ))}

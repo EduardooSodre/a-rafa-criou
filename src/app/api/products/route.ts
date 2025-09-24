@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { mockProducts } from '@/lib/mock-data';
+import { db } from '@/lib/db';
+import { products, categories } from '@/lib/db/schema';
+import { eq, inArray } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,19 +10,52 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0');
     const featured = searchParams.get('featured') === 'true';
 
-    // Filtrar produtos em destaque se solicitado
-    let filteredProducts = mockProducts;
+    // Montar query base
+    let whereClause = undefined;
     if (featured) {
-      filteredProducts = mockProducts.filter(product => product.isFeatured);
+      whereClause = eq(products.isFeatured, true);
     }
 
-    // Aplicar paginação
-    const paginatedProducts = filteredProducts.slice(offset, offset + limit);
-    const total = filteredProducts.length;
+    // Buscar produtos do banco
+    const dbProducts = await db.select()
+      .from(products)
+      .where(whereClause)
+      .limit(limit)
+      .offset(offset);
+
+    // Buscar total para paginação
+    const totalArr = await db.select({ count: products.id }).from(products).where(whereClause);
+    const total = totalArr.length > 0 ? totalArr.length : 0;
     const hasMore = offset + limit < total;
 
+    // Buscar categorias para mapear nome
+  const categoryIds = dbProducts.map(p => p.categoryId).filter((id): id is string => !!id);
+    const categoriesMap: Record<string, { id: string; name: string; slug: string }> = {};
+    if (categoryIds.length > 0) {
+      const cats = await db.select().from(categories).where(inArray(categories.id, categoryIds));
+      cats.forEach(cat => {
+        categoriesMap[cat.id] = cat;
+      });
+    }
+
+    // Adaptar formato para o frontend
+    const productsOut = dbProducts.map(p => ({
+      id: p.id,
+      name: p.name,
+      slug: p.slug,
+      description: p.description,
+      shortDescription: p.shortDescription,
+      price: Number(p.price),
+      priceDisplay: `R$ ${Number(p.price).toFixed(2).replace('.', ',')}`,
+      categoryId: p.categoryId,
+      category: p.categoryId ? categoriesMap[p.categoryId] || null : null,
+      isFeatured: p.isFeatured,
+      variations: [], // Adapte se quiser buscar variações
+      mainImage: null // Adapte se quiser buscar imagem
+    }));
+
     return NextResponse.json({
-      products: paginatedProducts,
+      products: productsOut,
       pagination: {
         total,
         limit,

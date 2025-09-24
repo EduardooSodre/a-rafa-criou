@@ -1,14 +1,15 @@
+
 'use client'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 import { useState } from 'react'
-import Image from 'next/image'
+import { ProductGallery } from '@/components/ui/product-gallery'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Label } from '@/components/ui/label'
+
 import { ShoppingCart, Download, Star, FileText, Shield } from 'lucide-react'
 import { useCart } from '@/contexts/cart-context'
 
@@ -39,12 +40,13 @@ interface ProductDetailClientProps {
 }
 
 export function ProductDetailClient({ product }: ProductDetailClientProps) {
-    const [selectedVariation, setSelectedVariation] = useState(product.variations[0]?.id || '')
-    const [selectedImageIndex, setSelectedImageIndex] = useState(0)
+    const [selectedVariation, setSelectedVariation] = useState(
+        Array.isArray(product.variations) && product.variations.length > 0 ? product.variations[0].id : ''
+    )
     const router = useRouter()
     const { addItem } = useCart()
 
-    const currentVariation = product.variations.find(v => v.id === selectedVariation)
+    const currentVariation = Array.isArray(product.variations) ? product.variations.find(v => v.id === selectedVariation) : undefined
     const currentPrice = currentVariation?.price || product.basePrice
 
     const handleAddToCart = () => {
@@ -70,43 +72,14 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
     }
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <section className="w-full max-w-6xl mx-auto px-2 sm:px-4 md:px-8 py-6 grid grid-cols-1 xl:grid-cols-2 gap-10 xl:gap-16">
             {/* Galeria de Imagens */}
-            <div className="space-y-4">
-                <div className="aspect-square overflow-hidden rounded-lg bg-gray-100">
-                    <Image
-                        src={product.images[selectedImageIndex]}
-                        alt={product.name}
-                        width={600}
-                        height={600}
-                        className="w-full h-full object-cover"
-                    />
-                </div>
-
-                {product.images.length > 1 && (
-                    <div className="grid grid-cols-4 gap-2">
-                        {product.images.map((image, index) => (
-                            <button
-                                key={index}
-                                onClick={() => setSelectedImageIndex(index)}
-                                className={`aspect-square overflow-hidden rounded-md border-2 ${selectedImageIndex === index ? 'border-primary' : 'border-gray-200'
-                                    }`}
-                            >
-                                <Image
-                                    src={image}
-                                    alt={`${product.name} - imagem ${index + 1}`}
-                                    width={150}
-                                    height={150}
-                                    className="w-full h-full object-cover"
-                                />
-                            </button>
-                        ))}
-                    </div>
-                )}
+            <div className="w-full max-w-lg mx-auto xl:mx-0">
+                <ProductGallery images={product.images} alt={product.name} />
             </div>
 
             {/* Informações do Produto */}
-            <div className="space-y-6">
+            <div className="flex flex-col gap-6 w-full max-w-xl mx-auto xl:mx-0">
                 <div>
                     <div className="flex items-center gap-2 mb-2">
                         <Badge variant="secondary">{product.category}</Badge>
@@ -119,71 +92,64 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                     </div>
 
                     <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
-                    <p className="text-gray-600 mt-2">{product.description}</p>
 
                     <div className="flex flex-wrap gap-2 mt-4">
-                        {product.tags.map((tag) => (
+                        {(Array.isArray(product.tags) ? product.tags : []).map((tag) => (
                             <Badge key={tag} variant="outline">{tag}</Badge>
                         ))}
                     </div>
                 </div>
 
                 {/* Seleção de Variação */}
-                {product.variations.length > 1 && (
-                    <Card>
+                {Array.isArray(product.variations) && product.variations.length > 1 && (
+                    <Card className="border-2 border-primary/40 bg-[#FFFBEA] shadow-md">
                         <CardContent className="p-4">
-                            <h3 className="font-semibold mb-3">Escolha uma opção:</h3>
-                            <RadioGroup value={selectedVariation} onValueChange={setSelectedVariation}>
-                                {product.variations.map((variation) => (
-                                    <div key={variation.id} className="flex items-center space-x-2 p-3 border rounded-md">
-                                        <RadioGroupItem value={variation.id} id={variation.id} />
-                                        <Label htmlFor={variation.id} className="flex-1 cursor-pointer">
-                                            <div className="flex justify-between items-start">
-                                                <div>
-                                                    <div className="font-medium">{variation.name}</div>
-                                                    <div className="text-sm text-gray-600">{variation.description}</div>
-                                                    <div className="text-xs text-gray-500 mt-1 flex items-center gap-3">
-                                                        <span className="flex items-center gap-1">
-                                                            <Download className="w-3 h-3" />
-                                                            {variation.downloadLimit} downloads
-                                                        </span>
-                                                        <span className="flex items-center gap-1">
-                                                            <FileText className="w-3 h-3" />
-                                                            {variation.fileSize}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                <div className="font-bold text-primary">
-                                                    R$ {variation.price.toFixed(2).replace('.', ',')}
-                                                </div>
-                                            </div>
-                                        </Label>
+                            <h3 className="font-semibold mb-3 text-primary flex items-center gap-2 text-lg">
+                                <FileText className="w-5 h-5 text-primary" /> Escolha uma variação:
+                            </h3>
+                            <Select value={selectedVariation} onValueChange={setSelectedVariation}>
+                                <SelectTrigger className="w-full bg-white border-2 border-primary/40 focus:border-primary shadow-sm rounded-lg text-base">
+                                    <SelectValue placeholder="Selecione uma variação" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-white rounded-lg shadow-lg border border-primary/30 max-h-60 overflow-y-auto">
+                                    {product.variations.map((variation) => (
+                                        <SelectItem key={variation.id} value={variation.id} className="flex justify-between items-center px-3 py-2">
+                                            <span className="font-medium text-gray-900 truncate">{variation.name}</span>
+                                            <span className="font-bold text-primary ml-2 whitespace-nowrap">R$ {variation.price.toFixed(2).replace('.', ',')}</span>
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            {currentVariation && (
+                                <div className="mt-4 p-3 rounded-lg bg-white/80 border border-primary/10 text-sm flex flex-col gap-1">
+                                    <span className="font-semibold text-gray-900">{currentVariation.name}</span>
+                                    {currentVariation.description && <span className="text-gray-500">{currentVariation.description}</span>}
+                                    <div className="flex gap-4 mt-1 text-xs text-gray-500">
+                                        <span className="flex items-center gap-1"><Download className="w-3 h-3" />{currentVariation.downloadLimit} downloads</span>
+                                        <span className="flex items-center gap-1"><FileText className="w-3 h-3" />{currentVariation.fileSize}</span>
                                     </div>
-                                ))}
-                            </RadioGroup>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 )}
 
                 {/* Preço e Botões */}
                 <div className="space-y-4">
-                    <div className="text-3xl font-bold text-primary">
-                        R$ {currentPrice.toFixed(2).replace('.', ',')}
+                    <div className="text-3xl font-bold text-primary drop-shadow-sm">
+                        R$ {(typeof currentPrice === 'number' && !isNaN(currentPrice) ? currentPrice : 0).toFixed(2).replace('.', ',')}
                     </div>
-
-                    <div className="space-y-3">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
                         <Button
                             onClick={handleBuyNow}
-                            className="w-full bg-primary hover:bg-secondary text-black font-medium"
+                            className="flex-1 bg-primary hover:bg-secondary text-black font-semibold shadow-md"
                             size="lg"
                         >
                             Comprar Agora
                         </Button>
-
                         <Button
                             onClick={handleAddToCart}
-                            variant="outline"
-                            className="w-full"
+                            className="flex-1 bg-primary hover:bg-secondary text-black font-semibold shadow-md border-2 border-primary focus:ring-2 focus:ring-primary/60"
                             size="lg"
                         >
                             <ShoppingCart className="w-4 h-4 mr-2" />
@@ -214,7 +180,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
             </div>
 
             {/* Descrição Detalhada */}
-            <div className="lg:col-span-2">
+            <div className="xl:col-span-2 mt-10">
                 <Tabs defaultValue="description" className="w-full">
                     <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="description">Descrição</TabsTrigger>
@@ -226,7 +192,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                         <Card>
                             <CardContent className="p-6">
                                 <div
-                                    className="prose max-w-none"
+                                    className="prose max-w-none text-gray-800"
                                     dangerouslySetInnerHTML={{ __html: product.longDescription }}
                                 />
                             </CardContent>
@@ -246,15 +212,14 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                                             </div>
                                             <div className="flex justify-between">
                                                 <span>Variações:</span>
-                                                <span>{product.variations.length}</span>
+                                                <span>{Array.isArray(product.variations) ? product.variations.length : 0}</span>
                                             </div>
                                             <div className="flex justify-between">
                                                 <span>Tags:</span>
-                                                <span>{product.tags.join(', ')}</span>
+                                                <span>{Array.isArray(product.tags) ? product.tags.join(', ') : ''}</span>
                                             </div>
                                         </div>
                                     </div>
-
                                     {currentVariation && (
                                         <div>
                                             <h4 className="font-semibold mb-2">Variação Selecionada</h4>
@@ -292,6 +257,6 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                     </TabsContent>
                 </Tabs>
             </div>
-        </div>
+        </section>
     )
 }

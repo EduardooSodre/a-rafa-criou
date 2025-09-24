@@ -45,7 +45,6 @@
 - ✅ `/produtos` e `/produtos/[slug]` estrutura criada
 - ⚠️ Variações (estrutura no banco, falta implementar UI)
 - ⚠️ SEO por produto/variação (falta implementar)
-- ❌ Suporte a **traduções de PDFs** na PDP
 
 ### 6) Checkout & Pagamentos ⚠️
 
@@ -281,7 +280,6 @@
 - Auth extra: `password_reset_tokens`, `legacy_credentials`
 - Notificações: `notifications`, `notification_settings`
 - Afiliação: `affiliates`, `affiliate_links`, `affiliate_commissions`
-- Traduções: `product_translations`
 
 ### 2) Migração WooCommerce
 
@@ -384,7 +382,7 @@
 ## 📦 Armazenamento de PDFs (Cloudflare R2)
 
 - **Bucket privado** (ex.: `pdfs`)
-- **Variáveis `.env`**:
+- **Variáveis `.env` e `.env.local`**:
   ```bash
   R2_ACCOUNT_ID=xxxx
   R2_ACCESS_KEY_ID=xxxx
