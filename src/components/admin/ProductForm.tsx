@@ -210,12 +210,12 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
         name: initialData?.name || '',
         slug: initialData?.slug || '',
         description: initialData?.description || '',
-    // basePrice removido
+        // basePrice removido
         categoryId: initialData?.categoryId || '',
         isActive: initialData?.isActive ?? true,
         isFeatured: initialData?.isFeatured ?? false,
         images: initialData?.images || [],
-    // files removido
+        // files removido
         variations: initialData?.variations || [
             {
                 name: 'Padrão',
@@ -959,25 +959,25 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                             </div>
 
 
-                        <div className="space-y-3">
-                            <div className="flex items-center space-x-2">
-                                <Switch
-                                    id="isActive"
-                                    checked={formData.isActive}
-                                    onCheckedChange={(checked) => handleInputChange('isActive', checked)}
-                                />
-                                <Label htmlFor="isActive" className="text-sm">Produto Ativo</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <Switch
-                                    id="isFeatured"
-                                    checked={formData.isFeatured}
-                                    onCheckedChange={(checked) => handleInputChange('isFeatured', checked)}
-                                />
-                                <Label htmlFor="isFeatured" className="text-sm">Produto em Destaque</Label>
+                            <div className="space-y-3">
+                                <div className="flex items-center space-x-2">
+                                    <Switch
+                                        id="isActive"
+                                        checked={formData.isActive}
+                                        onCheckedChange={(checked) => handleInputChange('isActive', checked)}
+                                    />
+                                    <Label htmlFor="isActive" className="text-sm">Produto Ativo</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <Switch
+                                        id="isFeatured"
+                                        checked={formData.isFeatured}
+                                        onCheckedChange={(checked) => handleInputChange('isFeatured', checked)}
+                                    />
+                                    <Label htmlFor="isFeatured" className="text-sm">Produto em Destaque</Label>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
 
 
