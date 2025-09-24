@@ -68,12 +68,10 @@ interface ProductFormData {
     name: string
     slug: string
     description: string
-    basePrice: string
     categoryId: string
     isActive: boolean
     isFeatured: boolean
     images: UploadedImage[]
-    files: UploadedFile[]
     variations: ProductVariation[]
 }
 
@@ -212,12 +210,12 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
         name: initialData?.name || '',
         slug: initialData?.slug || '',
         description: initialData?.description || '',
-        basePrice: initialData?.basePrice || '0.00',
+    // basePrice removido
         categoryId: initialData?.categoryId || '',
         isActive: initialData?.isActive ?? true,
         isFeatured: initialData?.isFeatured ?? false,
         images: initialData?.images || [],
-        files: initialData?.files || [],
+    // files removido
         variations: initialData?.variations || [
             {
                 name: 'Padrão',
@@ -319,7 +317,7 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
             ...prev,
             variations: [...prev.variations, {
                 name: `Variação ${prev.variations.length + 1}`,
-                price: prev.basePrice,
+                price: '',
                 files: [],
                 images: [],
                 isActive: true
@@ -386,35 +384,6 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
 
     // Upload de arquivos para o produto principal
     // Upload de arquivos para o produto principal (apenas armazenar localmente)
-    const handleProductFileUpload = async (files: FileList) => {
-        const validFiles = Array.from(files).filter(file => {
-            const isValidType = file.type === 'application/pdf' || file.type.startsWith('image/')
-            const isValidSize = file.size <= 50 * 1024 * 1024 // 50MB
-            return isValidType && isValidSize
-        })
-
-        for (const file of validFiles) {
-            const uploadFile: UploadedFile = {
-                file,
-                type: file.type === 'application/pdf' ? 'pdf' : 'image',
-                uploading: false, // Não fazemos upload imediato
-                uploaded: false   // Será marcado como true apenas após salvar o produto
-            }
-
-            // Adicionar arquivo ao produto (apenas localmente)
-            setFormData(prev => ({
-                ...prev,
-                files: [...prev.files, uploadFile]
-            }))
-        }
-    }
-
-    const removeProductFile = (fileIndex: number) => {
-        setFormData(prev => ({
-            ...prev,
-            files: prev.files.filter((_, i) => i !== fileIndex)
-        }))
-    }
 
     // Upload de imagens para o produto
     const handleProductImageUpload = async (files: FileList) => {
@@ -628,10 +597,7 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
             return false
         }
 
-        if (parseFloat(formData.basePrice) < 0) {
-            alert('Preço base deve ser maior ou igual a R$ 0,00')
-            return false
-        }
+
 
         // Validar variações
         for (let i = 0; i < formData.variations.length; i++) {
@@ -665,7 +631,7 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
         try {
             console.log('=== INÍCIO DO SUBMIT ===')
             console.log('FormData inicial:', {
-                mainFiles: formData.files.length,
+                // mainFiles removido
                 variations: formData.variations.map((v, i) => ({
                     index: i,
                     name: v.name,
@@ -680,54 +646,10 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
             })
 
             // Fazer upload dos arquivos PDF para o R2 antes de salvar o produto
-            const uploadedFiles: { file: UploadedFile; r2Key: string }[] = []
+            // const uploadedFiles removido
 
             // Upload dos arquivos do produto principal
-            for (const file of formData.files) {
-                if (!file.uploaded && !file.error && file.file) {
-                    try {
-                        const formDataUpload = new FormData()
-                        formDataUpload.append('file', file.file)
-
-                        const response = await fetch('/api/r2/upload', {
-                            method: 'POST',
-                            body: formDataUpload,
-                        })
-
-                        if (response.ok) {
-                            const result = await response.json()
-                            console.log(`Upload response for ${file.file.name}:`, {
-                                success: result.success,
-                                hasData: !!result.data,
-                                hasKey: !!(result.data?.key || result.key)
-                            })
-
-                            // Tentar diferentes estruturas de resposta
-                            let r2Key = null
-                            if (result.data && result.data.key) {
-                                r2Key = result.data.key
-                            } else if (result.key) {
-                                r2Key = result.key
-                            }
-
-                            if (r2Key) {
-                                uploadedFiles.push({ file, r2Key })
-                                console.log(`Successfully stored r2Key: ${r2Key}`)
-                            } else {
-                                console.error('Upload response missing key in any expected location:', result)
-                                throw new Error(`Upload bem-sucedido mas sem chave R2 para ${file.file.name}`)
-                            }
-                        } else {
-                            throw new Error(`Erro no upload do arquivo ${file.file.name}`)
-                        }
-                    } catch (error) {
-                        throw new Error(`Falha no upload do arquivo ${file.file.name}: ${error}`)
-                    }
-                } else if (file.uploaded && file.r2Key) {
-                    // Arquivo já foi uploadado anteriormente
-                    uploadedFiles.push({ file, r2Key: file.r2Key })
-                }
-            }
+            // upload dos arquivos do produto principal removido
 
             // Upload dos arquivos das variações
             const uploadedVariationFiles: { variationIndex: number; file: UploadedFile; r2Key: string }[] = []
@@ -797,7 +719,7 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                 name: formData.name,
                 slug: formData.slug,
                 description: formData.description,
-                price: parseFloat(formData.basePrice),
+                // basePrice removido
                 categoryId: formData.categoryId || null,
                 isActive: formData.isActive,
                 isFeatured: formData.isFeatured,
@@ -809,15 +731,7 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                         isMain: img.isMain || false,
                         order: img.order
                     })),
-                files: uploadedFiles
-                    .filter(({ r2Key }) => r2Key && r2Key.trim() !== '') // Garantir que r2Key existe
-                    .map(({ file, r2Key }) => ({
-                        filename: file.file.name,
-                        originalName: file.file.name,
-                        fileSize: file.file.size,
-                        mimeType: file.file.type,
-                        r2Key: r2Key
-                    })),
+                // files removido
                 variations: formData.variations.map((variation, index) => {
                     const variationFiles = uploadedVariationFiles
                         .filter(({ variationIndex, r2Key }) => variationIndex === index && r2Key && r2Key.trim() !== '') // Garantir que r2Key existe
@@ -850,18 +764,10 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
             }
 
             // Debug: Log para verificar se todos os arquivos têm r2Key
-            console.log('Files to be sent:', productData.files.length)
-            console.log('Variation files:', productData.variations.map(v => v.files.length))
-
-            // Log detailed info about all files
-            console.log('Product files:', productData.files.map(f => ({ name: f.filename, r2Key: f.r2Key })))
-            productData.variations.forEach((v, i) => {
-                console.log(`Variation ${i} files:`, v.files.map(f => ({ name: f.filename, r2Key: f.r2Key })))
-            })
+            // logs de arquivos do produto removidos
 
             // Validação extra antes de enviar
             const allFiles = [
-                ...productData.files,
                 ...productData.variations.flatMap(v => v.files)
             ]
 
@@ -879,7 +785,7 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
             console.log('Method:', method)
             console.log('Payload summary:', {
                 name: productData.name,
-                filesCount: productData.files.length,
+                // filesCount removido
                 variationsCount: productData.variations.length,
                 imagesCount: productData.images.length
             })
@@ -1052,107 +958,28 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <Label htmlFor="basePrice">Preço Base (R$)</Label>
-                                    <Input
-                                        id="basePrice"
-                                        type="number"
-                                        step="0.01"
-                                        min="0"
-                                        value={formData.basePrice}
-                                        onChange={(e) => handleInputChange('basePrice', e.target.value)}
-                                        placeholder="0.00"
-                                    />
-                                </div>
-                                <div className="space-y-3">
-                                    <div className="flex items-center space-x-2">
-                                        <Switch
-                                            id="isActive"
-                                            checked={formData.isActive}
-                                            onCheckedChange={(checked) => handleInputChange('isActive', checked)}
-                                        />
-                                        <Label htmlFor="isActive" className="text-sm">Produto Ativo</Label>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        <Switch
-                                            id="isFeatured"
-                                            checked={formData.isFeatured}
-                                            onCheckedChange={(checked) => handleInputChange('isFeatured', checked)}
-                                        />
-                                        <Label htmlFor="isFeatured" className="text-sm">Produto em Destaque</Label>
-                                    </div>
-                                </div>
+
+                        <div className="space-y-3">
+                            <div className="flex items-center space-x-2">
+                                <Switch
+                                    id="isActive"
+                                    checked={formData.isActive}
+                                    onCheckedChange={(checked) => handleInputChange('isActive', checked)}
+                                />
+                                <Label htmlFor="isActive" className="text-sm">Produto Ativo</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <Switch
+                                    id="isFeatured"
+                                    checked={formData.isFeatured}
+                                    onCheckedChange={(checked) => handleInputChange('isFeatured', checked)}
+                                />
+                                <Label htmlFor="isFeatured" className="text-sm">Produto em Destaque</Label>
                             </div>
                         </div>
+                    </div>
 
-                        {/* Upload de Arquivos */}
-                        <div>
-                            <Label>Arquivos do Produto *</Label>
-                            <div className="mt-2">
-                                <label className="block w-full border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 cursor-pointer">
-                                    <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                                    <span className="mt-2 block text-sm font-medium text-gray-900">
-                                        Clique para fazer upload ou arraste arquivos aqui
-                                    </span>
-                                    <span className="mt-1 block text-xs text-gray-500">
-                                        PDF, PNG, JPG até 50MB cada
-                                    </span>
-                                    <input
-                                        type="file"
-                                        multiple
-                                        accept=".pdf,image/*"
-                                        onChange={(e) => e.target.files && handleProductFileUpload(e.target.files)}
-                                        className="hidden"
-                                    />
-                                </label>
-                            </div>
 
-                            {/* Lista de Arquivos */}
-                            {formData.files.length > 0 && (
-                                <div className="mt-4 max-h-64 scroll-rounded space-y-2">
-                                    {formData.files.map((file, fileIndex) => (
-                                        <div key={fileIndex} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                            <div className="flex items-center space-x-3">
-                                                <FileText className="w-5 h-5 text-gray-400" />
-                                                <div>
-                                                    <p className="text-sm font-medium text-gray-900">
-                                                        {file.file.name}
-                                                    </p>
-                                                    <p className="text-xs text-gray-500">
-                                                        {(file.file.size / 1024 / 1024).toFixed(2)} MB
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center space-x-2">
-                                                {file.uploading && (
-                                                    <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
-                                                )}
-                                                {file.uploaded && (
-                                                    <Badge variant="default" className="bg-green-500">
-                                                        Uploaded
-                                                    </Badge>
-                                                )}
-                                                {file.error && (
-                                                    <Badge variant="destructive">
-                                                        Erro
-                                                    </Badge>
-                                                )}
-                                                <Button
-                                                    type="button"
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => removeProductFile(fileIndex)}
-                                                    className="cursor-pointer"
-                                                >
-                                                    <X className="w-4 h-4" />
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
 
                         {/* Upload de Imagens do Produto */}
                         <div>
