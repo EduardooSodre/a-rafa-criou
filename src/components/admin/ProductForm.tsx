@@ -1214,6 +1214,78 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                                         </div>
                                     </div>
 
+                                    {/* Upload de Imagens da Variação (agora com cor secundária) */}
+                                    <div className="bg-[#FFF3ED] rounded-lg p-4 mb-6 border border-[#FD9555]">
+                                        <div className="mb-4">
+                                            <h4 className="text-sm font-semibold text-[#FD9555] flex items-center gap-2">
+                                                <ImageIcon className="w-4 h-4" style={{ color: '#FD9555' }} />
+                                                Imagens da Variação
+                                            </h4>
+                                            <p className="text-xs text-[#FD9555] mt-1">
+                                                Adicione imagens de preview para esta variação (opcional)
+                                            </p>
+                                        </div>
+                                        <div className="border-2 border-dashed border-[#FD9555] rounded-lg p-6 hover:border-[#FD9555]/80 transition-all duration-200 bg-white hover:bg-[#FFF3ED]">
+                                            <label className="cursor-pointer block text-center">
+                                                <ImageIcon className="mx-auto h-10 w-10" style={{ color: '#FD9555' }} />
+                                                <span className="mt-2 block text-sm font-medium text-[#FD9555]">
+                                                    Clique para selecionar imagens
+                                                </span>
+                                                <span className="mt-1 block text-xs text-[#FD9555]">
+                                                    PNG, JPG, WebP até 10MB cada
+                                                </span>
+                                                <input
+                                                    type="file"
+                                                    multiple
+                                                    accept="image/*"
+                                                    onChange={(e) => e.target.files && handleVariationImageUpload(index, e.target.files)}
+                                                    className="hidden"
+                                                />
+                                            </label>
+                                        </div>
+                                        {/* Grid de Imagens da Variação */}
+                                        {variation.images.length > 0 && (
+                                            <div className="space-y-4 mt-4">
+                                                <div className="flex items-center justify-between">
+                                                    <h4 className="text-sm font-medium text-gray-900">
+                                                        Imagens ({variation.images.length})
+                                                    </h4>
+                                                    <div className="text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded">
+                                                        Arraste para reordenar
+                                                    </div>
+                                                </div>
+                                                <DndContext
+                                                    sensors={sensors}
+                                                    collisionDetection={closestCenter}
+                                                    onDragEnd={handleVariationImageDragEnd(index)}
+                                                >
+                                                    <SortableContext
+                                                        items={variation.images.map(img => img.id)}
+                                                        strategy={rectSortingStrategy}
+                                                    >
+                                                        <div className="max-h-64 overflow-y-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-2">
+                                                            {variation.images.map((image, imageIndex) => (
+                                                                <div key={image.id} className="relative group">
+                                                                    <SortableImageItem
+                                                                        image={image}
+                                                                        index={imageIndex}
+                                                                        isMain={variation.mainImageIndex === imageIndex}
+                                                                        onRemove={() => removeVariationImage(index, imageIndex)}
+                                                                    />
+                                                                    {imageIndex === 0 && (
+                                                                        <div className="absolute -top-2 -left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+                                                                            Principal
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </SortableContext>
+                                                </DndContext>
+                                            </div>
+                                        )}
+                                    </div>
+
                                     {/* Upload de Arquivos */}
                                     <div className="bg-blue-50 rounded-lg p-4">
                                         <div className="mb-4">
@@ -1310,81 +1382,6 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                                                         </div>
                                                     ))}
                                                 </div>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Upload de Imagens da Variação */}
-                                    <div className="space-y-4">
-                                        <div>
-                                            <Label className="text-sm font-medium flex items-center gap-2">
-                                                <ImageIcon className="w-4 h-4" />
-                                                Imagens da Variação
-                                            </Label>
-                                            <p className="text-xs text-gray-500 mt-1">
-                                                Adicione imagens de preview para esta variação (opcional)
-                                            </p>
-                                        </div>
-
-                                        <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 hover:border-gray-300 transition-colors">
-                                            <label className="cursor-pointer block text-center">
-                                                <ImageIcon className="mx-auto h-10 w-10 text-gray-400" />
-                                                <span className="mt-2 block text-sm font-medium text-gray-700">
-                                                    Clique para selecionar imagens
-                                                </span>
-                                                <span className="mt-1 block text-xs text-gray-500">
-                                                    PNG, JPG, WebP até 10MB cada
-                                                </span>
-                                                <input
-                                                    type="file"
-                                                    multiple
-                                                    accept="image/*"
-                                                    onChange={(e) => e.target.files && handleVariationImageUpload(index, e.target.files)}
-                                                    className="hidden"
-                                                />
-                                            </label>
-                                        </div>
-
-                                        {/* Grid de Imagens da Variação */}
-                                        {variation.images.length > 0 && (
-                                            <div className="space-y-4">
-                                                <div className="flex items-center justify-between">
-                                                    <h4 className="text-sm font-medium text-gray-900">
-                                                        Imagens ({variation.images.length})
-                                                    </h4>
-                                                    <div className="text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded">
-                                                        Arraste para reordenar
-                                                    </div>
-                                                </div>
-
-                                                <DndContext
-                                                    sensors={sensors}
-                                                    collisionDetection={closestCenter}
-                                                    onDragEnd={handleVariationImageDragEnd(index)}
-                                                >
-                                                    <SortableContext
-                                                        items={variation.images.map(img => img.id)}
-                                                        strategy={rectSortingStrategy}
-                                                    >
-                                                        <div className="max-h-64 overflow-y-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-2">
-                                                            {variation.images.map((image, imageIndex) => (
-                                                                <div key={image.id} className="relative group">
-                                                                    <SortableImageItem
-                                                                        image={image}
-                                                                        index={imageIndex}
-                                                                        isMain={variation.mainImageIndex === imageIndex}
-                                                                        onRemove={() => removeVariationImage(index, imageIndex)}
-                                                                    />
-                                                                    {imageIndex === 0 && (
-                                                                        <div className="absolute -top-2 -left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
-                                                                            Principal
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    </SortableContext>
-                                                </DndContext>
                                             </div>
                                         )}
                                     </div>
