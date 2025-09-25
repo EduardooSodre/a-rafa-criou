@@ -35,7 +35,6 @@ export async function GET(request: NextRequest) {
       whereClause = eq(products.isFeatured, true);
     }
 
-
     // Buscar produtos do banco
     const dbProducts = await db
       .select()
@@ -46,9 +45,12 @@ export async function GET(request: NextRequest) {
 
     // Buscar variações de todos os produtos retornados
     const productIds = dbProducts.map(p => p.id);
-  let allVariations: VariationDb[] = [];
+    let allVariations: VariationDb[] = [];
     if (productIds.length > 0) {
-      const rawVariations = await db.select().from(productVariations).where(inArray(productVariations.productId, productIds));
+      const rawVariations = await db
+        .select()
+        .from(productVariations)
+        .where(inArray(productVariations.productId, productIds));
       allVariations = rawVariations.map(v => ({
         id: v.id,
         productId: v.productId!,
@@ -63,7 +65,10 @@ export async function GET(request: NextRequest) {
     // Buscar todas as imagens de todos os produtos
     let allImages: ImageDb[] = [];
     if (productIds.length > 0) {
-      const rawImages = await db.select().from(productImages).where(inArray(productImages.productId, productIds));
+      const rawImages = await db
+        .select()
+        .from(productImages)
+        .where(inArray(productImages.productId, productIds));
       allImages = rawImages.map(img => ({
         id: img.id,
         productId: img.productId!,
