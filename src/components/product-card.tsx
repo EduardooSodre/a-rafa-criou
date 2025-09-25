@@ -39,14 +39,19 @@ export function ProductCard({ product }: ProductCardProps) {
       <CardContent className='flex flex-col justify-between'>
         <div className='mb-4'>
           <div className='mb-2 text-2xl font-bold text-primary'>
-            {formatPrice(product.price)}
+            {product.variations && product.variations.length > 1 ? (
+              (() => {
+                const prices = product.variations.map(v => v.price);
+                const min = Math.min(...prices);
+                const max = Math.max(...prices);
+                return min !== max
+                  ? `R$ ${min.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} - R$ ${max.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+                  : `R$ ${min.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+              })()
+            ) : (
+              formatPrice(product.price)
+            )}
           </div>
-          
-          {product.variations && product.variations.length > 1 && (
-            <p className='text-sm text-muted-foreground'>
-              A partir de {formatPrice(Math.min(...product.variations.map(v => v.price)))}
-            </p>
-          )}
         </div>
 
         <Button asChild className='w-full bg-primary hover:bg-secondary'>

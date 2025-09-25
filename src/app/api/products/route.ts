@@ -1,6 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { products, categories } from '@/lib/db/schema';
+import { products, categories, productVariations, productImages } from '@/lib/db/schema';
+
+type VariationDb = {
+  id: string;
+  productId: string;
+  name: string;
+  slug: string;
+  price: string | number;
+  isActive: boolean;
+  sortOrder: number;
+};
+
+type ImageDb = {
+  id: string;
+  productId: string;
+  variationId?: string;
+  data: string;
+  alt?: string;
+  isMain?: boolean;
+};
 import { eq, inArray } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
@@ -16,6 +35,7 @@ export async function GET(request: NextRequest) {
       whereClause = eq(products.isFeatured, true);
     }
 
+
     // Buscar produtos do banco
     const dbProducts = await db
       .select()
@@ -23,6 +43,36 @@ export async function GET(request: NextRequest) {
       .where(whereClause)
       .limit(limit)
       .offset(offset);
+
+    // Buscar variações de todos os produtos retornados
+    const productIds = dbProducts.map(p => p.id);
+  let allVariations: VariationDb[] = [];
+    if (productIds.length > 0) {
+      const rawVariations = await db.select().from(productVariations).where(inArray(productVariations.productId, productIds));
+      allVariations = rawVariations.map(v => ({
+        id: v.id,
+        productId: v.productId!,
+        name: v.name,
+        slug: v.slug,
+        price: v.price,
+        isActive: v.isActive,
+        sortOrder: v.sortOrder ?? 0,
+      }));
+    }
+
+    // Buscar todas as imagens de todos os produtos
+    let allImages: ImageDb[] = [];
+    if (productIds.length > 0) {
+      const rawImages = await db.select().from(productImages).where(inArray(productImages.productId, productIds));
+      allImages = rawImages.map(img => ({
+        id: img.id,
+        productId: img.productId!,
+        variationId: img.variationId || undefined,
+        data: img.data,
+        alt: img.alt || undefined,
+        isMain: !!img.isMain,
+      }));
+    }
 
     // Buscar total para paginação
     const totalArr = await db.select({ count: products.id }).from(products).where(whereClause);
@@ -40,20 +90,48 @@ export async function GET(request: NextRequest) {
     }
 
     // Adaptar formato para o frontend
-    const productsOut = dbProducts.map(p => ({
-      id: p.id,
-      name: p.name,
-      slug: p.slug,
-      description: p.description,
-      shortDescription: p.shortDescription,
-      price: Number(p.price),
-      priceDisplay: `R$ ${Number(p.price).toFixed(2).replace('.', ',')}`,
-      categoryId: p.categoryId,
-      category: p.categoryId ? categoriesMap[p.categoryId] || null : null,
-      isFeatured: p.isFeatured,
-      variations: [], // Adapte se quiser buscar variações
-      mainImage: null, // Adapte se quiser buscar imagem
-    }));
+    const productsOut = dbProducts.map(p => {
+      // Variações deste produto
+      const variations = allVariations
+        .filter(v => v.productId === p.id)
+        .map(v => ({
+          id: v.id,
+          name: v.name,
+          slug: v.slug,
+          price: Number(v.price),
+          isActive: v.isActive,
+          sortOrder: v.sortOrder,
+        }));
+
+      // Todas as imagens deste produto
+      const images = allImages.filter(img => img.productId === p.id);
+      // Imagem principal: prioriza isMain, senão pega a primeira
+      const mainImageObj = images.find(img => img.isMain) || images[0];
+
+      return {
+        id: p.id,
+        name: p.name,
+        slug: p.slug,
+        description: p.description,
+        shortDescription: p.shortDescription,
+        price: Number(p.price),
+        priceDisplay: `R$ ${Number(p.price).toFixed(2).replace('.', ',')}`,
+        categoryId: p.categoryId,
+        category: p.categoryId ? categoriesMap[p.categoryId] || null : null,
+        isFeatured: p.isFeatured,
+        variations,
+        mainImage: mainImageObj
+          ? {
+              data: mainImageObj.data,
+              alt: mainImageObj.alt || p.name,
+            }
+          : null,
+        images: images.map(img => ({
+          data: img.data,
+          alt: img.alt || p.name,
+        })),
+      };
+    });
 
     return NextResponse.json({
       products: productsOut,

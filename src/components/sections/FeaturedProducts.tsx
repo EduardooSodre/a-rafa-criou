@@ -195,16 +195,16 @@ export default function FeaturedProducts({
                                 <Link href={`/produtos/${product.slug}`} className="block group focus:outline-none focus:ring-2 focus:ring-primary">
                                     <div className="p-3 md:p-4">
                                         <div className="aspect-square bg-gray-100 relative overflow-hidden group rounded-lg">
-                                            {product.mainImage ? (
+                                            {product.mainImage && product.mainImage.data ? (
                                                 <Image
                                                     src={product.mainImage.data}
-                                                    alt={product.name}
+                                                    alt={product.mainImage.alt || product.name}
                                                     fill
                                                     sizes="(max-width: 768px) 50vw, 25vw"
-                                                    className="object-cover group-hover:scale-105 transition-transform duration-300 rounded-lg"
+                                                    className="object-cover group-hover:scale-105 transition-transform duration-300 rounded-lg bg-[#F4F4F4]"
                                                 />
                                             ) : (
-                                                <div className="flex items-center justify-center h-full rounded-lg">
+                                                <div className="flex items-center justify-center h-full rounded-lg bg-[#F4F4F4]">
                                                     <span className="text-gray-400 text-sm">Sem imagem</span>
                                                 </div>
                                             )}
@@ -239,7 +239,18 @@ export default function FeaturedProducts({
                                         {/* Preço destacado */}
                                         <div className="flex-grow-0 mb-3 md:mb-3 lg:mb-3 text-center">
                                             <span className="text-lg md:text-xl lg:text-2xl font-bold text-[#FD9555] block">
-                                                {product.priceDisplay}
+                                                {product.variations && product.variations.length > 1 ? (
+                                                    (() => {
+                                                        const prices = product.variations.map(v => v.price);
+                                                        const min = Math.min(...prices);
+                                                        const max = Math.max(...prices);
+                                                        return min !== max
+                                                            ? `R$ ${min.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} - R$ ${max.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+                                                            : `R$ ${min.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+                                                    })()
+                                                ) : (
+                                                    `R$ ${product.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+                                                )}
                                             </span>
                                         </div>
                                     </div>
