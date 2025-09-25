@@ -32,7 +32,7 @@ interface UploadedImage {
 }
 
 interface UploadedFile {
-    file: File
+    file?: File
     type: 'pdf' | 'image'
     uploading?: boolean
     uploaded?: boolean
@@ -42,6 +42,7 @@ interface UploadedFile {
     originalName?: string
     fileSize?: number
     mimeType?: string
+    url?: string // para arquivos já existentes
 }
 
 interface VariationData {
@@ -327,7 +328,18 @@ export default function EditVariationDialog({
                                 {formData.files.map((file, i) => (
                                     <li key={i} className="flex items-center gap-2 text-sm bg-gray-50 rounded p-2">
                                         <FileText className="w-4 h-4 text-gray-500" />
-                                        <span className="flex-1 truncate">{file.file?.name || file.filename || 'Arquivo'}</span>
+                                        {(file.r2Key || file.url) ? (
+                                            <a
+                                                href={file.url ? String(file.url) : `/api/r2/download?r2Key=${encodeURIComponent(file.r2Key || '')}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex-1 truncate text-blue-600 underline"
+                                            >
+                                                {file.filename || file.originalName || (file.r2Key ? decodeURIComponent(file.r2Key.split('/').pop() || '') : 'Arquivo PDF')}
+                                            </a>
+                                        ) : (
+                                            <span className="flex-1 truncate">{file.file?.name || file.filename || 'Arquivo'}</span>
+                                        )}
                                         <Button type="button" size="icon" variant="ghost" onClick={() => removeFile(i)}>
                                             <Trash2 className="w-4 h-4 text-red-500" />
                                         </Button>
@@ -362,6 +374,8 @@ export default function EditVariationDialog({
                                     <div key={img.id || i} className="relative group border rounded overflow-hidden bg-gray-50">
                                         {img.data ? (
                                             <Image src={img.data} alt={img.alt || formData.name} width={120} height={120} className="object-cover w-full h-24" />
+                                        ) : img.url ? (
+                                            <Image src={img.url} alt={img.alt || formData.name} width={120} height={120} className="object-cover w-full h-24" />
                                         ) : (
                                             <div className="flex items-center justify-center h-24 text-gray-400">
                                                 <ImageIcon className="w-8 h-8" />

@@ -86,6 +86,7 @@ interface UploadedFile {
     originalName?: string
     fileSize?: number
     mimeType?: string
+    url?: string // para arquivos já existentes
 }
 
 interface EditProductDialogProps {
@@ -258,7 +259,8 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
                 filename: file.filename,
                 originalName: file.originalName,
                 fileSize: file.fileSize,
-                mimeType: file.mimeType
+                mimeType: file.mimeType,
+                url: file.url || (file.r2Key ? `/api/r2/download?r2Key=${encodeURIComponent(file.r2Key)}` : undefined)
             })),
             images: (variation.images || []).map((img: any, imgIndex: number) => ({
                 id: `existing-variation-${variation.id}-img-${img.id || imgIndex}`,
@@ -1327,7 +1329,18 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
                                                                     </div>
                                                                     <div className="flex-1 min-w-0">
                                                                         <p className="text-sm font-medium text-gray-900 truncate">
-                                                                            {file.filename || file.file?.name || 'Arquivo sem nome'}
+                                                                            {(file.r2Key || file.url) ? (
+                                                                                <a
+                                                                                    href={file.url ? String(file.url) : `/api/r2/download?r2Key=${encodeURIComponent(file.r2Key || '')}`}
+                                                                                    target="_blank"
+                                                                                    rel="noopener noreferrer"
+                                                                                    className="text-blue-600 underline"
+                                                                                >
+                                                                                    {file.filename || file.originalName || 'Arquivo PDF'}
+                                                                                </a>
+                                                                            ) : (
+                                                                                file.filename || file.file?.name || 'Arquivo sem nome'
+                                                                            )}
                                                                         </p>
                                                                         <div className="flex items-center gap-2 mt-1">
                                                                             <p className="text-xs text-gray-500">
