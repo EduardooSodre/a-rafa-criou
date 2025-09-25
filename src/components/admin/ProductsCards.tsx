@@ -83,6 +83,7 @@ export default function ProductsCardsView({
     const [expandedCards, setExpandedCards] = useState(new Set<string>())
     const [deletingProduct, setDeletingProduct] = useState<string | null>(null)
     const [deletingVariation, setDeletingVariation] = useState<string | null>(null)
+    const [editingProduct, setEditingProduct] = useState<ProductData | null>(null)
 
     // Fetch products from API
     useEffect(() => {
@@ -335,9 +336,22 @@ export default function ProductsCardsView({
                                             <Eye className="h-4 w-4 text-blue-600" />
                                         </Link>
                                     </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-8 w-8 p-0 hover:bg-green-50"
+                                        onClick={() => setEditingProduct(product)}
+                                    >
+                                        <FileText className="h-4 w-4 text-green-600" />
+                                    </Button>
                                     <EditProductDialog
-                                        product={product}
-                                        onSuccess={refreshProducts}
+                                        product={editingProduct}
+                                        open={!!editingProduct}
+                                        onOpenChange={(open) => !open && setEditingProduct(null)}
+                                        onSuccess={() => {
+                                            setEditingProduct(null)
+                                            refreshProducts()
+                                        }}
                                     />
                                     <AlertDialog>
                                         <AlertDialogTrigger asChild>
