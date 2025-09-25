@@ -50,6 +50,13 @@ export default function ProductsPage() {
     const [isNewProductOpen, setIsNewProductOpen] = useState(false)
     const [stats, setStats] = useState<ProductStats>({ total: 0, active: 0, inactive: 0, revenue: 0 })
     const [loading, setLoading] = useState(true)
+    const [refreshTrigger, setRefreshTrigger] = useState(0)
+
+    const handleRefresh = () => {
+        setRefreshTrigger(prev => prev + 1)
+        // Recarregar estatísticas
+        fetch('/api/admin/products/stats').then(res => res.json()).then(setStats)
+    }
 
     // Carregar estatísticas
     useEffect(() => {
@@ -143,8 +150,7 @@ export default function ProductsPage() {
                         <div className="mt-6">
                             <ProductForm onSuccess={() => {
                                 setIsNewProductOpen(false)
-                                // Recarregar estatísticas
-                                fetch('/api/admin/products/stats').then(res => res.json()).then(setStats)
+                                handleRefresh()
                             }} />
                         </div>
                     </DialogContent>
@@ -258,8 +264,10 @@ export default function ProductsPage() {
                 </CardHeader>
                 <CardContent>
                     <ProductsCards
+                        key={refreshTrigger}
                         search={search}
                         category={category === 'all' ? '' : category}
+                        onRefresh={handleRefresh}
                     />
                 </CardContent>
             </Card>
