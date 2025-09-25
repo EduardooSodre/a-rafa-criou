@@ -1,4 +1,5 @@
-'use client'
+// LOG FINAL ANTES DO ENVIO
+"use client";
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
@@ -107,13 +108,13 @@ function SortableImageItem({ image, index, isMain, onRemove }: SortableImageItem
         transform,
         transition,
         isDragging,
-    } = useSortable({ id: image.id })
+    } = useSortable({ id: image.id });
 
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
         opacity: isDragging ? 0.5 : 1,
-    }
+    };
 
     return (
         <div ref={setNodeRef} style={style} className="relative group">
@@ -147,7 +148,6 @@ function SortableImageItem({ image, index, isMain, onRemove }: SortableImageItem
                     />
                 )}
             </div>
-
             {/* Handle de drag - área bem visível */}
             <div
                 {...attributes}
@@ -157,7 +157,6 @@ function SortableImageItem({ image, index, isMain, onRemove }: SortableImageItem
             >
                 <GripVertical className="w-4 h-4 text-gray-700" />
             </div>
-
             {/* Botão de excluir */}
             <Button
                 type="button"
@@ -169,7 +168,6 @@ function SortableImageItem({ image, index, isMain, onRemove }: SortableImageItem
             >
                 <X className="w-4 h-4" />
             </Button>
-
             {/* Indicador de Imagem Principal */}
             {isMain && (
                 <div className="absolute top-2 left-12">
@@ -178,14 +176,12 @@ function SortableImageItem({ image, index, isMain, onRemove }: SortableImageItem
                     </Badge>
                 </div>
             )}
-
             {/* Indicador de Ordem */}
             <div className="absolute bottom-2 left-2">
                 <Badge variant="secondary" className="text-xs">
                     #{index + 1}
                 </Badge>
             </div>
-
             {/* Status do Upload */}
             {image.error && (
                 <div className="absolute top-12 right-2">
@@ -195,7 +191,7 @@ function SortableImageItem({ image, index, isMain, onRemove }: SortableImageItem
                 </div>
             )}
         </div>
-    )
+    );
 }
 
 export default function ProductForm({ initialData, isEditing = false, onSuccess }: ProductFormProps) {
@@ -735,14 +731,28 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
 
             console.log(`Total uploaded variation files: ${uploadedVariationFiles.length}`)
 
+
+            // Cálculo robusto de minPrice
+            const variationPrices = formData.variations
+                .map(v => {
+                    const n = Number(v.price);
+                    return isNaN(n) ? undefined : n;
+                })
+                .filter((p): p is number => typeof p === 'number' && !isNaN(p) && p > 0);
+            const minPrice = variationPrices.length > 0 ? Math.min(...variationPrices) : 0;
+            const maxPrice = variationPrices.length > 0 ? Math.max(...variationPrices) : 0;
+            const safePrice = typeof minPrice === 'number' && !isNaN(minPrice) ? minPrice : 0;
+
             const productData = {
                 name: formData.name,
                 slug: formData.slug,
                 description: formData.description,
-                // basePrice removido
                 categoryId: formData.categoryId || null,
                 isActive: formData.isActive,
                 isFeatured: formData.isFeatured,
+                minPrice,
+                maxPrice,
+                price: safePrice,
                 images: formData.images
                     .filter(img => img.uploaded && img.data)
                     .map(img => ({
@@ -751,10 +761,9 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                         isMain: img.isMain || false,
                         order: img.order
                     })),
-                // files removido
                 variations: formData.variations.map((variation, index) => {
                     const variationFiles = uploadedVariationFiles
-                        .filter(({ variationIndex, r2Key }) => variationIndex === index && r2Key && r2Key.trim() !== '') // Garantir que r2Key existe
+                        .filter(({ variationIndex, r2Key }) => variationIndex === index && r2Key && r2Key.trim() !== '')
                         .map(({ file, r2Key }) => ({
                             filename: file.file.name,
                             originalName: file.file.name,
@@ -762,13 +771,9 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                             mimeType: file.file.type,
                             r2Key: r2Key
                         }))
-
-                    console.log(`Variation ${index} (${variation.name}): ${variationFiles.length} files with r2Key`)
-                    variationFiles.forEach((f, i) => console.log(`  File ${i}: ${f.filename} -> ${f.r2Key}`))
-
                     return {
                         name: variation.name,
-                        price: parseFloat(variation.price),
+                        price: variation.price ? Number(variation.price) : 0,
                         isActive: variation.isActive,
                         images: variation.images
                             .filter(img => img.uploaded && img.data)
@@ -781,7 +786,8 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                         files: variationFiles
                     }
                 })
-            }
+            };
+
 
             // Debug: Log para verificar se todos os arquivos têm r2Key
             // logs de arquivos do produto removidos
@@ -797,18 +803,35 @@ export default function ProductForm({ initialData, isEditing = false, onSuccess 
                 throw new Error(`Alguns arquivos não têm chave R2 válida: ${filesWithoutR2Key.map(f => f.filename).join(', ')}`)
             }
 
+            // LOG FINAL ANTES DO ENVIO
+            console.log('[DEBUG] Valor final de productData.price:', productData.price, typeof productData.price);
+            console.log('[DEBUG] productData completo:', productData);
+            console.log('[DEBUG] safePrice:', safePrice, 'minPrice:', minPrice, 'maxPrice:', maxPrice);
+            console.log('[DEBUG] variationPrices:', variationPrices);
+            if (typeof productData.price === 'undefined') {
+                console.error('[ERRO GRAVE] productData.price está undefined! productData:', productData);
+                console.error('[ERRO GRAVE] variationPrices:', variationPrices);
+                console.error('[ERRO GRAVE] safePrice:', safePrice);
+            }
+
             const url = isEditing ? `/api/admin/products/${initialData?.id}` : '/api/admin/products'
             const method = isEditing ? 'PUT' : 'POST'
 
             console.log('=== ENVIANDO PARA API ===')
             console.log('URL:', url)
             console.log('Method:', method)
+
+            // Log seguro
             console.log('Payload summary:', {
-                name: productData.name,
-                // filesCount removido
+                ...productData,
                 variationsCount: productData.variations.length,
                 imagesCount: productData.images.length
-            })
+            });
+
+
+            // LOG DETALHADO PARA DEBUG
+            console.log('DEBUG productData:', productData);
+            console.log('DEBUG JSON enviado:', JSON.stringify(productData));
 
             const response = await fetch(url, {
                 method,
