@@ -138,372 +138,372 @@ function SortableImageItem({ image, index, isMain, onRemove }: { image: Uploaded
                         width={400}
                         height={400}
                         style={{ objectFit: 'cover' }}
-                            unoptimized={true}
-                            priority={index === 0}
-                        />
-                    )}
-                </div>
-                <div
-                    {...attributes}
-                    {...listeners}
-                    className="absolute top-2 left-2 bg-white/90 hover:bg-white rounded p-2 cursor-grab active:cursor-grabbing shadow-sm border"
-                    style={{ zIndex: 10 }}
-                >
-                    <GripVertical className="w-4 h-4 text-gray-700" />
-                </div>
-                <Button
-                    type="button"
-                    size="sm"
-                    variant="destructive"
-                    onClick={onRemove}
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity w-8 h-8 p-0 cursor-pointer shadow-sm"
-                    style={{ zIndex: 10 }}
-                >
-                    <X className="w-4 h-4" />
-                </Button>
-                {isMain && (
-                    <div className="absolute top-2 left-12">
-                        <Badge className="bg-yellow-500 text-yellow-900 text-xs">
-                            Capa
-                        </Badge>
-                    </div>
-                )}
-                <div className="absolute bottom-2 left-2">
-                    <Badge variant="secondary" className="text-xs">
-                        #{index + 1}
-                    </Badge>
-                </div>
-                {image.error && (
-                    <div className="absolute top-12 right-2">
-                        <Badge variant="destructive" className="text-xs">
-                            Erro
-                        </Badge>
-                    </div>
+                        unoptimized={true}
+                        priority={index === 0}
+                    />
                 )}
             </div>
-        );
+            <div
+                {...attributes}
+                {...listeners}
+                className="absolute top-2 left-2 bg-white/90 hover:bg-white rounded p-2 cursor-grab active:cursor-grabbing shadow-sm border"
+                style={{ zIndex: 10 }}
+            >
+                <GripVertical className="w-4 h-4 text-gray-700" />
+            </div>
+            <Button
+                type="button"
+                size="sm"
+                variant="destructive"
+                onClick={onRemove}
+                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity w-8 h-8 p-0 cursor-pointer shadow-sm"
+                style={{ zIndex: 10 }}
+            >
+                <X className="w-4 h-4" />
+            </Button>
+            {isMain && (
+                <div className="absolute top-2 left-12">
+                    <Badge className="bg-yellow-500 text-yellow-900 text-xs">
+                        Capa
+                    </Badge>
+                </div>
+            )}
+            <div className="absolute bottom-2 left-2">
+                <Badge variant="secondary" className="text-xs">
+                    #{index + 1}
+                </Badge>
+            </div>
+            {image.error && (
+                <div className="absolute top-12 right-2">
+                    <Badge variant="destructive" className="text-xs">
+                        Erro
+                    </Badge>
+                </div>
+            )}
+        </div>
+    );
+}
+
+export default function EditProductDialog({ product, open, onOpenChange, onSuccess }: EditProductDialogProps) {
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [categories, setCategories] = useState<Category[]>([])
+    const [isNewCategoryOpen, setIsNewCategoryOpen] = useState(false)
+    const [newCategoryName, setNewCategoryName] = useState('')
+    const [newCategoryDescription, setNewCategoryDescription] = useState('')
+    const [isCreatingCategory, setIsCreatingCategory] = useState(false)
+
+    const [formData, setFormData] = useState<ProductFormData>({
+        name: '',
+        slug: '',
+        description: '',
+        categoryId: '',
+        isActive: true,
+        isFeatured: false,
+        images: [],
+        variations: []
+    })
+
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    )
+
+    useEffect(() => {
+        fetchCategories()
+    }, [])
+
+    useEffect(() => {
+        if (open && product) {
+            loadProductData()
+        }
+    }, [open, product])
+
+    const fetchCategories = async () => {
+        try {
+            const response = await fetch('/api/admin/categories')
+            if (response.ok) {
+                const data = await response.json()
+                setCategories(data.categories)
+            }
+        } catch (error) {
+            console.error('Erro ao carregar categorias:', error)
+        }
     }
 
-    export default function EditProductDialog({ product, open, onOpenChange, onSuccess }: EditProductDialogProps) {
-        const [isSubmitting, setIsSubmitting] = useState(false)
-        const [categories, setCategories] = useState<Category[]>([])
-        const [isNewCategoryOpen, setIsNewCategoryOpen] = useState(false)
-        const [newCategoryName, setNewCategoryName] = useState('')
-        const [newCategoryDescription, setNewCategoryDescription] = useState('')
-        const [isCreatingCategory, setIsCreatingCategory] = useState(false)
+    const loadProductData = () => {
+        if (!product) return
 
-        const [formData, setFormData] = useState<ProductFormData>({
-            name: '',
-            slug: '',
-            description: '',
-            categoryId: '',
-            isActive: true,
-            isFeatured: false,
-            images: [],
-            variations: []
-        })
+        const productImages: UploadedImage[] = (product.images || []).map((img: any, index: number) => ({
+            id: `existing-product-img-${img.id || index}`,
+            uploaded: true,
+            url: img.url,
+            preview: img.url,
+            alt: img.alt,
+            isMain: img.isMain,
+            order: img.order || index
+        }))
 
-        const sensors = useSensors(
-            useSensor(PointerSensor),
-            useSensor(KeyboardSensor, {
-                coordinateGetter: sortableKeyboardCoordinates,
-            })
-        )
-
-        useEffect(() => {
-            fetchCategories()
-        }, [])
-
-        useEffect(() => {
-            if (open && product) {
-                loadProductData()
-            }
-        }, [open, product])
-
-        const fetchCategories = async () => {
-            try {
-                const response = await fetch('/api/admin/categories')
-                if (response.ok) {
-                    const data = await response.json()
-                    setCategories(data.categories)
-                }
-            } catch (error) {
-                console.error('Erro ao carregar categorias:', error)
-            }
-        }
-
-        const loadProductData = () => {
-            if (!product) return
-
-            const productImages: UploadedImage[] = (product.images || []).map((img: any, index: number) => ({
-                id: `existing-product-img-${img.id || index}`,
+        const variations: ProductVariation[] = (product.variations || []).map((variation: any, index: number) => ({
+            id: variation.id,
+            name: variation.name,
+            price: variation.price?.toString() || '0.00',
+            isActive: variation.isActive ?? true,
+            idioma: variation.idioma || '',
+            files: (variation.files || []).map((file: any) => ({
+                type: file.mimeType === 'application/pdf' ? 'pdf' : 'image',
+                uploaded: true,
+                r2Key: file.r2Key,
+                filename: file.filename,
+                originalName: file.originalName,
+                fileSize: file.fileSize,
+                mimeType: file.mimeType
+            })),
+            images: (variation.images || []).map((img: any, imgIndex: number) => ({
+                id: `existing-variation-${variation.id}-img-${img.id || imgIndex}`,
                 uploaded: true,
                 url: img.url,
                 preview: img.url,
                 alt: img.alt,
                 isMain: img.isMain,
-                order: img.order || index
+                order: img.order || imgIndex
             }))
+        }))
 
-            const variations: ProductVariation[] = (product.variations || []).map((variation: any, index: number) => ({
-                id: variation.id,
-                name: variation.name,
-                price: variation.price?.toString() || '0.00',
-                isActive: variation.isActive ?? true,
-                idioma: variation.idioma || '',
-                files: (variation.files || []).map((file: any) => ({
-                    type: file.mimeType === 'application/pdf' ? 'pdf' : 'image',
-                    uploaded: true,
-                    r2Key: file.r2Key,
-                    filename: file.filename,
-                    originalName: file.originalName,
-                    fileSize: file.fileSize,
-                    mimeType: file.mimeType
-                })),
-                images: (variation.images || []).map((img: any, imgIndex: number) => ({
-                    id: `existing-variation-${variation.id}-img-${img.id || imgIndex}`,
-                    uploaded: true,
-                    url: img.url,
-                    preview: img.url,
-                    alt: img.alt,
-                    isMain: img.isMain,
-                    order: img.order || imgIndex
-                }))
-            }))
+        setFormData({
+            name: product.name || '',
+            slug: product.slug || '',
+            description: product.description || '',
+            categoryId: product.categoryId || '',
+            isActive: product.isActive ?? true,
+            isFeatured: product.isFeatured ?? false,
+            images: productImages,
+            variations: variations.length > 0 ? variations : [{
+                name: 'Padrão',
+                price: '0.00',
+                files: [],
+                images: [],
+                isActive: true
+            }]
+        })
+    }
 
-            setFormData({
-                name: product.name || '',
-                slug: product.slug || '',
-                description: product.description || '',
-                categoryId: product.categoryId || '',
-                isActive: product.isActive ?? true,
-                isFeatured: product.isFeatured ?? false,
-                images: productImages,
-                variations: variations.length > 0 ? variations : [{
-                    name: 'Padrão',
-                    price: '0.00',
+    const handleCreateCategory = async () => {
+        if (!newCategoryName.trim()) return
+
+        setIsCreatingCategory(true)
+        try {
+            const response = await fetch('/api/admin/categories', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: newCategoryName,
+                    description: newCategoryDescription
+                })
+            })
+
+            if (response.ok) {
+                const newCategory = await response.json()
+                setCategories(prev => [newCategory, ...prev])
+                setFormData(prev => ({ ...prev, categoryId: newCategory.id }))
+                setNewCategoryName('')
+                setNewCategoryDescription('')
+                setIsNewCategoryOpen(false)
+            } else {
+                alert('Erro ao criar categoria')
+            }
+        } catch (error) {
+            console.error('Erro ao criar categoria:', error)
+            alert('Erro ao criar categoria')
+        } finally {
+            setIsCreatingCategory(false)
+        }
+    }
+
+    const generateSlug = (name: string) => {
+        return name
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .trim()
+    }
+
+    const handleNameChange = (name: string) => {
+        setFormData(prev => ({
+            ...prev,
+            name,
+            slug: generateSlug(name)
+        }))
+    }
+
+    const handleInputChange = (field: keyof ProductFormData, value: string | boolean) => {
+        setFormData(prev => ({ ...prev, [field]: value }))
+    }
+
+    const variationRefs = useRef<(HTMLDivElement | null)[]>([]);
+    const addVariation = () => {
+        setFormData(prev => {
+            const newVariations = [
+                ...prev.variations,
+                {
+                    name: `Variação ${prev.variations.length + 1}`,
+                    price: '',
                     files: [],
                     images: [],
-                    isActive: true
-                }]
-            })
-        }
-
-        const handleCreateCategory = async () => {
-            if (!newCategoryName.trim()) return
-
-            setIsCreatingCategory(true)
-            try {
-                const response = await fetch('/api/admin/categories', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        name: newCategoryName,
-                        description: newCategoryDescription
-                    })
-                })
-
-                if (response.ok) {
-                    const newCategory = await response.json()
-                    setCategories(prev => [newCategory, ...prev])
-                    setFormData(prev => ({ ...prev, categoryId: newCategory.id }))
-                    setNewCategoryName('')
-                    setNewCategoryDescription('')
-                    setIsNewCategoryOpen(false)
-                } else {
-                    alert('Erro ao criar categoria')
+                    isActive: true,
+                    idioma: ''
                 }
-            } catch (error) {
-                console.error('Erro ao criar categoria:', error)
-                alert('Erro ao criar categoria')
-            } finally {
-                setIsCreatingCategory(false)
-            }
-        }
+            ];
+            setTimeout(() => {
+                const lastIdx = newVariations.length - 1;
+                variationRefs.current[lastIdx]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+            return {
+                ...prev,
+                variations: newVariations
+            };
+        });
+    }
 
-        const generateSlug = (name: string) => {
-            return name
-                .toLowerCase()
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '')
-                .replace(/[^a-z0-9\s-]/g, '')
-                .replace(/\s+/g, '-')
-                .replace(/-+/g, '-')
-                .trim()
-        }
+    const LANGUAGE_OPTIONS = [
+        { value: 'portugues', label: 'Português' },
+        { value: 'espanhol', label: 'Espanhol' },
+        { value: 'escreva', label: 'Escreva sua mensagem' },
+    ];
 
-        const handleNameChange = (name: string) => {
+    const removeVariation = (index: number) => {
+        if (formData.variations.length > 1) {
             setFormData(prev => ({
                 ...prev,
-                name,
-                slug: generateSlug(name)
+                variations: prev.variations.filter((_, i) => i !== index)
             }))
         }
+    }
 
-        const handleInputChange = (field: keyof ProductFormData, value: string | boolean) => {
-            setFormData(prev => ({ ...prev, [field]: value }))
-        }
+    const updateVariation = (index: number, field: keyof ProductVariation, value: string | boolean) => {
+        setFormData(prev => ({
+            ...prev,
+            variations: prev.variations.map((variation, i) =>
+                i === index ? { ...variation, [field]: value } : variation
+            )
+        }))
+    }
 
-        const variationRefs = useRef<(HTMLDivElement | null)[]>([]);
-        const addVariation = () => {
-            setFormData(prev => {
-                const newVariations = [
-                    ...prev.variations,
-                    {
-                        name: `Variação ${prev.variations.length + 1}`,
-                        price: '',
-                        files: [],
-                        images: [],
-                        isActive: true,
-                        idioma: ''
-                    }
-                ];
-                setTimeout(() => {
-                    const lastIdx = newVariations.length - 1;
-                    variationRefs.current[lastIdx]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 100);
-                return {
-                    ...prev,
-                    variations: newVariations
-                };
-            });
-        }
+    const handleFileUpload = async (variationIndex: number, files: FileList) => {
+        const validFiles = Array.from(files).filter(file => {
+            const isValidType = file.type === 'application/pdf' || file.type.startsWith('image/')
+            const isValidSize = file.size <= 50 * 1024 * 1024
+            return isValidType && isValidSize
+        })
 
-        const LANGUAGE_OPTIONS = [
-            { value: 'portugues', label: 'Português' },
-            { value: 'espanhol', label: 'Espanhol' },
-            { value: 'escreva', label: 'Escreva sua mensagem' },
-        ];
-
-        const removeVariation = (index: number) => {
-            if (formData.variations.length > 1) {
-                setFormData(prev => ({
-                    ...prev,
-                    variations: prev.variations.filter((_, i) => i !== index)
-                }))
+        for (const file of validFiles) {
+            const uploadFile: UploadedFile = {
+                file,
+                type: file.type === 'application/pdf' ? 'pdf' : 'image',
+                uploading: false,
+                uploaded: false
             }
-        }
 
-        const updateVariation = (index: number, field: keyof ProductVariation, value: string | boolean) => {
-            setFormData(prev => ({
-                ...prev,
-                variations: prev.variations.map((variation, i) =>
-                    i === index ? { ...variation, [field]: value } : variation
-                )
-            }))
-        }
-
-        const handleFileUpload = async (variationIndex: number, files: FileList) => {
-            const validFiles = Array.from(files).filter(file => {
-                const isValidType = file.type === 'application/pdf' || file.type.startsWith('image/')
-                const isValidSize = file.size <= 50 * 1024 * 1024
-                return isValidType && isValidSize
-            })
-
-            for (const file of validFiles) {
-                const uploadFile: UploadedFile = {
-                    file,
-                    type: file.type === 'application/pdf' ? 'pdf' : 'image',
-                    uploading: false,
-                    uploaded: false
-                }
-
-                setFormData(prev => ({
-                    ...prev,
-                    variations: prev.variations.map((variation, i) =>
-                        i === variationIndex
-                            ? { ...variation, files: [...variation.files, uploadFile] }
-                            : variation
-                    )
-                }))
-            }
-        }
-
-        const removeFileFromVariation = (variationIndex: number, fileIndex: number) => {
             setFormData(prev => ({
                 ...prev,
                 variations: prev.variations.map((variation, i) =>
                     i === variationIndex
-                        ? { ...variation, files: variation.files.filter((_, fi) => fi !== fileIndex) }
+                        ? { ...variation, files: [...variation.files, uploadFile] }
                         : variation
                 )
             }))
         }
+    }
 
-        const handleProductImageUpload = async (files: FileList) => {
-            const validFiles = Array.from(files).filter(file => {
-                const isValidType = file.type.startsWith('image/')
-                const isValidSize = file.size <= 10 * 1024 * 1024
-                return isValidType && isValidSize
-            })
+    const removeFileFromVariation = (variationIndex: number, fileIndex: number) => {
+        setFormData(prev => ({
+            ...prev,
+            variations: prev.variations.map((variation, i) =>
+                i === variationIndex
+                    ? { ...variation, files: variation.files.filter((_, fi) => fi !== fileIndex) }
+                    : variation
+            )
+        }))
+    }
 
-            for (const file of validFiles) {
-                const uploadImage: UploadedImage = {
-                    id: `product-img-${Date.now()}-${Math.random()}`,
-                    file,
-                    uploading: true,
-                    order: formData.images.length
-                }
+    const handleProductImageUpload = async (files: FileList) => {
+        const validFiles = Array.from(files).filter(file => {
+            const isValidType = file.type.startsWith('image/')
+            const isValidSize = file.size <= 10 * 1024 * 1024
+            return isValidType && isValidSize
+        })
 
-                setFormData(prev => ({
-                    ...prev,
-                    images: [...prev.images, uploadImage]
-                }))
-
-                try {
-                    const base64Data = await new Promise<string>((resolve, reject) => {
-                        const reader = new FileReader()
-                        reader.onload = () => resolve(reader.result as string)
-                        reader.onerror = reject
-                        reader.readAsDataURL(file)
-                    })
-
-                    setFormData(prev => ({
-                        ...prev,
-                        images: prev.images.map(img =>
-                            img.file === file
-                                ? { ...img, uploading: false, uploaded: true, data: base64Data, url: base64Data }
-                                : img
-                        )
-                    }))
-                } catch {
-                    setFormData(prev => ({
-                        ...prev,
-                        images: prev.images.map(img =>
-                            img.file === file
-                                ? { ...img, uploading: false, error: 'Erro no upload' }
-                                : img
-                        )
-                    }))
-                }
+        for (const file of validFiles) {
+            const uploadImage: UploadedImage = {
+                id: `product-img-${Date.now()}-${Math.random()}`,
+                file,
+                uploading: true,
+                order: formData.images.length
             }
-        }
 
-        const handleVariationImageUpload = async (variationIndex: number, files: FileList) => {
-            const validFiles = Array.from(files).filter(file => {
-                const isValidType = file.type.startsWith('image/')
-                const isValidSize = file.size <= 10 * 1024 * 1024
-                return isValidType && isValidSize
-            })
+            setFormData(prev => ({
+                ...prev,
+                images: [...prev.images, uploadImage]
+            }))
 
-            for (const file of validFiles) {
-                const uploadImage: UploadedImage = {
-                    id: `variation-${variationIndex}-img-${Date.now()}-${Math.random()}`,
-                    file,
-                    uploading: true,
-                    order: formData.variations[variationIndex]?.images.length || 0
-                }
+            try {
+                const base64Data = await new Promise<string>((resolve, reject) => {
+                    const reader = new FileReader()
+                    reader.onload = () => resolve(reader.result as string)
+                    reader.onerror = reject
+                    reader.readAsDataURL(file)
+                })
 
                 setFormData(prev => ({
                     ...prev,
-                    variations: prev.variations.map((variation, i) =>
-                        i === variationIndex
-                            ? { ...variation, images: [...variation.images, uploadImage] }
-                            : variation
+                    images: prev.images.map(img =>
+                        img.file === file
+                            ? { ...img, uploading: false, uploaded: true, data: base64Data, url: base64Data }
+                            : img
                     )
                 }))
+            } catch {
+                setFormData(prev => ({
+                    ...prev,
+                    images: prev.images.map(img =>
+                        img.file === file
+                            ? { ...img, uploading: false, error: 'Erro no upload' }
+                            : img
+                    )
+                }))
+            }
+        }
+    }
+
+    const handleVariationImageUpload = async (variationIndex: number, files: FileList) => {
+        const validFiles = Array.from(files).filter(file => {
+            const isValidType = file.type.startsWith('image/')
+            const isValidSize = file.size <= 10 * 1024 * 1024
+            return isValidType && isValidSize
+        })
+
+        for (const file of validFiles) {
+            const uploadImage: UploadedImage = {
+                id: `variation-${variationIndex}-img-${Date.now()}-${Math.random()}`,
+                file,
+                uploading: true,
+                order: formData.variations[variationIndex]?.images.length || 0
+            }
+
+            setFormData(prev => ({
+                ...prev,
+                variations: prev.variations.map((variation, i) =>
+                    i === variationIndex
+                        ? { ...variation, images: [...variation.images, uploadImage] }
+                        : variation
+                )
+            }))
 
             try {
                 const base64Data = await new Promise<string>((resolve, reject) => {
