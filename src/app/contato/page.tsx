@@ -82,7 +82,7 @@ export default function ContatoPage() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                                <p className="text-gray-600">
+                            <p className="text-gray-600">
                                 {t('contact.addressLine1', 'São Paulo, SP - Brasil')}<br />
                                 {t('contact.digitalSupport', 'Atendimento 100% digital')}
                             </p>

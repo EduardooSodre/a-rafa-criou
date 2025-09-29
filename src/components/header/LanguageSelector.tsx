@@ -26,7 +26,7 @@ export function LanguageSelector({ selectedLanguage, setSelectedLanguage, isScro
         const stored = typeof window !== 'undefined' ? (localStorage.getItem('NEXT_LOCALE') || localStorage.getItem('locale')) : null
         if (stored) {
             initI18n(stored).then(() => {
-                i18n.changeLanguage(stored).catch(() => {})
+                i18n.changeLanguage(stored).catch(() => { })
             })
             const label = Object.keys(LOCALE_MAP).find((k) => LOCALE_MAP[k] === stored)
             if (label) setSelectedLanguage(label)
@@ -39,17 +39,17 @@ export function LanguageSelector({ selectedLanguage, setSelectedLanguage, isScro
         try {
             localStorage.setItem('locale', locale)
             localStorage.setItem('NEXT_LOCALE', locale)
-        } catch {}
+        } catch { }
 
         try {
             document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=${60 * 60 * 24 * 365}`
-        } catch {}
+        } catch { }
 
         // Try to apply client-side quickly
         try {
-            initI18n(locale).catch(() => {})
-            i18n.changeLanguage(locale).catch(() => {})
-        } catch {}
+            initI18n(locale).catch(() => { })
+            i18n.changeLanguage(locale).catch(() => { })
+        } catch { }
 
         if (typeof window !== 'undefined') {
             try {
@@ -64,7 +64,7 @@ export function LanguageSelector({ selectedLanguage, setSelectedLanguage, isScro
                 // If the POST fails or the cookie wasn't set, set cookie client-side as a fallback
                 try {
                     document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=${60 * 60 * 24 * 365}`
-                } catch {}
+                } catch { }
             }
 
             // Include ?lang so Providers can pick it up immediately on client load

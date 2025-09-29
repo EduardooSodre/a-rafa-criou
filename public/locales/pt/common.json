@@ -52,13 +52,11 @@
     "customer": "Cliente"
   },
   "loading": "Carregando...",
-  "quickLinks": "Links Rápidos"
-  ,
+  "quickLinks": "Links Rápidos",
   "search": {
     "placeholder": "O que você procura?",
     "ariaLabel": "Buscar produtos"
-  }
-  ,
+  },
   "welcome": {
     "title": "🚀 Bem-vindo ao A Rafa Criou!",
     "subtitle": "Base do projeto configurada com sucesso. Ready para desenvolvimento!",
@@ -81,10 +79,8 @@
   "quickActions": {
     "viewProducts": "Ver Produtos",
     "viewProduct": "Ver Produto"
-  }
-  ,
-  "selectLanguage": "Selecione seu idioma"
-  ,
+  },
+  "selectLanguage": "Selecione seu idioma",
   "hero": {
     "title": "BEM-VINDA \n OVELHINHA!",
     "subtitle": "Descubra uma coleção de arquivos\nteocráticos digitais para ajudar você\na dar seu melhor a Jeová!"
@@ -116,5 +112,4 @@
     "featured": "Destaque",
     "viewDetails": "Ver detalhes"
   }
-
 }

@@ -26,7 +26,7 @@ export function Providers({ children }: ProvidersProps) {
                     // persist chosen locale
                     try {
                         localStorage.setItem('NEXT_LOCALE', locale);
-                    } catch {}
+                    } catch { }
                     setCookie('NEXT_LOCALE', locale, 365);
                     // remove lang param to keep clean URL
                     url.searchParams.delete('lang');

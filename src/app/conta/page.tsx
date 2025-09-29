@@ -61,7 +61,7 @@ export default function ContaPage() {
                         <h1 className="text-4xl font-bold text-gray-900">
                             {t('account.title')}
                         </h1>
-                            <Button
+                        <Button
                             variant="outline"
                             onClick={handleSignOut}
                             className="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
@@ -42,9 +42,9 @@ export async function initI18n(locale = 'pt') {
       // ignore
     }
     i18n.addResourceBundle(locale, 'common', common, true, true);
-  await i18n.changeLanguage(locale);
+    await i18n.changeLanguage(locale);
   } catch {
-    console.error('i18n init error')
+    console.error('i18n init error');
   }
 
   return i18n;
