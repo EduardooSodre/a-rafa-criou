@@ -113,6 +113,9 @@
     "featured": "Featured",
     "viewDetails": "View details"
   },
+  "cart": {
+    "addedToCart": "{{product}} added to cart!"
+  },
   "header": {
     "promo": "USE THE COUPON \"FIRSTBUY\" TO GET 10% OFF YOUR FIRST PURCHASE! ✨",
     "account": "ACCOUNT",
@@ -124,5 +127,26 @@
     "account": "My Account",
     "orders": "My Orders",
     "signOut": "Sign out"
+  }
+  ,
+  "productNames": {
+    "guia-marketing-digital": "Complete Guide to Digital Marketing",
+    "planejador-financeiro": "Personal Financial Planner",
+    "receitas-saudaveis": "E-book: Healthy Recipes"
+  }
+  ,
+  "productInfo": {
+    "chooseVariation": "Choose a variation:",
+    "selectVariationPlaceholder": "Select a variation",
+    "downloads": "downloads",
+    "warranty": "30-day warranty",
+    "immediateDownload": "Immediate download after payment",
+    "generalInformation": "General Information",
+    "categoryLabel": "Category:",
+    "variationsLabel": "Variations:",
+    "tagsLabel": "Tags:"
+  },
+  "productCategories": {
+    "adesivos": "Stickers"
   }
 }

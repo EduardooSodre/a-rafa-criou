@@ -22,14 +22,14 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Card className='group h-full transition-all hover:shadow-lg'>
-      <CardHeader className='pb-3'>
+        <CardHeader className='pb-3'>
         {product.isFeatured && (
           <Badge className='mb-2 w-fit bg-secondary text-secondary-foreground'>
             {t('product.featured', 'Destaque')}
           </Badge>
         )}
         <CardTitle className='line-clamp-2 text-lg group-hover:text-primary'>
-          {product.name}
+          {t(`productNames.${product.slug}`, product.name)}
         </CardTitle>
         {product.shortDescription && (
           <CardDescription className='line-clamp-3'>

@@ -113,6 +113,9 @@
     "featured": "Destacado",
     "viewDetails": "Ver detalles"
   },
+  "cart": {
+    "addedToCart": "¡{{product}} añadido al carrito!"
+  },
   "header": {
     "promo": "USA EL CUPÓN \"PRIMERACOMPRA\" PARA OBTENER 10% DE DESCUENTO EN TU PRIMERA COMPRA! ✨",
     "account": "CUENTA",
@@ -124,5 +127,26 @@
     "account": "Mi Cuenta",
     "orders": "Mis Pedidos",
     "signOut": "Salir"
+  }
+  ,
+  "productNames": {
+    "guia-marketing-digital": "Guía Completa de Marketing Digital",
+    "planejador-financeiro": "Planificador Financiero Personal",
+    "receitas-saudaveis": "E-book: Recetas Saludables"
+  }
+  ,
+  "productInfo": {
+    "chooseVariation": "Elige una variación:",
+    "selectVariationPlaceholder": "Selecciona una variación",
+    "downloads": "descargas",
+    "warranty": "Garantía de 30 días",
+    "immediateDownload": "Descarga inmediata después del pago",
+    "generalInformation": "Información General",
+    "categoryLabel": "Categoría:",
+    "variationsLabel": "Variaciones:",
+    "tagsLabel": "Etiquetas:"
+  },
+  "productCategories": {
+    "adesivos": "Adhesivos"
   }
 }

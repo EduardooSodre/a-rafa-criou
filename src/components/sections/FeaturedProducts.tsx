@@ -122,14 +122,14 @@ export default function FeaturedProducts({
             id: variation ? `${product.id}-${variation.id}` : product.id,
             productId: product.id,
             variationId: variation?.id || 'default',
-            name: product.name,
+            name: t(`productNames.${product.slug}`, { defaultValue: product.name }),
             price: variation?.price || product.price,
             variationName: variation?.name || 'Padrão',
             image: product.mainImage?.data || ''
         });
 
         // Mostrar toast de confirmação
-        showToast(`${product.name} adicionado ao carrinho!`, 'success');
+        showToast(t('cart.addedToCart', { product: t(`productNames.${product.slug}`, { defaultValue: product.name }) }), 'success');
     };
 
     // Produtos fallback simples
@@ -227,14 +227,14 @@ export default function FeaturedProducts({
                                                 WebkitBoxOrient: 'vertical',
                                                 overflow: 'hidden'
                                             }}>
-                                                {product.name}
+                                                {t(`productNames.${product.slug}`, { defaultValue: product.name })}
                                             </h3>
                                         </div>
                                         {/* Categoria */}
                                         <div className="flex-grow-0 mb-2 md:mb-2 lg:mb-3 text-center">
                                             {product.category && (
                                                 <span className="text-xs bg-orange-200 text-gray-700 px-2 md:px-3 py-1 rounded-full font-medium">
-                                                    {product.category.name}
+                                                    {t(`productCategories.${product.category.slug}`, { defaultValue: product.category.name })}
                                                 </span>
                                             )}
                                         </div>
