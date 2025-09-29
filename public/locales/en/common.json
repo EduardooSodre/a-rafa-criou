@@ -39,7 +39,7 @@
     "title": "Get in touch",
     "subtitle": "For questions about products or technical support",
     "backToProducts": "Back to Products",
-    "email": "E-mail",
+  "email": "Email",
     "whatsapp": "WhatsApp",
     "whatsappHours": "Quick support Monday to Friday, 9am to 6pm",
     "phone": "Phone",
@@ -72,7 +72,7 @@
     "nextSteps": "🔄 Next Steps",
     "todo": {
       "db": "Configure database",
-      "authPages": "Create auth pages",
+      "authPages": "Create authentication pages",
       "catalog": "Implement catalog",
       "payments": "Payment system"
     }
@@ -83,7 +83,7 @@
   },
   "selectLanguage": "Select your language",
   "hero": {
-    "title": "WELCOME \n SHEEP!",
+  "title": "WELCOME\nSHEEP!",
     "subtitle": "Discover a collection of theocratic digital files\nto help you give your best\nto Jehovah!"
   },
   "featured": {

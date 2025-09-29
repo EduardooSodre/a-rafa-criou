@@ -72,7 +72,7 @@
     "nextSteps": "🔄 Próximos Pasos",
     "todo": {
       "db": "Configurar base de datos",
-      "authPages": "Crear páginas de auth",
+      "authPages": "Crear páginas de autenticación",
       "catalog": "Implementar catálogo",
       "payments": "Sistema de pagos"
     }
@@ -83,7 +83,7 @@
   },
   "selectLanguage": "Selecciona tu idioma",
   "hero": {
-    "title": "¡BIENVENIDA \n OVEJITA!",
+  "title": "¡BIENVENIDA\nOVEJITA!",
     "subtitle": "Descubre una colección de archivos\nteocráticos digitales para ayudarte\na dar lo mejor a Jehová!"
   },
   "featured": {
