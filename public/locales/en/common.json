@@ -112,8 +112,8 @@
     "addToCart": "ADD TO CART",
     "featured": "Featured",
     "viewDetails": "View details",
-    "buyNow": "Buy Now"
-    ,"tabs": {
+    "buyNow": "Buy Now",
+    "tabs": {
       "description": "Description",
       "specifications": "Specifications"
     }

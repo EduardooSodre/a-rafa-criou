@@ -206,9 +206,9 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
             <div className="xl:col-span-2 mt-10">
                 <Tabs defaultValue="description" className="w-full">
                     <TabsList className="grid w-full grid-cols-2">
-                            <TabsTrigger value="description">{t('product.tabs.description', 'Descrição')}</TabsTrigger>
-                            <TabsTrigger value="specifications">{t('product.tabs.specifications', 'Especificações')}</TabsTrigger>
-                        </TabsList>
+                        <TabsTrigger value="description">{t('product.tabs.description', 'Descrição')}</TabsTrigger>
+                        <TabsTrigger value="specifications">{t('product.tabs.specifications', 'Especificações')}</TabsTrigger>
+                    </TabsList>
 
                     <TabsContent value="description" className="mt-4">
                         <Card>

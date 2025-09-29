@@ -330,7 +330,7 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
         }
     }
 
-    
+
 
     const handleCreateCategory = async () => {
         if (!newCategoryName.trim()) return
