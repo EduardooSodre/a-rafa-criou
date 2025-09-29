@@ -113,4 +113,18 @@
     "featured": "Featured",
     "viewDetails": "View details"
   }
+  ,
+  "header": {
+    "promo": "USE THE COUPON \"FIRSTBUY\" TO GET 10% OFF YOUR FIRST PURCHASE! ✨",
+    "account": "ACCOUNT",
+    "accountIconAlt": "User icon",
+    "favorites": "FAVORITES",
+    "favoritesIconAlt": "Favorites icon"
+  }
+  ,
+  "headerDropdown": {
+    "account": "My Account",
+    "orders": "My Orders",
+    "signOut": "Sign out"
+  }
 }

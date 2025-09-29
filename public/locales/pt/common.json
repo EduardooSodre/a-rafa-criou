@@ -112,4 +112,18 @@
     "featured": "Destaque",
     "viewDetails": "Ver detalhes"
   }
+  ,
+  "header": {
+    "promo": "USE O CUPOM \"PRIMEIRACOMPRA\" PARA TER 10% DE DESCONTO NA SUA PRIMEIRA COMPRA! ✨",
+    "account": "CONTA",
+    "accountIconAlt": "Ícone de usuário",
+    "favorites": "FAVORITOS",
+    "favoritesIconAlt": "Ícone de favoritos"
+  }
+  ,
+  "headerDropdown": {
+    "account": "Minha Conta",
+    "orders": "Meus Pedidos",
+    "signOut": "Sair"
+  }
 }

@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { LogOut, Settings, ShoppingBag } from 'lucide-react'
 import { getDisplayName } from '@/lib/utils/user'
+import { useTranslation } from 'react-i18next'
 
 interface ExtendedUser {
     id: string
@@ -26,6 +27,7 @@ interface ExtendedUser {
 
 export function MobileHeader() {
     const { data: session, status } = useSession()
+    const { t } = useTranslation('common')
 
     const handleSignOut = async () => {
         await signOut({ callbackUrl: '/' })
@@ -62,13 +64,13 @@ export function MobileHeader() {
                                 <DropdownMenuItem asChild>
                                     <Link href="/conta" className="flex items-center gap-2 no-underline">
                                         <Settings className="w-4 h-4" />
-                                        Minha Conta
+                                        {t('headerDropdown.account', 'Minha Conta')}
                                     </Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild>
                                     <Link href="/conta/pedidos" className="flex items-center gap-2 no-underline">
                                         <ShoppingBag className="w-4 h-4" />
-                                        Meus Pedidos
+                                        {t('headerDropdown.orders', 'Meus Pedidos')}
                                     </Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
@@ -77,7 +79,7 @@ export function MobileHeader() {
                                     className="flex items-center gap-2 text-red-600 focus:text-red-600"
                                 >
                                     <LogOut className="w-4 h-4" />
-                                    Sair
+                                    {t('headerDropdown.signOut', 'Sair')}
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
@@ -86,12 +88,12 @@ export function MobileHeader() {
                             <Link href="/auth/login" className="no-underline flex flex-col items-center gap-2">
                                 <Image
                                     src="/user.png"
-                                    alt="Ícone de usuário"
+                                    alt={t('header.accountIconAlt', 'Ícone de usuário')}
                                     width={32}
                                     height={32}
                                     className="w-8 h-8 text-white drop-shadow-md hover:scale-110 active:scale-95 transition-all duration-200"
                                 />
-                                <span className="text-xs font-bold text-white tracking-wide drop-shadow-md">CONTA</span>
+                                <span className="text-xs font-bold text-white tracking-wide drop-shadow-md">{t('header.account', 'CONTA')}</span>
                             </Link>
                         </div>
                     )}
@@ -112,12 +114,12 @@ export function MobileHeader() {
                         <Link href="/favoritos" className="no-underline flex flex-col items-center gap-2">
                             <Image
                                 src="/favorito.png"
-                                alt="Ícone de favoritos"
+                                alt={t('header.favoritesIconAlt', 'Ícone de favoritos')}
                                 width={48}
                                 height={48}
                                 className="w-8 h-8 text-white drop-shadow-md hover:scale-110 active:scale-95 transition-all duration-200"
                             />
-                            <span className="text-xs font-bold text-white tracking-wide drop-shadow-md ">FAVORITOS</span>
+                            <span className="text-xs font-bold text-white tracking-wide drop-shadow-md ">{t('header.favorites', 'FAVORITOS')}</span>
                         </Link>
                     </div>
                 </div>
