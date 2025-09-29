@@ -113,6 +113,10 @@
     "featured": "Destacado",
     "viewDetails": "Ver detalles",
     "buyNow": "Comprar Ahora"
+    ,"tabs": {
+      "description": "Descripción",
+      "specifications": "Especificaciones"
+    }
   },
   "cart": {
     "addedToCart": "¡{{product}} añadido al carrito!"

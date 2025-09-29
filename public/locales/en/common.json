@@ -113,6 +113,10 @@
     "featured": "Featured",
     "viewDetails": "View details",
     "buyNow": "Buy Now"
+    ,"tabs": {
+      "description": "Description",
+      "specifications": "Specifications"
+    }
   },
   "cart": {
     "addedToCart": "{{product}} added to cart!"

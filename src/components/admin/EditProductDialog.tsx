@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Upload, X, FileText, Loader2, Plus, Trash2, Package, FolderPlus, Image as ImageIcon, GripVertical } from 'lucide-react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
@@ -10,7 +10,6 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { useTranslation } from 'react-i18next'
-const { t } = useTranslation('common')
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
@@ -91,8 +90,45 @@ interface UploadedFile {
     url?: string // para arquivos já existentes
 }
 
+import type { Product as ProductType } from '@/types'
+
+// Shapes returned by admin API (partial/extended Product)
+interface ApiImage {
+    id?: string | number
+    url?: string
+    alt?: string
+    isMain?: boolean
+    order?: number
+}
+
+interface ApiFile {
+    r2Key?: string
+    filename?: string
+    originalName?: string
+    fileSize?: number
+    mimeType?: string
+    url?: string
+}
+
+interface ApiVariation {
+    id?: string
+    name?: string
+    price?: number | string
+    isActive?: boolean
+    idioma?: string
+    files?: ApiFile[]
+    images?: ApiImage[]
+}
+
+interface AdminProduct extends Partial<ProductType> {
+    images?: ApiImage[]
+    variations?: ApiVariation[]
+    categoryId?: string
+    isFeatured?: boolean
+}
+
 interface EditProductDialogProps {
-    product: any
+    product: AdminProduct | null
     open: boolean
     onOpenChange: (open: boolean) => void
     onSuccess?: () => void
@@ -218,11 +254,69 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
         fetchCategories()
     }, [])
 
+    // load product data when dialog opens or product changes
+    const loadProductData = useCallback(() => {
+        const p = product
+        if (!p) return
+
+        const productImages: UploadedImage[] = (p.images || []).map((img: ApiImage, idx: number) => ({
+            id: `existing-product-img-${img.id || idx}`,
+            uploaded: true,
+            url: img.url,
+            preview: img.url,
+            alt: img.alt,
+            isMain: img.isMain,
+            order: img.order || idx
+        }))
+
+        const variations: ProductVariation[] = (p.variations || []).map((variation: ApiVariation) => ({
+            id: variation.id,
+            name: variation.name || 'Variação',
+            price: variation.price?.toString() || '0.00',
+            isActive: variation.isActive ?? true,
+            idioma: variation.idioma || '',
+            files: (variation.files || []).map((file: ApiFile) => ({
+                type: file.mimeType === 'application/pdf' ? 'pdf' : 'image',
+                uploaded: true,
+                r2Key: file.r2Key,
+                filename: file.filename,
+                originalName: file.originalName,
+                fileSize: file.fileSize,
+                mimeType: file.mimeType,
+                url: file.url || (file.r2Key ? `/api/r2/download?r2Key=${encodeURIComponent(file.r2Key)}` : undefined)
+            })),
+            images: (variation.images || []).map((img: ApiImage, imgIndex: number) => ({
+                id: `existing-variation-${variation.id}-img-${img.id || imgIndex}`,
+                uploaded: true,
+                url: img.url,
+                preview: img.url,
+                alt: img.alt,
+                isMain: img.isMain,
+                order: img.order || imgIndex
+            }))
+        }))
+
+        setFormData({
+            name: p.name || '',
+            slug: p.slug || '',
+            description: p.description || '',
+            categoryId: p.categoryId || '',
+            isActive: p.isActive ?? true,
+            isFeatured: p.isFeatured ?? false,
+            images: productImages,
+            variations: variations.length > 0 ? variations : [{
+                name: 'Padrão',
+                price: '0.00',
+                files: [],
+                images: [],
+                isActive: true
+            }]
+        })
+    }, [product])
+
     useEffect(() => {
-        if (open && product) {
-            loadProductData()
-        }
-    }, [open, product])
+        if (open) loadProductData()
+    }, [open, loadProductData])
 
     const fetchCategories = async () => {
         try {
@@ -236,63 +330,7 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
         }
     }
 
-    const loadProductData = () => {
-        if (!product) return
-
-        const productImages: UploadedImage[] = (product.images || []).map((img: any, index: number) => ({
-            id: `existing-product-img-${img.id || index}`,
-            uploaded: true,
-            url: img.url,
-            preview: img.url,
-            alt: img.alt,
-            isMain: img.isMain,
-            order: img.order || index
-        }))
-
-        const variations: ProductVariation[] = (product.variations || []).map((variation: any, index: number) => ({
-            id: variation.id,
-            name: variation.name,
-            price: variation.price?.toString() || '0.00',
-            isActive: variation.isActive ?? true,
-            idioma: variation.idioma || '',
-            files: (variation.files || []).map((file: any) => ({
-                type: file.mimeType === 'application/pdf' ? 'pdf' : 'image',
-                uploaded: true,
-                r2Key: file.r2Key,
-                filename: file.filename,
-                originalName: file.originalName,
-                fileSize: file.fileSize,
-                mimeType: file.mimeType,
-                url: file.url || (file.r2Key ? `/api/r2/download?r2Key=${encodeURIComponent(file.r2Key)}` : undefined)
-            })),
-            images: (variation.images || []).map((img: any, imgIndex: number) => ({
-                id: `existing-variation-${variation.id}-img-${img.id || imgIndex}`,
-                uploaded: true,
-                url: img.url,
-                preview: img.url,
-                alt: img.alt,
-                isMain: img.isMain,
-                order: img.order || imgIndex
-            }))
-        }))
-
-        setFormData({
-            name: product.name || '',
-            slug: product.slug || '',
-            description: product.description || '',
-            categoryId: product.categoryId || '',
-            isActive: product.isActive ?? true,
-            isFeatured: product.isFeatured ?? false,
-            images: productImages,
-            variations: variations.length > 0 ? variations : [{
-                name: 'Padrão',
-                price: '0.00',
-                files: [],
-                images: [],
-                isActive: true
-            }]
-        })
-    }
+    
 
     const handleCreateCategory = async () => {
         if (!newCategoryName.trim()) return
@@ -792,6 +830,9 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
             console.log('[DEBUG] Valor final de productData.price:', productData.price, typeof productData.price);
             console.log('[DEBUG] productData completo:', productData);
 
+            if (!product || !product.id) {
+                throw new Error('Produto inválido ao tentar atualizar')
+            }
             const url = `/api/admin/products/${product.id}`
             const method = 'PUT'
 

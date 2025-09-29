@@ -52,6 +52,22 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
     const currentVariation = Array.isArray(product.variations) ? product.variations.find(v => v.id === selectedVariation) : undefined
     const currentPrice = currentVariation?.price || product.basePrice
 
+    // Normalize category to a slug key for i18n lookups. Backend may return a human name (e.g. "Adesivos")
+    // so we slugify it to match keys like productCategories.adesivos
+    const slugify = (s?: string) => {
+        if (!s) return ''
+        return s
+            .toString()
+            .normalize('NFD') // decompose accents
+            .replace(/\p{Diacritic}/gu, '') // remove diacritics
+            .replace(/[^\w\s-]/g, '') // remove non-word chars
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+    }
+    const categoryKey = slugify(product.category)
+
     const handleAddToCart = () => {
         if (!currentVariation) return
 
@@ -89,7 +105,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
             <div className="flex flex-col gap-6 w-full max-w-xl mx-auto xl:mx-0">
                 <div>
                     <div className="flex items-center gap-2 mb-2">
-                        <Badge variant="secondary">{t(`productCategories.${product.category}`, product.category)}</Badge>
+                        <Badge variant="secondary">{t(`productCategories.${categoryKey}`, { defaultValue: product.category })}</Badge>
                         <div className="flex items-center gap-1">
                             {[...Array(5)].map((_, i) => (
                                 <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
@@ -189,11 +205,10 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
             {/* Descrição Detalhada */}
             <div className="xl:col-span-2 mt-10">
                 <Tabs defaultValue="description" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="description">Descrição</TabsTrigger>
-                        <TabsTrigger value="specifications">Especificações</TabsTrigger>
-                        <TabsTrigger value="reviews">Avaliações</TabsTrigger>
-                    </TabsList>
+                    <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="description">{t('product.tabs.description', 'Descrição')}</TabsTrigger>
+                            <TabsTrigger value="specifications">{t('product.tabs.specifications', 'Especificações')}</TabsTrigger>
+                        </TabsList>
 
                     <TabsContent value="description" className="mt-4">
                         <Card>
@@ -215,7 +230,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                                         <div className="space-y-2 text-sm">
                                             <div className="flex justify-between">
                                                 <span>{t('productInfo.categoryLabel', 'Categoria:')}</span>
-                                                <span>{t(`productCategories.${product.category}`, product.category)}</span>
+                                                <span>{t(`productCategories.${categoryKey}`, { defaultValue: product.category })}</span>
                                             </div>
                                             <div className="flex justify-between">
                                                 <span>{t('productInfo.variationsLabel', 'Variações:')}</span>
@@ -251,17 +266,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                         </Card>
                     </TabsContent>
 
-                    <TabsContent value="reviews" className="mt-4">
-                        <Card>
-                            <CardContent className="p-6">
-                                <div className="text-center text-gray-500">
-                                    <Star className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                                    <p>Sistema de avaliações em desenvolvimento</p>
-                                    <p className="text-sm mt-2">Em breve você poderá ver e deixar avaliações!</p>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
+                    {/* Reviews tab intentionally removed (no reviews feature) */}
                 </Tabs>
             </div>
         </section>
