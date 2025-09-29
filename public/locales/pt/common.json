@@ -126,14 +126,12 @@
     "account": "Minha Conta",
     "orders": "Meus Pedidos",
     "signOut": "Sair"
-  }
-  ,
+  },
   "productNames": {
     "guia-marketing-digital": "Guia Completo de Marketing Digital",
     "planejador-financeiro": "Planejador Financeiro Pessoal",
     "receitas-saudaveis": "E-book: Receitas Saudáveis"
-  }
-  ,
+  },
   "productInfo": {
     "chooseVariation": "Escolha uma variação:",
     "selectVariationPlaceholder": "Selecione uma variação",

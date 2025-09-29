@@ -127,14 +127,12 @@
     "account": "My Account",
     "orders": "My Orders",
     "signOut": "Sign out"
-  }
-  ,
+  },
   "productNames": {
     "guia-marketing-digital": "Complete Guide to Digital Marketing",
     "planejador-financeiro": "Personal Financial Planner",
     "receitas-saudaveis": "E-book: Healthy Recipes"
-  }
-  ,
+  },
   "productInfo": {
     "chooseVariation": "Choose a variation:",
     "selectVariationPlaceholder": "Select a variation",
