@@ -121,7 +121,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                                 <SelectContent className="bg-white rounded-lg shadow-lg border border-primary/30 max-h-60 overflow-y-auto">
                                     {product.variations.map((variation) => (
                                         <SelectItem key={variation.id} value={variation.id} className="flex justify-between items-center px-3 py-2">
-                                            <span className="font-medium text-gray-900 truncate">{variation.name}</span>
+                                            <span className="font-medium text-gray-900 truncate">{t(`variationNames.${variation.name}`, { defaultValue: variation.name })}</span>
                                             <span className="font-bold text-primary ml-2 whitespace-nowrap">R$ {variation.price.toFixed(2).replace('.', ',')}</span>
                                         </SelectItem>
                                     ))}
@@ -229,18 +229,18 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                                     </div>
                                     {currentVariation && (
                                         <div>
-                                            <h4 className="font-semibold mb-2">Variação Selecionada</h4>
+                                            <h4 className="font-semibold mb-2">{t('productInfo.selectedVariation', 'Variação Selecionada')}</h4>
                                             <div className="space-y-2 text-sm">
                                                 <div className="flex justify-between">
-                                                    <span>Nome:</span>
-                                                    <span>{currentVariation.name}</span>
+                                                    <span>{t('productInfo.fieldName', 'Nome:')}</span>
+                                                    <span>{t(`variationNames.${currentVariation.name}`, { defaultValue: currentVariation.name })}</span>
                                                 </div>
                                                 <div className="flex justify-between">
-                                                    <span>Tamanho:</span>
+                                                    <span>{t('productInfo.fieldSize', 'Tamanho:')}</span>
                                                     <span>{currentVariation.fileSize}</span>
                                                 </div>
                                                 <div className="flex justify-between">
-                                                    <span>Downloads:</span>
+                                                    <span>{t('productInfo.fieldDownloads', 'Downloads:')}</span>
                                                     <span>{currentVariation.downloadLimit}</span>
                                                 </div>
                                             </div>

@@ -111,7 +111,8 @@
     "new": "NEW",
     "addToCart": "ADD TO CART",
     "featured": "Featured",
-    "viewDetails": "View details"
+    "viewDetails": "View details",
+    "buyNow": "Buy Now"
   },
   "cart": {
     "addedToCart": "{{product}} added to cart!"
@@ -142,7 +143,15 @@
     "generalInformation": "General Information",
     "categoryLabel": "Category:",
     "variationsLabel": "Variations:",
-    "tagsLabel": "Tags:"
+    "tagsLabel": "Tags:",
+    "supportIncluded": "Support included",
+    "selectedVariation": "Selected variation",
+    "fieldName": "Name:",
+    "fieldSize": "Size:",
+    "fieldDownloads": "Downloads:"
+  },
+  "variationNames": {
+    "Default": "Default"
   },
   "productCategories": {
     "adesivos": "Stickers"

@@ -102,7 +102,7 @@ export function MobileHeader() {
                     <Link href="/" className="flex items-center justify-center gap-2 no-underline">
                         <Image
                             src="/logo.webp"
-                            alt="A Rafa Criou"
+                            alt={t('siteTitle', 'A Rafa Criou - E-commerce de PDFs')}
                             width={200}
                             height={60}
                             className="h-22 sm:h-22 w-auto"

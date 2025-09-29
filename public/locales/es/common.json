@@ -111,7 +111,8 @@
     "new": "NUEVO",
     "addToCart": "AÑADIR AL CARRITO",
     "featured": "Destacado",
-    "viewDetails": "Ver detalles"
+    "viewDetails": "Ver detalles",
+    "buyNow": "Comprar Ahora"
   },
   "cart": {
     "addedToCart": "¡{{product}} añadido al carrito!"
@@ -142,7 +143,15 @@
     "generalInformation": "Información General",
     "categoryLabel": "Categoría:",
     "variationsLabel": "Variaciones:",
-    "tagsLabel": "Etiquetas:"
+    "tagsLabel": "Etiquetas:",
+    "supportIncluded": "Soporte técnico incluido",
+    "selectedVariation": "Variación seleccionada",
+    "fieldName": "Nombre:",
+    "fieldSize": "Tamaño:",
+    "fieldDownloads": "Descargas:"
+  },
+  "variationNames": {
+    "Predeterminado": "Predeterminado"
   },
   "productCategories": {
     "adesivos": "Adhesivos"
