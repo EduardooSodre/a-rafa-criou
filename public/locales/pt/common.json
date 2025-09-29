@@ -155,4 +155,12 @@
   "productCategories": {
     "adesivos": "Adesivos"
   }
+  ,
+  "productDescriptions": {
+    "guia-marketing-digital": "<p>Guia completo de marketing digital: estratégias práticas para promover seu trabalho e alcançar mais pessoas. Inclui dicas de SEO, redes sociais e planejamento de conteúdo.</p>",
+    "planejador-financeiro": "<p>Planejador financeiro pessoal para organizar suas finanças mensais, controlar gastos e poupar para projetos importantes.</p>",
+    "receitas-saudaveis": "<p>E-book com receitas saudáveis e práticas para o dia a dia, com versões para impressão e dicas de substituições.</p>"
+    ,
+    "autyro": "<p>Olá, tudo bem com você ?</p>"
+  }
 }
