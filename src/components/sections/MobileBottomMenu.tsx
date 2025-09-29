@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Menu, Home, ShoppingCart, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from 'react-i18next';
 
 interface MobileBottomMenuProps {
     cartItemCount?: number;
@@ -21,6 +22,7 @@ export default function MobileBottomMenu({
     onSearchClick,
     className
 }: MobileBottomMenuProps) {
+    const { t } = useTranslation('common');
 
     return (
         <div className={cn(
@@ -40,10 +42,10 @@ export default function MobileBottomMenu({
                         "rounded-xl"
                     )}
                     onClick={onMenuClick}
-                    aria-label="Abrir menu"
+                    aria-label={t('nav.menuAria', 'Abrir menu')}
                 >
                     <Menu className="w-7 h-7" strokeWidth={2} />
-                    <span className="text-[10px] font-bold tracking-wide">MENU</span>
+                    <span className="text-[10px] font-bold tracking-wide">{t('nav.menu', 'MENU')}</span>
                 </Button>
 
                 {/* Início */}
@@ -57,10 +59,10 @@ export default function MobileBottomMenu({
                         "rounded-xl"
                     )}
                     onClick={onHomeClick}
-                    aria-label="Ir para início"
+                    aria-label={t('nav.home', 'Início')}
                 >
                     <Home className="w-7 h-7" strokeWidth={2} />
-                    <span className="text-[10px] font-bold tracking-wide">INÍCIO</span>
+                    <span className="text-[10px] font-bold tracking-wide">{t('nav.home', 'INÍCIO')}</span>
                 </Button>
 
                 {/* Carrinho */}
@@ -74,7 +76,7 @@ export default function MobileBottomMenu({
                         "rounded-xl"
                     )}
                     onClick={onCartClick}
-                    aria-label={`Carrinho ${cartItemCount > 0 ? `com ${cartItemCount} ${cartItemCount === 1 ? 'item' : 'itens'}` : 'vazio'}`}
+                    aria-label={t('nav.cartAria', `Carrinho ${cartItemCount > 0 ? `com ${cartItemCount} ${cartItemCount === 1 ? 'item' : 'itens'}` : 'vazio'}`)}
                 >
                     <div className="relative">
                         <ShoppingCart className="w-7 h-7" strokeWidth={2} />
@@ -88,7 +90,7 @@ export default function MobileBottomMenu({
                             </div>
                         )}
                     </div>
-                    <span className="text-[10px] font-bold tracking-wide">CARRINHO</span>
+                    <span className="text-[10px] font-bold tracking-wide">{t('nav.cart', 'CARRINHO')}</span>
                 </Button>
 
                 {/* Busca */}
@@ -102,10 +104,10 @@ export default function MobileBottomMenu({
                         "rounded-xl"
                     )}
                     onClick={onSearchClick}
-                    aria-label="Buscar produtos"
+                    aria-label={t('nav.searchAria', 'Buscar produtos')}
                 >
                     <Search className="w-7 h-7" strokeWidth={2} />
-                    <span className="text-[10px] font-bold tracking-wide">BUSCA</span>
+                    <span className="text-[10px] font-bold tracking-wide">{t('nav.search', 'BUSCA')}</span>
                 </Button>
             </div>
         </div>

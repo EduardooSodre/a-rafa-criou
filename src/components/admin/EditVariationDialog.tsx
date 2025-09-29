@@ -50,15 +50,15 @@ interface VariationData {
     productId: string
     name: string
     slug: string
-    price: string
+    price: string | number
     isActive: boolean
     idioma?: string
-    images: UploadedImage[]
-    files: UploadedFile[]
+    images?: UploadedImage[]
+    files?: UploadedFile[]
 }
 
 interface EditVariationDialogProps {
-    variation: VariationData
+    variation: any
     productId: string
     onSuccess?: () => void
     trigger?: React.ReactNode
@@ -78,7 +78,7 @@ export default function EditVariationDialog({
         images: variation.images || [],
         files: variation.files || [],
         idioma: variation.idioma || '',
-    })
+    } as VariationData)
     // Opções de idioma
     const LANGUAGE_OPTIONS = [
         { value: 'portugues', label: 'Português' },
@@ -102,7 +102,7 @@ export default function EditVariationDialog({
             }
             setFormData(prev => ({
                 ...prev,
-                files: [...prev.files, uploadFile]
+                files: [...(prev.files || []), uploadFile]
             }))
         }
     }
@@ -110,7 +110,7 @@ export default function EditVariationDialog({
     const removeFile = (fileIndex: number) => {
         setFormData(prev => ({
             ...prev,
-            files: prev.files.filter((_, i) => i !== fileIndex)
+            files: (prev.files || []).filter((_, i) => i !== fileIndex)
         }))
     }
 
@@ -126,11 +126,11 @@ export default function EditVariationDialog({
                 id: `variation-img-${Date.now()}-${Math.random()}`,
                 file,
                 uploading: true,
-                order: formData.images.length
+                order: (formData.images || []).length
             }
             setFormData(prev => ({
                 ...prev,
-                images: [...prev.images, uploadImage]
+                images: [...(prev.images || []), uploadImage]
             }))
             try {
                 const base64Data = await new Promise<string>((resolve, reject) => {
@@ -141,7 +141,7 @@ export default function EditVariationDialog({
                 })
                 setFormData(prev => ({
                     ...prev,
-                    images: prev.images.map(img =>
+                    images: (prev.images || []).map(img =>
                         img.file === file
                             ? { ...img, uploading: false, uploaded: true, data: base64Data, url: base64Data }
                             : img
@@ -150,7 +150,7 @@ export default function EditVariationDialog({
             } catch {
                 setFormData(prev => ({
                     ...prev,
-                    images: prev.images.map(img =>
+                    images: (prev.images || []).map(img =>
                         img.file === file
                             ? { ...img, uploading: false, error: 'Erro no upload' }
                             : img
@@ -163,7 +163,7 @@ export default function EditVariationDialog({
     const removeImage = (imageIndex: number) => {
         setFormData(prev => ({
             ...prev,
-            images: prev.images.filter((_, i) => i !== imageIndex)
+            images: (prev.images || []).filter((_, i) => i !== imageIndex)
         }))
     }
 
@@ -197,16 +197,16 @@ export default function EditVariationDialog({
                 price: formData.price,
                 isActive: formData.isActive,
                 idioma: formData.idioma,
-                images: formData.images.filter(img => img.uploaded && img.data).map(img => ({
+                images: (formData.images || []).filter(img => img.uploaded && img.data).map(img => ({
                     data: img.data!,
                     alt: img.alt || formData.name,
                     order: img.order
                 })),
-                files: formData.files.map(file => ({
-                    filename: file.file.name,
-                    originalName: file.file.name,
-                    fileSize: file.file.size,
-                    mimeType: file.file.type,
+                files: (formData.files || []).map(file => ({
+                    filename: file.file ? file.file.name : (file.filename || ''),
+                    originalName: file.file ? file.file.name : (file.originalName || ''),
+                    fileSize: file.file ? file.file.size : (file.fileSize || 0),
+                    mimeType: file.file ? file.file.type : (file.mimeType || ''),
                 }))
             }
             const response = await fetch(url, {
@@ -323,9 +323,9 @@ export default function EditVariationDialog({
                                 />
                             </label>
                         </div>
-                        {formData.files.length > 0 && (
+                        {(formData.files || []).length > 0 && (
                             <ul className="mt-3 space-y-2">
-                                {formData.files.map((file, i) => (
+                                {(formData.files || []).map((file, i) => (
                                     <li key={i} className="flex items-center gap-2 text-sm bg-gray-50 rounded p-2">
                                         <FileText className="w-4 h-4 text-gray-500" />
                                         {(file.r2Key || file.url) ? (
@@ -368,9 +368,9 @@ export default function EditVariationDialog({
                                 />
                             </label>
                         </div>
-                        {formData.images.length > 0 && (
+                        {(formData.images || []).length > 0 && (
                             <div className="mt-3 grid grid-cols-2 md:grid-cols-3 gap-3">
-                                {formData.images.map((img, i) => (
+                                {(formData.images || []).map((img, i) => (
                                     <div key={img.id || i} className="relative group border rounded overflow-hidden bg-gray-50">
                                         {img.data ? (
                                             <Image src={img.data} alt={img.alt || formData.name} width={120} height={120} className="object-cover w-full h-24" />

@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { type Product } from '@/hooks/use-products';
+import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 
 interface ProductCardProps {
@@ -11,6 +12,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const { t } = useTranslation('common');
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -23,7 +25,7 @@ export function ProductCard({ product }: ProductCardProps) {
       <CardHeader className='pb-3'>
         {product.isFeatured && (
           <Badge className='mb-2 w-fit bg-secondary text-secondary-foreground'>
-            Destaque
+            {t('product.featured', 'Destaque')}
           </Badge>
         )}
         <CardTitle className='line-clamp-2 text-lg group-hover:text-primary'>
@@ -56,7 +58,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
         <Button asChild className='w-full bg-primary hover:bg-secondary'>
           <Link href={`/produtos/${product.slug}`}>
-            Ver detalhes
+            {t('product.viewDetails', 'Ver detalhes')}
           </Link>
         </Button>
       </CardContent>

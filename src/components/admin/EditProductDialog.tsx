@@ -9,6 +9,8 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
+import { useTranslation } from 'react-i18next'
+    const { t } = useTranslation('common')
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
@@ -186,6 +188,7 @@ function SortableImageItem({ image, index, isMain, onRemove }: { image: Uploaded
 }
 
 export default function EditProductDialog({ product, open, onOpenChange, onSuccess }: EditProductDialogProps) {
+    const { t } = useTranslation('common')
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [categories, setCategories] = useState<Category[]>([])
     const [isNewCategoryOpen, setIsNewCategoryOpen] = useState(false)
@@ -978,7 +981,7 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
                                             checked={formData.isActive}
                                             onCheckedChange={(checked) => handleInputChange('isActive', checked)}
                                         />
-                                        <Label htmlFor="isActive" className="text-sm">Produto Ativo</Label>
+                                        <Label htmlFor="isActive" className="text-sm">{t('admin.productActive', 'Produto Ativo')}</Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         <Switch
@@ -986,7 +989,7 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
                                             checked={formData.isFeatured}
                                             onCheckedChange={(checked) => handleInputChange('isFeatured', checked)}
                                         />
-                                        <Label htmlFor="isFeatured" className="text-sm">Produto em Destaque</Label>
+                                        <Label htmlFor="isFeatured" className="text-sm">{t('admin.productFeatured', 'Produto em Destaque')}</Label>
                                     </div>
                                 </div>
                             </div>
@@ -998,10 +1001,10 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
                                     <label className="block w-full border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 cursor-pointer">
                                         <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
                                         <span className="mt-2 block text-sm font-medium text-gray-900">
-                                            Clique para fazer upload ou arraste imagens aqui
+                                            {t('admin.upload.clickOrDrop', 'Clique para fazer upload ou arraste imagens aqui')}
                                         </span>
                                         <span className="mt-1 block text-xs text-gray-500">
-                                            PNG, JPG, WebP até 10MB cada
+                                            {t('admin.upload.formats', 'PNG, JPG, WebP até 10MB cada')}
                                         </span>
                                         <input
                                             type="file"

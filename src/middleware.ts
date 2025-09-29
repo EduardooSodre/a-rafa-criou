@@ -4,6 +4,17 @@ import { getToken } from 'next-auth/jwt';
 
 export async function middleware(request: NextRequest) {
   try {
+    // Ensure NEXT_LOCALE cookie exists so server-side rendering can read it
+    const cookieLocale = request.cookies.get('NEXT_LOCALE')?.value
+    if (!cookieLocale) {
+      const accept = request.headers.get('accept-language') || ''
+      const pref = accept.split(',')[0]?.split('-')[0] || 'pt'
+      const locale = ['pt', 'en', 'es'].includes(pref) ? pref : 'pt'
+      const res = NextResponse.next()
+      // Set cookie for 1 year
+      res.cookies.set('NEXT_LOCALE', locale, { path: '/', maxAge: 60 * 60 * 24 * 365 })
+      return res
+    }
     // Rotas que precisam de autenticação de admin
     if (request.nextUrl.pathname.startsWith('/admin')) {
       const token = await getToken({

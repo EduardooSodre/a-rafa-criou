@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import { useEffect } from 'react'
 import { useSession } from 'next-auth/react'
@@ -10,6 +10,7 @@ import { Avatar } from '@/components/ui/avatar'
 import { Package, Settings, Download, LogOut } from 'lucide-react'
 import { signOut } from 'next-auth/react'
 import { getDisplayName } from '@/lib/utils/user'
+import { useTranslation } from 'react-i18next'
 
 interface ExtendedUser {
     id: string
@@ -20,6 +21,7 @@ interface ExtendedUser {
 }
 
 export default function ContaPage() {
+    const { t } = useTranslation('common');
     const { data: session, status } = useSession()
     const router = useRouter()
 
@@ -35,7 +37,7 @@ export default function ContaPage() {
             <div className="container mx-auto px-4 py-8">
                 <div className="max-w-4xl mx-auto">
                     <div className="text-center">
-                        <p className="text-gray-600">Carregando...</p>
+                        <p className="text-gray-600">{t('loading', 'Carregando...')}</p>
                     </div>
                 </div>
             </div>
@@ -57,15 +59,15 @@ export default function ContaPage() {
                 <div className="mb-8">
                     <div className="flex items-center justify-between mb-4">
                         <h1 className="text-4xl font-bold text-gray-900">
-                            Minha Conta
+                            {t('account.title')}
                         </h1>
-                        <Button
+                            <Button
                             variant="outline"
                             onClick={handleSignOut}
                             className="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
                         >
                             <LogOut className="w-4 h-4 mr-2" />
-                            Sair
+                            {t('auth.signOut', 'Sair')}
                         </Button>
                     </div>
 
@@ -84,7 +86,7 @@ export default function ContaPage() {
                                 </h2>
                                 <p className="text-gray-600">{session.user?.email}</p>
                                 <span className="inline-block mt-1 px-2 py-1 bg-primary/20 text-primary text-xs rounded-full">
-                                    {session.user?.role === 'admin' ? 'Administrador' : 'Cliente'}
+                                    {session.user?.role === 'admin' ? t('roles.admin', 'Administrador') : t('roles.customer', 'Cliente')}
                                 </span>
                             </div>
                         </div>
@@ -96,11 +98,11 @@ export default function ContaPage() {
                     <Card className="hover:shadow-lg transition-shadow cursor-pointer">
                         <CardHeader className="text-center">
                             <Package className="w-12 h-12 text-primary mx-auto mb-4" />
-                            <CardTitle>Meus Pedidos</CardTitle>
+                            <CardTitle>{t('account.orders', 'Meus Pedidos')}</CardTitle>
                         </CardHeader>
                         <CardContent className="text-center">
                             <p className="text-gray-600 mb-4">
-                                Veja o histórico de todos os seus pedidos
+                                {t('account.ordersDescription', 'Veja o histórico de todos os seus pedidos')}
                             </p>
                             <Button asChild className="w-full bg-primary hover:bg-secondary text-black">
                                 <Link href="/conta/pedidos">
@@ -113,11 +115,11 @@ export default function ContaPage() {
                     <Card className="hover:shadow-lg transition-shadow cursor-pointer">
                         <CardHeader className="text-center">
                             <Download className="w-12 h-12 text-primary mx-auto mb-4" />
-                            <CardTitle>Downloads</CardTitle>
+                            <CardTitle>{t('account.downloads', 'Downloads')}</CardTitle>
                         </CardHeader>
                         <CardContent className="text-center">
                             <p className="text-gray-600 mb-4">
-                                Baixe novamente seus produtos digitais
+                                {t('account.downloadAgain')}
                             </p>
                             <Button asChild variant="outline" className="w-full">
                                 <Link href="/conta/downloads">
@@ -130,11 +132,11 @@ export default function ContaPage() {
                     <Card className="hover:shadow-lg transition-shadow cursor-pointer">
                         <CardHeader className="text-center">
                             <Settings className="w-12 h-12 text-primary mx-auto mb-4" />
-                            <CardTitle>Configurações</CardTitle>
+                            <CardTitle>{t('account.settings', 'Configurações')}</CardTitle>
                         </CardHeader>
                         <CardContent className="text-center">
                             <p className="text-gray-600 mb-4">
-                                Atualize suas informações pessoais
+                                {t('account.updateInfo', 'Atualize suas informações pessoais')}
                             </p>
                             <Button asChild variant="outline" className="w-full">
                                 <Link href="/conta/configuracoes">
@@ -147,30 +149,30 @@ export default function ContaPage() {
 
                 {/* Links rápidos */}
                 <div className="mt-12 pt-8 border-t border-gray-200">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Links Rápidos</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('quickLinks', 'Links Rápidos')}</h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <Button asChild variant="ghost" className="h-auto flex-col py-4">
                             <Link href="/produtos">
                                 <Package className="w-6 h-6 mb-2" />
-                                <span className="text-sm">Produtos</span>
+                                <span className="text-sm">{t('nav.products')}</span>
                             </Link>
                         </Button>
                         <Button asChild variant="ghost" className="h-auto flex-col py-4">
                             <Link href="/carrinho">
                                 <Package className="w-6 h-6 mb-2" />
-                                <span className="text-sm">Carrinho</span>
+                                <span className="text-sm">{t('nav.cart')}</span>
                             </Link>
                         </Button>
                         <Button asChild variant="ghost" className="h-auto flex-col py-4">
                             <Link href="/contato">
                                 <Package className="w-6 h-6 mb-2" />
-                                <span className="text-sm">Contato</span>
+                                <span className="text-sm">{t('nav.contact')}</span>
                             </Link>
                         </Button>
                         <Button asChild variant="ghost" className="h-auto flex-col py-4">
                             <Link href="/">
                                 <Package className="w-6 h-6 mb-2" />
-                                <span className="text-sm">Início</span>
+                                <span className="text-sm">{t('nav.home', 'Início')}</span>
                             </Link>
                         </Button>
                     </div>

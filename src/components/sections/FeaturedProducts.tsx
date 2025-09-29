@@ -1,9 +1,10 @@
-'use client'
+ 'use client'
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
 import { useCart } from '@/contexts/cart-context';
 import { useToast } from '@/components/ui/toast';
 
@@ -54,6 +55,7 @@ interface ApiResponse {
 export default function FeaturedProducts({
     showViewAll = true
 }: FeaturedProductsProps) {
+    const { t } = useTranslation('common')
     const { addItem } = useCart();
     const { showToast } = useToast();
     const [products, setProducts] = useState<Product[]>([]);
@@ -138,7 +140,7 @@ export default function FeaturedProducts({
         return (
             <section className="py-8 bg-gray-50">
                 <div className="bg-[#8FBC8F] mb-12 flex items-center justify-center m-0 p-2">
-                    <h1
+                <h1
                         className="font-scripter text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-[4rem] 2xl:text-[5rem] font-bold m-3 sm:m-4 md:m-5 lg:m-5 xl:m-6 uppercase text-center leading-none"
                         style={{
                             color: '#FFFFFF',
@@ -146,7 +148,7 @@ export default function FeaturedProducts({
                             fontSize: 'clamp(2rem, 6vw, 4rem)',
                         }}
                     >
-                        TODOS OS ARQUIVOS
+                        {t('featured.allFiles', 'TODOS OS ARQUIVOS')}
                     </h1>
                 </div>
                 <div className="container mx-auto px-4 mb-22">
@@ -181,7 +183,7 @@ export default function FeaturedProducts({
                         fontSize: 'clamp(2rem, 6vw, 4rem)',
                     }}
                 >
-                    TODOS OS ARQUIVOS
+                    {t('featured.allFiles', 'TODOS OS ARQUIVOS')}
                 </h1>
             </div>
             <div className="container mx-auto px-4 mb-22">
@@ -205,13 +207,13 @@ export default function FeaturedProducts({
                                                 />
                                             ) : (
                                                 <div className="flex items-center justify-center h-full rounded-lg bg-[#F4F4F4]">
-                                                    <span className="text-gray-400 text-sm">Sem imagem</span>
+                                                    <span className="text-gray-400 text-sm">{t('product.noImage', 'Sem imagem')}</span>
                                                 </div>
                                             )}
                                             {/* Badge para produtos novos (IDs 14, 15, 16) */}
                                             {['14', '15', '16'].includes(product.id) && (
                                                 <div className="absolute top-2 right-2 bg-[#FED466] text-xs font-bold px-2 py-1 md:px-3 md:py-1 rounded-full shadow-md">
-                                                    NOVO
+                                                    {t('product.new', 'NOVO')}
                                                 </div>
                                             )}
                                         </div>
@@ -262,7 +264,7 @@ export default function FeaturedProducts({
                                     className="w-full bg-[#FD9555] hover:bg-[#FD9555]/90 text-white font-bold py-2 md:py-2 lg:py-3 text-xs md:text-xs lg:text-sm uppercase tracking-wide transition-all duration-200 hover:shadow-lg rounded-lg cursor-pointer"
                                     onClick={() => handleAddToCart(product)}
                                 >
-                                    ADICIONAR AO CARRINHO
+                                    {t('product.addToCart', 'ADICIONAR AO CARRINHO')}
                                 </Button>
                             </div>
                         </div>
@@ -288,7 +290,7 @@ export default function FeaturedProducts({
                                 fontFamily: 'Scripter, sans-serif',
                             }}
                         >
-                            {loading ? 'CARREGANDO...' : 'CLIQUE PARA VER MAIS ARQUIVOS'}
+                            {loading ? t('featured.loading', 'CARREGANDO...') : t('featured.viewMore', 'CLIQUE PARA VER MAIS ARQUIVOS')}
                         </div>
                         <Image
                             src="/arrow.png"
@@ -304,7 +306,7 @@ export default function FeaturedProducts({
                     <div className="mt-12 text-center">
                         <div className="bg-gray-200 inline-block px-6 py-3 rounded-full">
                             <span className="text-gray-600 font-medium">
-                                ✨ Todos os arquivos foram exibidos! ✨
+                                {t('featured.endMessage', '✨ Todos os arquivos foram exibidos! ✨')}
                             </span>
                         </div>
                     </div>

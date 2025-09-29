@@ -20,8 +20,8 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "A Rafa Criou - E-commerce de PDFs",
-  description: "Loja online de produtos digitais em PDF com foco em acessibilidade e experiência do usuário.",
+  title: process.env.NEXT_PUBLIC_SITE_TITLE || "A Rafa Criou - E-commerce de PDFs",
+  description: process.env.NEXT_PUBLIC_SITE_DESCRIPTION || "Loja online de produtos digitais em PDF com foco em acessibilidade e experiência do usuário.",
 };
 
 export default function RootLayout({
@@ -30,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR">
+    <html lang={process.env.NEXT_PUBLIC_DEFAULT_LOCALE || 'pt'}>
       <body
         className={`${poppins.variable} font-sans antialiased`}
         suppressHydrationWarning={true}

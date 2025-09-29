@@ -1,0 +1,120 @@
+{
+  "siteTitle": "A Rafa Criou - E-commerce de PDFs",
+  "siteDescription": "Loja online de produtos digitais em PDF com foco em acessibilidade e experiência do usuário.",
+  "nav": {
+    "products": "Produtos",
+    "cart": "Carrinho",
+    "account": "Minha Conta",
+    "contact": "Contato",
+    "login": "Entrar",
+    "register": "Cadastrar",
+    "home": "Início",
+    "cartAria": "Carrinho",
+    "menu": "MENU",
+    "menuAria": "Abrir menu",
+    "search": "BUSCA",
+    "searchAria": "Buscar produtos"
+  },
+  "auth": {
+    "loginTitle": "Entrar na A Rafa Criou",
+    "loginSubtitle": "Acesse sua conta para continuar comprando",
+    "login": "Entrar",
+    "loggingIn": "Entrando...",
+    "register": "Fazer cadastro",
+    "registerSuccess": "Conta criada com sucesso!",
+    "password": "Senha",
+    "noAccount": "Não tem uma conta?"
+  },
+  "account": {
+    "title": "Minha Conta",
+    "downloadAgain": "Baixe novamente seus produtos digitais",
+    "orders": "Meus Pedidos",
+    "ordersDescription": "Veja o histórico de todos os seus pedidos",
+    "downloads": "Downloads",
+    "settings": "Configurações",
+    "updateInfo": "Atualize suas informações pessoais"
+  },
+  "contact": {
+    "title": "Entre em Contato",
+    "subtitle": "Para dúvidas sobre produtos ou suporte técnico",
+    "backToProducts": "Voltar aos Produtos",
+    "email": "E-mail",
+    "whatsapp": "WhatsApp",
+    "whatsappHours": "Atendimento rápido de segunda a sexta, 9h às 18h",
+    "phone": "Telefone",
+    "phoneHours": "Atendimento telefônico de segunda a sexta",
+    "address": "Endereço",
+    "addressLine1": "São Paulo, SP - Brasil",
+    "digitalSupport": "Atendimento 100% digital"
+  },
+  "roles": {
+    "admin": "Administrador",
+    "customer": "Cliente"
+  },
+  "loading": "Carregando...",
+  "quickLinks": "Links Rápidos"
+  ,
+  "search": {
+    "placeholder": "O que você procura?",
+    "ariaLabel": "Buscar produtos"
+  }
+  ,
+  "welcome": {
+    "title": "🚀 Bem-vindo ao A Rafa Criou!",
+    "subtitle": "Base do projeto configurada com sucesso. Ready para desenvolvimento!",
+    "configured": "✅ Configurado",
+    "feature": {
+      "nextjs": "Next.js + TypeScript",
+      "tailwind": "Tailwind + Shadcn UI",
+      "drizzle": "Drizzle + PostgreSQL",
+      "auth": "Auth.js configurado",
+      "catalog": "Catálogo de produtos"
+    },
+    "nextSteps": "🔄 Próximos Passos",
+    "todo": {
+      "db": "Configurar banco de dados",
+      "authPages": "Criar páginas de auth",
+      "catalog": "Implementar catálogo",
+      "payments": "Sistema de pagamentos"
+    }
+  },
+  "quickActions": {
+    "viewProducts": "Ver Produtos",
+    "viewProduct": "Ver Produto"
+  }
+  ,
+  "selectLanguage": "Selecione seu idioma"
+  ,
+  "hero": {
+    "title": "BEM-VINDA \n OVELHINHA!",
+    "subtitle": "Descubra uma coleção de arquivos\nteocráticos digitais para ajudar você\na dar seu melhor a Jeová!"
+  },
+  "featured": {
+    "allFiles": "TODOS OS ARQUIVOS",
+    "loading": "CARREGANDO...",
+    "viewMore": "CLIQUE PARA VER MAIS ARQUIVOS",
+    "endMessage": "✨ Todos os arquivos foram exibidos! ✨"
+  },
+  "benefits": {
+    "automatico": {
+      "title": "AUTOMÁTICO",
+      "text": "ARQUIVO LIBERADO\nAUTOMATICAMENTE\nAPÓS CONFIRMAÇÃO DE\n PAGAMENTO"
+    },
+    "pratico": {
+      "title": "PRÁTICO",
+      "text": "BAIXE SEU ARQUIVO E \n MONTE EM CASA, NÃO \nPRECISA PAGAR FRETE"
+    },
+    "economico": {
+      "title": "ECONÔMICO",
+      "text": "IMPRIMA O MESMO\n ARQUIVO QUANTAS\n VEZES QUISER"
+    }
+  },
+  "product": {
+    "noImage": "Sem imagem",
+    "new": "NOVO",
+    "addToCart": "ADICIONAR AO CARRINHO",
+    "featured": "Destaque",
+    "viewDetails": "Ver detalhes"
+  }
+
+}

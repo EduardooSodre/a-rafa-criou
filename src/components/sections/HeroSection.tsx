@@ -1,6 +1,19 @@
 import Image from 'next/image';
+import { useTranslation } from 'react-i18next';
 
 export default function HeroSection() {
+    const { t } = useTranslation('common')
+
+    // Normalize various break markers translators might use into a single newline
+    const splitByBreaks = (text: string) => {
+        if (!text) return [''];
+        // Replace HTML-like <br> tags and custom [br] token with \n, then split
+        const normalized = text
+            .replace(/<br\s*\/?>/gi, '\n')
+            .replace(/\[br\]/gi, '\n');
+        return normalized.split(/\r?\n/).map(s => s.trim());
+    }
+
     return (
         <section className="relative w-full flex items-center justify-center bg-[#F4F4F4] overflow-hidden">
             <div className="relative w-full max-w-none">
@@ -30,7 +43,16 @@ export default function HeroSection() {
                             fontSize: 'clamp(3rem, 6vw, 6rem)', // Backup responsivo mais moderado
                         }}
                     >
-                        BEM-VINDA <br /> OVELHINHA!
+                        {(() => {
+                            const title = t('hero.title', 'BEM-VINDA \n OVELHINHA!');
+                            const parts = splitByBreaks(title);
+                            return parts.map((line, idx) => (
+                                <span key={idx}>
+                                    {line}
+                                    {idx < parts.length - 1 && <br />}
+                                </span>
+                            ));
+                        })()}
                     </h1>
 
                     <p
@@ -39,9 +61,19 @@ export default function HeroSection() {
                             fontFamily: 'Times New Roman, serif',
                         }}
                     >
-                        Descubra uma coleção de arquivos<br />
-                        teocráticos digitais para ajudar você<br />
-                        a dar seu melhor a Jeová!
+                        {(() => {
+                            const subtitle = t(
+                                'hero.subtitle',
+                                'Descubra uma coleção de arquivos \n teocráticos digitais para ajudar você \n a dar seu melhor a Jeová!'
+                            );
+                            const parts = splitByBreaks(subtitle);
+                            return parts.map((line, idx) => (
+                                <span key={idx}>
+                                    {line}
+                                    {idx < parts.length - 1 && <br />}
+                                </span>
+                            ));
+                        })()}
                     </p>
                 </div>
             </div>

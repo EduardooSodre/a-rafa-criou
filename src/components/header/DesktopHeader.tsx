@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -16,6 +17,7 @@ interface DesktopHeaderProps {
 export function DesktopHeader({ totalItems }: DesktopHeaderProps) {
     const [searchQuery, setSearchQuery] = useState('')
     const router = useRouter()
+    const { t } = useTranslation('common')
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault()
@@ -32,7 +34,7 @@ export function DesktopHeader({ totalItems }: DesktopHeaderProps) {
                     <Link href="/" className="flex items-center gap-2 no-underline">
                         <Image
                             src="/logo.webp"
-                            alt="A Rafa Criou"
+                            alt={t('siteTitle')}
                             width={200}
                             height={60}
                             className="h-14 sm:h-16 md:h-18 w-auto"
@@ -44,7 +46,8 @@ export function DesktopHeader({ totalItems }: DesktopHeaderProps) {
                         <form onSubmit={handleSearch} className="relative">
                             <Input
                                 type="search"
-                                placeholder="O que você procura?"
+                                placeholder={t('search.placeholder', 'O que você procura?')}
+                                aria-label={t('search.ariaLabel', 'Buscar produtos')}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="w-full h-10 md:h-12 pl-4 pr-12 rounded-lg border-0 bg-white text-black placeholder:text-gray-500"

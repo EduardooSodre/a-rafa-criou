@@ -1,0 +1,116 @@
+{
+  "siteTitle": "A Rafa Criou - PDF Store",
+  "siteDescription": "Online store for digital PDF products focusing on accessibility and user experience.",
+  "nav": {
+    "products": "Products",
+    "cart": "Cart",
+    "account": "Account",
+    "contact": "Contact",
+    "login": "Log in",
+    "register": "Register",
+    "home": "Home",
+    "cartAria": "Cart",
+    "menu": "MENU",
+    "menuAria": "Open menu",
+    "search": "SEARCH",
+    "searchAria": "Search products"
+  },
+  "auth": {
+    "loginTitle": "Log in to A Rafa Criou",
+    "loginSubtitle": "Access your account to continue shopping",
+    "login": "Log in",
+    "loggingIn": "Logging in...",
+    "register": "Create account",
+    "registerSuccess": "Account created successfully!",
+    "password": "Password",
+    "noAccount": "Don't have an account?",
+    "signOut": "Sign out"
+  },
+  "account": {
+    "title": "My Account",
+    "downloadAgain": "Download your digital products again",
+    "orders": "My Orders",
+    "ordersDescription": "See the history of all your orders",
+    "downloads": "Downloads",
+    "settings": "Settings",
+    "updateInfo": "Update your personal information"
+  },
+  "contact": {
+    "title": "Get in touch",
+    "subtitle": "For questions about products or technical support",
+    "backToProducts": "Back to Products",
+    "email": "E-mail",
+    "whatsapp": "WhatsApp",
+    "whatsappHours": "Quick support Monday to Friday, 9am to 6pm",
+    "phone": "Phone",
+    "phoneHours": "Phone support Monday to Friday",
+    "address": "Address",
+    "addressLine1": "São Paulo, SP - Brazil",
+    "digitalSupport": "100% digital support"
+  },
+  "roles": {
+    "admin": "Administrator",
+    "customer": "Customer"
+  },
+  "loading": "Loading...",
+  "quickLinks": "Quick Links",
+  "search": {
+    "placeholder": "What are you looking for?",
+    "ariaLabel": "Search products"
+  },
+  "welcome": {
+    "title": "🚀 Welcome to A Rafa Criou!",
+    "subtitle": "Project base successfully configured. Ready for development!",
+    "configured": "✅ Configured",
+    "feature": {
+      "nextjs": "Next.js + TypeScript",
+      "tailwind": "Tailwind + Shadcn UI",
+      "drizzle": "Drizzle + PostgreSQL",
+      "auth": "Auth.js configured",
+      "catalog": "Product catalog"
+    },
+    "nextSteps": "🔄 Next Steps",
+    "todo": {
+      "db": "Configure database",
+      "authPages": "Create auth pages",
+      "catalog": "Implement catalog",
+      "payments": "Payment system"
+    }
+  },
+  "quickActions": {
+    "viewProducts": "View Products",
+    "viewProduct": "View Product"
+  },
+  "selectLanguage": "Select your language",
+  "hero": {
+    "title": "WELCOME \n SHEEP!",
+    "subtitle": "Discover a collection of theocratic digital files\nto help you give your best\nto Jehovah!"
+  },
+  "featured": {
+    "allFiles": "ALL FILES",
+    "loading": "LOADING...",
+    "viewMore": "CLICK TO SEE MORE FILES",
+    "endMessage": "✨ All files have been shown! ✨"
+  },
+  "benefits": {
+    "automatico": {
+      "title": "AUTOMATIC",
+      "text": "FILE RELEASED\nAUTOMATICALLY\nAFTER PAYMENT\nCONFIRMATION"
+    },
+    "pratico": {
+      "title": "PRACTICAL",
+      "text": "DOWNLOAD YOUR FILE AND\nASSEMBLE AT HOME, NO\nSHIPPING REQUIRED"
+    },
+    "economico": {
+      "title": "ECONOMICAL",
+      "text": "PRINT THE SAME\nFILE AS MANY\nTIMES AS YOU WANT"
+    }
+  },
+  "product": {
+    "noImage": "No image",
+    "new": "NEW",
+    "addToCart": "ADD TO CART",
+    "featured": "Featured",
+    "viewDetails": "View details"
+  }
+}

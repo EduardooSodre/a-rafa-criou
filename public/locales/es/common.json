@@ -1,0 +1,116 @@
+{
+  "siteTitle": "A Rafa Criou - Tienda de PDFs",
+  "siteDescription": "Tienda en línea de productos digitales en PDF con enfoque en accesibilidad y experiencia de usuario.",
+  "nav": {
+    "products": "Productos",
+    "cart": "Carrito",
+    "account": "Cuenta",
+    "contact": "Contacto",
+    "login": "Entrar",
+    "register": "Registrarse",
+    "home": "Inicio",
+    "cartAria": "Carrito",
+    "menu": "MENU",
+    "menuAria": "Abrir menú",
+    "search": "BUSCAR",
+    "searchAria": "Buscar productos"
+  },
+  "auth": {
+    "loginTitle": "Entrar a A Rafa Criou",
+    "loginSubtitle": "Accede a tu cuenta para continuar comprando",
+    "login": "Entrar",
+    "loggingIn": "Iniciando sesión...",
+    "register": "Crear cuenta",
+    "registerSuccess": "¡Cuenta creada con éxito!",
+    "password": "Contraseña",
+    "noAccount": "¿No tienes una cuenta?",
+    "signOut": "Salir"
+  },
+  "account": {
+    "title": "Mi Cuenta",
+    "downloadAgain": "Descarga tus productos digitales nuevamente",
+    "orders": "Mis Pedidos",
+    "ordersDescription": "Consulta el historial de todos tus pedidos",
+    "downloads": "Descargas",
+    "settings": "Configuraciones",
+    "updateInfo": "Actualiza tu información personal"
+  },
+  "contact": {
+    "title": "Ponte en contacto",
+    "subtitle": "Para preguntas sobre productos o soporte técnico",
+    "backToProducts": "Volver a Productos",
+    "email": "Correo electrónico",
+    "whatsapp": "WhatsApp",
+    "whatsappHours": "Atención rápida de lunes a viernes, 9 a.m. a 6 p.m.",
+    "phone": "Teléfono",
+    "phoneHours": "Atención telefónica de lunes a viernes",
+    "address": "Dirección",
+    "addressLine1": "São Paulo, SP - Brasil",
+    "digitalSupport": "Soporte 100% digital"
+  },
+  "roles": {
+    "admin": "Administrador",
+    "customer": "Cliente"
+  },
+  "loading": "Cargando...",
+  "quickLinks": "Enlaces Rápidos",
+  "search": {
+    "placeholder": "¿Qué estás buscando?",
+    "ariaLabel": "Buscar productos"
+  },
+  "welcome": {
+    "title": "🚀 ¡Bienvenido a A Rafa Criou!",
+    "subtitle": "La base del proyecto se ha configurado correctamente. ¡Listo para el desarrollo!",
+    "configured": "✅ Configurado",
+    "feature": {
+      "nextjs": "Next.js + TypeScript",
+      "tailwind": "Tailwind + Shadcn UI",
+      "drizzle": "Drizzle + PostgreSQL",
+      "auth": "Auth.js configurado",
+      "catalog": "Catálogo de productos"
+    },
+    "nextSteps": "🔄 Próximos Pasos",
+    "todo": {
+      "db": "Configurar base de datos",
+      "authPages": "Crear páginas de auth",
+      "catalog": "Implementar catálogo",
+      "payments": "Sistema de pagos"
+    }
+  },
+  "quickActions": {
+    "viewProducts": "Ver Productos",
+    "viewProduct": "Ver Producto"
+  },
+  "selectLanguage": "Selecciona tu idioma",
+  "hero": {
+    "title": "¡BEM-VINDA \n OVELHINHA!",
+    "subtitle": "Descubre una colección de archivos\nteocráticos digitales para ayudarte\na dar lo mejor a Jehová!"
+  },
+  "featured": {
+    "allFiles": "TODOS LOS ARCHIVOS",
+    "loading": "CARGANDO...",
+    "viewMore": "HAZ CLIC PARA VER MÁS ARCHIVOS",
+    "endMessage": "✨ ¡Todos los archivos han sido mostrados! ✨"
+  },
+  "benefits": {
+    "automatico": {
+      "title": "AUTOMÁTICO",
+      "text": "ARCHIVO LIBERADO\nAUTOMÁTICAMENTE\nDESPUÉS DE LA CONFIRMACIÓN\nDE PAGO"
+    },
+    "pratico": {
+      "title": "PRÁCTICO",
+      "text": "DESCARGA TU ARCHIVO Y\nMONTA EN CASA, NO\nSE NECESITA ENVÍO"
+    },
+    "economico": {
+      "title": "ECONÓMICO",
+      "text": "IMPRIME EL MISMO\nARCHIVO CUANTAS\nVECES QUIERAS"
+    }
+  },
+  "product": {
+    "noImage": "Sin imagen",
+    "new": "NUEVO",
+    "addToCart": "AÑADIR AL CARRITO",
+    "featured": "Destacado",
+    "viewDetails": "Ver detalles"
+  }
+}

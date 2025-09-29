@@ -22,6 +22,7 @@ import {
     CircleUserRound,
 } from 'lucide-react'
 import { getDisplayName } from '@/lib/utils/user'
+import { useTranslation } from 'react-i18next'
 
 interface ExtendedUser {
     id: string
@@ -33,15 +34,16 @@ interface ExtendedUser {
 
 export function DesktopNavigation() {
     const { data: session, status } = useSession()
+    const { t } = useTranslation('common')
 
     const handleSignOut = async () => {
         await signOut({ callbackUrl: '/' })
     }
 
     const navigation = [
-        { name: 'Início', href: '/', icon: Home },
-        { name: 'Menu', href: '/produtos', icon: Package },
-        { name: 'Favoritos', href: '/favoritos', icon: Heart },
+        { name: t('nav.home', 'Início'), href: '/', icon: Home },
+        { name: t('nav.products'), href: '/produtos', icon: Package },
+        { name: t('nav.favorites', 'Favoritos'), href: '/favoritos', icon: Heart },
     ]
 
     return (
@@ -85,15 +87,15 @@ export function DesktopNavigation() {
                                     </DropdownMenuLabel>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem asChild>
-                                        <Link href="/conta" className="flex items-center gap-2 no-underline">
+                                            <Link href="/conta" className="flex items-center gap-2 no-underline">
                                             <Settings className="w-4 h-4" />
-                                            Minha Conta
+                                            {t('account.title')}
                                         </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem asChild>
-                                        <Link href="/conta/pedidos" className="flex items-center gap-2 no-underline">
+                                            <Link href="/conta/pedidos" className="flex items-center gap-2 no-underline">
                                             <ShoppingBag className="w-4 h-4" />
-                                            Meus Pedidos
+                                            {t('account.orders')}
                                         </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
@@ -102,29 +104,29 @@ export function DesktopNavigation() {
                                         className="flex items-center gap-2 text-red-600 focus:text-red-600"
                                     >
                                         <LogOut className="w-4 h-4" />
-                                        Sair
+                                        {t('auth.signOut', 'Sair')}
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         ) : (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" className="text-md flex items-center gap-2 text-white hover:text-white/80 transition-colors font-bold px-4 py-2 rounded-md hover:bg-white/10 cursor-pointer">
+                                        <Button variant="ghost" className="text-md flex items-center gap-2 text-white hover:text-white/80 transition-colors font-bold px-4 py-2 rounded-md hover:bg-white/10 cursor-pointer">
                                         <CircleUserRound className="w-4 h-4" />
-                                        Login
+                                        {t('nav.login')}
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="w-48">
                                     <DropdownMenuItem asChild>
-                                        <Link href="/auth/login" className="flex items-center gap-2 w-full no-underline ">
+                                            <Link href="/auth/login" className="flex items-center gap-2 w-full no-underline ">
                                             <LogOut className="w-4 h-4" />
-                                            Entrar
+                                            {t('auth.login')}
                                         </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem asChild>
-                                        <Link href="/auth/register" className="flex items-center gap-2 w-full no-underline">
+                                            <Link href="/auth/register" className="flex items-center gap-2 w-full no-underline">
                                             <CircleUserRound className="w-4 h-4" />
-                                            Cadastrar
+                                            {t('nav.register')}
                                         </Link>
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>

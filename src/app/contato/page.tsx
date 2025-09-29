@@ -1,20 +1,22 @@
-'use client'
+"use client"
 
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Mail, Phone, MapPin, MessageSquare } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 export default function ContatoPage() {
+    const { t } = useTranslation('common');
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="max-w-4xl mx-auto">
                 <div className="text-center mb-12">
                     <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                        Entre em Contato
+                        {t('contact.title')}
                     </h1>
                     <p className="text-gray-600 text-lg">
-                        Estamos aqui para ajudar! Escolha a melhor forma de falar conosco.
+                        {t('contact.subtitle')}
                     </p>
                 </div>
 
@@ -22,11 +24,11 @@ export default function ContatoPage() {
                     <Card className="text-center">
                         <CardHeader>
                             <Mail className="w-12 h-12 text-primary mx-auto mb-4" />
-                            <CardTitle>E-mail</CardTitle>
+                            <CardTitle>{t('contact.email', 'E-mail')}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <p className="text-gray-600 mb-4">
-                                Para dúvidas sobre produtos ou suporte técnico
+                                {t('contact.subtitle')}
                             </p>
                             <Button asChild variant="outline" className="w-full">
                                 <a href="mailto:suporte@arafacriou.com.br">
@@ -39,11 +41,11 @@ export default function ContatoPage() {
                     <Card className="text-center">
                         <CardHeader>
                             <MessageSquare className="w-12 h-12 text-primary mx-auto mb-4" />
-                            <CardTitle>WhatsApp</CardTitle>
+                            <CardTitle>{t('contact.whatsapp', 'WhatsApp')}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <p className="text-gray-600 mb-4">
-                                Atendimento rápido de segunda a sexta, 9h às 18h
+                                {t('contact.whatsappHours', 'Atendimento rápido de segunda a sexta, 9h às 18h')}
                             </p>
                             <Button asChild variant="outline" className="w-full">
                                 <a href="https://wa.me/5511999999999" target="_blank" rel="noopener">
@@ -56,11 +58,11 @@ export default function ContatoPage() {
                     <Card className="text-center">
                         <CardHeader>
                             <Phone className="w-12 h-12 text-primary mx-auto mb-4" />
-                            <CardTitle>Telefone</CardTitle>
+                            <CardTitle>{t('contact.phone', 'Telefone')}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <p className="text-gray-600 mb-4">
-                                Atendimento telefônico de segunda a sexta
+                                {t('contact.phoneHours', 'Atendimento telefônico de segunda a sexta')}
                             </p>
                             <Button asChild variant="outline" className="w-full">
                                 <a href="tel:+551140000000">
@@ -76,13 +78,13 @@ export default function ContatoPage() {
                         <CardHeader>
                             <CardTitle className="flex items-center justify-center gap-2">
                                 <MapPin className="w-5 h-5" />
-                                Endereço
+                                {t('contact.address', 'Endereço')}
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-gray-600">
-                                São Paulo, SP - Brasil<br />
-                                Atendimento 100% digital
+                                <p className="text-gray-600">
+                                {t('contact.addressLine1', 'São Paulo, SP - Brasil')}<br />
+                                {t('contact.digitalSupport', 'Atendimento 100% digital')}
                             </p>
                         </CardContent>
                     </Card>
@@ -91,7 +93,7 @@ export default function ContatoPage() {
                 <div className="mt-8 text-center">
                     <Button asChild className="bg-primary hover:bg-secondary text-black">
                         <Link href="/produtos">
-                            Voltar aos Produtos
+                            {t('contact.backToProducts')}
                         </Link>
                     </Button>
                 </div>

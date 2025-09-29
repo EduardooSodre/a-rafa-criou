@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState, useEffect, Suspense } from 'react';
 import { signIn } from 'next-auth/react';
@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
 
 function LoginContent() {
     const [email, setEmail] = useState('');
@@ -18,6 +19,8 @@ function LoginContent() {
     const [successMessage, setSuccessMessage] = useState('');
     const router = useRouter();
     const searchParams = useSearchParams();
+
+    const { t } = useTranslation('common');
 
     useEffect(() => {
         const message = searchParams.get('message');
@@ -57,10 +60,10 @@ function LoginContent() {
             <Card className='w-full max-w-md'>
                 <CardHeader className='text-center'>
                     <CardTitle className='text-2xl font-bold text-foreground'>
-                        Entrar na A Rafa Criou
+                        {t('auth.loginTitle')}
                     </CardTitle>
                     <CardDescription>
-                        Acesse sua conta para continuar comprando
+                        {t('auth.loginSubtitle')}
                     </CardDescription>
                 </CardHeader>
 
@@ -79,7 +82,7 @@ function LoginContent() {
 
                     <form onSubmit={handleSubmit} className='space-y-4'>
                         <div className='space-y-2'>
-                            <Label htmlFor='email'>E-mail</Label>
+                            <Label htmlFor='email'>{t('nav.login') === 'Entrar' ? 'E-mail' : 'E-mail'}</Label>
                             <Input
                                 id='email'
                                 type='email'
@@ -92,7 +95,7 @@ function LoginContent() {
                         </div>
 
                         <div className='space-y-2'>
-                            <Label htmlFor='password'>Senha</Label>
+                            <Label htmlFor='password'>{t('auth.password', 'Senha')}</Label>
                             <Input
                                 id='password'
                                 type='password'
@@ -109,7 +112,7 @@ function LoginContent() {
                             className='w-full bg-primary hover:bg-secondary'
                             disabled={isLoading}
                         >
-                            {isLoading ? 'Entrando...' : 'Entrar'}
+                            {isLoading ? t('auth.loggingIn') : t('auth.login')}
                         </Button>
                     </form>
 
@@ -132,9 +135,9 @@ function LoginContent() {
                     </Button>
 
                     <div className='text-center text-sm text-muted-foreground'>
-                        Não tem uma conta?{' '}
+                        {t('auth.noAccount', 'Não tem uma conta?')}{' '}
                         <Link href='/auth/register' className='text-primary hover:underline'>
-                            Criar conta
+                            {t('auth.register')}
                         </Link>
                     </div>
 

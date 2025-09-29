@@ -1,27 +1,30 @@
 import Image from 'next/image';
-
-const benefits = [
-    {
-        id: 'automatico',
-        title: 'AUTOMÁTICO',
-        icon: '/automatico.webp',
-        desktopText: 'ARQUIVO LIBERADO\nAUTOMATICAMENTE\nAPÓS CONFIRMAÇÃO DE\n PAGAMENTO'
-    },
-    {
-        id: 'pratico',
-        title: 'PRÁTICO',
-        icon: '/pratico.webp',
-        desktopText: 'BAIXE SEU ARQUIVO E \n MONTE EM CASA, NÃO \nPRECISA PAGAR FRETE'
-    },
-    {
-        id: 'economico',
-        title: 'ECONÔMICO',
-        icon: '/economico.webp',
-        desktopText: 'IMPRIMA O MESMO\n ARQUIVO QUANTAS\n VEZES QUISER'
-    }
-];
+import { useTranslation } from 'react-i18next';
 
 export default function BenefitsSection() {
+    const { t } = useTranslation('common');
+
+    const benefits = [
+        {
+            id: 'automatico',
+            title: t('benefits.automatico.title', 'AUTOMÁTICO'),
+            icon: '/automatico.webp',
+            desktopText: t('benefits.automatico.text', 'ARQUIVO LIBERADO\nAUTOMATICAMENTE\nAPÓS CONFIRMAÇÃO DE\n PAGAMENTO')
+        },
+        {
+            id: 'pratico',
+            title: t('benefits.pratico.title', 'PRÁTICO'),
+            icon: '/pratico.webp',
+            desktopText: t('benefits.pratico.text', 'BAIXE SEU ARQUIVO E \n MONTE EM CASA, NÃO \nPRECISA PAGAR FRETE')
+        },
+        {
+            id: 'economico',
+            title: t('benefits.economico.title', 'ECONÔMICO'),
+            icon: '/economico.webp',
+            desktopText: t('benefits.economico.text', 'IMPRIMA O MESMO\n ARQUIVO QUANTAS\n VEZES QUISER')
+        }
+    ];
+
     return (
         <section className="py-12 md:py-16 bg-white">
             <div className="container mx-auto px-4 mt-4">
