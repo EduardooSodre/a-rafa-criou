@@ -59,7 +59,7 @@
   },
   "welcome": {
     "title": "🚀 Bem-vindo ao A Rafa Criou!",
-    "subtitle": "Base do projeto configurada com sucesso. Ready para desenvolvimento!",
+  "subtitle": "Base do projeto configurada com sucesso. Pronto para desenvolvimento!",
     "configured": "✅ Configurado",
     "feature": {
       "nextjs": "Next.js + TypeScript",
@@ -159,6 +159,6 @@
     "guia-marketing-digital": "<p>Guia completo de marketing digital: estratégias práticas para promover seu trabalho e alcançar mais pessoas. Inclui dicas de SEO, redes sociais e planejamento de conteúdo.</p>",
     "planejador-financeiro": "<p>Planejador financeiro pessoal para organizar suas finanças mensais, controlar gastos e poupar para projetos importantes.</p>",
     "receitas-saudaveis": "<p>E-book com receitas saudáveis e práticas para o dia a dia, com versões para impressão e dicas de substituições.</p>",
-    "autyro": "<p>Olá, tudo bem com você ?</p>"
+  "autyro": "<p>Olá, tudo bem com você?</p>"
   }
 }
