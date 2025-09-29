@@ -214,34 +214,34 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                     <TabsContent value="description" className="mt-4">
                         <Card>
                             <CardContent className="p-6">
-                                            {/** Use translation for product long description when available; fallback to DB value. */}
-                                            {(() => {
-                                                const key = `productDescriptions.${product.slug}`
-                                                const langsToTry = [i18n.language, 'pt', 'en', 'es']
-                                                for (const lng of langsToTry) {
-                                                    if (!lng) continue
-                                                    if (i18n.exists(key, { lng })) {
-                                                        const res = i18n.getResource(lng, 'common', `productDescriptions.${product.slug}`) || i18n.t(key, { lng })
-                                                        return (
-                                                            <div
-                                                                className="prose max-w-none text-gray-800"
-                                                                dangerouslySetInnerHTML={{ __html: String(res) }}
-                                                            />
-                                                        )
-                                                    }
-                                                }
+                                {/** Use translation for product long description when available; fallback to DB value. */}
+                                {(() => {
+                                    const key = `productDescriptions.${product.slug}`
+                                    const langsToTry = [i18n.language, 'pt', 'en', 'es']
+                                    for (const lng of langsToTry) {
+                                        if (!lng) continue
+                                        if (i18n.exists(key, { lng })) {
+                                            const res = i18n.getResource(lng, 'common', `productDescriptions.${product.slug}`) || i18n.t(key, { lng })
+                                            return (
+                                                <div
+                                                    className="prose max-w-none text-gray-800"
+                                                    dangerouslySetInnerHTML={{ __html: String(res) }}
+                                                />
+                                            )
+                                        }
+                                    }
 
-                                                // If no translation resource exists in any language, fall back to DB HTML
-                                                if (process.env.NODE_ENV !== 'production') {
-                                                    console.debug(`i18n: no translation found for ${key} in languages ${langsToTry.join(', ')}`)
-                                                }
-                                                return (
-                                                    <div
-                                                        className="prose max-w-none text-gray-800"
-                                                        dangerouslySetInnerHTML={{ __html: product.longDescription }}
-                                                    />
-                                                )
-                                            })()}
+                                    // If no translation resource exists in any language, fall back to DB HTML
+                                    if (process.env.NODE_ENV !== 'production') {
+                                        console.debug(`i18n: no translation found for ${key} in languages ${langsToTry.join(', ')}`)
+                                    }
+                                    return (
+                                        <div
+                                            className="prose max-w-none text-gray-800"
+                                            dangerouslySetInnerHTML={{ __html: product.longDescription }}
+                                        />
+                                    )
+                                })()}
                             </CardContent>
                         </Card>
                     </TabsContent>

@@ -159,13 +159,11 @@
   },
   "productCategories": {
     "adesivos": "Stickers"
-  }
-  ,
+  },
   "productDescriptions": {
     "guia-marketing-digital": "<p>Complete guide to digital marketing: practical strategies to promote your work and reach more people. Includes SEO tips, social media, and content planning.</p>",
     "planejador-financeiro": "<p>Personal financial planner to organize your monthly finances, control expenses and save for important projects.</p>",
-    "receitas-saudaveis": "<p>E-book with healthy and practical recipes for everyday life, with printable versions and substitution tips.</p>"
-    ,
+    "receitas-saudaveis": "<p>E-book with healthy and practical recipes for everyday life, with printable versions and substitution tips.</p>",
     "autyro": "<p>Hello, how are you doing?</p>"
   }
 }
