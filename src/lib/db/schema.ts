@@ -464,18 +464,33 @@ export const attributesRelations = relations(attributes, ({ many }) => ({
 }));
 
 export const attributeValuesRelations = relations(attributeValues, ({ one }) => ({
-  attribute: one(attributes, { fields: [attributeValues.attributeId], references: [attributes.id] }),
+  attribute: one(attributes, {
+    fields: [attributeValues.attributeId],
+    references: [attributes.id],
+  }),
 }));
 
 export const productAttributesRelations = relations(productAttributes, ({ one }) => ({
   product: one(products, { fields: [productAttributes.productId], references: [products.id] }),
-  attribute: one(attributes, { fields: [productAttributes.attributeId], references: [attributes.id] }),
+  attribute: one(attributes, {
+    fields: [productAttributes.attributeId],
+    references: [attributes.id],
+  }),
 }));
 
 export const variationAttributeValuesRelations = relations(variationAttributeValues, ({ one }) => ({
-  variation: one(productVariations, { fields: [variationAttributeValues.variationId], references: [productVariations.id] }),
-  attribute: one(attributes, { fields: [variationAttributeValues.attributeId], references: [attributes.id] }),
-  value: one(attributeValues, { fields: [variationAttributeValues.valueId], references: [attributeValues.id] }),
+  variation: one(productVariations, {
+    fields: [variationAttributeValues.variationId],
+    references: [productVariations.id],
+  }),
+  attribute: one(attributes, {
+    fields: [variationAttributeValues.attributeId],
+    references: [attributes.id],
+  }),
+  value: one(attributeValues, {
+    fields: [variationAttributeValues.valueId],
+    references: [attributeValues.id],
+  }),
 }));
 
 export const productImagesRelations = relations(productImages, ({ one }) => ({

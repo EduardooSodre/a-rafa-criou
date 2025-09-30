@@ -931,7 +931,7 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
                                             <label className="mr-2">Aplicar</label>
                                             <input type="checkbox" checked={!!selected} onChange={(e) => {
                                                 if (e.target.checked) {
-                                                    setFormData(prev => ({ ...prev, attributes: [ ...(prev.attributes || []), { attributeId: attr.id, valueIds: [] } ] }))
+                                                    setFormData(prev => ({ ...prev, attributes: [...(prev.attributes || []), { attributeId: attr.id, valueIds: [] }] }))
                                                 } else {
                                                     setFormData(prev => ({ ...prev, attributes: (prev.attributes || []).filter(a => a.attributeId !== attr.id) }))
                                                 }

@@ -14,7 +14,12 @@ export async function GET() {
   const attrs = await db.select().from(attributes).orderBy(attributes.sortOrder).execute();
   const ids = attrs.map(a => a.id);
   const vals = ids.length
-    ? await db.select().from(attributeValues).where(inArray(attributeValues.attributeId, ids)).orderBy(attributeValues.sortOrder).execute()
+    ? await db
+        .select()
+        .from(attributeValues)
+        .where(inArray(attributeValues.attributeId, ids))
+        .orderBy(attributeValues.sortOrder)
+        .execute()
     : [];
 
   const byAttr = new Map<string, Array<Record<string, unknown>>>();
@@ -44,4 +49,3 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ ok: true, id: inserted.id });
 }
-

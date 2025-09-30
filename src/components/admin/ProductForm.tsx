@@ -40,14 +40,14 @@ export default function ProductForm({ defaultValues, categories = [], availableA
     const [isCreatingCategory, setIsCreatingCategory] = useState(false)
 
     const [formData, setFormData] = useState<ProductFormData>(() => ({
-    name: defaultValues?.name || '',
-    slug: defaultValues?.slug,
+        name: defaultValues?.name || '',
+        slug: defaultValues?.slug,
         description: defaultValues?.description,
         categoryId: defaultValues?.categoryId ?? null,
         isActive: defaultValues?.isActive ?? true,
         isFeatured: defaultValues?.isFeatured ?? false,
-    images: defaultValues?.images || [],
-    price: defaultValues?.price ? String(defaultValues.price) : '',
+        images: defaultValues?.images || [],
+        price: defaultValues?.price ? String(defaultValues.price) : '',
         variations: defaultValues?.variations || [{ name: '', price: '', attributeValues: [], files: [] }],
         attributes: defaultValues?.attributes || [],
     }))
@@ -68,7 +68,7 @@ export default function ProductForm({ defaultValues, categories = [], availableA
     // fetch categories from API when none were passed as prop
     useEffect(() => {
         if ((!categories || categories.length === 0) && categoriesLocal.length === 0) {
-            ;(async () => {
+            ; (async () => {
                 try {
                     const res = await fetch('/api/admin/categories')
                     if (!res.ok) return
@@ -85,7 +85,7 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                 }
             })()
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useEffect(() => {
@@ -289,43 +289,43 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                                             <DialogTrigger asChild>
                                                 <Button type="button" variant="outline" size="icon"><FolderPlus className="w-4 h-4" /></Button>
                                             </DialogTrigger>
-                                                    <DialogContent>
-                                                        <DialogHeader><DialogTitle>Nova Categoria</DialogTitle></DialogHeader>
-                                                        <div className="py-4 space-y-2">
-                                                            <Input placeholder="Nome" value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)} />
-                                                            <Textarea placeholder="Descrição" rows={3} value={newCategoryDescription} onChange={e => setNewCategoryDescription(e.target.value)} />
-                                                            <div className="flex justify-end mt-2 gap-2">
-                                                                <Button disabled={isCreatingCategory} onClick={() => setIsNewCategoryOpen(false)}>Fechar</Button>
-                                                                <Button disabled={isCreatingCategory || !newCategoryName} onClick={async () => {
-                                                                    // create category via API
-                                                                    setIsCreatingCategory(true)
-                                                                    try {
-                                                                        const res = await fetch('/api/admin/categories', {
-                                                                            method: 'POST',
-                                                                            headers: { 'Content-Type': 'application/json' },
-                                                                            body: JSON.stringify({ name: newCategoryName, description: newCategoryDescription })
-                                                                        })
-                                                                        if (!res.ok) throw new Error('Erro ao criar categoria')
-                                                                        const created = await res.json()
-                                                                        if (created && created.id) {
-                                                                            setCategoriesLocal(prev => [created, ...prev])
-                                                                            setFormData(prev => ({ ...prev, categoryId: created.id }))
-                                                                            setNewCategoryName('')
-                                                                            setNewCategoryDescription('')
-                                                                            setIsNewCategoryOpen(false)
-                                                                        } else {
-                                                                            alert('Resposta inesperada ao criar categoria')
-                                                                        }
-                                                                    } catch (err) {
-                                                                        console.error(err)
-                                                                        alert('Falha ao criar categoria')
-                                                                    } finally {
-                                                                        setIsCreatingCategory(false)
-                                                                    }
-                                                                }}>Criar</Button>
-                                                            </div>
-                                                        </div>
-                                                    </DialogContent>
+                                            <DialogContent>
+                                                <DialogHeader><DialogTitle>Nova Categoria</DialogTitle></DialogHeader>
+                                                <div className="py-4 space-y-2">
+                                                    <Input placeholder="Nome" value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)} />
+                                                    <Textarea placeholder="Descrição" rows={3} value={newCategoryDescription} onChange={e => setNewCategoryDescription(e.target.value)} />
+                                                    <div className="flex justify-end mt-2 gap-2">
+                                                        <Button disabled={isCreatingCategory} onClick={() => setIsNewCategoryOpen(false)}>Fechar</Button>
+                                                        <Button disabled={isCreatingCategory || !newCategoryName} onClick={async () => {
+                                                            // create category via API
+                                                            setIsCreatingCategory(true)
+                                                            try {
+                                                                const res = await fetch('/api/admin/categories', {
+                                                                    method: 'POST',
+                                                                    headers: { 'Content-Type': 'application/json' },
+                                                                    body: JSON.stringify({ name: newCategoryName, description: newCategoryDescription })
+                                                                })
+                                                                if (!res.ok) throw new Error('Erro ao criar categoria')
+                                                                const created = await res.json()
+                                                                if (created && created.id) {
+                                                                    setCategoriesLocal(prev => [created, ...prev])
+                                                                    setFormData(prev => ({ ...prev, categoryId: created.id }))
+                                                                    setNewCategoryName('')
+                                                                    setNewCategoryDescription('')
+                                                                    setIsNewCategoryOpen(false)
+                                                                } else {
+                                                                    alert('Resposta inesperada ao criar categoria')
+                                                                }
+                                                            } catch (err) {
+                                                                console.error(err)
+                                                                alert('Falha ao criar categoria')
+                                                            } finally {
+                                                                setIsCreatingCategory(false)
+                                                            }
+                                                        }}>Criar</Button>
+                                                    </div>
+                                                </div>
+                                            </DialogContent>
                                         </Dialog>
                                     </div>
                                 </div>
@@ -353,7 +353,7 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                         </CardHeader>
                         <CardContent>
                             <div className="grid md:grid-cols-2 gap-4">
-                                        <div>
+                                <div>
                                     <Label>Criar novo atributo</Label>
                                     <div className="flex gap-2">
                                         <Input placeholder="Nome do atributo" value={newAttrName} onChange={e => setNewAttrName(e.target.value)} />

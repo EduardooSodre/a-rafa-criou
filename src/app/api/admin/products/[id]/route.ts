@@ -84,18 +84,27 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     if (body.variations && Array.isArray(body.variations)) {
       for (const variation of body.variations) {
         // variation should have an id when updating existing variations
-        if (!variation.id) continue
+        if (!variation.id) continue;
         // delete existing mappings for this variation
-        await db.delete(variationAttributeValues).where(eq(variationAttributeValues.variationId, variation.id)).execute()
+        await db
+          .delete(variationAttributeValues)
+          .where(eq(variationAttributeValues.variationId, variation.id))
+          .execute();
         // insert new mappings if provided
-        if (variation.attributeValues && Array.isArray(variation.attributeValues) && variation.attributeValues.length > 0) {
-          const vamp = variation.attributeValues.map((av: { attributeId: string; valueId: string }) => ({
-            variationId: variation.id,
-            attributeId: av.attributeId,
-            valueId: av.valueId,
-          }))
+        if (
+          variation.attributeValues &&
+          Array.isArray(variation.attributeValues) &&
+          variation.attributeValues.length > 0
+        ) {
+          const vamp = variation.attributeValues.map(
+            (av: { attributeId: string; valueId: string }) => ({
+              variationId: variation.id,
+              attributeId: av.attributeId,
+              valueId: av.valueId,
+            })
+          );
           if (vamp.length > 0) {
-            await db.insert(variationAttributeValues).values(vamp).execute()
+            await db.insert(variationAttributeValues).values(vamp).execute();
           }
         }
       }
