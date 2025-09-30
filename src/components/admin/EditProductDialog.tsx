@@ -90,8 +90,8 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
             if (i.r2Key) return `/api/r2/download?r2Key=${encodeURIComponent(String(i.r2Key))}`
             return i.url || ''
         })
-    type RawAttr = ApiAttributeValue & { attribute_id?: string; attribute_value_id?: string }
-    type RawFile = ApiFile & { name?: string; path?: string; size?: number }
+        type RawAttr = ApiAttributeValue & { attribute_id?: string; attribute_value_id?: string }
+        type RawFile = ApiFile & { name?: string; path?: string; size?: number }
         const variations = (source.variations || []).map(v => {
             const vv = v as ApiVariation
             const imgs = (vv.images || []).map(img => {
