@@ -37,15 +37,32 @@ export async function GET(
 
     // Get related files, images and attribute mappings
     const variationFiles = await db.select().from(files).where(eq(files.variationId, variationId));
-    const variationImages = await db.select().from(productImages).where(eq(productImages.variationId, variationId));
-    const mappings = await db.select().from(variationAttributeValues).where(eq(variationAttributeValues.variationId, variationId));
+    const variationImages = await db
+      .select()
+      .from(productImages)
+      .where(eq(productImages.variationId, variationId));
+    const mappings = await db
+      .select()
+      .from(variationAttributeValues)
+      .where(eq(variationAttributeValues.variationId, variationId));
 
     const attributeValues = mappings.map(m => ({ attributeId: m.attributeId, valueId: m.valueId }));
 
     const completeVariation = {
       ...variation,
-      files: variationFiles.map(f => ({ filename: f.name, originalName: f.originalName || f.name, fileSize: f.size, mimeType: f.mimeType || '', r2Key: f.path })),
-      images: variationImages.map(img => ({ data: img.data, alt: img.alt, isMain: img.isMain, order: img.sortOrder })),
+      files: variationFiles.map(f => ({
+        filename: f.name,
+        originalName: f.originalName || f.name,
+        fileSize: f.size,
+        mimeType: f.mimeType || '',
+        r2Key: f.path,
+      })),
+      images: variationImages.map(img => ({
+        data: img.data,
+        alt: img.alt,
+        isMain: img.isMain,
+        order: img.sortOrder,
+      })),
       attributeValues,
     };
 

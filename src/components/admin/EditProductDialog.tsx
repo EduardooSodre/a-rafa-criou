@@ -35,28 +35,28 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
 
     useEffect(() => {
         let mounted = true
-        ;(async () => {
-            try {
-                const res = await fetch('/api/admin/attributes')
-                if (!res.ok) return
-                const j = await res.json()
-                if (!mounted) return
-                // map API attributes into our Attribute shape if necessary
-                const rawAttrs = (j.attributes || j || []) as unknown
-                const attrs: Attribute[] = Array.isArray(rawAttrs) ? rawAttrs.map((a: unknown) => {
-                    const obj = a as Record<string, unknown>
-                    const vals = Array.isArray(obj.values) ? obj.values as unknown[] : []
-                    const values = vals.map(v => {
-                        const vv = v as Record<string, unknown>
-                        return { id: String(vv.id), value: String(vv.value ?? vv.name ?? '') }
-                    })
-                    return { id: String(obj.id), name: String(obj.name), values }
-                }) : []
-                setAvailableAttributes(attrs)
-            } catch (err) {
-                console.error('Failed to fetch attributes', err)
-            }
-        })()
+            ; (async () => {
+                try {
+                    const res = await fetch('/api/admin/attributes')
+                    if (!res.ok) return
+                    const j = await res.json()
+                    if (!mounted) return
+                    // map API attributes into our Attribute shape if necessary
+                    const rawAttrs = (j.attributes || j || []) as unknown
+                    const attrs: Attribute[] = Array.isArray(rawAttrs) ? rawAttrs.map((a: unknown) => {
+                        const obj = a as Record<string, unknown>
+                        const vals = Array.isArray(obj.values) ? obj.values as unknown[] : []
+                        const values = vals.map(v => {
+                            const vv = v as Record<string, unknown>
+                            return { id: String(vv.id), value: String(vv.value ?? vv.name ?? '') }
+                        })
+                        return { id: String(obj.id), name: String(obj.name), values }
+                    }) : []
+                    setAvailableAttributes(attrs)
+                } catch (err) {
+                    console.error('Failed to fetch attributes', err)
+                }
+            })()
         return () => { mounted = false }
     }, [])
 
@@ -65,18 +65,18 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
 
     useEffect(() => {
         let mounted = true
-        ;(async () => {
-            try {
-                if (!product?.id || !open) return
-                const res = await fetch(`/api/admin/products/${product.id}`)
-                if (!res.ok) return
-                const j = await res.json()
-                if (!mounted) return
-                setDetailedProduct(j)
-            } catch (err) {
-                console.error('Failed to fetch product details', err)
-            }
-        })()
+            ; (async () => {
+                try {
+                    if (!product?.id || !open) return
+                    const res = await fetch(`/api/admin/products/${product.id}`)
+                    if (!res.ok) return
+                    const j = await res.json()
+                    if (!mounted) return
+                    setDetailedProduct(j)
+                } catch (err) {
+                    console.error('Failed to fetch product details', err)
+                }
+            })()
         return () => { mounted = false }
     }, [product?.id, open])
 
@@ -84,18 +84,41 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
         const src = detailedProduct || product
         if (!src) return undefined
         const source = src as AdminProduct
-        const images = (source.images || []).map(i => i.r2Key || i.data || i.url || '')
-        type RawAttr = ApiAttributeValue & { attribute_id?: string; attribute_value_id?: string }
+        const images = (source.images || []).map(i => {
+            if (!i) return ''
+            if (i.data) return i.data
+            if (i.r2Key) return `/api/r2/download?r2Key=${encodeURIComponent(String(i.r2Key))}`
+            return i.url || ''
+        })
+    type RawAttr = ApiAttributeValue & { attribute_id?: string; attribute_value_id?: string }
+    type RawFile = ApiFile & { name?: string; path?: string; size?: number }
         const variations = (source.variations || []).map(v => {
             const vv = v as ApiVariation
-            const imgs = (vv.images || []).map(img => ({ filename: img.alt || '', previewUrl: img.data || img.r2Key || img.url || '' }))
+            const imgs = (vv.images || []).map(img => {
+                if (!img) return { filename: '', previewUrl: '' }
+                const preview = img.data ? img.data : img.r2Key ? `/api/r2/download?r2Key=${encodeURIComponent(String(img.r2Key))}` : img.url || ''
+                return { filename: img.alt || '', previewUrl: preview }
+            })
             const attrVals = (vv.attributeValues || []).map((av: RawAttr) => ({ attributeId: av.attributeId || av.attribute_id || '', valueId: av.valueId || av.attribute_value_id || '' })).filter(a => a.attributeId && a.valueId)
+            const files = (vv.files || []).map((f: RawFile) => {
+                const r2 = f.r2Key || f.path || ''
+                const url = r2 ? `/api/r2/download?r2Key=${encodeURIComponent(String(r2))}` : (f.url || '')
+                return {
+                    filename: f.filename || f.originalName || f.name || '',
+                    originalName: f.originalName || '',
+                    fileSize: f.fileSize ?? f.size ?? 0,
+                    mimeType: f.mimeType || '',
+                    r2Key: r2,
+                    uploaded: !!r2,
+                    url,
+                }
+            })
             return {
                 id: vv.id,
                 name: vv.name || '',
                 price: vv.price ? String(vv.price) : '',
                 attributeValues: attrVals,
-                files: vv.files || [],
+                files,
                 images: imgs,
             }
         })

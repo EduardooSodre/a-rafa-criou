@@ -72,14 +72,24 @@ export default function ProductForm({ defaultValues, categories = [], availableA
 
         // prepare image preview objects for product images so drag/reorder/removal work
         const prodImages = defaultValues?.images || []
-    imagePreviewsRef.current = prodImages.map((url, i) => ({ file: undefined as File | undefined, filename: String(url).split('/').pop() || `img-${i}`, previewUrl: String(url) } as ImageFile))
+        imagePreviewsRef.current = prodImages.map((url, i) => ({ file: undefined as File | undefined, filename: String(url).split('/').pop() || `img-${i}`, previewUrl: String(url) } as ImageFile))
 
         // map variations: ensure images are ImageFile objects and keep files as-is
-    const mappedVariations = (defaultValues?.variations || []).map((v: Partial<VariationForm>) => ({
+        type InFile = { filename?: string; originalName?: string; fileSize?: number; mimeType?: string; r2Key?: string; url?: string }
+        const mappedVariations = (defaultValues?.variations || []).map((v: Partial<VariationForm>) => ({
             name: v.name || '',
             price: v.price ? String(v.price) : '',
             attributeValues: v.attributeValues || [],
-            files: v.files || [],
+            files: (v.files || []).map((f: string | InFile) => {
+                if (typeof f === 'string') {
+                    // if API sent a simple string (unlikely) treat as r2Key/url
+                    const r = String(f)
+                    return { file: undefined as File | undefined, filename: r.split('/').pop() || r, r2Key: r.startsWith('/') || r.includes('/api/r2/download') ? '' : r, url: r.startsWith('/') || r.includes('/api/r2/download') ? r : undefined }
+                }
+                const ff = f as InFile
+                const url = ff.r2Key ? `/api/r2/download?r2Key=${encodeURIComponent(String(ff.r2Key))}` : (ff.url || undefined)
+                return { file: undefined as File | undefined, filename: ff.filename || ff.originalName || url?.split('/').pop() || '', r2Key: ff.r2Key || '', originalName: ff.originalName, fileSize: ff.fileSize, mimeType: ff.mimeType, url }
+            }),
             images: (v.images || []).map((img: string | { filename?: string; previewUrl?: string; data?: string; url?: string }, ii: number) => {
                 // image may be string or object { filename, previewUrl }
                 if (typeof img === 'string') return { file: undefined as File | undefined, filename: String(img).split('/').pop() || `var-${ii}`, previewUrl: img } as ImageFile
