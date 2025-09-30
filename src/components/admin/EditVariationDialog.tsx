@@ -32,7 +32,7 @@ interface UploadedImage {
 
 interface UploadedFile {
     file?: File
-    type: 'pdf' | 'image'
+    type?: 'pdf' | 'image'
     uploading?: boolean
     uploaded?: boolean
     r2Key?: string
@@ -57,7 +57,7 @@ interface VariationData {
 }
 
 interface EditVariationDialogProps {
-    variation: Partial<VariationData>
+    variation: Partial<VariationData> | Record<string, unknown>
     productId: string
     onSuccess?: () => void
     trigger?: React.ReactNode
@@ -75,7 +75,8 @@ export default function EditVariationDialog({
         ...variation,
         price: variation.price?.toString() ?? '',
         images: variation.images || [],
-        files: variation.files || [],
+        // variation.files may come in a different shape (FileData). Cast to UploadedFile[] safely.
+        files: (variation.files as unknown as UploadedFile[]) || [],
         idioma: variation.idioma || '',
     } as VariationData)
     // Opções de idioma
@@ -235,7 +236,7 @@ export default function EditVariationDialog({
                 <DialogHeader>
                     <DialogTitle>Editar Variação</DialogTitle>
                     <DialogDescription>
-                        Atualize as informações da variação &quot;{variation.name}&quot;.
+                        Atualize as informações da variação &quot;{(variation as unknown as Partial<VariationData>).name as string}&quot;.
                     </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-6">

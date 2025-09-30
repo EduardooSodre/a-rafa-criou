@@ -230,7 +230,7 @@ export default function ProductForm({ defaultValues, categories = [], availableA
         try {
             // First: upload all variation files to R2
             type R2File = { filename: string; originalName: string; fileSize: number; mimeType: string; r2Key: string }
-            const variationsPayload: Array<{ name: string; price: number; isActive: boolean; files: R2File[]; attributeValues: VariationForm['attributeValues'] }> = []
+            const variationsPayload: Array<{ name: string; price: number; isActive: boolean; files: R2File[]; images?: Array<{ data: string; alt?: string; isMain?: boolean; order?: number }>; attributeValues: VariationForm['attributeValues'] }> = []
             for (let vi = 0; vi < formData.variations.length; vi++) {
                 const variation = formData.variations[vi]
                 const filesPayload: R2File[] = []
@@ -249,11 +249,30 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                     }
                 }
 
+                // Process variation images (upload to R2 if file present)
+                const variationImagesPayload: Array<{ data: string; alt?: string; isMain?: boolean; order?: number }> = []
+                for (let viImg = 0; viImg < (variation.images || []).length; viImg++) {
+                    const vimg = variation.images[viImg]
+                    if (vimg.file) {
+                        const fd = new FormData()
+                        fd.append('file', vimg.file)
+                        const resImg = await fetch('/api/r2/upload', { method: 'POST', body: fd })
+                        if (!resImg.ok) throw new Error('Falha no upload de imagem da variação')
+                        const jimg = await resImg.json()
+                        const r2k = jimg?.data?.key ?? jimg?.data
+                        if (r2k) variationImagesPayload.push({ data: r2k, alt: vimg.filename || undefined, isMain: viImg === 0, order: viImg })
+                        if (vimg.previewUrl) URL.revokeObjectURL(vimg.previewUrl)
+                    } else if (vimg.previewUrl) {
+                        variationImagesPayload.push({ data: vimg.previewUrl, alt: vimg.filename || undefined, isMain: viImg === 0, order: viImg })
+                    }
+                }
+
                 variationsPayload.push({
                     name: variation.name,
                     price: parseFloat(variation.price) || 0,
                     isActive: true,
                     files: filesPayload,
+                    images: variationImagesPayload,
                     attributeValues: variation.attributeValues || [],
                 })
             }
@@ -261,8 +280,9 @@ export default function ProductForm({ defaultValues, categories = [], availableA
             // Product price: prefer explicit field, otherwise first variation
             const productPrice = formData.price ? parseFloat(formData.price) : (formData.variations[0] ? parseFloat(formData.variations[0].price || '0') : 0)
             // Upload product images (if any previews present)
-            const productImageKeys: string[] = []
-            for (const img of imagePreviewsRef.current) {
+            const productImagesPayload: Array<{ data: string; alt?: string; isMain?: boolean; order?: number }> = []
+            for (let i = 0; i < imagePreviewsRef.current.length; i++) {
+                const img = imagePreviewsRef.current[i]
                 if (img.file) {
                     const fd = new FormData()
                     fd.append('file', img.file)
@@ -270,9 +290,12 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                     if (!resImg.ok) throw new Error('Falha no upload de imagem do produto')
                     const jimg = await resImg.json()
                     const r2k = jimg?.data?.key ?? jimg?.data
-                    if (r2k) productImageKeys.push(r2k)
+                    if (r2k) productImagesPayload.push({ data: r2k, alt: img.filename || undefined, isMain: i === 0, order: i })
                     // revoke preview URL after upload
                     if (img.previewUrl) URL.revokeObjectURL(img.previewUrl)
+                } else if (img.previewUrl) {
+                    // If there's no File object (existing preview), send the preview URL or key as data
+                    productImagesPayload.push({ data: img.previewUrl, alt: img.filename || undefined, isMain: i === 0, order: i })
                 }
             }
 
@@ -284,10 +307,14 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                 categoryId: formData.categoryId || null,
                 isActive: formData.isActive,
                 isFeatured: formData.isFeatured,
-                images: productImageKeys,
+                images: productImagesPayload,
                 variations: variationsPayload,
                 files: [],
                 attributes: formData.attributes || [],
+                // include any locally-created attribute definitions so server can create them
+                attributeDefinitions: localAttributes
+                    .filter(a => a.id.startsWith('local-'))
+                    .map(a => ({ id: a.id, name: a.name, values: (a.values || []).map(v => ({ id: v.id, value: v.value })) })),
             }
 
             const res = await fetch('/api/admin/products', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
