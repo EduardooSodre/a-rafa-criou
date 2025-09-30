@@ -51,6 +51,58 @@ export default function ProductForm({ defaultValues, categories = [], availableA
     // Simple refs for variation blocks (used for scroll into view)
     const variationRefs = useRef<Array<HTMLDivElement | null>>([])
 
+    // Refs and state for image previews and drag-and-drop
+    const imagePreviewsRef = useRef<ImageFile[]>([])
+    const dragIndexRef = useRef<number | null>(null)
+    type DragPayload = { source: 'product'; imageIndex: number; image: ImageFile } | { source: 'variation'; variationIndex: number; imageIndex: number; image: ImageFile } | null
+    const dragDataRef = useRef<DragPayload>(null)
+    const variationDragRef = useRef<{ variationIndex: number; imageIndex: number } | null>(null)
+
+    const [productDraggingIndex, setProductDraggingIndex] = useState<number | null>(null)
+    const [productDragOverIndex, setProductDragOverIndex] = useState<number | null>(null)
+
+    const [variationDraggingState, setVariationDraggingState] = useState<{ variationIndex: number; imageIndex: number } | null>(null)
+    const [variationDragOverState, setVariationDragOverState] = useState<{ variationIndex: number; overIndex: number } | null>(null)
+
+    function handleProductImageUpload(files: FileList) {
+        const list = Array.from(files).map(f => ({ file: f, filename: f.name, previewUrl: URL.createObjectURL(f) }))
+        imagePreviewsRef.current = [...imagePreviewsRef.current, ...list]
+        setFormData(prev => ({ ...prev, images: [...prev.images, ...list.map(l => l.previewUrl!)] }))
+    }
+
+    function removeProductImageByPreview(previewUrl: string) {
+        setFormData(prev => {
+            const idx = prev.images.indexOf(previewUrl)
+            if (idx === -1) return prev
+            const previews = [...imagePreviewsRef.current]
+            const [removed] = previews.splice(idx, 1)
+            if (removed && removed.previewUrl) URL.revokeObjectURL(removed.previewUrl)
+            imagePreviewsRef.current = previews
+            return { ...prev, images: prev.images.filter(p => p !== previewUrl) }
+        })
+    }
+
+    function handleVariationImageUpload(variationIndex: number, files: FileList) {
+        const list = Array.from(files).map(f => ({ file: f, filename: f.name, previewUrl: URL.createObjectURL(f) }))
+        setFormData(prev => ({ ...prev, variations: prev.variations.map((v, i) => i === variationIndex ? { ...v, images: [...v.images, ...list] } : v) }))
+    }
+
+    function addVariation() {
+        setFormData(prev => ({ ...prev, variations: [...prev.variations, { name: '', price: '', attributeValues: [], files: [], images: [] }] }))
+        // scroll to new variation after slight delay (UI)
+        setTimeout(() => { const idx = formData.variations.length; variationRefs.current[idx]?.scrollIntoView({ behavior: 'smooth' }) }, 100)
+    }
+
+    function updateVariation<K extends keyof VariationForm | string>(index: number, key: K, value: unknown) {
+        setFormData(prev => ({ ...prev, variations: prev.variations.map((v, i) => i === index ? { ...v, [key]: value as any } : v) }))
+    }
+
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    function removeVariation(index: number) {
+        setFormData(prev => ({ ...prev, variations: prev.variations.filter((_, i) => i !== index) }))
+    }
+    /* eslint-enable @typescript-eslint/no-unused-vars */
+
     // Small Dropzone component (local) to provide drag/drop and click-to-select behavior
     type DropzoneProps = { accept?: string; multiple?: boolean; onFilesSelected: (files: FileList) => void; children?: React.ReactNode }
     function Dropzone({ accept, multiple, onFilesSelected, children }: DropzoneProps) {
@@ -86,77 +138,14 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                 try {
                     const res = await fetch('/api/admin/categories')
                     if (!res.ok) return
-                    const data = await res.json()
-                    // API returns { categories: [...], total }
-                    if (Array.isArray(data)) {
-                        setCategoriesLocal(data)
-                    } else if (data && typeof data === 'object' && Array.isArray((data as { categories?: Category[] }).categories)) {
-                        const resp = data as { categories?: Category[] }
-                        setCategoriesLocal(resp.categories || [])
-                    }
+                    const j = await res.json()
+                    setCategoriesLocal(j.categories || [])
                 } catch (err) {
-                    console.error('Erro ao buscar categorias', err)
+                    console.error('Falha ao buscar categorias', err)
                 }
             })()
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
-
-    useEffect(() => {
-        // ensure at least one variation exists
-        if (!formData.variations || formData.variations.length === 0) {
-            setFormData(prev => ({ ...prev, variations: [{ name: '', price: '', attributeValues: [], files: [], images: [] }] }))
-        }
-    }, [formData.variations])
-
-    // Handlers
-    // Keep image preview objects to handle revoke and upload
-    const imagePreviewsRef = useRef<ImageFile[]>([])
-    const dragIndexRef = useRef<number | null>(null)
-    const variationDragRef = useRef<{ variationIndex: number; imageIndex: number } | null>(null)
-    // reactive state to trigger re-renders and visual feedback
-    const [productDraggingIndex, setProductDraggingIndex] = useState<number | null>(null)
-    const [productDragOverIndex, setProductDragOverIndex] = useState<number | null>(null)
-    // variation drag reactive state (used to show visual feedback)
-    const [variationDraggingState, setVariationDraggingState] = useState<{ variationIndex: number; imageIndex: number } | null>(null)
-    const [variationDragOverState, setVariationDragOverState] = useState<{ variationIndex: number; overIndex: number } | null>(null)
-
-    function handleProductImageUpload(files: FileList) {
-        const list: ImageFile[] = Array.from(files).map(f => ({ file: f, filename: f.name, previewUrl: URL.createObjectURL(f) }))
-        const urls = list.map(i => i.previewUrl!).filter(Boolean)
-        setFormData(prev => ({ ...prev, images: [...prev.images, ...urls] }))
-        imagePreviewsRef.current = [...imagePreviewsRef.current, ...list]
-    }
-
-    function removeProductImageByPreview(previewUrl: string) {
-        const found = imagePreviewsRef.current.find(i => i.previewUrl === previewUrl)
-        if (found && found.previewUrl) URL.revokeObjectURL(found.previewUrl)
-        imagePreviewsRef.current = imagePreviewsRef.current.filter(i => i.previewUrl !== previewUrl)
-        setFormData(prev => ({ ...prev, images: prev.images.filter(im => im !== previewUrl) }))
-    }
-
-    // revoke previews on unmount
-    useEffect(() => {
-        return () => {
-            imagePreviewsRef.current.forEach(i => i.previewUrl && URL.revokeObjectURL(i.previewUrl))
-            imagePreviewsRef.current = []
-        }
-    }, [])
-
-    function addVariation() {
-        setFormData(prev => ({ ...prev, variations: [...prev.variations, { name: '', price: '', attributeValues: [], files: [], images: [] }] }))
-        setTimeout(() => setStep(3), 100)
-    }
-
-    function updateVariation(index: number, field: keyof VariationForm, value: string | UploadedFile[] | VariationForm['attributeValues'] | ImageFile[]) {
-        setFormData(prev => ({ ...prev, variations: prev.variations.map((v, i) => i === index ? { ...v, [field]: value } : v) }))
-    }
-
-    function handleVariationImageUpload(variationIndex: number, files: FileList) {
-        const list: ImageFile[] = Array.from(files).map(f => ({ file: f, filename: f.name, previewUrl: URL.createObjectURL(f) }))
-        setFormData(prev => ({ ...prev, variations: prev.variations.map((v, i) => i === variationIndex ? { ...v, images: [...v.images, ...list] } : v) }))
-    }
-
+    }, [categories, categoriesLocal.length])
     function removeVariationImage(variationIndex: number, imageIndex: number) {
         setFormData(prev => {
             const newVars = prev.variations.map((v, i) => {
@@ -405,7 +394,39 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                                         <Label>Imagens do Produto</Label>
                                         <div className="mt-2">
                                             <Dropzone accept="image/*" multiple onFilesSelected={files => handleProductImageUpload(files)}>
-                                                <div className="block w-full border-2 border-dashed rounded-lg p-6 text-center cursor-pointer">
+                                                <div className="block w-full border-2 border-dashed rounded-lg p-6 text-center cursor-pointer"
+                                                    onDrop={e => {
+                                                        const payload = dragDataRef.current
+                                                        if (!payload) return
+                                                        e.preventDefault()
+                                                        if (payload.source === 'product') {
+                                                            const from = payload.imageIndex
+                                                            if (typeof from === 'number') {
+                                                                setFormData(prev => {
+                                                                    const arr = [...prev.images]
+                                                                    const [moved] = arr.splice(from, 1)
+                                                                    arr.push(moved)
+                                                                    return { ...prev, images: arr }
+                                                                })
+                                                                const previews = [...imagePreviewsRef.current]
+                                                                const [movedP] = previews.splice(from, 1)
+                                                                previews.push(movedP)
+                                                                imagePreviewsRef.current = previews
+                                                            }
+                                                        } else if (payload.source === 'variation') {
+                                                            const fromVar = payload.variationIndex!
+                                                            const fromIdx = payload.imageIndex
+                                                            const imgObj = payload.image
+                                                            setFormData(prev => {
+                                                                const newVars = prev.variations.map((v, vi) => vi === fromVar ? { ...v, images: v.images.filter((_, i) => i !== fromIdx) } : v)
+                                                                return { ...prev, variations: newVars, images: [...prev.images, imgObj!.previewUrl!] }
+                                                            })
+                                                            imagePreviewsRef.current = [...imagePreviewsRef.current, imgObj!]
+                                                        }
+                                                        dragDataRef.current = null
+                                                        setProductDraggingIndex(null)
+                                                    }}
+                                                >
                                                     <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
                                                     <div className="text-sm text-gray-500">Arraste e solte ou clique para selecionar imagens</div>
                                                 </div>
@@ -419,9 +440,11 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                                                             onDragStart={e => {
                                                                 dragIndexRef.current = idx
                                                                 setProductDraggingIndex(idx)
+                                                                // attach payload for moving between product and variations
+                                                                dragDataRef.current = { source: 'product', imageIndex: idx, image: imagePreviewsRef.current[idx] }
                                                                 e.dataTransfer!.effectAllowed = 'move'
                                                             }}
-                                                            onDragEnd={() => { dragIndexRef.current = null; setProductDraggingIndex(null); setProductDragOverIndex(null) }}
+                                                            onDragEnd={() => { dragIndexRef.current = null; setProductDraggingIndex(null); setProductDragOverIndex(null); dragDataRef.current = null }}
                                                             onDragOver={e => { e.preventDefault(); setProductDragOverIndex(idx) }}
                                                             onDragLeave={() => setProductDragOverIndex(null)}
                                                             onDrop={e => {
