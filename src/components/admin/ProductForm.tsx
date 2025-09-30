@@ -94,7 +94,17 @@ export default function ProductForm({ defaultValues, categories = [], availableA
     }
 
     function updateVariation<K extends keyof VariationForm | string>(index: number, key: K, value: unknown) {
-        setFormData(prev => ({ ...prev, variations: prev.variations.map((v, i) => i === index ? { ...v, [key]: value as any } : v) }))
+        setFormData(prev => ({
+            ...prev,
+            variations: prev.variations.map((v, i) =>
+                i === index
+                    ? {
+                        ...v,
+                        [key]: value as VariationForm[Extract<keyof VariationForm, string>]
+                    }
+                    : v
+            )
+        }))
     }
 
     /* eslint-disable @typescript-eslint/no-unused-vars */
