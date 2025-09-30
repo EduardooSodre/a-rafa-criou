@@ -26,7 +26,8 @@ export default function ProductForm({ defaultValues, categories = [], availableA
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isNewCategoryOpen, setIsNewCategoryOpen] = useState(false)
     const [newAttrName, setNewAttrName] = useState('')
-    const [newAttrValuesRaw, setNewAttrValuesRaw] = useState('')
+    const [newAttrValues, setNewAttrValues] = useState<string[]>([])
+    const [newAttrValueInput, setNewAttrValueInput] = useState('')
 
     const [localAttributes, setLocalAttributes] = useState<Attribute[]>(availableAttributes)
     const [categoriesLocal, setCategoriesLocal] = useState<Category[]>(categories)
@@ -189,12 +190,17 @@ export default function ProductForm({ defaultValues, categories = [], availableA
 
     function handleCreateAttribute() {
         if (!newAttrName) return
-        const values = newAttrValuesRaw.split(',').map(s => s.trim()).filter(Boolean)
+        const values = newAttrValues.map(s => s.trim()).filter(Boolean)
+        if (values.length === 0) {
+            alert('Adicione pelo menos um valor para o atributo')
+            return
+        }
         const id = `local-${Date.now()}`
         const attr: Attribute = { id, name: newAttrName, values: values.map((v, i) => ({ id: `${id}-${i}`, value: v })) }
         setLocalAttributes(prev => [attr, ...prev])
         setNewAttrName('')
-        setNewAttrValuesRaw('')
+        setNewAttrValues([])
+        setNewAttrValueInput('')
         setIsNewCategoryOpen(false)
     }
 
@@ -511,7 +517,33 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                                                 <Plus className="w-4 h-4" />
                                             </Button>
                                         </div>
-                                        <Input className="mt-2" placeholder="Valores (separados por vírgula)" value={newAttrValuesRaw} onChange={e => setNewAttrValuesRaw(e.target.value)} />
+                                        <div className="mt-2">
+                                            <div className="flex gap-2">
+                                                <Input className="flex-1" placeholder="Adicionar valor e pressionar Enter" value={newAttrValueInput} onChange={e => setNewAttrValueInput(e.target.value)} onKeyDown={e => {
+                                                    if (e.key === 'Enter') {
+                                                        e.preventDefault()
+                                                        const v = newAttrValueInput.trim()
+                                                        if (v) { setNewAttrValues(prev => [...prev, v]); setNewAttrValueInput('') }
+                                                    }
+                                                }} />
+                                                <Button type="button" onClick={() => {
+                                                    const v = newAttrValueInput.trim()
+                                                    if (!v) return
+                                                    setNewAttrValues(prev => [...prev, v])
+                                                    setNewAttrValueInput('')
+                                                }} className="bg-[#FED466] text-black hover:brightness-95">+</Button>
+                                            </div>
+                                            <div className="mt-2 flex flex-wrap gap-2">
+                                                {newAttrValues.map((v, i) => (
+                                                    <div key={i} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 border">
+                                                        <span className="text-sm">{v}</span>
+                                                        <button type="button" onClick={() => setNewAttrValues(prev => prev.filter((_, idx) => idx !== i))} className="text-gray-500">
+                                                            <X className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div>
