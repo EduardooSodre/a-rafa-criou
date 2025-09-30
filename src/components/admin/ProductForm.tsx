@@ -117,7 +117,9 @@ export default function ProductForm({ defaultValues, categories = [], availableA
     // reactive state to trigger re-renders and visual feedback
     const [productDraggingIndex, setProductDraggingIndex] = useState<number | null>(null)
     const [productDragOverIndex, setProductDragOverIndex] = useState<number | null>(null)
-    // variation drag state handled via variationDragRef to avoid unnecessary re-renders
+    // variation drag reactive state (used to show visual feedback)
+    const [variationDraggingState, setVariationDraggingState] = useState<{ variationIndex: number; imageIndex: number } | null>(null)
+    const [variationDragOverState, setVariationDragOverState] = useState<{ variationIndex: number; overIndex: number } | null>(null)
 
     function handleProductImageUpload(files: FileList) {
         const list: ImageFile[] = Array.from(files).map(f => ({ file: f, filename: f.name, previewUrl: URL.createObjectURL(f) }))
@@ -601,25 +603,38 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                                             {variation.images.length > 0 && (
                                                 <div className="mt-3 grid grid-cols-3 gap-2">
                                                     {variation.images.map((img, ii) => (
-                                                        <div key={ii} draggable onDragStart={e => { variationDragRef.current = { variationIndex: index, imageIndex: ii }; e.dataTransfer!.effectAllowed = 'move' }} onDragOver={e => e.preventDefault()} onDrop={e => {
-                                                            e.preventDefault()
-                                                            const from = variationDragRef.current
-                                                            const to = ii
-                                                            if (!from) return
-                                                            if (from.variationIndex !== index) return // only allow reorder within same variation
-                                                            if (from.imageIndex === to) return
-                                                            setFormData(prev => {
-                                                                const newVars = prev.variations.map((v, vi) => {
-                                                                    if (vi !== index) return v
-                                                                    const imgs = [...v.images]
-                                                                    const [moved] = imgs.splice(from.imageIndex, 1)
-                                                                    imgs.splice(to, 0, moved)
-                                                                    return { ...v, images: imgs }
+                                                        <div key={ii}
+                                                            draggable
+                                                            onDragStart={e => {
+                                                                variationDragRef.current = { variationIndex: index, imageIndex: ii }
+                                                                setVariationDraggingState({ variationIndex: index, imageIndex: ii })
+                                                                e.dataTransfer!.effectAllowed = 'move'
+                                                            }}
+                                                            onDragEnd={() => { variationDragRef.current = null; setVariationDraggingState(null); setVariationDragOverState(null) }}
+                                                            onDragOver={e => { e.preventDefault(); setVariationDragOverState({ variationIndex: index, overIndex: ii }) }}
+                                                            onDragLeave={() => setVariationDragOverState(null)}
+                                                            onDrop={e => {
+                                                                e.preventDefault()
+                                                                const from = variationDragRef.current
+                                                                const to = ii
+                                                                if (!from) return
+                                                                if (from.variationIndex !== index) return // only allow reorder within same variation
+                                                                if (from.imageIndex === to) return
+                                                                setFormData(prev => {
+                                                                    const newVars = prev.variations.map((v, vi) => {
+                                                                        if (vi !== index) return v
+                                                                        const imgs = [...v.images]
+                                                                        const [moved] = imgs.splice(from.imageIndex, 1)
+                                                                        imgs.splice(to, 0, moved)
+                                                                        return { ...v, images: imgs }
+                                                                    })
+                                                                    return { ...prev, variations: newVars }
                                                                 })
-                                                                return { ...prev, variations: newVars }
-                                                            })
-                                                            variationDragRef.current = null
-                                                        }} className="relative border rounded overflow-hidden cursor-move">
+                                                                variationDragRef.current = null
+                                                                setVariationDraggingState(null)
+                                                                setVariationDragOverState(null)
+                                                            }}
+                                                            className={`relative border rounded overflow-hidden cursor-move transition-transform duration-150 ${variationDraggingState?.variationIndex === index && variationDraggingState.imageIndex === ii ? 'opacity-70 scale-95' : ''} ${variationDragOverState?.variationIndex === index && variationDragOverState.overIndex === ii ? 'ring-2 ring-yellow-300' : ''}`}>
                                                             {/* eslint-disable-next-line @next/next/no-img-element */}
                                                             <img src={img.previewUrl || ''} alt={img.filename} className="w-full h-24 object-cover" />
                                                             {ii === 0 && <span className="absolute left-1 top-1 bg-yellow-300 text-black text-xs px-2 py-0.5 rounded">Capa</span>}
