@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+// Nested Dialog removed to keep a single outer modal during create/edit
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 
 // Types used in this form
@@ -18,9 +18,9 @@ interface ImageFile { file?: File; filename?: string; previewUrl?: string }
 interface VariationForm { name: string; price: string; attributeValues: { attributeId: string; valueId: string }[]; files: UploadedFile[]; images: ImageFile[] }
 interface ProductFormData { name: string; slug?: string; description?: string; categoryId?: string | null; isActive?: boolean; isFeatured?: boolean; images: string[]; price?: string; variations: VariationForm[]; attributes?: { attributeId: string; valueIds: string[] }[] }
 
-interface ProductFormProps { defaultValues?: Partial<ProductFormData>; categories?: Category[]; availableAttributes?: Attribute[]; isEditing?: boolean; onSuccess?: () => void }
+interface ProductFormProps { defaultValues?: Partial<ProductFormData & { id?: string }>; categories?: Category[]; availableAttributes?: Attribute[]; isEditing?: boolean; productId?: string | null; onSuccess?: () => void }
 
-export default function ProductForm({ defaultValues, categories = [], availableAttributes = [], isEditing = false, onSuccess }: ProductFormProps) {
+export default function ProductForm({ defaultValues, categories = [], availableAttributes = [], isEditing = false, productId = null, onSuccess }: ProductFormProps) {
     const router = useRouter()
     const [step, setStep] = useState<number>(1)
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -48,6 +48,72 @@ export default function ProductForm({ defaultValues, categories = [], availableA
         variations: defaultValues?.variations || [{ name: '', price: '', attributeValues: [], files: [], images: [] }],
         attributes: defaultValues?.attributes || [],
     }))
+
+    // Defensive: when the step changes or the form is reloaded for editing, close any inline panels
+    useEffect(() => {
+        if (isNewCategoryOpen) setIsNewCategoryOpen(false)
+    }, [step, isEditing, defaultValues, isNewCategoryOpen])
+
+    // Sync form state when defaultValues change (e.g., opening edit dialog with product data)
+    useEffect(() => {
+        if (!defaultValues) return
+        // ensure local attributes include server-provided ones
+        // (merge by id, prefer existing local ones)
+        if (availableAttributes && availableAttributes.length > 0) {
+            setLocalAttributes(prev => {
+                const map = new Map(prev.map(a => [a.id, a]))
+                for (const a of availableAttributes) {
+                    if (!map.has(a.id)) map.set(a.id, a)
+                }
+                return Array.from(map.values())
+            })
+
+        }
+
+        // prepare image preview objects for product images so drag/reorder/removal work
+        const prodImages = defaultValues?.images || []
+    imagePreviewsRef.current = prodImages.map((url, i) => ({ file: undefined as File | undefined, filename: String(url).split('/').pop() || `img-${i}`, previewUrl: String(url) } as ImageFile))
+
+        // map variations: ensure images are ImageFile objects and keep files as-is
+    const mappedVariations = (defaultValues?.variations || []).map((v: Partial<VariationForm>) => ({
+            name: v.name || '',
+            price: v.price ? String(v.price) : '',
+            attributeValues: v.attributeValues || [],
+            files: v.files || [],
+            images: (v.images || []).map((img: string | { filename?: string; previewUrl?: string; data?: string; url?: string }, ii: number) => {
+                // image may be string or object { filename, previewUrl }
+                if (typeof img === 'string') return { file: undefined as File | undefined, filename: String(img).split('/').pop() || `var-${ii}`, previewUrl: img } as ImageFile
+                return { file: undefined as File | undefined, filename: img.filename || String(img.previewUrl || '').split('/').pop() || `var-${ii}`, previewUrl: img.previewUrl || img.data || img.url || '' } as ImageFile
+            })
+        }))
+
+        setFormData({
+            name: defaultValues?.name || '',
+            slug: defaultValues?.slug,
+            description: defaultValues?.description,
+            categoryId: defaultValues?.categoryId ?? null,
+            isActive: defaultValues?.isActive ?? true,
+            isFeatured: defaultValues?.isFeatured ?? false,
+            images: prodImages,
+            price: defaultValues?.price ? String(defaultValues.price) : '',
+            variations: mappedVariations.length > 0 ? mappedVariations : [{ name: '', price: '', attributeValues: [], files: [], images: [] }],
+            attributes: defaultValues?.attributes || [],
+        })
+        // reset to first step when loading existing product
+        setStep(1)
+    }, [defaultValues, availableAttributes])
+
+    // When availableAttributes prop changes after mount, merge into localAttributes
+    useEffect(() => {
+        if (!availableAttributes || availableAttributes.length === 0) return
+        setLocalAttributes(prev => {
+            const map = new Map(prev.map(a => [a.id, a]))
+            for (const a of availableAttributes) {
+                if (!map.has(a.id)) map.set(a.id, a)
+            }
+            return Array.from(map.values())
+        })
+    }, [availableAttributes])
 
     // Simple refs for variation blocks (used for scroll into view)
     const variationRefs = useRef<Array<HTMLDivElement | null>>([])
@@ -230,7 +296,8 @@ export default function ProductForm({ defaultValues, categories = [], availableA
         try {
             // First: upload all variation files to R2
             type R2File = { filename: string; originalName: string; fileSize: number; mimeType: string; r2Key: string }
-            const variationsPayload: Array<{ name: string; price: number; isActive: boolean; files: R2File[]; images?: Array<{ data: string; alt?: string; isMain?: boolean; order?: number }>; attributeValues: VariationForm['attributeValues'] }> = []
+            type VariationPayload = { id?: string; name: string; price: number; isActive: boolean; files: R2File[]; images?: Array<{ data: string; alt?: string; isMain?: boolean; order?: number }>; attributeValues: VariationForm['attributeValues'] }
+            const variationsPayload: VariationPayload[] = []
             for (let vi = 0; vi < formData.variations.length; vi++) {
                 const variation = formData.variations[vi]
                 const filesPayload: R2File[] = []
@@ -317,7 +384,23 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                     .map(a => ({ id: a.id, name: a.name, values: (a.values || []).map(v => ({ id: v.id, value: v.value })) })),
             }
 
-            const res = await fetch('/api/admin/products', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+            // Type-safe extraction of id from defaultValues: prefer explicit prop, fallback to defaultValues.id
+            const dv = defaultValues as Partial<ProductFormData & { id?: string }> | undefined
+            const effectiveProductId = productId ?? dv?.id
+            const url = isEditing && effectiveProductId ? `/api/admin/products/${effectiveProductId}` : '/api/admin/products'
+            const method = isEditing && effectiveProductId ? 'PUT' : 'POST'
+            // When updating, include variation ids if present in defaultValues
+            if (isEditing) {
+                // Merge existing variation ids into payload.variations by index if available
+                const existingVariations = (defaultValues?.variations || []) as Array<Partial<{ id?: string }>>
+                for (let i = 0; i < (payload.variations || []).length; i++) {
+                    const pv = payload.variations[i] as VariationPayload
+                    const ev = existingVariations[i]
+                    if (ev && ev.id) pv.id = ev.id
+                }
+            }
+
+            const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
             if (!res.ok) {
                 const txt = await res.text()
                 throw new Error(`Erro na API de produtos: ${res.status} ${txt}`)
@@ -387,12 +470,15 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                                                 {categoriesLocal.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                                             </SelectContent>
                                         </Select>
-                                        <Dialog open={isNewCategoryOpen} onOpenChange={setIsNewCategoryOpen}>
-                                            <DialogTrigger asChild>
-                                                <Button type="button" variant="outline" size="icon"><FolderPlus className="w-4 h-4" /></Button>
-                                            </DialogTrigger>
-                                            <DialogContent>
-                                                <DialogHeader><DialogTitle>Nova Categoria</DialogTitle></DialogHeader>
+                                        <div>
+                                            <Button type="button" variant="outline" size="icon" onClick={() => setIsNewCategoryOpen(v => !v)}><FolderPlus className="w-4 h-4" /></Button>
+                                        </div>
+                                        {isNewCategoryOpen && (
+                                            <div className="mt-2 p-4 border rounded bg-white shadow">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="font-medium">Nova Categoria</div>
+                                                    <button type="button" onClick={() => setIsNewCategoryOpen(false)} className="text-gray-500">Fechar</button>
+                                                </div>
                                                 <div className="py-4 space-y-2">
                                                     <Input placeholder="Nome" value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)} />
                                                     <Textarea placeholder="Descrição" rows={3} value={newCategoryDescription} onChange={e => setNewCategoryDescription(e.target.value)} />
@@ -427,8 +513,8 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                                                         }}>Criar</Button>
                                                     </div>
                                                 </div>
-                                            </DialogContent>
-                                        </Dialog>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 

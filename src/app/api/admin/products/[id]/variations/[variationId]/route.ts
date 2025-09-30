@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { db } from '@/lib/db';
 import { productVariations, files } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+import { productImages, variationAttributeValues } from '@/lib/db/schema';
 
 const updateVariationSchema = z.object({
   name: z.string().min(1).max(255).optional(),
@@ -34,12 +35,18 @@ export async function GET(
       return NextResponse.json({ error: 'Variation not found' }, { status: 404 });
     }
 
-    // Get related files
+    // Get related files, images and attribute mappings
     const variationFiles = await db.select().from(files).where(eq(files.variationId, variationId));
+    const variationImages = await db.select().from(productImages).where(eq(productImages.variationId, variationId));
+    const mappings = await db.select().from(variationAttributeValues).where(eq(variationAttributeValues.variationId, variationId));
+
+    const attributeValues = mappings.map(m => ({ attributeId: m.attributeId, valueId: m.valueId }));
 
     const completeVariation = {
       ...variation,
-      files: variationFiles,
+      files: variationFiles.map(f => ({ filename: f.name, originalName: f.originalName || f.name, fileSize: f.size, mimeType: f.mimeType || '', r2Key: f.path })),
+      images: variationImages.map(img => ({ data: img.data, alt: img.alt, isMain: img.isMain, order: img.sortOrder })),
+      attributeValues,
     };
 
     return NextResponse.json(completeVariation);

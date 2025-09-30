@@ -13,7 +13,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+// Select removed: 'Idioma' field was removed from variations
 import { Edit, Loader2, FileText, Image as ImageIcon, Trash2 } from 'lucide-react'
 import Image from 'next/image'
 
@@ -51,7 +51,6 @@ interface VariationData {
     slug: string
     price: string | number
     isActive: boolean
-    idioma?: string
     images?: UploadedImage[]
     files?: UploadedFile[]
 }
@@ -77,17 +76,9 @@ export default function EditVariationDialog({
         images: variation.images || [],
         // variation.files may come in a different shape (FileData). Cast to UploadedFile[] safely.
         files: (variation.files as unknown as UploadedFile[]) || [],
-        idioma: variation.idioma || '',
     } as VariationData)
-    // Opções de idioma
-    const LANGUAGE_OPTIONS = [
-        { value: 'portugues', label: 'Português' },
-        { value: 'espanhol', label: 'Espanhol' },
-        { value: 'escreva', label: 'Escreva sua mensagem' },
-    ]
-
-    // Upload de arquivos (PDF ou imagem)
-    const handleFileUpload = async (files: FileList) => {
+    // Upload de arquivos (PDF ou imagem) - add File objects to formData.files
+    const handleFileUpload = (files: FileList) => {
         const validFiles = Array.from(files).filter(file => {
             const isValidType = file.type === 'application/pdf' || file.type.startsWith('image/')
             const isValidSize = file.size <= 50 * 1024 * 1024
@@ -98,7 +89,11 @@ export default function EditVariationDialog({
                 file,
                 type: file.type === 'application/pdf' ? 'pdf' : 'image',
                 uploading: false,
-                uploaded: false
+                uploaded: false,
+                filename: file.name,
+                originalName: file.name,
+                fileSize: file.size,
+                mimeType: file.type,
             }
             setFormData(prev => ({
                 ...prev,
@@ -114,8 +109,8 @@ export default function EditVariationDialog({
         }))
     }
 
-    // Upload de imagens
-    const handleImageUpload = async (files: FileList) => {
+    // Upload de imagens: add File objects to images array; actual upload happens on submit
+    const handleImageUpload = (files: FileList) => {
         const validFiles = Array.from(files).filter(file => {
             const isValidType = file.type.startsWith('image/')
             const isValidSize = file.size <= 10 * 1024 * 1024
@@ -132,31 +127,6 @@ export default function EditVariationDialog({
                 ...prev,
                 images: [...(prev.images || []), uploadImage]
             }))
-            try {
-                const base64Data = await new Promise<string>((resolve, reject) => {
-                    const reader = new FileReader()
-                    reader.onload = () => resolve(reader.result as string)
-                    reader.onerror = reject
-                    reader.readAsDataURL(file)
-                })
-                setFormData(prev => ({
-                    ...prev,
-                    images: (prev.images || []).map(img =>
-                        img.file === file
-                            ? { ...img, uploading: false, uploaded: true, data: base64Data, url: base64Data }
-                            : img
-                    )
-                }))
-            } catch {
-                setFormData(prev => ({
-                    ...prev,
-                    images: (prev.images || []).map(img =>
-                        img.file === file
-                            ? { ...img, uploading: false, error: 'Erro no upload' }
-                            : img
-                    )
-                }))
-            }
         }
     }
 
@@ -184,30 +154,68 @@ export default function EditVariationDialog({
         e.preventDefault()
         setLoading(true)
         try {
-            const url = `/api/admin/products/${productId}/variations/${variation.id}`
+            // validation: ensure at least one file (PDF) is present
+            const filesArr = formData.files || []
+            if (filesArr.length === 0) {
+                alert('Cada variação precisa ter ao menos um arquivo (PDF).')
+                setLoading(false)
+                return
+            }
+            const hasPdf = filesArr.some(f => (f.mimeType === 'application/pdf') || (f.file && f.file.type === 'application/pdf') || (f.filename && f.filename.toLowerCase().endsWith('.pdf')))
+            if (!hasPdf) {
+                alert('Adicione pelo menos um arquivo PDF à variação.')
+                setLoading(false)
+                return
+            }
+
+            // First upload any files to R2 and collect r2Key
+            const filesPayload: Array<{ filename: string; originalName: string; fileSize: number; mimeType: string; r2Key?: string }> = []
+            for (const f of filesArr) {
+                if (f.file) {
+                    const fd = new FormData()
+                    fd.append('file', f.file)
+                    const res = await fetch('/api/r2/upload', { method: 'POST', body: fd })
+                    if (!res.ok) throw new Error('Falha no upload de arquivo')
+                    const j = await res.json()
+                    const r2Key = j?.data?.key ?? j?.data
+                    filesPayload.push({ filename: f.filename || f.file.name, originalName: f.file.name, fileSize: f.file.size, mimeType: f.file.type, r2Key })
+                } else if (f.r2Key) {
+                    filesPayload.push({ filename: f.filename || '', originalName: f.originalName || '', fileSize: f.fileSize || 0, mimeType: f.mimeType || '', r2Key: f.r2Key })
+                }
+            }
+
+            // Upload images to R2 if File objects exist; otherwise use existing url/data
+            const imagesPayload: Array<{ data: string; alt?: string; order?: number }> = []
+            for (let i = 0; i < (formData.images || []).length; i++) {
+                const img = formData.images![i]
+                if (img.file) {
+                    const fd = new FormData()
+                    fd.append('file', img.file)
+                    const resImg = await fetch('/api/r2/upload', { method: 'POST', body: fd })
+                    if (!resImg.ok) throw new Error('Falha no upload de imagem da variação')
+                    const jimg = await resImg.json()
+                    const r2k = jimg?.data?.key ?? jimg?.data
+                    imagesPayload.push({ data: r2k, alt: img.alt || undefined, order: img.order })
+                } else if (img.data) {
+                    imagesPayload.push({ data: img.data, alt: img.alt || undefined, order: img.order })
+                } else if (img.url) {
+                    imagesPayload.push({ data: img.url, alt: img.alt || undefined, order: img.order })
+                }
+            }
+
+            // Build payload and send PUT to update variation
             const payload = {
                 name: formData.name,
                 slug: formData.slug,
-                price: formData.price,
+                price: Number(formData.price) || 0,
                 isActive: formData.isActive,
-                idioma: formData.idioma,
-                images: (formData.images || []).filter(img => img.uploaded && img.data).map(img => ({
-                    data: img.data!,
-                    alt: img.alt || formData.name,
-                    order: img.order
-                })),
-                files: (formData.files || []).map(file => ({
-                    filename: file.file ? file.file.name : (file.filename || ''),
-                    originalName: file.file ? file.file.name : (file.originalName || ''),
-                    fileSize: file.file ? file.file.size : (file.fileSize || 0),
-                    mimeType: file.file ? file.file.type : (file.mimeType || ''),
-                }))
+                files: filesPayload,
+                images: imagesPayload,
             }
-            const response = await fetch(url, {
+
+            const response = await fetch(`/api/admin/products/${productId}/variations/${formData.id}`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
             })
             if (!response.ok) {
@@ -216,7 +224,8 @@ export default function EditVariationDialog({
             }
             setOpen(false)
             onSuccess?.()
-        } catch {
+        } catch (err) {
+            console.error(err)
             alert('Erro ao atualizar variação. Tente novamente.')
         } finally {
             setLoading(false)
@@ -275,28 +284,7 @@ export default function EditVariationDialog({
                                 required
                             />
                         </div>
-                        <div>
-                            <Label>Idioma *</Label>
-                            <Select
-                                value={formData.idioma || ''}
-                                onValueChange={val => setFormData(prev => ({ ...prev, idioma: val }))}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Selecione o idioma" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {LANGUAGE_OPTIONS.map(opt => (
-                                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
                     </div>
-                    {formData.idioma === 'escreva' && (
-                        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded text-yellow-900 text-sm">
-                            Este idioma permite que o cliente escreva uma mensagem personalizada. Certifique-se de configurar corretamente os campos e instruções no produto e na página de detalhes.
-                        </div>
-                    )}
                     <div>
                         <Label>Arquivos (PDF ou imagem)</Label>
                         <div className="mt-2">
