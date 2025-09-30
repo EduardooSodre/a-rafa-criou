@@ -28,7 +28,7 @@ function analyze(file) {
     });
   } catch (err) {
     // If parsing fails, log the filename and the error for debugging and continue
-    console.warn(`Failed to parse ${file}:`, err && err.message ? err.message : err)
+    console.warn(`Failed to parse ${file}:`, err && err.message ? err.message : err);
     return;
   }
 

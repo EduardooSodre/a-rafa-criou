@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/lib/db';
 import { products, files, productImages, productVariations, categories } from '@/lib/db/schema';
-import { productAttributes, variationAttributeValues, attributes, attributeValues } from '@/lib/db/schema';
+import {
+  productAttributes,
+  variationAttributeValues,
+  attributes,
+  attributeValues,
+} from '@/lib/db/schema';
 import { eq, desc, or, and, ilike, isNull } from 'drizzle-orm';
 
 const createProductSchema = z.object({
@@ -81,14 +86,16 @@ const createProductSchema = z.object({
 const attributeDefSchema = z.object({
   id: z.string(), // local id from frontend (ex: local-...)
   name: z.string(),
-  values: z.array(z.object({ id: z.string(), value: z.string() }))
-})
+  values: z.array(z.object({ id: z.string(), value: z.string() })),
+});
 
 // Extend createProductSchema with optional attributeDefinitions
 const createProductSchemaWithDefs = createProductSchema.extend({
   attributeDefinitions: z.array(attributeDefSchema).optional(),
-  attributes: z.array(z.object({ attributeId: z.string(), valueIds: z.array(z.string()) })).optional(),
-})
+  attributes: z
+    .array(z.object({ attributeId: z.string(), valueIds: z.array(z.string()) }))
+    .optional(),
+});
 
 export async function GET(request: NextRequest) {
   try {
@@ -274,7 +281,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Erro de validação' }, { status: 400 });
     }
 
-  // Generate base slug from name (ou usar o slug enviado se estiver editando)
+    // Generate base slug from name (ou usar o slug enviado se estiver editando)
     const baseSlug =
       validatedData.slug ||
       validatedData.name
@@ -334,12 +341,29 @@ export async function POST(request: NextRequest) {
       if (Array.isArray(localAttrDefs) && localAttrDefs.length > 0) {
         for (const def of localAttrDefs) {
           // insert attribute
-          const [createdAttr] = await tx.insert(attributes).values({ name: def.name, slug: def.name.toLowerCase().replace(/\s+/g, '-'), createdAt: new Date(), updatedAt: new Date() }).returning();
+          const [createdAttr] = await tx
+            .insert(attributes)
+            .values({
+              name: def.name,
+              slug: def.name.toLowerCase().replace(/\s+/g, '-'),
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            })
+            .returning();
           localAttrIdToReal[def.id] = createdAttr.id;
           // insert values
           if (Array.isArray(def.values)) {
             for (const val of def.values) {
-              const [createdVal] = await tx.insert(attributeValues).values({ attributeId: createdAttr.id, value: val.value, slug: val.value.toLowerCase().replace(/\s+/g, '-'), createdAt: new Date(), updatedAt: new Date() }).returning();
+              const [createdVal] = await tx
+                .insert(attributeValues)
+                .values({
+                  attributeId: createdAttr.id,
+                  value: val.value,
+                  slug: val.value.toLowerCase().replace(/\s+/g, '-'),
+                  createdAt: new Date(),
+                  updatedAt: new Date(),
+                })
+                .returning();
               localValIdToReal[val.id] = createdVal.id;
             }
           }
@@ -427,15 +451,17 @@ export async function POST(request: NextRequest) {
           ) {
             const vamp = variation.attributeValues.map(
               (av: { attributeId: string; valueId: string }) => {
-                let attrId = av.attributeId
-                let valId = av.valueId
-                if (attrId && attrId.startsWith('local-') && localAttrIdToReal[attrId]) attrId = localAttrIdToReal[attrId]
-                if (valId && valId.startsWith('local-') && localValIdToReal[valId]) valId = localValIdToReal[valId]
+                let attrId = av.attributeId;
+                let valId = av.valueId;
+                if (attrId && attrId.startsWith('local-') && localAttrIdToReal[attrId])
+                  attrId = localAttrIdToReal[attrId];
+                if (valId && valId.startsWith('local-') && localValIdToReal[valId])
+                  valId = localValIdToReal[valId];
                 return {
                   variationId: insertedVariation.id,
                   attributeId: attrId,
                   valueId: valId,
-                }
+                };
               }
             );
             if (vamp.length > 0) {
@@ -467,7 +493,10 @@ export async function POST(request: NextRequest) {
       if (attrsPayload && Array.isArray(attrsPayload)) {
         const toInsert = attrsPayload.map(a => ({
           productId: insertedProduct.id,
-          attributeId: a.attributeId && a.attributeId.startsWith('local-') ? (localAttrIdToReal[a.attributeId] || a.attributeId) : a.attributeId,
+          attributeId:
+            a.attributeId && a.attributeId.startsWith('local-')
+              ? localAttrIdToReal[a.attributeId] || a.attributeId
+              : a.attributeId,
         }));
         if (toInsert.length > 0) {
           await tx.insert(productAttributes).values(toInsert).execute();
@@ -496,8 +525,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
     // Log with stack if available to aid debugging
-    console.error('Error creating product:', error instanceof Error ? error.message : String(error));
-  if (error instanceof Error && (error as Error).stack) console.error((error as Error).stack);
+    console.error(
+      'Error creating product:',
+      error instanceof Error ? error.message : String(error)
+    );
+    if (error instanceof Error && (error as Error).stack) console.error((error as Error).stack);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
