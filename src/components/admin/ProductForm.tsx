@@ -82,7 +82,7 @@ export default function ProductForm({ defaultValues, categories = [], availableA
     // fetch categories from API when none were passed as prop
     useEffect(() => {
         if ((!categories || categories.length === 0) && categoriesLocal.length === 0) {
-            ;(async () => {
+            ; (async () => {
                 try {
                     const res = await fetch('/api/admin/categories')
                     if (!res.ok) return
@@ -539,16 +539,16 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                                         <div className="text-sm text-gray-500">R$ {Number(variation.price || 0).toFixed(2)}</div>
                                     </div>
 
-                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                                <div className="flex flex-col gap-2">
-                                                                    <Label>Nome</Label>
-                                                                    <Input value={variation.name} onChange={e => updateVariation(index, 'name', e.target.value)} />
-                                                                </div>
-                                                                <div className="flex flex-col gap-2">
-                                                                    <Label>Preço (R$)</Label>
-                                                                    <Input type="number" step="0.01" value={variation.price} onChange={e => updateVariation(index, 'price', e.target.value)} />
-                                                                </div>
-                                                            </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div className="flex flex-col gap-2">
+                                            <Label>Nome</Label>
+                                            <Input value={variation.name} onChange={e => updateVariation(index, 'name', e.target.value)} />
+                                        </div>
+                                        <div className="flex flex-col gap-2">
+                                            <Label>Preço (R$)</Label>
+                                            <Input type="number" step="0.01" value={variation.price} onChange={e => updateVariation(index, 'price', e.target.value)} />
+                                        </div>
+                                    </div>
 
                                     {localAttributes.length > 0 && (
                                         <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
