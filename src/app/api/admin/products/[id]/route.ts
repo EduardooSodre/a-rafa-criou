@@ -106,7 +106,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             r2Key: f.path,
           })),
           images: variationImages.map(img => ({
+            id: img.id,
+            name: img.name,
             data: img.data,
+            mimeType: img.mimeType,
             alt: img.alt,
             isMain: img.isMain,
             order: img.sortOrder,
@@ -126,7 +129,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         r2Key: f.path,
       })),
       images: images.map(img => ({
+        id: img.id,
+        name: img.name,
         data: img.data,
+        mimeType: img.mimeType,
         alt: img.alt,
         isMain: img.isMain,
         order: img.sortOrder,
@@ -394,7 +400,10 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
             r2Key: f.path,
           })),
           images: variationImages.map(img => ({
+            id: img.id,
+            name: img.name,
             data: img.data,
+            mimeType: img.mimeType,
             alt: img.alt,
             isMain: img.isMain,
             order: img.sortOrder,
@@ -419,7 +428,10 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         r2Key: f.path,
       })),
       images: images.map(img => ({
+        id: img.id,
+        name: img.name,
         data: img.data,
+        mimeType: img.mimeType,
         alt: img.alt,
         isMain: img.isMain,
         order: img.sortOrder,

@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import ProductForm from './ProductForm'
 
 // Types used only to map API product into ProductForm default values
-interface ApiImage { r2Key?: string; url?: string; data?: string; alt?: string }
+interface ApiImage { id?: string; name?: string; r2Key?: string; url?: string; data?: string; mimeType?: string; alt?: string }
 interface ApiFile { filename?: string; originalName?: string; fileSize?: number; mimeType?: string; r2Key?: string; url?: string }
 interface ApiAttributeValue { attributeId?: string; valueId?: string; attribute_id?: string; attribute_value_id?: string }
 interface ApiVariation { id?: string; name?: string; price?: number | string; isActive?: boolean; images?: ApiImage[]; files?: ApiFile[]; attributeValues?: ApiAttributeValue[] }
@@ -86,7 +86,15 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
         const source = src as AdminProduct
         const images = (source.images || []).map(i => {
             if (!i) return ''
-            if (i.data) return i.data
+            if (i.data) {
+                const raw = String(i.data)
+                if (raw.startsWith('data:')) return raw
+                // Heuristic: if the data looks like a path/key (contains / or . or small length), treat as r2Key
+                const looksLikeKey = raw.includes('/') || raw.includes('.') || raw.length < 200
+                if (looksLikeKey) return `/api/r2/download?r2Key=${encodeURIComponent(raw)}`
+                const mime = (i as ApiImage).mimeType || 'image/jpeg'
+                return `data:${mime};base64,${raw}`
+            }
             if (i.r2Key) return `/api/r2/download?r2Key=${encodeURIComponent(String(i.r2Key))}`
             return i.url || ''
         })
@@ -96,8 +104,25 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
             const vv = v as ApiVariation
             const imgs = (vv.images || []).map(img => {
                 if (!img) return { filename: '', previewUrl: '' }
-                const preview = img.data ? img.data : img.r2Key ? `/api/r2/download?r2Key=${encodeURIComponent(String(img.r2Key))}` : img.url || ''
-                return { filename: img.alt || '', previewUrl: preview }
+                const raw = (img as ApiImage).data ? String((img as ApiImage).data) : ''
+                let preview = ''
+                if (raw) {
+                    if (raw.startsWith('data:')) {
+                        preview = raw
+                    } else {
+                        const looksLikeKey = raw.includes('/') || raw.includes('.') || raw.length < 200
+                        if (looksLikeKey) {
+                            preview = `/api/r2/download?r2Key=${encodeURIComponent(raw)}`
+                        } else {
+                            preview = `data:${(img as ApiImage).mimeType || 'image/jpeg'};base64,${raw}`
+                        }
+                    }
+                } else if ((img as ApiImage).r2Key) {
+                    preview = `/api/r2/download?r2Key=${encodeURIComponent(String((img as ApiImage).r2Key))}`
+                } else {
+                    preview = (img as ApiImage).url || ''
+                }
+                return { filename: (img as ApiImage).alt || (img as ApiImage).name || '', previewUrl: preview }
             })
             const attrVals = (vv.attributeValues || []).map((av: RawAttr) => ({ attributeId: av.attributeId || av.attribute_id || '', valueId: av.valueId || av.attribute_value_id || '' })).filter(a => a.attributeId && a.valueId)
             const files = (vv.files || []).map((f: RawFile) => {
