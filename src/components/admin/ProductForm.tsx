@@ -1,1439 +1,500 @@
-// LOG FINAL ANTES DO ENVIO
-"use client";
+"use client"
 
-import { useState, useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+import { Upload, X, Plus, Package, FolderPlus, Image as ImageIcon, FileText } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { Upload, X, FileText, Loader2, Plus, Trash2, Package, FolderPlus, Image as ImageIcon, GripVertical } from 'lucide-react'
-import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Switch } from '@/components/ui/switch'
-import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import {
-    DndContext,
-    closestCenter,
-    KeyboardSensor,
-    PointerSensor,
-    useSensor,
-    useSensors,
-    DragEndEvent,
-} from '@dnd-kit/core'
-import {
-    arrayMove,
-    SortableContext,
-    sortableKeyboardCoordinates,
-    rectSortingStrategy,
-} from '@dnd-kit/sortable'
-import {
-    useSortable,
-} from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 
-interface Category {
-    id: string
-    name: string
-    slug: string
-    description?: string
-}
+// Minimal types used by this form. Keep narrow to avoid coupling.
+interface Category { id: string; name: string }
+interface AttributeValue { id: string; value: string }
+interface Attribute { id: string; name: string; values: AttributeValue[] }
 
-interface UploadedImage {
-    id: string // ID único para drag and drop
-    file: File
-    uploading?: boolean
-    uploaded?: boolean
-    data?: string // Base64 data
-    error?: string
-    url?: string
-    preview?: string
-    alt?: string
-    isMain?: boolean
-    order: number
-}
+interface UploadedFile { file?: File; filename?: string }
+interface VariationForm { name: string; price: string; idioma?: string; attributeValues: { attributeId: string; valueId: string }[]; files: UploadedFile[] }
 
-interface ProductVariation {
-    id?: string
-    name: string
-    price: string
-    files: UploadedFile[]
-    images: UploadedImage[]
-    mainImageIndex?: number
-    isActive: boolean
-    idioma?: string // novo campo
-}
+interface ProductFormData { name: string; slug?: string; description?: string; categoryId?: string | null; isActive: boolean; isFeatured: boolean; images: string[]; price?: string; variations: VariationForm[]; attributes?: { attributeId: string; valueIds: string[] }[] }
 
-interface ProductFormData {
-    name: string
-    slug: string
-    description: string
-    categoryId: string
-    isActive: boolean
-    isFeatured: boolean
-    images: UploadedImage[]
-    variations: ProductVariation[]
-}
+interface ProductFormProps { defaultValues?: Partial<ProductFormData>; categories?: Category[]; availableAttributes?: Attribute[]; isEditing?: boolean; onSuccess?: () => void }
 
-interface UploadedFile {
-    file: File
-    type: 'pdf' | 'image'
-    uploading?: boolean
-    uploaded?: boolean
-    r2Key?: string
-    error?: string
-}
-
-interface ProductFormProps {
-    initialData?: Partial<ProductFormData & { id: string }>
-    isEditing?: boolean
-    onSuccess?: () => void
-}
-
-// Componente para item de imagem arrastável
-interface SortableImageItemProps {
-    image: UploadedImage
-    index: number
-    isMain: boolean
-    onRemove: () => void
-}
-
-function SortableImageItem({ image, index, isMain, onRemove }: SortableImageItemProps) {
-    const {
-        attributes,
-        listeners,
-        setNodeRef,
-        transform,
-        transition,
-        isDragging,
-    } = useSortable({ id: image.id });
-
-    const style = {
-        transform: CSS.Transform.toString(transform),
-        transition,
-        opacity: isDragging ? 0.5 : 1,
-    };
-
-    return (
-        <div ref={setNodeRef} style={style} className="relative group">
-            <div className="aspect-square rounded-lg border-2 border-gray-200 overflow-hidden bg-gray-50">
-                {image.uploading ? (
-                    <>
-                        <div className="flex items-center justify-center h-full">
-                            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-                        </div>
-                        <Image
-                            src={image.url || image.preview || '/placeholder.png'}
-                            alt={image.alt || `Imagem ${index + 1}`}
-                            className="w-full h-full object-cover"
-                            width={400}
-                            height={400}
-                            style={{ objectFit: 'cover' }}
-                            unoptimized={true}
-                            priority={index === 0}
-                        />
-                    </>
-                ) : (
-                    <Image
-                        src={image.url || image.preview || '/placeholder.png'}
-                        alt={image.alt || `Imagem ${index + 1}`}
-                        className="w-full h-full object-cover"
-                        width={400}
-                        height={400}
-                        style={{ objectFit: 'cover' }}
-                        unoptimized={true}
-                        priority={index === 0}
-                    />
-                )}
-            </div>
-            {/* Handle de drag - área bem visível */}
-            <div
-                {...attributes}
-                {...listeners}
-                className="absolute top-2 left-2 bg-white/90 hover:bg-white rounded p-2 cursor-grab active:cursor-grabbing shadow-sm border"
-                style={{ zIndex: 10 }}
-            >
-                <GripVertical className="w-4 h-4 text-gray-700" />
-            </div>
-            {/* Botão de excluir */}
-            <Button
-                type="button"
-                size="sm"
-                variant="destructive"
-                onClick={onRemove}
-                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity w-8 h-8 p-0 cursor-pointer shadow-sm"
-                style={{ zIndex: 10 }}
-            >
-                <X className="w-4 h-4" />
-            </Button>
-            {/* Indicador de Imagem Principal */}
-            {isMain && (
-                <div className="absolute top-2 left-12">
-                    <Badge className="bg-yellow-500 text-yellow-900 text-xs">
-                        Capa
-                    </Badge>
-                </div>
-            )}
-            {/* Indicador de Ordem */}
-            <div className="absolute bottom-2 left-2">
-                <Badge variant="secondary" className="text-xs">
-                    #{index + 1}
-                </Badge>
-            </div>
-            {/* Status do Upload */}
-            {image.error && (
-                <div className="absolute top-12 right-2">
-                    <Badge variant="destructive" className="text-xs">
-                        Erro
-                    </Badge>
-                </div>
-            )}
-        </div>
-    );
-}
-
-export default function ProductForm({ initialData, isEditing = false, onSuccess }: ProductFormProps) {
+export default function ProductForm({ defaultValues, categories = [], availableAttributes = [], isEditing, onSuccess }: ProductFormProps) {
     const router = useRouter()
+    const [step, setStep] = useState<number>(1)
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [categories, setCategories] = useState<Category[]>([])
     const [isNewCategoryOpen, setIsNewCategoryOpen] = useState(false)
+
+    const [newAttrName, setNewAttrName] = useState('')
+    const [newAttrValuesRaw, setNewAttrValuesRaw] = useState('')
+
+    const [localAttributes, setLocalAttributes] = useState<Attribute[]>(availableAttributes)
+    const [categoriesLocal, setCategoriesLocal] = useState<Category[]>(categories)
+    const [slugTouched, setSlugTouched] = useState(false)
     const [newCategoryName, setNewCategoryName] = useState('')
     const [newCategoryDescription, setNewCategoryDescription] = useState('')
     const [isCreatingCategory, setIsCreatingCategory] = useState(false)
 
-    const [formData, setFormData] = useState<ProductFormData>({
-        name: initialData?.name || '',
-        slug: initialData?.slug || '',
-        description: initialData?.description || '',
-        // basePrice removido
-        categoryId: initialData?.categoryId || '',
-        isActive: initialData?.isActive ?? true,
-        isFeatured: initialData?.isFeatured ?? false,
-        images: initialData?.images || [],
-        // files removido
-        variations: initialData?.variations || [
-            {
-                name: 'Padrão',
-                price: '0.00',
-                files: [],
-                images: [],
-                isActive: true
-            }
-        ]
-    })
+    const [formData, setFormData] = useState<ProductFormData>(() => ({
+    name: defaultValues?.name || '',
+    slug: defaultValues?.slug,
+        description: defaultValues?.description,
+        categoryId: defaultValues?.categoryId ?? null,
+        isActive: defaultValues?.isActive ?? true,
+        isFeatured: defaultValues?.isFeatured ?? false,
+    images: defaultValues?.images || [],
+    price: defaultValues?.price ? String(defaultValues.price) : '',
+        variations: defaultValues?.variations || [{ name: '', price: '', attributeValues: [], files: [] }],
+        attributes: defaultValues?.attributes || [],
+    }))
 
-    // Configuração do DnD Kit
-    const sensors = useSensors(
-        useSensor(PointerSensor),
-        useSensor(KeyboardSensor, {
-            coordinateGetter: sortableKeyboardCoordinates,
-        })
-    )
+    // Simple refs for variation blocks (used for scroll into view)
+    const variationRefs = useRef<Array<HTMLDivElement | null>>([])
 
-    // Carregar categorias
+    function slugify(text: string) {
+        return text
+            .toString()
+            .toLowerCase()
+            .trim()
+            .replace(/\s+/g, '-') // spaces to dashes
+            .replace(/[^a-z0-9-_]/g, '') // remove invalid chars
+            .replace(/-+/g, '-')
+    }
+
+    // fetch categories from API when none were passed as prop
     useEffect(() => {
-        fetchCategories()
+        if ((!categories || categories.length === 0) && categoriesLocal.length === 0) {
+            ;(async () => {
+                try {
+                    const res = await fetch('/api/admin/categories')
+                    if (!res.ok) return
+                    const data = await res.json()
+                    // API returns { categories: [...], total }
+                    if (Array.isArray(data)) {
+                        setCategoriesLocal(data)
+                    } else if (data && typeof data === 'object' && Array.isArray((data as { categories?: Category[] }).categories)) {
+                        const resp = data as { categories?: Category[] }
+                        setCategoriesLocal(resp.categories || [])
+                    }
+                } catch (err) {
+                    console.error('Erro ao buscar categorias', err)
+                }
+            })()
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    const fetchCategories = async () => {
-        try {
-            const response = await fetch('/api/admin/categories')
-            if (response.ok) {
-                const data = await response.json()
-                setCategories(data.categories)
-            }
-        } catch (error) {
-            console.error('Erro ao carregar categorias:', error)
+    useEffect(() => {
+        // ensure at least one variation exists
+        if (!formData.variations || formData.variations.length === 0) {
+            setFormData(prev => ({ ...prev, variations: [{ name: '', price: '', attributeValues: [], files: [] }] }))
         }
+    }, [formData.variations])
+
+    // Handlers
+    function handleProductImageUpload(files: FileList) {
+        const arr = Array.from(files).map(f => f.name)
+        setFormData(prev => ({ ...prev, images: [...prev.images, ...arr] }))
     }
 
-    // Criar nova categoria
-    const handleCreateCategory = async () => {
-        if (!newCategoryName.trim()) return
-
-        setIsCreatingCategory(true)
-        try {
-            const response = await fetch('/api/admin/categories', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    name: newCategoryName,
-                    description: newCategoryDescription
-                })
-            })
-
-            if (response.ok) {
-                const newCategory = await response.json()
-                setCategories(prev => [newCategory, ...prev])
-                setFormData(prev => ({ ...prev, categoryId: newCategory.id }))
-                setNewCategoryName('')
-                setNewCategoryDescription('')
-                setIsNewCategoryOpen(false)
-            } else {
-                alert('Erro ao criar categoria')
-            }
-        } catch (error) {
-            console.error('Erro ao criar categoria:', error)
-            alert('Erro ao criar categoria')
-        } finally {
-            setIsCreatingCategory(false)
-        }
+    function addVariation() {
+        setFormData(prev => ({ ...prev, variations: [...prev.variations, { name: '', price: '', attributeValues: [], files: [] }] }))
+        setTimeout(() => setStep(3), 100)
     }
 
-    // Gerar slug automaticamente
-    const generateSlug = (name: string) => {
-        return name
-            .toLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .replace(/[^a-z0-9\s-]/g, '')
-            .replace(/\s+/g, '-')
-            .replace(/-+/g, '-')
-            .trim()
+    function updateVariation(index: number, field: keyof VariationForm, value: string | UploadedFile[] | VariationForm['attributeValues']) {
+        setFormData(prev => ({ ...prev, variations: prev.variations.map((v, i) => i === index ? { ...v, [field]: value } : v) }))
     }
 
-    const handleNameChange = (name: string) => {
-        setFormData(prev => ({
-            ...prev,
-            name,
-            slug: !isEditing ? generateSlug(name) : prev.slug
-        }))
+    function updateVariationAttributeValue(index: number, attributeId: string, valueId: string) {
+        setFormData(prev => ({ ...prev, variations: prev.variations.map((v, i) => i === index ? { ...v, attributeValues: [...v.attributeValues.filter(av => av.attributeId !== attributeId), { attributeId, valueId }] } : v) }))
     }
 
-    const handleInputChange = (field: keyof ProductFormData, value: string | boolean) => {
-        setFormData(prev => ({ ...prev, [field]: value }))
+    function handleFileUpload(variationIndex: number, files: FileList) {
+        const list = Array.from(files).map(f => ({ file: f, filename: f.name }))
+        setFormData(prev => ({ ...prev, variations: prev.variations.map((v, i) => i === variationIndex ? { ...v, files: [...v.files, ...list] } : v) }))
     }
 
-    // Funções para gerenciar variações
-    // Ref para scroll automático
-    const variationRefs = useRef<(HTMLDivElement | null)[]>([]);
-    const addVariation = () => {
+    function handleToggleAttributeValue(attributeId: string, valueId: string) {
         setFormData(prev => {
-            const newVariations = [
-                ...prev.variations,
-                {
-                    name: `Variação ${prev.variations.length + 1}`,
-                    price: '',
-                    files: [],
-                    images: [],
-                    isActive: true,
-                    idioma: ''
-                }
-            ];
-            setTimeout(() => {
-                const lastIdx = newVariations.length - 1;
-                variationRefs.current[lastIdx]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 100);
-            return {
-                ...prev,
-                variations: newVariations
-            };
-        });
-    }
-    // Opções de idioma
-    const LANGUAGE_OPTIONS = [
-        { value: 'portugues', label: 'Português' },
-        { value: 'espanhol', label: 'Espanhol' },
-        { value: 'escreva', label: 'Escreva sua mensagem' },
-    ];
-
-    const removeVariation = (index: number) => {
-        if (formData.variations.length > 1) {
-            setFormData(prev => ({
-                ...prev,
-                variations: prev.variations.filter((_, i) => i !== index)
-            }))
-        }
-    }
-
-    const updateVariation = (index: number, field: keyof ProductVariation, value: string | boolean) => {
-        setFormData(prev => ({
-            ...prev,
-            variations: prev.variations.map((variation, i) =>
-                i === index ? { ...variation, [field]: value } : variation
-            )
-        }))
-    }
-
-    // Upload de arquivos para variação específica (apenas armazenar localmente)
-    const handleFileUpload = async (variationIndex: number, files: FileList) => {
-        const validFiles = Array.from(files).filter(file => {
-            const isValidType = file.type === 'application/pdf' || file.type.startsWith('image/')
-            const isValidSize = file.size <= 50 * 1024 * 1024 // 50MB
-            return isValidType && isValidSize
+            const arr = prev.attributes || []
+            const att = arr.find(a => a.attributeId === attributeId)
+            if (!att) return { ...prev, attributes: [...arr, { attributeId, valueIds: [valueId] }] }
+            const exists = att.valueIds.includes(valueId)
+            return { ...prev, attributes: arr.map(a => a.attributeId === attributeId ? { ...a, valueIds: exists ? a.valueIds.filter(v => v !== valueId) : [...a.valueIds, valueId] } : a) }
         })
+    }
 
-        for (const file of validFiles) {
-            const uploadFile: UploadedFile = {
-                file,
-                type: file.type === 'application/pdf' ? 'pdf' : 'image',
-                uploading: false, // Não fazemos upload imediato
-                uploaded: false   // Será marcado como true apenas após salvar o produto
-            }
+    function handleCreateAttribute() {
+        if (!newAttrName) return
+        const values = newAttrValuesRaw.split(',').map(s => s.trim()).filter(Boolean)
+        const id = `local-${Date.now()}`
+        const attr: Attribute = { id, name: newAttrName, values: values.map((v, i) => ({ id: `${id}-${i}`, value: v })) }
+        setLocalAttributes(prev => [attr, ...prev])
+        setNewAttrName('')
+        setNewAttrValuesRaw('')
+        setIsNewCategoryOpen(false)
+    }
 
-            // Adicionar arquivo à variação (apenas localmente)
-            setFormData(prev => ({
-                ...prev,
-                variations: prev.variations.map((variation, i) =>
-                    i === variationIndex
-                        ? { ...variation, files: [...variation.files, uploadFile] }
-                        : variation
-                )
-            }))
+    function prevStep() { setStep(s => Math.max(1, s - 1)) }
+    function nextStep() { setStep(s => Math.min(3, s + 1)) }
+
+    function validate(): string | null {
+        // Ensure every variation has at least one file
+        for (const v of formData.variations) {
+            if (!v.files || v.files.length === 0) return 'Cada variação precisa ter pelo menos um arquivo.'
         }
+        if (!formData.name) return 'Nome do produto é obrigatório.'
+        // price must be present or at least one variation price
+        const priceOk = !!formData.price || formData.variations.some(v => !!v.price)
+        if (!priceOk) return 'Preço do produto é obrigatório (ou preencha preço nas variações).'
+        return null
     }
 
-    const removeFileFromVariation = (variationIndex: number, fileIndex: number) => {
-        setFormData(prev => ({
-            ...prev,
-            variations: prev.variations.map((variation, i) =>
-                i === variationIndex
-                    ? { ...variation, files: variation.files.filter((_, fi) => fi !== fileIndex) }
-                    : variation
-            )
-        }))
-    }
-
-    // Upload de arquivos para o produto principal
-    // Upload de arquivos para o produto principal (apenas armazenar localmente)
-
-    // Upload de imagens para o produto
-    const handleProductImageUpload = async (files: FileList) => {
-        const validFiles = Array.from(files).filter(file => {
-            const isValidType = file.type.startsWith('image/')
-            const isValidSize = file.size <= 10 * 1024 * 1024 // 10MB
-            return isValidType && isValidSize
-        })
-
-        for (const file of validFiles) {
-            const uploadImage: UploadedImage = {
-                id: `product-img-${Date.now()}-${Math.random()}`,
-                file,
-                uploading: true,
-                order: formData.images.length
-            }
-
-            // Adicionar imagem ao produto
-            setFormData(prev => ({
-                ...prev,
-                images: [...prev.images, uploadImage]
-            }))
-
-            try {
-                // Converter arquivo para base64
-                const base64Data = await new Promise<string>((resolve, reject) => {
-                    const reader = new FileReader()
-                    reader.onload = () => resolve(reader.result as string)
-                    reader.onerror = reject
-                    reader.readAsDataURL(file)
-                })
-
-                // Atualizar imagem como uploaded com dados base64
-                setFormData(prev => ({
-                    ...prev,
-                    images: prev.images.map(img =>
-                        img.file === file
-                            ? { ...img, uploading: false, uploaded: true, data: base64Data, url: base64Data }
-                            : img
-                    )
-                }))
-            } catch {
-                // Marcar erro na imagem
-                setFormData(prev => ({
-                    ...prev,
-                    images: prev.images.map(img =>
-                        img.file === file
-                            ? { ...img, uploading: false, error: 'Erro no upload' }
-                            : img
-                    )
-                }))
-            }
-        }
-    }
-
-    // Upload de imagens para variação específica
-    const handleVariationImageUpload = async (variationIndex: number, files: FileList) => {
-        const validFiles = Array.from(files).filter(file => {
-            const isValidType = file.type.startsWith('image/')
-            const isValidSize = file.size <= 10 * 1024 * 1024 // 10MB
-            return isValidType && isValidSize
-        })
-
-        for (const file of validFiles) {
-            const uploadImage: UploadedImage = {
-                id: `variation-${variationIndex}-img-${Date.now()}-${Math.random()}`,
-                file,
-                uploading: true,
-                order: formData.variations[variationIndex]?.images.length || 0
-            }
-
-            // Adicionar imagem à variação
-            setFormData(prev => ({
-                ...prev,
-                variations: prev.variations.map((variation, i) =>
-                    i === variationIndex
-                        ? { ...variation, images: [...variation.images, uploadImage] }
-                        : variation
-                )
-            }))
-
-            try {
-                // Converter arquivo para base64
-                const base64Data = await new Promise<string>((resolve, reject) => {
-                    const reader = new FileReader()
-                    reader.onload = () => resolve(reader.result as string)
-                    reader.onerror = reject
-                    reader.readAsDataURL(file)
-                })
-
-                // Atualizar imagem como uploaded com dados base64
-                setFormData(prev => ({
-                    ...prev,
-                    variations: prev.variations.map((variation, i) =>
-                        i === variationIndex
-                            ? {
-                                ...variation,
-                                images: variation.images.map(img =>
-                                    img.file === file
-                                        ? { ...img, uploading: false, uploaded: true, data: base64Data, url: base64Data }
-                                        : img
-                                )
-                            }
-                            : variation
-                    )
-                }))
-            } catch {
-                // Marcar erro na imagem
-                setFormData(prev => ({
-                    ...prev,
-                    variations: prev.variations.map((variation, i) =>
-                        i === variationIndex
-                            ? {
-                                ...variation,
-                                images: variation.images.map(img =>
-                                    img.file === file
-                                        ? { ...img, uploading: false, error: 'Erro no upload' }
-                                        : img
-                                )
-                            }
-                            : variation
-                    )
-                }))
-            }
-        }
-    }
-
-    const removeProductImage = (imageIndex: number) => {
-        setFormData(prev => ({
-            ...prev,
-            images: prev.images.filter((_, i) => i !== imageIndex)
-        }))
-    }
-
-    const removeVariationImage = (variationIndex: number, imageIndex: number) => {
-        setFormData(prev => ({
-            ...prev,
-            variations: prev.variations.map((variation, i) =>
-                i === variationIndex
-                    ? { ...variation, images: variation.images.filter((_, ii) => ii !== imageIndex) }
-                    : variation
-            )
-        }))
-    }
-
-    // Funções de Drag and Drop para imagens do produto
-    const handleProductImageDragEnd = (event: DragEndEvent) => {
-        const { active, over } = event
-
-        if (over && active.id !== over.id) {
-            const oldIndex = formData.images.findIndex(img => img.id === active.id)
-            const newIndex = formData.images.findIndex(img => img.id === over.id)
-
-            if (oldIndex !== -1 && newIndex !== -1) {
-                const reorderedImages = arrayMove(formData.images, oldIndex, newIndex)
-
-                // Atualizar ordens
-                const updatedImages = reorderedImages.map((img, index) => ({
-                    ...img,
-                    order: index,
-                    isMain: index === 0 // Primeira imagem sempre é a capa
-                }))
-
-                setFormData(prev => ({
-                    ...prev,
-                    images: updatedImages
-                }))
-            }
-        }
-    }
-
-    // Funções de Drag and Drop para imagens das variações
-    const handleVariationImageDragEnd = (variationIndex: number) => (event: DragEndEvent) => {
-        const { active, over } = event
-
-        if (over && active.id !== over.id) {
-            const variation = formData.variations[variationIndex]
-            const oldIndex = variation.images.findIndex(img => img.id === active.id)
-            const newIndex = variation.images.findIndex(img => img.id === over.id)
-
-            if (oldIndex !== -1 && newIndex !== -1) {
-                const reorderedImages = arrayMove(variation.images, oldIndex, newIndex)
-
-                // Atualizar ordens
-                const updatedImages = reorderedImages.map((img, index) => ({
-                    ...img,
-                    order: index
-                }))
-
-                setFormData(prev => ({
-                    ...prev,
-                    variations: prev.variations.map((v, i) =>
-                        i === variationIndex
-                            ? { ...v, images: updatedImages }
-                            : v
-                    )
-                }))
-            }
-        }
-    }
-
-    // Validação
-    const validateForm = () => {
-        if (!formData.name.trim()) {
-            alert('Nome do produto é obrigatório')
-            return false
-        }
-
-        if (!formData.description.trim()) {
-            alert('Descrição é obrigatória')
-            return false
-        }
-
-
-
-        // Validar variações
-        for (let i = 0; i < formData.variations.length; i++) {
-            const variation = formData.variations[i]
-            if (!variation.name.trim()) {
-                alert(`Nome da variação ${i + 1} é obrigatório`)
-                return false
-            }
-            if (parseFloat(variation.price) <= 0) {
-                alert(`Preço da variação ${i + 1} deve ser maior que R$ 0,00`)
-                return false
-            }
-            if (variation.files.length === 0) {
-                alert(`Variação ${i + 1} deve ter pelo menos um arquivo`)
-                return false
-            }
-        }
-
-        return true
-    }
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-
-        if (!validateForm()) {
+    async function handleSubmit(e?: React.FormEvent) {
+        e?.preventDefault()
+        const err = validate()
+        if (err) {
+            alert(err)
             return
         }
-
         setIsSubmitting(true)
-
         try {
-            console.log('=== INÍCIO DO SUBMIT ===')
-            console.log('FormData inicial:', {
-                // mainFiles removido
-                variations: formData.variations.map((v, i) => ({
-                    index: i,
-                    name: v.name,
-                    files: v.files.length,
-                    filesDetail: v.files.map(f => ({
-                        name: f.file?.name || 'no-file',
-                        uploaded: f.uploaded,
-                        r2Key: f.r2Key,
-                        hasFile: !!f.file
-                    }))
-                }))
-            })
-
-            // Fazer upload dos arquivos PDF para o R2 antes de salvar o produto
-            // const uploadedFiles removido
-
-            // Upload dos arquivos do produto principal
-            // upload dos arquivos do produto principal removido
-
-            // Upload dos arquivos das variações
-            const uploadedVariationFiles: { variationIndex: number; file: UploadedFile; r2Key: string }[] = []
-
-            for (let variationIndex = 0; variationIndex < formData.variations.length; variationIndex++) {
-                const variation = formData.variations[variationIndex]
-                console.log(`Processing variation ${variationIndex} with ${variation.files.length} files`)
-
-                for (let fileIndex = 0; fileIndex < variation.files.length; fileIndex++) {
-                    const file = variation.files[fileIndex]
-                    console.log(`File ${fileIndex}: uploaded=${file.uploaded}, r2Key=${file.r2Key}, hasFile=${!!file.file}`)
-
-                    if (!file.uploaded && !file.error && file.file) {
-                        try {
-                            console.log(`Uploading variation file: ${file.file.name}`)
-                            const formDataUpload = new FormData()
-                            formDataUpload.append('file', file.file)
-
-                            const response = await fetch('/api/r2/upload', {
-                                method: 'POST',
-                                body: formDataUpload,
-                            })
-
-                            if (response.ok) {
-                                const result = await response.json()
-                                console.log(`Upload response for variation file ${file.file.name}:`, {
-                                    success: result.success,
-                                    hasData: !!result.data,
-                                    hasKey: !!(result.data?.key || result.key)
-                                })
-
-                                // Tentar diferentes estruturas de resposta
-                                let r2Key = null
-                                if (result.data && result.data.key) {
-                                    r2Key = result.data.key
-                                } else if (result.key) {
-                                    r2Key = result.key
-                                }
-
-                                if (r2Key) {
-                                    uploadedVariationFiles.push({ variationIndex, file, r2Key })
-                                    console.log(`Successfully added variation file to uploadedVariationFiles: ${r2Key}`)
-                                } else {
-                                    console.error('Upload response missing key in any expected location:', result)
-                                    throw new Error(`Upload bem-sucedido mas sem chave R2 para ${file.file.name}`)
-                                }
-                            } else {
-                                throw new Error(`Erro no upload do arquivo ${file.file.name}`)
-                            }
-                        } catch (error) {
-                            console.error(`Error uploading variation file ${file.file.name}:`, error)
-                            throw new Error(`Falha no upload do arquivo ${file.file.name}: ${error}`)
-                        }
-                    } else if (file.uploaded && file.r2Key) {
-                        // Arquivo já foi uploadado anteriormente
-                        console.log(`Using previously uploaded file: ${file.r2Key}`)
-                        uploadedVariationFiles.push({ variationIndex, file, r2Key: file.r2Key })
-                    } else {
-                        console.warn(`Skipping file ${fileIndex} in variation ${variationIndex}: uploaded=${file.uploaded}, r2Key=${file.r2Key}, hasFile=${!!file.file}`)
+            // First: upload all variation files to R2
+            type R2File = { filename: string; originalName: string; fileSize: number; mimeType: string; r2Key: string }
+            const variationsPayload: Array<{ name: string; price: number; isActive: boolean; files: R2File[]; attributeValues: VariationForm['attributeValues'] }> = []
+            for (let vi = 0; vi < formData.variations.length; vi++) {
+                const variation = formData.variations[vi]
+                const filesPayload: R2File[] = []
+                for (const f of variation.files) {
+                    if (f.file) {
+                        const fd = new FormData()
+                        fd.append('file', f.file)
+                        const res = await fetch('/api/r2/upload', { method: 'POST', body: fd })
+                        if (!res.ok) throw new Error('Falha no upload de arquivo')
+                        const j = await res.json()
+                        const r2Key = j?.data?.key || j?.data?.key === 0 ? j.data.key : (j?.data?.key ?? j?.data?.key)
+                        filesPayload.push({ filename: f.filename || f.file.name, originalName: f.file.name, fileSize: f.file.size, mimeType: f.file.type, r2Key })
+                    } else if ((f as unknown as R2File).r2Key) {
+                        // already uploaded
+                        filesPayload.push(f as unknown as R2File)
                     }
                 }
+
+                variationsPayload.push({
+                    name: variation.name,
+                    price: parseFloat(variation.price) || 0,
+                    isActive: true,
+                    files: filesPayload,
+                    attributeValues: variation.attributeValues || [],
+                })
             }
 
-            console.log(`Total uploaded variation files: ${uploadedVariationFiles.length}`)
+            // Product price: prefer explicit field, otherwise first variation
+            const productPrice = formData.price ? parseFloat(formData.price) : (formData.variations[0] ? parseFloat(formData.variations[0].price || '0') : 0)
 
-
-            // Cálculo robusto de minPrice
-            const variationPrices = formData.variations
-                .map(v => {
-                    const n = Number(v.price);
-                    return isNaN(n) ? undefined : n;
-                })
-                .filter((p): p is number => typeof p === 'number' && !isNaN(p) && p > 0);
-            const minPrice = variationPrices.length > 0 ? Math.min(...variationPrices) : 0;
-            const maxPrice = variationPrices.length > 0 ? Math.max(...variationPrices) : 0;
-            const safePrice = typeof minPrice === 'number' && !isNaN(minPrice) ? minPrice : 0;
-
-            const productData = {
+            const payload = {
                 name: formData.name,
                 slug: formData.slug,
                 description: formData.description,
+                price: productPrice,
                 categoryId: formData.categoryId || null,
                 isActive: formData.isActive,
                 isFeatured: formData.isFeatured,
-                minPrice,
-                maxPrice,
-                price: safePrice,
-                images: formData.images
-                    .filter(img => img.uploaded && img.data)
-                    .map(img => ({
-                        data: img.data!,
-                        alt: img.alt || formData.name,
-                        isMain: img.isMain || false,
-                        order: img.order
-                    })),
-                variations: formData.variations.map((variation, index) => {
-                    const variationFiles = uploadedVariationFiles
-                        .filter(({ variationIndex, r2Key }) => variationIndex === index && r2Key && r2Key.trim() !== '')
-                        .map(({ file, r2Key }) => ({
-                            filename: file.file.name,
-                            originalName: file.file.name,
-                            fileSize: file.file.size,
-                            mimeType: file.file.type,
-                            r2Key: r2Key
-                        }))
-                    return {
-                        name: variation.name,
-                        price: variation.price ? Number(variation.price) : 0,
-                        isActive: variation.isActive,
-                        images: variation.images
-                            .filter(img => img.uploaded && img.data)
-                            .map(img => ({
-                                data: img.data!,
-                                alt: img.alt || variation.name,
-                                isMain: img.isMain || false,
-                                order: img.order
-                            })),
-                        files: variationFiles
-                    }
-                })
-            };
-
-
-            // Debug: Log para verificar se todos os arquivos têm r2Key
-            // logs de arquivos do produto removidos
-
-            // Validação extra antes de enviar
-            const allFiles = [
-                ...productData.variations.flatMap(v => v.files)
-            ]
-
-            const filesWithoutR2Key = allFiles.filter(f => !f.r2Key || f.r2Key.trim() === '')
-            if (filesWithoutR2Key.length > 0) {
-                console.error('Files without r2Key:', filesWithoutR2Key)
-                throw new Error(`Alguns arquivos não têm chave R2 válida: ${filesWithoutR2Key.map(f => f.filename).join(', ')}`)
+                images: [],
+                variations: variationsPayload,
+                files: [],
+                attributes: formData.attributes || [],
             }
 
-            // LOG FINAL ANTES DO ENVIO
-            console.log('[DEBUG] Valor final de productData.price:', productData.price, typeof productData.price);
-            console.log('[DEBUG] productData completo:', productData);
-            console.log('[DEBUG] safePrice:', safePrice, 'minPrice:', minPrice, 'maxPrice:', maxPrice);
-            console.log('[DEBUG] variationPrices:', variationPrices);
-            if (typeof productData.price === 'undefined') {
-                console.error('[ERRO GRAVE] productData.price está undefined! productData:', productData);
-                console.error('[ERRO GRAVE] variationPrices:', variationPrices);
-                console.error('[ERRO GRAVE] safePrice:', safePrice);
+            const res = await fetch('/api/admin/products', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+            if (!res.ok) {
+                const txt = await res.text()
+                throw new Error(`Erro na API de produtos: ${res.status} ${txt}`)
             }
-
-            const url = isEditing ? `/api/admin/products/${initialData?.id}` : '/api/admin/products'
-            const method = isEditing ? 'PUT' : 'POST'
-
-            console.log('=== ENVIANDO PARA API ===')
-            console.log('URL:', url)
-            console.log('Method:', method)
-
-            // Log seguro
-            console.log('Payload summary:', {
-                ...productData,
-                variationsCount: productData.variations.length,
-                imagesCount: productData.images.length
-            });
-
-
-            // LOG DETALHADO PARA DEBUG
-            console.log('DEBUG productData:', productData);
-            console.log('DEBUG JSON enviado:', JSON.stringify(productData));
-
-            const response = await fetch(url, {
-                method,
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(productData),
-            })
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }))
-                throw new Error(`Erro ao salvar produto: ${errorData.error || 'Erro desconhecido'}`)
-            }
-
-            if (onSuccess) {
-                onSuccess()
-                alert('Produto salvo com sucesso!')
-            } else {
-                router.push('/admin/produtos')
-            }
-        } catch (error) {
-            console.error('Erro completo:', error)
-            alert(`Erro ao salvar produto: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
-        } finally {
+            const saved = await res.json()
+            console.log('Produto salvo', saved)
             setIsSubmitting(false)
+            if (onSuccess) onSuccess()
+            else router.push('/admin/produtos')
+        } catch (err: unknown) {
+            setIsSubmitting(false)
+            console.error(err)
+            alert('Erro ao salvar produto: ' + (err instanceof Error ? err.message : String(err)))
         }
     }
+
+    // Small helper UI lists
+    const LANGUAGE_OPTIONS = [
+        { value: 'pt', label: 'Português' },
+        { value: 'en', label: 'English' },
+    ]
 
     return (
         <div className="max-w-4xl mx-auto space-y-6">
             <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Informações do Produto */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Package className="w-5 h-5" />
-                            Informações do Produto
-                        </CardTitle>
-                        <CardDescription>
-                            Dados básicos, arquivos e imagens do produto
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        {/* Dados Básicos */}
-                        <div className="space-y-4">
+                {/* Stepper header */}
+                <div className="flex items-center justify-between">
+                    <div className="flex gap-2 items-center">
+                        <button type="button" onClick={() => setStep(1)} className={`px-3 py-1 rounded ${step === 1 ? 'bg-yellow-200 text-yellow-900' : 'bg-gray-100'}`}>1. Informações</button>
+                        <button type="button" onClick={() => setStep(2)} className={`px-3 py-1 rounded ${step === 2 ? 'bg-yellow-200 text-yellow-900' : 'bg-gray-100'}`}>2. Atributos</button>
+                        <button type="button" onClick={() => setStep(3)} className={`px-3 py-1 rounded ${step === 3 ? 'bg-yellow-200 text-yellow-900' : 'bg-gray-100'}`}>3. Variações</button>
+                    </div>
+                    <div className="text-sm text-gray-500">Passo {step} de 3</div>
+                </div>
+
+                {/* Step 1 */}
+                {step === 1 && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><Package className="w-5 h-5" /> Informações do Produto</CardTitle>
+                            <CardDescription>Dados básicos, imagens e categoria.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <Label htmlFor="name">Nome do Produto *</Label>
-                                    <Input
-                                        id="name"
-                                        value={formData.name}
-                                        onChange={(e) => handleNameChange(e.target.value)}
-                                        placeholder="Ex: Planner 2024 Digital"
-                                        required
-                                    />
+                                    <Label>Nome *</Label>
+                                    <Input value={formData.name} onChange={e => {
+                                        const val = e.target.value
+                                        setFormData(prev => ({ ...prev, name: val }))
+                                        // auto-fill slug only if user hasn't touched slug field
+                                        if (!slugTouched) setFormData(prev => ({ ...prev, slug: slugify(val) }))
+                                    }} />
                                 </div>
                                 <div>
-                                    <Label htmlFor="slug">Slug (URL)</Label>
-                                    <Input
-                                        id="slug"
-                                        value={formData.slug}
-                                        onChange={(e) => handleInputChange('slug', e.target.value)}
-                                        placeholder="planner-2024-digital"
-                                    />
+                                    <Label>Slug</Label>
+                                    <Input value={formData.slug || ''} onChange={e => {
+                                        setSlugTouched(true)
+                                        setFormData(prev => ({ ...prev, slug: e.target.value }))
+                                    }} />
                                 </div>
-                            </div>
-
-                            <div>
-                                <Label htmlFor="description">Descrição *</Label>
-                                <Textarea
-                                    id="description"
-                                    value={formData.description}
-                                    onChange={(e) => handleInputChange('description', e.target.value)}
-                                    placeholder="Descreva o produto..."
-                                    rows={4}
-                                    required
-                                />
-                            </div>
-
-                            {/* Categoria */}
-                            <div>
-                                <Label>Categoria</Label>
-                                <div className="flex gap-2">
-                                    <Select
-                                        value={formData.categoryId}
-                                        onValueChange={(value) => handleInputChange('categoryId', value)}
-                                    >
-                                        <SelectTrigger className="flex-1">
-                                            <SelectValue placeholder="Selecione uma categoria" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {categories.map((category) => (
-                                                <SelectItem key={category.id} value={category.id}>
-                                                    {category.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-
-                                    <Dialog open={isNewCategoryOpen} onOpenChange={setIsNewCategoryOpen}>
-                                        <DialogTrigger asChild>
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                size="icon"
-                                                className="cursor-pointer"
-                                                title="Nova categoria"
-                                            >
-                                                <FolderPlus className="w-4 h-4" />
-                                            </Button>
-                                        </DialogTrigger>
-                                        <DialogContent className="sm:max-w-[600px] lg:max-w-[700px]">
-                                            <DialogHeader>
-                                                <DialogTitle>Nova Categoria</DialogTitle>
-                                                <DialogDescription>
-                                                    Crie uma nova categoria para organizar seus produtos
-                                                </DialogDescription>
-                                            </DialogHeader>
-                                            <div className="grid gap-4 py-4">
-                                                <div>
-                                                    <Label htmlFor="categoryName">Nome da Categoria *</Label>
-                                                    <Input
-                                                        id="categoryName"
-                                                        value={newCategoryName}
-                                                        onChange={(e) => setNewCategoryName(e.target.value)}
-                                                        placeholder="Ex: Planners"
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <Label htmlFor="categoryDescription">Descrição</Label>
-                                                    <Textarea
-                                                        id="categoryDescription"
-                                                        value={newCategoryDescription}
-                                                        onChange={(e) => setNewCategoryDescription(e.target.value)}
-                                                        placeholder="Descrição opcional da categoria..."
-                                                        rows={3}
-                                                    />
-                                                </div>
-                                            </div>
-                                            <div className="flex justify-end gap-2">
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    onClick={() => setIsNewCategoryOpen(false)}
-                                                    className="cursor-pointer"
-                                                >
-                                                    Cancelar
-                                                </Button>
-                                                <Button
-                                                    type="button"
-                                                    onClick={handleCreateCategory}
-                                                    disabled={isCreatingCategory || !newCategoryName.trim()}
-                                                    className="cursor-pointer"
-                                                >
-                                                    {isCreatingCategory ? (
-                                                        <>
-                                                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                                            Criando...
-                                                        </>
-                                                    ) : (
-                                                        'Criar Categoria'
-                                                    )}
-                                                </Button>
-                                            </div>
-                                        </DialogContent>
-                                    </Dialog>
+                                <div className="md:col-span-2">
+                                    <Label>Descrição *</Label>
+                                    <Textarea value={formData.description || ''} onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))} rows={4} />
                                 </div>
-                            </div>
-
-
-                            <div className="space-y-3">
-                                <div className="flex items-center space-x-2">
-                                    <Switch
-                                        id="isActive"
-                                        checked={formData.isActive}
-                                        onCheckedChange={(checked) => handleInputChange('isActive', checked)}
-                                    />
-                                    <Label htmlFor="isActive" className="text-sm">Produto Ativo</Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <Switch
-                                        id="isFeatured"
-                                        checked={formData.isFeatured}
-                                        onCheckedChange={(checked) => handleInputChange('isFeatured', checked)}
-                                    />
-                                    <Label htmlFor="isFeatured" className="text-sm">Produto em Destaque</Label>
-                                </div>
-                            </div>
-                        </div>
-
-
-
-                        {/* Upload de Imagens do Produto */}
-                        <div>
-                            <Label>Imagens do Produto</Label>
-                            <div className="mt-2">
-                                <label className="block w-full border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 cursor-pointer">
-                                    <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
-                                    <span className="mt-2 block text-sm font-medium text-gray-900">
-                                        Clique para fazer upload ou arraste imagens aqui
-                                    </span>
-                                    <span className="mt-1 block text-xs text-gray-500">
-                                        PNG, JPG, WebP até 10MB cada
-                                    </span>
-                                    <input
-                                        type="file"
-                                        multiple
-                                        accept="image/*"
-                                        onChange={(e) => e.target.files && handleProductImageUpload(e.target.files)}
-                                        className="hidden"
-                                    />
-                                </label>
-                            </div>
-
-                            {/* Grid de Imagens do Produto */}
-                            {formData.images.length > 0 && (
-                                <div className="mt-4">
-                                    <div className="mb-4">
-                                        <Label className="text-sm text-gray-600">
-                                            Arraste as imagens para reordenar. A primeira imagem será a capa.
-                                        </Label>
-                                    </div>
-
-                                    <DndContext
-                                        sensors={sensors}
-                                        collisionDetection={closestCenter}
-                                        onDragEnd={handleProductImageDragEnd}
-                                    >
-                                        <SortableContext
-                                            items={formData.images.map(img => img.id)}
-                                            strategy={rectSortingStrategy}
-                                        >
-                                            <div className="max-h-80 scroll-rounded grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                                                {formData.images.map((image, imageIndex) => (
-                                                    <SortableImageItem
-                                                        key={image.id}
-                                                        image={image}
-                                                        index={imageIndex}
-                                                        isMain={imageIndex === 0}
-                                                        onRemove={() => removeProductImage(imageIndex)}
-                                                    />
-                                                ))}
-                                            </div>
-                                        </SortableContext>
-                                    </DndContext>
-                                </div>
-                            )}
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Variações */}
-                <Card>
-                    <CardHeader>
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <CardTitle className="flex items-center gap-2">
-                                    <Package className="w-5 h-5" />
-                                    Variações do Produto
-                                </CardTitle>
-                                <CardDescription>
-                                    Crie diferentes versões do produto com preços e arquivos específicos
-                                </CardDescription>
-                            </div>
-                            <Button type="button" onClick={addVariation} variant="outline" size="sm" className="cursor-pointer">
-                                <Plus className="w-4 h-4 mr-2" />
-                                Nova Variação
-                            </Button>
-                        </div>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        {formData.variations.map((variation, index) => (
-                            <div
-                                key={index}
-                                ref={el => { variationRefs.current[index] = el; }}
-                                className={`border rounded-xl shadow-sm bg-white overflow-hidden transition-all duration-200 hover:shadow-md ${variation.isActive ? 'border-green-200' : 'border-gray-200'}`}
-                            >
-                                {/* Header da Variação */}
-                                <div className={`p-4 ${variation.isActive ? 'bg-gradient-to-r from-green-50 to-emerald-50' : 'bg-gray-50'} border-b`}>
-                                    <div className="flex justify-between items-start">
-                                        <div className="flex items-center gap-3">
-                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold shadow-sm ${variation.isActive
-                                                ? 'bg-green-500 text-white'
-                                                : 'bg-gray-400 text-white'
-                                                }`}>
-                                                {index + 1}
-                                            </div>
-                                            <div className="flex-1">
-                                                <h3 className="text-lg font-semibold text-gray-900">
-                                                    {variation.name || `Variação ${index + 1}`}
-                                                </h3>
-                                                <div className="flex items-center gap-3 mt-1">
-                                                    <Badge
-                                                        variant={variation.isActive ? "default" : "secondary"}
-                                                        className={`text-xs font-medium ${variation.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}
-                                                    >
-                                                        {variation.isActive ? 'Ativa' : 'Inativa'}
-                                                    </Badge>
-                                                    <div className="flex items-center gap-1">
-                                                        <span className="text-lg font-bold text-green-600">
-                                                            R$ {parseFloat(variation.price || '0').toFixed(2).replace('.', ',')}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex items-center gap-1 text-sm text-gray-500">
-                                                        <FileText className="w-4 h-4" />
-                                                        <span>{variation.files?.length || 0} arquivo(s)</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-1 text-sm text-gray-500">
-                                                        <ImageIcon className="w-4 h-4" />
-                                                        <span>{variation.images?.length || 0} imagem(ns)</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        {formData.variations.length > 1 && (
-                                            <Button
-                                                type="button"
-                                                onClick={() => removeVariation(index)}
-                                                variant="ghost"
-                                                size="sm"
-                                                className="text-red-600 hover:text-red-700 hover:bg-red-100 cursor-pointer transition-colors"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                                <span className="ml-1 text-xs">Remover</span>
-                                            </Button>
-                                        )}
+                                <div className="md:col-span-2">
+                                    <Label>Categoria</Label>
+                                    <div className="flex gap-2">
+                                        <Select value={formData.categoryId || ''} onValueChange={val => setFormData(prev => ({ ...prev, categoryId: val || null }))}>
+                                            <SelectTrigger className="flex-1"><SelectValue placeholder="Selecione uma categoria" /></SelectTrigger>
+                                            <SelectContent>
+                                                {categoriesLocal.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
+                                        <Dialog open={isNewCategoryOpen} onOpenChange={setIsNewCategoryOpen}>
+                                            <DialogTrigger asChild>
+                                                <Button type="button" variant="outline" size="icon"><FolderPlus className="w-4 h-4" /></Button>
+                                            </DialogTrigger>
+                                                    <DialogContent>
+                                                        <DialogHeader><DialogTitle>Nova Categoria</DialogTitle></DialogHeader>
+                                                        <div className="py-4 space-y-2">
+                                                            <Input placeholder="Nome" value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)} />
+                                                            <Textarea placeholder="Descrição" rows={3} value={newCategoryDescription} onChange={e => setNewCategoryDescription(e.target.value)} />
+                                                            <div className="flex justify-end mt-2 gap-2">
+                                                                <Button disabled={isCreatingCategory} onClick={() => setIsNewCategoryOpen(false)}>Fechar</Button>
+                                                                <Button disabled={isCreatingCategory || !newCategoryName} onClick={async () => {
+                                                                    // create category via API
+                                                                    setIsCreatingCategory(true)
+                                                                    try {
+                                                                        const res = await fetch('/api/admin/categories', {
+                                                                            method: 'POST',
+                                                                            headers: { 'Content-Type': 'application/json' },
+                                                                            body: JSON.stringify({ name: newCategoryName, description: newCategoryDescription })
+                                                                        })
+                                                                        if (!res.ok) throw new Error('Erro ao criar categoria')
+                                                                        const created = await res.json()
+                                                                        if (created && created.id) {
+                                                                            setCategoriesLocal(prev => [created, ...prev])
+                                                                            setFormData(prev => ({ ...prev, categoryId: created.id }))
+                                                                            setNewCategoryName('')
+                                                                            setNewCategoryDescription('')
+                                                                            setIsNewCategoryOpen(false)
+                                                                        } else {
+                                                                            alert('Resposta inesperada ao criar categoria')
+                                                                        }
+                                                                    } catch (err) {
+                                                                        console.error(err)
+                                                                        alert('Falha ao criar categoria')
+                                                                    } finally {
+                                                                        setIsCreatingCategory(false)
+                                                                    }
+                                                                }}>Criar</Button>
+                                                            </div>
+                                                        </div>
+                                                    </DialogContent>
+                                        </Dialog>
                                     </div>
                                 </div>
 
-                                {/* Conteúdo da Variação */}
-                                <div className="p-6 space-y-6">
-                                    {/* Informações Básicas */}
-                                    <div className="bg-gray-50 rounded-lg p-4">
-                                        <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                            <Package className="w-4 h-4" />
-                                            Informações Básicas
-                                        </h4>
-                                        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-                                            <div className="lg:col-span-2">
-                                                <Label className="text-sm font-medium text-gray-700">Nome da Variação *</Label>
-                                                <Input
-                                                    value={variation.name}
-                                                    onChange={(e) => updateVariation(index, 'name', e.target.value)}
-                                                    placeholder="Ex: PDF Premium, Kit Completo"
-                                                    className="mt-1 border-gray-300 focus:border-blue-500"
-                                                    required
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label className="text-sm font-medium text-gray-700">Preço (R$) *</Label>
-                                                <Input
-                                                    type="number"
-                                                    step="0.01"
-                                                    min="0.01"
-                                                    value={variation.price}
-                                                    onChange={(e) => updateVariation(index, 'price', e.target.value)}
-                                                    placeholder="0,00"
-                                                    className="mt-1 border-gray-300 focus:border-blue-500"
-                                                    required
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label className="text-sm font-medium text-gray-700">Idioma *</Label>
-                                                <Select
-                                                    value={variation.idioma || ''}
-                                                    onValueChange={val => updateVariation(index, 'idioma', val)}
-                                                >
-                                                    <SelectTrigger className="mt-1 border-gray-300 focus:border-blue-500">
-                                                        <SelectValue placeholder="Selecione o idioma" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {LANGUAGE_OPTIONS.map(opt => (
-                                                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                                {variation.idioma === 'escreva' && (
-                                                    <div className="bg-yellow-100 border-l-4 border-yellow-400 p-3 mt-2 rounded text-yellow-900 text-xs">
-                                                        Este idioma permite que o cliente escreva uma mensagem personalizada. Certifique-se de configurar corretamente os campos e instruções no produto e na página de detalhes.
+                                <div className="md:col-span-2">
+                                    <Label>Imagens do Produto</Label>
+                                    <div className="mt-2">
+                                        <label className="block w-full border-2 border-dashed rounded-lg p-6 text-center cursor-pointer">
+                                            <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
+                                            <input type="file" multiple accept="image/*" onChange={e => e.target.files && handleProductImageUpload(e.target.files)} className="hidden" />
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* Step 2 */}
+                {step === 2 && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Atributos do Produto</CardTitle>
+                            <CardDescription>Selecione atributos aplicáveis e valores. Você pode criar novos atributos.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid md:grid-cols-2 gap-4">
+                                        <div>
+                                    <Label>Criar novo atributo</Label>
+                                    <div className="flex gap-2">
+                                        <Input placeholder="Nome do atributo" value={newAttrName} onChange={e => setNewAttrName(e.target.value)} />
+                                        <Button onClick={handleCreateAttribute} variant="default" className="bg-[#FED466] text-black hover:brightness-95 ring-1 ring-yellow-300" aria-label="Adicionar atributo">
+                                            <Plus className="w-4 h-4" />
+                                        </Button>
+                                    </div>
+                                    <Input className="mt-2" placeholder="Valores (separados por vírgula)" value={newAttrValuesRaw} onChange={e => setNewAttrValuesRaw(e.target.value)} />
+                                </div>
+                                <div>
+                                    <Label>Atributos disponíveis</Label>
+                                    <div className="max-h-72 overflow-y-auto mt-2 space-y-3">
+                                        {localAttributes.map(attr => (
+                                            <div key={attr.id} className="border rounded p-3">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="font-medium">{attr.name}</div>
+                                                    <div>
+                                                        <input type="checkbox" checked={!!formData.attributes?.find(a => a.attributeId === attr.id)} onChange={e => {
+                                                            if (e.target.checked) setFormData(prev => ({ ...prev, attributes: [...(prev.attributes || []), { attributeId: attr.id, valueIds: [] }] }))
+                                                            else setFormData(prev => ({ ...prev, attributes: (prev.attributes || []).filter(a => a.attributeId !== attr.id) }))
+                                                        }} />
+                                                    </div>
+                                                </div>
+                                                {formData.attributes?.find(a => a.attributeId === attr.id) && (
+                                                    <div className="mt-2 flex flex-wrap gap-2">
+                                                        {(attr.values || []).map((v: AttributeValue) => {
+                                                            const selected = !!formData.attributes?.find(a => a.attributeId === attr.id && a.valueIds.includes(v.id))
+                                                            return (
+                                                                <label key={v.id} className={`inline-flex items-center gap-2 px-2 py-1 rounded border ${selected ? 'bg-yellow-100' : 'bg-white'}`}>
+                                                                    <input type="checkbox" checked={selected} onChange={() => handleToggleAttributeValue(attr.id, v.id)} />
+                                                                    <span className="text-sm">{v.value}</span>
+                                                                </label>
+                                                            )
+                                                        })}
                                                     </div>
                                                 )}
                                             </div>
-                                        </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
 
-                                        <div className="mt-4 flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
-                                            <div className="flex items-center space-x-3">
-                                                <Switch
-                                                    checked={variation.isActive}
-                                                    onCheckedChange={(checked) => updateVariation(index, 'isActive', checked)}
-                                                    className="data-[state=checked]:bg-green-600"
-                                                />
-                                                <div>
-                                                    <Label className="text-sm font-medium text-gray-700">Variação Ativa</Label>
-                                                    <p className="text-xs text-gray-500">
-                                                        {variation.isActive ? 'Esta variação estará disponível para compra' : 'Esta variação ficará oculta na loja'}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div className={`px-2 py-1 rounded-full text-xs font-medium ${variation.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
-                                                }`}>
-                                                {variation.isActive ? 'Visível' : 'Oculta'}
-                                            </div>
+                {/* Step 3 */}
+                {step === 3 && (
+                    <Card>
+                        <CardHeader>
+                            <div className="flex justify-between items-center w-full">
+                                <div>
+                                    <CardTitle>Variações do Produto</CardTitle>
+                                    <CardDescription>Adicione variações, preços e arquivos. Cada variação precisa ter ao menos um arquivo.</CardDescription>
+                                </div>
+                                <div>
+                                    <Button type="button" onClick={addVariation} variant="outline" size="sm"><Plus className="w-4 h-4" /> Nova Variação</Button>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            {formData.variations.map((variation, index) => (
+                                <div key={index} ref={el => { variationRefs.current[index] = el }} className="border rounded-xl p-4 mb-4">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <div className="font-medium">{variation.name || `Variação ${index + 1}`}</div>
+                                        <div className="text-sm text-gray-500">R$ {Number(variation.price || 0).toFixed(2)}</div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                        <div>
+                                            <Label>Nome</Label>
+                                            <Input value={variation.name} onChange={e => updateVariation(index, 'name', e.target.value)} />
+                                        </div>
+                                        <div>
+                                            <Label>Preço (R$)</Label>
+                                            <Input type="number" step="0.01" value={variation.price} onChange={e => updateVariation(index, 'price', e.target.value)} />
+                                        </div>
+                                        <div>
+                                            <Label>Idioma</Label>
+                                            <Select value={variation.idioma || ''} onValueChange={val => updateVariation(index, 'idioma', val)}>
+                                                <SelectTrigger className="w-full"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                                                <SelectContent>
+                                                    {LANGUAGE_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                                                </SelectContent>
+                                            </Select>
                                         </div>
                                     </div>
 
-                                    {/* Upload de Imagens da Variação (agora com cor secundária) */}
-                                    <div className="bg-[#FFF3ED] rounded-lg p-4 mb-6 border border-[#FD9555]">
-                                        <div className="mb-4">
-                                            <h4 className="text-sm font-semibold text-[#FD9555] flex items-center gap-2">
-                                                <ImageIcon className="w-4 h-4" style={{ color: '#FD9555' }} />
-                                                Imagens da Variação
-                                            </h4>
-                                            <p className="text-xs text-[#FD9555] mt-1">
-                                                Adicione imagens de preview para esta variação (opcional)
-                                            </p>
+                                    {localAttributes.length > 0 && (
+                                        <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            {localAttributes.map(attr => (
+                                                <div key={attr.id}>
+                                                    <Label className="text-sm">{attr.name}</Label>
+                                                    <Select value={variation.attributeValues?.find(av => av.attributeId === attr.id)?.valueId || ''} onValueChange={val => updateVariationAttributeValue(index, attr.id, val)}>
+                                                        <SelectTrigger className="w-full"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                                                        <SelectContent>{(attr.values || []).map((v: AttributeValue) => <SelectItem key={v.id} value={v.id}>{v.value}</SelectItem>)}</SelectContent>
+                                                    </Select>
+                                                </div>
+                                            ))}
                                         </div>
-                                        <div className="border-2 border-dashed border-[#FD9555] rounded-lg p-6 hover:border-[#FD9555]/80 transition-all duration-200 bg-white hover:bg-[#FFF3ED]">
-                                            <label className="cursor-pointer block text-center">
-                                                <ImageIcon className="mx-auto h-10 w-10" style={{ color: '#FD9555' }} />
-                                                <span className="mt-2 block text-sm font-medium text-[#FD9555]">
-                                                    Clique para selecionar imagens
-                                                </span>
-                                                <span className="mt-1 block text-xs text-[#FD9555]">
-                                                    PNG, JPG, WebP até 10MB cada
-                                                </span>
-                                                <input
-                                                    type="file"
-                                                    multiple
-                                                    accept="image/*"
-                                                    onChange={(e) => e.target.files && handleVariationImageUpload(index, e.target.files)}
-                                                    className="hidden"
-                                                />
+                                    )}
+
+                                    <div className="mt-3">
+                                        <Label>Arquivos da variação *</Label>
+                                        <div className="mt-2">
+                                            <label className="block w-full border-2 border-dashed rounded-lg p-4 text-center cursor-pointer">
+                                                <Upload className="mx-auto h-8 w-8" />
+                                                <input type="file" multiple accept=".pdf,image/*" onChange={e => e.target.files && handleFileUpload(index, e.target.files)} className="hidden" />
                                             </label>
                                         </div>
-                                        {/* Grid de Imagens da Variação */}
-                                        {variation.images.length > 0 && (
-                                            <div className="space-y-4 mt-4">
-                                                <div className="flex items-center justify-between">
-                                                    <h4 className="text-sm font-medium text-gray-900">
-                                                        Imagens ({variation.images.length})
-                                                    </h4>
-                                                    <div className="text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded">
-                                                        Arraste para reordenar
-                                                    </div>
-                                                </div>
-                                                <DndContext
-                                                    sensors={sensors}
-                                                    collisionDetection={closestCenter}
-                                                    onDragEnd={handleVariationImageDragEnd(index)}
-                                                >
-                                                    <SortableContext
-                                                        items={variation.images.map(img => img.id)}
-                                                        strategy={rectSortingStrategy}
-                                                    >
-                                                        <div className="max-h-64 overflow-y-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-2">
-                                                            {variation.images.map((image, imageIndex) => (
-                                                                <div key={image.id} className="relative group">
-                                                                    <SortableImageItem
-                                                                        image={image}
-                                                                        index={imageIndex}
-                                                                        isMain={variation.mainImageIndex === imageIndex}
-                                                                        onRemove={() => removeVariationImage(index, imageIndex)}
-                                                                    />
-                                                                    {imageIndex === 0 && (
-                                                                        <div className="absolute -top-2 -left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
-                                                                            Principal
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    </SortableContext>
-                                                </DndContext>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Upload de Arquivos */}
-                                    <div className="bg-blue-50 rounded-lg p-4">
-                                        <div className="mb-4">
-                                            <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                                <FileText className="w-4 h-4 text-blue-600" />
-                                                Arquivos da Variação *
-                                            </h4>
-                                            <p className="text-xs text-gray-600 mt-1">
-                                                Adicione os arquivos digitais que serão entregues ao cliente (PDF, PNG, JPG até 50MB cada)
-                                            </p>
-                                        </div>
-
-                                        <div className="border-2 border-dashed border-blue-300 rounded-lg p-6 hover:border-blue-400 transition-all duration-200 bg-white hover:bg-blue-50">
-                                            <label className="cursor-pointer block text-center">
-                                                <div className="w-12 h-12 mx-auto mb-3 bg-blue-100 rounded-full flex items-center justify-center">
-                                                    <Upload className="h-6 w-6 text-blue-600" />
-                                                </div>
-                                                <span className="block text-sm font-semibold text-gray-900 mb-1">
-                                                    Clique ou arraste arquivos aqui
-                                                </span>
-                                                <span className="block text-xs text-gray-500">
-                                                    Suporta múltiplos arquivos: PDF, PNG, JPG
-                                                </span>
-                                                <input
-                                                    type="file"
-                                                    multiple
-                                                    accept=".pdf,image/*"
-                                                    onChange={(e) => e.target.files && handleFileUpload(index, e.target.files)}
-                                                    className="hidden"
-                                                />
-                                            </label>
-                                        </div>
-
-                                        {/* Lista de Arquivos Melhorada */}
                                         {variation.files.length > 0 && (
-                                            <div className="space-y-3">
-                                                <div className="flex items-center justify-between">
-                                                    <h4 className="text-sm font-medium text-gray-900">
-                                                        Arquivos ({variation.files.length})
-                                                    </h4>
-                                                </div>
-                                                <div className="max-h-48 overflow-y-auto space-y-2">
-                                                    {variation.files.map((file, fileIndex) => (
-                                                        <div key={fileIndex} className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                                                            <div className="flex items-center space-x-3 flex-1 min-w-0">
-                                                                <div className={`p-2 rounded-lg ${file.file.type === 'application/pdf'
-                                                                    ? 'bg-red-100 text-red-600'
-                                                                    : 'bg-blue-100 text-blue-600'
-                                                                    }`}>
-                                                                    <FileText className="w-4 h-4" />
-                                                                </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <p className="text-sm font-medium text-gray-900 truncate">
-                                                                        {file.file.name}
-                                                                    </p>
-                                                                    <div className="flex items-center gap-2 mt-1">
-                                                                        <p className="text-xs text-gray-500">
-                                                                            {(file.file.size / 1024 / 1024).toFixed(2)} MB
-                                                                        </p>
-                                                                        <span className="text-xs text-gray-300">•</span>
-                                                                        <p className="text-xs text-gray-500">
-                                                                            {file.file.type === 'application/pdf' ? 'PDF' : 'Imagem'}
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex items-center space-x-2 ml-4">
-                                                                {file.uploading && (
-                                                                    <div className="flex items-center gap-2">
-                                                                        <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
-                                                                        <span className="text-xs text-blue-600">Enviando...</span>
-                                                                    </div>
-                                                                )}
-                                                                {file.uploaded && (
-                                                                    <Badge variant="default" className="bg-green-500 hover:bg-green-600">
-                                                                        ✓ Enviado
-                                                                    </Badge>
-                                                                )}
-                                                                {file.error && (
-                                                                    <Badge variant="destructive">
-                                                                        ✗ Erro
-                                                                    </Badge>
-                                                                )}
-                                                                <Button
-                                                                    type="button"
-                                                                    variant="ghost"
-                                                                    size="sm"
-                                                                    onClick={() => removeFileFromVariation(index, fileIndex)}
-                                                                    className="text-gray-400 hover:text-red-500 cursor-pointer p-1"
-                                                                >
-                                                                    <X className="w-4 h-4" />
-                                                                </Button>
-                                                            </div>
+                                            <div className="mt-3 space-y-2">
+                                                {variation.files.map((f, fi) => (
+                                                    <div key={fi} className="flex items-center justify-between bg-white border rounded p-3">
+                                                        <div className="flex items-center gap-3">
+                                                            <FileText className="w-4 h-4" />
+                                                            <div className="text-sm">{f.filename}</div>
                                                         </div>
-                                                    ))}
-                                                </div>
+                                                        <div>
+                                                            <Button type="button" variant="ghost" onClick={() => setFormData(prev => ({ ...prev, variations: prev.variations.map((v, i) => i === index ? { ...v, files: v.files.filter((_, idx) => idx !== fi) } : v) }))}><X className="w-4 h-4" /></Button>
+                                                        </div>
+                                                    </div>
+                                                ))}
                                             </div>
                                         )}
                                     </div>
                                 </div>
-                            </div>
-                        ))}
-                    </CardContent>
-                </Card>
+                            ))}
+                        </CardContent>
+                    </Card>
+                )}
 
-                {/* Botões de Ação */}
-                <div className="flex justify-end space-x-4">
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => onSuccess ? onSuccess() : router.push('/admin/produtos')}
-                        className="cursor-pointer"
-                    >
-                        Cancelar
-                    </Button>
-                    <Button type="submit" disabled={isSubmitting} className="cursor-pointer">
-                        {isSubmitting ? (
-                            <>
-                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                Salvando...
-                            </>
-                        ) : (
-                            isEditing ? 'Atualizar Produto' : 'Criar Produto'
-                        )}
-                    </Button>
+                {/* Actions */}
+                <div className="flex justify-between items-center">
+                    <div>
+                        <Button type="button" variant="outline" onClick={() => onSuccess ? onSuccess() : router.push('/admin/produtos')}>Cancelar</Button>
+                    </div>
+                    <div className="flex gap-2">
+                        {step > 1 && <Button type="button" variant="ghost" onClick={prevStep}>Anterior</Button>}
+                        {step < 3 && <Button type="button" onClick={nextStep}>Próximo</Button>}
+                        {step === 3 && <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Salvando...' : (isEditing ? 'Atualizar Produto' : 'Criar Produto')}</Button>}
+                    </div>
                 </div>
             </form>
         </div>

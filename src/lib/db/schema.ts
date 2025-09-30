@@ -398,6 +398,86 @@ export const filesRelations = relations(files, ({ one, many }) => ({
   downloads: many(downloads),
 }));
 
+// ============================================================================
+// ATRIBUTOS E VARIAÇÕES (NORMALIZADO)
+// ============================================================================
+
+export const attributes = pgTable('attributes', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  name: varchar('name', { length: 255 }).notNull(),
+  slug: varchar('slug', { length: 255 }).notNull().unique(),
+  sortOrder: integer('sort_order').default(0),
+  isActive: boolean('is_active').default(true).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const attributeValues = pgTable('attribute_values', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  attributeId: uuid('attribute_id')
+    .notNull()
+    .references(() => attributes.id, { onDelete: 'cascade' }),
+  value: varchar('value', { length: 255 }).notNull(),
+  slug: varchar('slug', { length: 255 }).notNull(),
+  sortOrder: integer('sort_order').default(0),
+  isDefault: boolean('is_default').default(false),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const productAttributes = pgTable(
+  'product_attributes',
+  {
+    productId: uuid('product_id')
+      .notNull()
+      .references(() => products.id, { onDelete: 'cascade' }),
+    attributeId: uuid('attribute_id')
+      .notNull()
+      .references(() => attributes.id, { onDelete: 'cascade' }),
+  },
+  table => ({
+    pk: primaryKey({ columns: [table.productId, table.attributeId] }),
+  })
+);
+
+export const variationAttributeValues = pgTable(
+  'variation_attribute_values',
+  {
+    variationId: uuid('variation_id')
+      .notNull()
+      .references(() => productVariations.id, { onDelete: 'cascade' }),
+    attributeId: uuid('attribute_id')
+      .notNull()
+      .references(() => attributes.id, { onDelete: 'cascade' }),
+    valueId: uuid('value_id')
+      .notNull()
+      .references(() => attributeValues.id, { onDelete: 'cascade' }),
+  },
+  table => ({
+    pk: primaryKey({ columns: [table.variationId, table.attributeId, table.valueId] }),
+  })
+);
+
+export const attributesRelations = relations(attributes, ({ many }) => ({
+  values: many(attributeValues),
+  productAttributes: many(productAttributes),
+}));
+
+export const attributeValuesRelations = relations(attributeValues, ({ one }) => ({
+  attribute: one(attributes, { fields: [attributeValues.attributeId], references: [attributes.id] }),
+}));
+
+export const productAttributesRelations = relations(productAttributes, ({ one }) => ({
+  product: one(products, { fields: [productAttributes.productId], references: [products.id] }),
+  attribute: one(attributes, { fields: [productAttributes.attributeId], references: [attributes.id] }),
+}));
+
+export const variationAttributeValuesRelations = relations(variationAttributeValues, ({ one }) => ({
+  variation: one(productVariations, { fields: [variationAttributeValues.variationId], references: [productVariations.id] }),
+  attribute: one(attributes, { fields: [variationAttributeValues.attributeId], references: [attributes.id] }),
+  value: one(attributeValues, { fields: [variationAttributeValues.valueId], references: [attributeValues.id] }),
+}));
+
 export const productImagesRelations = relations(productImages, ({ one }) => ({
   product: one(products, { fields: [productImages.productId], references: [products.id] }),
   variation: one(productVariations, {

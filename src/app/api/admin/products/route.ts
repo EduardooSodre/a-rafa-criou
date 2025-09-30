@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/lib/db';
 import { products, files, productImages, productVariations, categories } from '@/lib/db/schema';
+import { productAttributes, variationAttributeValues } from '@/lib/db/schema';
 import { eq, desc, or, and, ilike, isNull } from 'drizzle-orm';
 
 const createProductSchema = z.object({
@@ -49,6 +50,14 @@ const createProductSchema = z.object({
               fileSize: z.number(),
               mimeType: z.string(),
               r2Key: z.string(),
+            })
+          )
+          .optional(),
+        attributeValues: z
+          .array(
+            z.object({
+              attributeId: z.string(),
+              valueId: z.string(),
             })
           )
           .optional(),
@@ -370,6 +379,17 @@ export async function POST(request: NextRequest) {
 
           await db.insert(files).values(variationFileData);
         }
+        // Persist variation attribute values mapping if provided
+        if (variation.attributeValues && Array.isArray(variation.attributeValues) && variation.attributeValues.length > 0) {
+          const vamp = variation.attributeValues.map((av: { attributeId: string; valueId: string }) => ({
+            variationId: insertedVariation.id,
+            attributeId: av.attributeId,
+            valueId: av.valueId,
+          }))
+          if (vamp.length > 0) {
+            await db.insert(variationAttributeValues).values(vamp).execute()
+          }
+        }
       }
     }
 
@@ -386,6 +406,15 @@ export async function POST(request: NextRequest) {
       }));
 
       await db.insert(files).values(fileData);
+    }
+
+    // Persist product_attributes if provided
+  const attrsPayload = (validatedData as unknown as { attributes?: { attributeId: string; valueIds: string[] }[] }).attributes
+  if (attrsPayload && Array.isArray(attrsPayload)) {
+      const toInsert = attrsPayload.map(a => ({ productId: insertedProduct.id, attributeId: a.attributeId }))
+      if (toInsert.length > 0) {
+        await db.insert(productAttributes).values(toInsert).execute()
+      }
     }
 
     // Fetch the complete product with files

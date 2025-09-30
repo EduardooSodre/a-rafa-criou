@@ -74,6 +74,7 @@ interface ProductFormData {
     isFeatured: boolean
     images: UploadedImage[]
     variations: ProductVariation[]
+    attributes?: { attributeId: string; valueIds: string[] }[]
 }
 
 interface UploadedFile {
@@ -243,6 +244,12 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
         variations: []
     })
 
+    // Atributos globais disponíveis (carregados da API)
+    type AttrValue = { id: string; value: string }
+    type Attr = { id: string; name: string; values?: AttrValue[] }
+    const [availableAttributes, setAvailableAttributes] = useState<Attr[]>([])
+    const [isAttributesOpen, setIsAttributesOpen] = useState(false)
+
     const sensors = useSensors(
         useSensor(PointerSensor),
         useSensor(KeyboardSensor, {
@@ -252,7 +259,20 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
 
     useEffect(() => {
         fetchCategories()
+        fetchAttributes()
     }, [])
+
+    const fetchAttributes = async () => {
+        try {
+            const res = await fetch('/api/admin/attributes')
+            if (res.ok) {
+                const data = await res.json()
+                setAvailableAttributes(data)
+            }
+        } catch (err) {
+            console.error('Erro ao buscar atributos:', err)
+        }
+    }
 
     // load product data when dialog opens or product changes
     const loadProductData = useCallback(() => {
@@ -310,7 +330,8 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
                 files: [],
                 images: [],
                 isActive: true
-            }]
+            }],
+            attributes: (p as unknown as { attributes?: { attributeId: string; valueIds: string[] }[] }).attributes || []
         })
     }, [product])
 
@@ -830,34 +851,56 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
             console.log('[DEBUG] Valor final de productData.price:', productData.price, typeof productData.price);
             console.log('[DEBUG] productData completo:', productData);
 
-            if (!product || !product.id) {
-                throw new Error('Produto inválido ao tentar atualizar')
+            // Anexar atributos selecionados ao payload
+            const payload: Record<string, unknown> = { ...productData }
+            if (formData.attributes) (payload as Record<string, unknown>)['attributes'] = formData.attributes as unknown
+
+            let response: Response
+            if (product && product.id) {
+                // Edit
+                const url = `/api/admin/products/${product.id}`
+                const method = 'PUT'
+                console.log('=== ENVIANDO PARA API (EDIT) ===')
+                console.log('URL:', url)
+                console.log('Method:', method)
+
+                response = await fetch(url, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(productData),
+                })
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }))
+                    throw new Error(`Erro ao atualizar produto: ${errorData.error || 'Erro desconhecido'}`)
+                }
+
+                if (onSuccess) onSuccess()
+                onOpenChange(false)
+                alert('Produto atualizado com sucesso!')
+            } else {
+                // Create
+                const url = '/api/admin/products'
+                console.log('=== ENVIANDO PARA API (CREATE) ===')
+                response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(productData),
+                })
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }))
+                    throw new Error(`Erro ao criar produto: ${errorData.error || 'Erro desconhecido'}`)
+                }
+
+                const created = await response.json()
+                console.log('Created product:', created)
+                if (onSuccess) onSuccess()
+                onOpenChange(false)
+                alert('Produto criado com sucesso!')
             }
-            const url = `/api/admin/products/${product.id}`
-            const method = 'PUT'
-
-            console.log('=== ENVIANDO PARA API (EDIT) ===')
-            console.log('URL:', url)
-            console.log('Method:', method)
-
-            const response = await fetch(url, {
-                method,
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(productData),
-            })
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }))
-                throw new Error(`Erro ao atualizar produto: ${errorData.error || 'Erro desconhecido'}`)
-            }
-
-            if (onSuccess) {
-                onSuccess()
-            }
-            onOpenChange(false)
-            alert('Produto atualizado com sucesso!')
         } catch (error) {
             console.error('Erro completo:', error)
             alert(`Erro ao atualizar produto: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
@@ -868,6 +911,68 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
+            {/* Modal simples para selecionar atributos */}
+            <Dialog open={isAttributesOpen} onOpenChange={setIsAttributesOpen}>
+                <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>Gerenciar Atributos</DialogTitle>
+                        <DialogDescription>Selecione quais atributos se aplicam ao produto e marque os valores válidos.</DialogDescription>
+                    </DialogHeader>
+
+                    <div className="py-4 space-y-4">
+                        {availableAttributes.length === 0 && <div>Sem atributos disponíveis</div>}
+                        {availableAttributes.map((attr) => {
+                            const selected = formData.attributes?.find(a => a.attributeId === attr.id)
+                            return (
+                                <div key={attr.id} className="border rounded p-3">
+                                    <div className="flex items-center justify-between">
+                                        <div className="font-medium">{attr.name}</div>
+                                        <div>
+                                            <label className="mr-2">Aplicar</label>
+                                            <input type="checkbox" checked={!!selected} onChange={(e) => {
+                                                if (e.target.checked) {
+                                                    setFormData(prev => ({ ...prev, attributes: [ ...(prev.attributes || []), { attributeId: attr.id, valueIds: [] } ] }))
+                                                } else {
+                                                    setFormData(prev => ({ ...prev, attributes: (prev.attributes || []).filter(a => a.attributeId !== attr.id) }))
+                                                }
+                                            }} />
+                                        </div>
+                                    </div>
+                                    {selected && (
+                                        <div className="mt-2 grid grid-cols-2 gap-2">
+                                            {(attr.values || []).map((v: AttrValue) => {
+                                                const isChecked = selected.valueIds.includes(v.id)
+                                                return (
+                                                    <label key={v.id} className="flex items-center gap-2">
+                                                        <input type="checkbox" checked={isChecked} onChange={(e) => {
+                                                            setFormData(prev => {
+                                                                const attrs = prev.attributes || []
+                                                                const found = attrs.find(a => a.attributeId === attr.id) || { attributeId: attr.id, valueIds: [] }
+                                                                if (e.target.checked) {
+                                                                    found.valueIds = Array.from(new Set([...(found.valueIds || []), v.id]))
+                                                                } else {
+                                                                    found.valueIds = (found.valueIds || []).filter((id: string) => id !== v.id)
+                                                                }
+                                                                const others = attrs.filter(a => a.attributeId !== attr.id)
+                                                                return { ...prev, attributes: [...others, found] }
+                                                            })
+                                                        }} />
+                                                        <span className="text-sm">{v.value}</span>
+                                                    </label>
+                                                )
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+                            )
+                        })}
+                    </div>
+
+                    <div className="flex justify-end gap-2 mt-4">
+                        <Button type="button" variant="ghost" onClick={() => setIsAttributesOpen(false)}>Fechar</Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Editar Produto</DialogTitle>
@@ -1012,6 +1117,10 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
                                                 </div>
                                             </DialogContent>
                                         </Dialog>
+
+                                        <Button type="button" variant="outline" onClick={() => setIsAttributesOpen(true)}>
+                                            Gerenciar Atributos
+                                        </Button>
                                     </div>
                                 </div>
 

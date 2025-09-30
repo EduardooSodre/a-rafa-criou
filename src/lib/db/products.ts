@@ -1,6 +1,6 @@
 import { db } from './index';
 import { eq } from 'drizzle-orm';
-import { products, productVariations, productImages, categories } from './schema';
+import { products, productVariations, productImages, categories, attributes, attributeValues, variationAttributeValues, files } from './schema';
 
 export async function getProductBySlug(slug: string) {
   // Busca produto principal
@@ -25,6 +25,40 @@ export async function getProductBySlug(slug: string) {
     .from(productVariations)
     .where(eq(productVariations.productId, product.id));
 
+  // Para cada variação, buscar os valores de atributo associados
+  const variationsWithAttributes = await Promise.all(
+    variations.map(async (v) => {
+      const mappings = await db.select().from(variationAttributeValues).where(eq(variationAttributeValues.variationId, v.id));
+      // Buscar os value records
+      const valueDetails = await Promise.all(
+        mappings.map(async (m) => {
+          const [val] = await db.select().from(attributeValues).where(eq(attributeValues.id, m.valueId)).limit(1);
+          const [attr] = await db.select().from(attributes).where(eq(attributes.id, m.attributeId)).limit(1);
+          return {
+            attributeId: m.attributeId,
+            attributeName: attr?.name || null,
+            valueId: m.valueId,
+            value: val?.value || null,
+          };
+        })
+      );
+
+      // Buscar arquivos da variação (r2Key)
+      const variationFiles = await db.select().from(files).where(eq(files.variationId, v.id));
+
+      return {
+        id: v.id,
+        name: v.name,
+        price: Number(v.price),
+        description: v.slug,
+        downloadLimit: 10,
+        fileSize: '-',
+        attributeValues: valueDetails,
+  files: variationFiles.map(f => ({ id: f.id, path: f.path, name: f.name }))
+      };
+    })
+  );
+
   // Busca imagens
   const imagesResult = await db
     .select()
@@ -45,13 +79,6 @@ export async function getProductBySlug(slug: string) {
     category: category || '',
     tags: [], // Adapte se houver tags
     images,
-    variations: variations.map(v => ({
-      id: v.id,
-      name: v.name,
-      price: Number(v.price),
-      description: v.slug,
-      downloadLimit: 10, // Adapte se houver campo
-      fileSize: '-', // Adapte se houver campo
-    })),
+    variations: variationsWithAttributes,
   };
 }

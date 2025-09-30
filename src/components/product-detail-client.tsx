@@ -2,10 +2,11 @@
 'use client'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ProductGallery } from '@/components/ui/product-gallery'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -23,6 +24,7 @@ interface ProductVariation {
     description: string
     downloadLimit: number
     fileSize: string
+    attributeValues?: { attributeId: string; attributeName?: string | null; valueId: string; value?: string | null }[]
 }
 
 interface Product {
@@ -43,6 +45,34 @@ interface ProductDetailClientProps {
 }
 
 export function ProductDetailClient({ product }: ProductDetailClientProps) {
+    // If product has attribute values on variations, build selectors state
+    const hasAttributeSelectors = Array.isArray(product.variations) && product.variations.some(v => Array.isArray(v.attributeValues) && v.attributeValues!.length > 0)
+
+    // Build available attributes from variations
+    const buildAttributes = () => {
+        if (!hasAttributeSelectors) return [] as { attributeId: string; attributeName?: string | null; options: { valueId: string; value?: string | null }[] }[]
+
+        const map: Record<string, { attributeName?: string | null; options: Record<string, string | null> }> = {}
+        product.variations.forEach(v => {
+            const av = v.attributeValues || []
+            av.forEach(a => {
+                if (!map[a.attributeId]) map[a.attributeId] = { attributeName: a.attributeName, options: {} }
+                map[a.attributeId].options[a.valueId] = a.value ?? null
+            })
+        })
+
+        return Object.keys(map).map(k => ({ attributeId: k, attributeName: map[k].attributeName, options: Object.keys(map[k].options).map(vid => ({ valueId: vid, value: map[k].options[vid] })) }))
+    }
+
+    const availableAttributes = buildAttributes()
+
+    const initialSelectedAttrs: Record<string, string> = {}
+    availableAttributes.forEach(attr => {
+        if (attr.options.length > 0) initialSelectedAttrs[attr.attributeId] = attr.options[0].valueId
+    })
+
+    const [selectedAttrs, setSelectedAttrs] = useState<Record<string, string>>(initialSelectedAttrs)
+
     const [selectedVariation, setSelectedVariation] = useState(
         Array.isArray(product.variations) && product.variations.length > 0 ? product.variations[0].id : ''
     )
@@ -83,6 +113,17 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
         })
         showToast(t('cart.addedToCart', { product: t(`productNames.${product.slug}`, { defaultValue: product.name }) }), 'success')
     }
+
+    // Resolve variation by selected attributes (if applicable)
+    useEffect(() => {
+        if (!hasAttributeSelectors) return
+        // find variation matching all selectedAttrs
+        const found = product.variations.find(v => {
+            const av = v.attributeValues || []
+            return Object.entries(selectedAttrs).every(([attrId, valId]) => av.some(x => x.attributeId === attrId && x.valueId === valId))
+        })
+        if (found) setSelectedVariation(found.id)
+    }, [selectedAttrs, hasAttributeSelectors, product.variations])
 
     const handleBuyNow = () => {
         handleAddToCart()
@@ -131,6 +172,26 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                             <h3 className="font-semibold mb-3 text-primary flex items-center gap-2 text-lg">
                                 <FileText className="w-5 h-5 text-primary" /> {t('productInfo.chooseVariation', 'Escolha uma variação:')}
                             </h3>
+                            {/* Attribute selectors (if any) */}
+                            {availableAttributes.length > 0 && (
+                                <div className="mb-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    {availableAttributes.map(attr => (
+                                        <div key={attr.attributeId}>
+                                            <Label className="text-sm">{attr.attributeName || attr.attributeId}</Label>
+                                            <Select value={selectedAttrs[attr.attributeId] || ''} onValueChange={(val) => setSelectedAttrs(prev => ({ ...prev, [attr.attributeId]: val }))}>
+                                                <SelectTrigger className="w-full bg-white border-2 border-primary/40 focus:border-primary shadow-sm rounded-lg text-base">
+                                                    <SelectValue placeholder="Selecione" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {attr.options.map(opt => (
+                                                        <SelectItem key={opt.valueId} value={opt.valueId}>{opt.value || opt.valueId}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                             <Select value={selectedVariation} onValueChange={setSelectedVariation}>
                                 <SelectTrigger className="w-full bg-white border-2 border-primary/40 focus:border-primary shadow-sm rounded-lg text-base">
                                     <SelectValue placeholder={t('productInfo.selectVariationPlaceholder', 'Selecione uma variação')} />
