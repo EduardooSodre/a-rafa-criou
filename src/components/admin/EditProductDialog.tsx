@@ -85,7 +85,7 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
         const src = detailedProduct || product
         if (!src) return undefined
         const source = src as AdminProduct
-    const images = (source.images || []).map(i => getPreviewSrc(i?.data ?? i?.r2Key ?? i?.url ?? '', i?.mimeType))
+        const images = (source.images || []).map(i => getPreviewSrc(i?.data ?? i?.r2Key ?? i?.url ?? '', i?.mimeType))
         type RawAttr = ApiAttributeValue & { attribute_id?: string; attribute_value_id?: string }
         type RawFile = ApiFile & { name?: string; path?: string; size?: number }
         const variations = (source.variations || []).map(v => {

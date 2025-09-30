@@ -91,7 +91,7 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                 const url = ff.r2Key ? `/api/r2/download?r2Key=${encodeURIComponent(String(ff.r2Key))}` : (ff.url || undefined)
                 return { file: undefined as File | undefined, filename: ff.filename || ff.originalName || url?.split('/').pop() || '', r2Key: ff.r2Key || '', originalName: ff.originalName, fileSize: ff.fileSize, mimeType: ff.mimeType, url }
             }),
-                images: (v.images || []).map((img: string | { filename?: string; previewUrl?: string; data?: string; url?: string; mimeType?: string }, ii: number) => {
+            images: (v.images || []).map((img: string | { filename?: string; previewUrl?: string; data?: string; url?: string; mimeType?: string }, ii: number) => {
                 // image may be string or object { filename, previewUrl }
                 if (typeof img === 'string') return { file: undefined as File | undefined, filename: String(img).split('/').pop() || `var-${ii}`, previewUrl: img } as ImageFile
                 type ImgObj = { filename?: string; previewUrl?: string; data?: string; url?: string; mimeType?: string }
