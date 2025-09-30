@@ -1,34 +1,30 @@
-"use client"
-
 import React, { useEffect, useRef, useState } from 'react'
 import { Upload, X, Plus, Package, FolderPlus, Image as ImageIcon, FileText } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 
-// Minimal types used by this form. Keep narrow to avoid coupling.
+// Types used in this form
 interface Category { id: string; name: string }
 interface AttributeValue { id: string; value: string }
-interface Attribute { id: string; name: string; values: AttributeValue[] }
-
-interface UploadedFile { file?: File; filename?: string }
-interface VariationForm { name: string; price: string; idioma?: string; attributeValues: { attributeId: string; valueId: string }[]; files: UploadedFile[] }
-
-interface ProductFormData { name: string; slug?: string; description?: string; categoryId?: string | null; isActive: boolean; isFeatured: boolean; images: string[]; price?: string; variations: VariationForm[]; attributes?: { attributeId: string; valueIds: string[] }[] }
+interface Attribute { id: string; name: string; values?: AttributeValue[] }
+interface UploadedFile { file?: File; filename?: string; r2Key?: string }
+interface ImageFile { file?: File; filename?: string; previewUrl?: string }
+interface VariationForm { name: string; price: string; attributeValues: { attributeId: string; valueId: string }[]; files: UploadedFile[]; images: ImageFile[] }
+interface ProductFormData { name: string; slug?: string; description?: string; categoryId?: string | null; isActive?: boolean; isFeatured?: boolean; images: string[]; price?: string; variations: VariationForm[]; attributes?: { attributeId: string; valueIds: string[] }[] }
 
 interface ProductFormProps { defaultValues?: Partial<ProductFormData>; categories?: Category[]; availableAttributes?: Attribute[]; isEditing?: boolean; onSuccess?: () => void }
 
-export default function ProductForm({ defaultValues, categories = [], availableAttributes = [], isEditing, onSuccess }: ProductFormProps) {
+export default function ProductForm({ defaultValues, categories = [], availableAttributes = [], isEditing = false, onSuccess }: ProductFormProps) {
     const router = useRouter()
     const [step, setStep] = useState<number>(1)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isNewCategoryOpen, setIsNewCategoryOpen] = useState(false)
-
     const [newAttrName, setNewAttrName] = useState('')
     const [newAttrValuesRaw, setNewAttrValuesRaw] = useState('')
 
@@ -48,12 +44,30 @@ export default function ProductForm({ defaultValues, categories = [], availableA
         isFeatured: defaultValues?.isFeatured ?? false,
         images: defaultValues?.images || [],
         price: defaultValues?.price ? String(defaultValues.price) : '',
-        variations: defaultValues?.variations || [{ name: '', price: '', attributeValues: [], files: [] }],
+        variations: defaultValues?.variations || [{ name: '', price: '', attributeValues: [], files: [], images: [] }],
         attributes: defaultValues?.attributes || [],
     }))
 
     // Simple refs for variation blocks (used for scroll into view)
     const variationRefs = useRef<Array<HTMLDivElement | null>>([])
+
+    // Small Dropzone component (local) to provide drag/drop and click-to-select behavior
+    type DropzoneProps = { accept?: string; multiple?: boolean; onFilesSelected: (files: FileList) => void; children?: React.ReactNode }
+    function Dropzone({ accept, multiple, onFilesSelected, children }: DropzoneProps) {
+        const inputRef = useRef<HTMLInputElement | null>(null)
+
+        function onDrop(e: React.DragEvent) {
+            e.preventDefault()
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) onFilesSelected(e.dataTransfer.files)
+        }
+
+        return (
+            <div onDragOver={e => e.preventDefault()} onDrop={onDrop} onClick={() => inputRef.current?.click()}>
+                <input ref={inputRef} type="file" accept={accept} multiple={multiple} onChange={e => e.target.files && onFilesSelected(e.target.files)} className="hidden" />
+                {children}
+            </div>
+        )
+    }
 
     function slugify(text: string) {
         return text
@@ -68,7 +82,7 @@ export default function ProductForm({ defaultValues, categories = [], availableA
     // fetch categories from API when none were passed as prop
     useEffect(() => {
         if ((!categories || categories.length === 0) && categoriesLocal.length === 0) {
-            ; (async () => {
+            ;(async () => {
                 try {
                     const res = await fetch('/api/admin/categories')
                     if (!res.ok) return
@@ -91,23 +105,66 @@ export default function ProductForm({ defaultValues, categories = [], availableA
     useEffect(() => {
         // ensure at least one variation exists
         if (!formData.variations || formData.variations.length === 0) {
-            setFormData(prev => ({ ...prev, variations: [{ name: '', price: '', attributeValues: [], files: [] }] }))
+            setFormData(prev => ({ ...prev, variations: [{ name: '', price: '', attributeValues: [], files: [], images: [] }] }))
         }
     }, [formData.variations])
 
     // Handlers
+    // Keep image preview objects to handle revoke and upload
+    const imagePreviewsRef = useRef<ImageFile[]>([])
+    const dragIndexRef = useRef<number | null>(null)
+    const variationDragRef = useRef<{ variationIndex: number; imageIndex: number } | null>(null)
+    // reactive state to trigger re-renders and visual feedback
+    const [productDraggingIndex, setProductDraggingIndex] = useState<number | null>(null)
+    const [productDragOverIndex, setProductDragOverIndex] = useState<number | null>(null)
+    // variation drag state handled via variationDragRef to avoid unnecessary re-renders
+
     function handleProductImageUpload(files: FileList) {
-        const arr = Array.from(files).map(f => f.name)
-        setFormData(prev => ({ ...prev, images: [...prev.images, ...arr] }))
+        const list: ImageFile[] = Array.from(files).map(f => ({ file: f, filename: f.name, previewUrl: URL.createObjectURL(f) }))
+        const urls = list.map(i => i.previewUrl!).filter(Boolean)
+        setFormData(prev => ({ ...prev, images: [...prev.images, ...urls] }))
+        imagePreviewsRef.current = [...imagePreviewsRef.current, ...list]
     }
 
+    function removeProductImageByPreview(previewUrl: string) {
+        const found = imagePreviewsRef.current.find(i => i.previewUrl === previewUrl)
+        if (found && found.previewUrl) URL.revokeObjectURL(found.previewUrl)
+        imagePreviewsRef.current = imagePreviewsRef.current.filter(i => i.previewUrl !== previewUrl)
+        setFormData(prev => ({ ...prev, images: prev.images.filter(im => im !== previewUrl) }))
+    }
+
+    // revoke previews on unmount
+    useEffect(() => {
+        return () => {
+            imagePreviewsRef.current.forEach(i => i.previewUrl && URL.revokeObjectURL(i.previewUrl))
+            imagePreviewsRef.current = []
+        }
+    }, [])
+
     function addVariation() {
-        setFormData(prev => ({ ...prev, variations: [...prev.variations, { name: '', price: '', attributeValues: [], files: [] }] }))
+        setFormData(prev => ({ ...prev, variations: [...prev.variations, { name: '', price: '', attributeValues: [], files: [], images: [] }] }))
         setTimeout(() => setStep(3), 100)
     }
 
-    function updateVariation(index: number, field: keyof VariationForm, value: string | UploadedFile[] | VariationForm['attributeValues']) {
+    function updateVariation(index: number, field: keyof VariationForm, value: string | UploadedFile[] | VariationForm['attributeValues'] | ImageFile[]) {
         setFormData(prev => ({ ...prev, variations: prev.variations.map((v, i) => i === index ? { ...v, [field]: value } : v) }))
+    }
+
+    function handleVariationImageUpload(variationIndex: number, files: FileList) {
+        const list: ImageFile[] = Array.from(files).map(f => ({ file: f, filename: f.name, previewUrl: URL.createObjectURL(f) }))
+        setFormData(prev => ({ ...prev, variations: prev.variations.map((v, i) => i === variationIndex ? { ...v, images: [...v.images, ...list] } : v) }))
+    }
+
+    function removeVariationImage(variationIndex: number, imageIndex: number) {
+        setFormData(prev => {
+            const newVars = prev.variations.map((v, i) => {
+                if (i !== variationIndex) return v
+                const toRemove = v.images[imageIndex]
+                if (toRemove && toRemove.previewUrl) URL.revokeObjectURL(toRemove.previewUrl)
+                return { ...v, images: v.images.filter((_, idx) => idx !== imageIndex) }
+            })
+            return { ...prev, variations: newVars }
+        })
     }
 
     function updateVariationAttributeValue(index: number, attributeId: string, valueId: string) {
@@ -177,7 +234,7 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                         const res = await fetch('/api/r2/upload', { method: 'POST', body: fd })
                         if (!res.ok) throw new Error('Falha no upload de arquivo')
                         const j = await res.json()
-                        const r2Key = j?.data?.key || j?.data?.key === 0 ? j.data.key : (j?.data?.key ?? j?.data?.key)
+                        const r2Key = j?.data?.key ?? j?.data
                         filesPayload.push({ filename: f.filename || f.file.name, originalName: f.file.name, fileSize: f.file.size, mimeType: f.file.type, r2Key })
                     } else if ((f as unknown as R2File).r2Key) {
                         // already uploaded
@@ -196,6 +253,21 @@ export default function ProductForm({ defaultValues, categories = [], availableA
 
             // Product price: prefer explicit field, otherwise first variation
             const productPrice = formData.price ? parseFloat(formData.price) : (formData.variations[0] ? parseFloat(formData.variations[0].price || '0') : 0)
+            // Upload product images (if any previews present)
+            const productImageKeys: string[] = []
+            for (const img of imagePreviewsRef.current) {
+                if (img.file) {
+                    const fd = new FormData()
+                    fd.append('file', img.file)
+                    const resImg = await fetch('/api/r2/upload', { method: 'POST', body: fd })
+                    if (!resImg.ok) throw new Error('Falha no upload de imagem do produto')
+                    const jimg = await resImg.json()
+                    const r2k = jimg?.data?.key ?? jimg?.data
+                    if (r2k) productImageKeys.push(r2k)
+                    // revoke preview URL after upload
+                    if (img.previewUrl) URL.revokeObjectURL(img.previewUrl)
+                }
+            }
 
             const payload = {
                 name: formData.name,
@@ -205,7 +277,7 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                 categoryId: formData.categoryId || null,
                 isActive: formData.isActive,
                 isFeatured: formData.isFeatured,
-                images: [],
+                images: productImageKeys,
                 variations: variationsPayload,
                 files: [],
                 attributes: formData.attributes || [],
@@ -228,11 +300,7 @@ export default function ProductForm({ defaultValues, categories = [], availableA
         }
     }
 
-    // Small helper UI lists
-    const LANGUAGE_OPTIONS = [
-        { value: 'pt', label: 'Português' },
-        { value: 'en', label: 'English' },
-    ]
+    // Small helper UI lists (language removed from variations - kept for potential future use)
 
     return (
         <div className="max-w-4xl mx-auto space-y-6">
@@ -331,12 +399,58 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                                 </div>
 
                                 <div className="md:col-span-2">
-                                    <Label>Imagens do Produto</Label>
-                                    <div className="mt-2">
-                                        <label className="block w-full border-2 border-dashed rounded-lg p-6 text-center cursor-pointer">
-                                            <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
-                                            <input type="file" multiple accept="image/*" onChange={e => e.target.files && handleProductImageUpload(e.target.files)} className="hidden" />
-                                        </label>
+                                    <div className="flex flex-col gap-2">
+                                        <Label>Imagens do Produto</Label>
+                                        <div className="mt-2">
+                                            <Dropzone accept="image/*" multiple onFilesSelected={files => handleProductImageUpload(files)}>
+                                                <div className="block w-full border-2 border-dashed rounded-lg p-6 text-center cursor-pointer">
+                                                    <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
+                                                    <div className="text-sm text-gray-500">Arraste e solte ou clique para selecionar imagens</div>
+                                                </div>
+                                            </Dropzone>
+
+                                            {formData.images.length > 0 && (
+                                                <div className="mt-3 grid grid-cols-4 gap-2">
+                                                    {formData.images.map((url, idx) => (
+                                                        <div key={url}
+                                                            draggable
+                                                            onDragStart={e => {
+                                                                dragIndexRef.current = idx
+                                                                setProductDraggingIndex(idx)
+                                                                e.dataTransfer!.effectAllowed = 'move'
+                                                            }}
+                                                            onDragEnd={() => { dragIndexRef.current = null; setProductDraggingIndex(null); setProductDragOverIndex(null) }}
+                                                            onDragOver={e => { e.preventDefault(); setProductDragOverIndex(idx) }}
+                                                            onDragLeave={() => setProductDragOverIndex(null)}
+                                                            onDrop={e => {
+                                                                e.preventDefault()
+                                                                const from = dragIndexRef.current
+                                                                const to = idx
+                                                                if (from === null || from === to) return
+                                                                setFormData(prev => {
+                                                                    const arr = [...prev.images]
+                                                                    const [moved] = arr.splice(from, 1)
+                                                                    arr.splice(to, 0, moved)
+                                                                    return { ...prev, images: arr }
+                                                                })
+                                                                const previews = [...imagePreviewsRef.current]
+                                                                const [movedP] = previews.splice(from, 1)
+                                                                previews.splice(to, 0, movedP)
+                                                                imagePreviewsRef.current = previews
+                                                                dragIndexRef.current = null
+                                                                setProductDraggingIndex(null)
+                                                                setProductDragOverIndex(null)
+                                                            }}
+                                                            className={`relative border rounded overflow-hidden cursor-move transition-transform duration-150 ${productDraggingIndex === idx ? 'opacity-70 scale-95' : ''} ${productDragOverIndex === idx ? 'ring-2 ring-yellow-300' : ''}`}>
+                                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                            <img src={url} alt={`preview-${idx}`} className="w-full h-24 object-cover" />
+                                                            {idx === 0 && <span className="absolute left-1 top-1 bg-yellow-300 text-black text-xs px-2 py-0.5 rounded">Capa</span>}
+                                                            <button type="button" aria-label="Remover imagem" onClick={() => removeProductImageByPreview(url)} className="absolute top-1 right-1 bg-white rounded-full p-1 shadow"><X className="w-3 h-3" /></button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -351,47 +465,51 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                             <CardTitle>Atributos do Produto</CardTitle>
                             <CardDescription>Selecione atributos aplicáveis e valores. Você pode criar novos atributos.</CardDescription>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="space-y-4">
                             <div className="grid md:grid-cols-2 gap-4">
                                 <div>
-                                    <Label>Criar novo atributo</Label>
-                                    <div className="flex gap-2">
-                                        <Input placeholder="Nome do atributo" value={newAttrName} onChange={e => setNewAttrName(e.target.value)} />
-                                        <Button onClick={handleCreateAttribute} variant="default" className="bg-[#FED466] text-black hover:brightness-95 ring-1 ring-yellow-300" aria-label="Adicionar atributo">
-                                            <Plus className="w-4 h-4" />
-                                        </Button>
+                                    <div className="flex flex-col gap-2">
+                                        <Label>Criar novo atributo</Label>
+                                        <div className="flex gap-2">
+                                            <Input placeholder="Nome do atributo" value={newAttrName} onChange={e => setNewAttrName(e.target.value)} />
+                                            <Button onClick={handleCreateAttribute} variant="default" className="bg-[#FED466] text-black hover:brightness-95 ring-1 ring-yellow-300" aria-label="Adicionar atributo">
+                                                <Plus className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                        <Input className="mt-2" placeholder="Valores (separados por vírgula)" value={newAttrValuesRaw} onChange={e => setNewAttrValuesRaw(e.target.value)} />
                                     </div>
-                                    <Input className="mt-2" placeholder="Valores (separados por vírgula)" value={newAttrValuesRaw} onChange={e => setNewAttrValuesRaw(e.target.value)} />
                                 </div>
                                 <div>
-                                    <Label>Atributos disponíveis</Label>
-                                    <div className="max-h-72 overflow-y-auto mt-2 space-y-3">
-                                        {localAttributes.map(attr => (
-                                            <div key={attr.id} className="border rounded p-3">
-                                                <div className="flex items-center justify-between">
-                                                    <div className="font-medium">{attr.name}</div>
-                                                    <div>
-                                                        <input type="checkbox" checked={!!formData.attributes?.find(a => a.attributeId === attr.id)} onChange={e => {
-                                                            if (e.target.checked) setFormData(prev => ({ ...prev, attributes: [...(prev.attributes || []), { attributeId: attr.id, valueIds: [] }] }))
-                                                            else setFormData(prev => ({ ...prev, attributes: (prev.attributes || []).filter(a => a.attributeId !== attr.id) }))
-                                                        }} />
+                                    <div>
+                                        <Label>Atributos disponíveis</Label>
+                                        <div className="max-h-72 overflow-y-auto mt-2 space-y-3">
+                                            {localAttributes.map(attr => (
+                                                <div key={attr.id} className="border rounded p-3">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="font-medium">{attr.name}</div>
+                                                        <div>
+                                                            <input type="checkbox" checked={!!formData.attributes?.find(a => a.attributeId === attr.id)} onChange={e => {
+                                                                if (e.target.checked) setFormData(prev => ({ ...prev, attributes: [...(prev.attributes || []), { attributeId: attr.id, valueIds: [] }] }))
+                                                                else setFormData(prev => ({ ...prev, attributes: (prev.attributes || []).filter(a => a.attributeId !== attr.id) }))
+                                                            }} />
+                                                        </div>
                                                     </div>
+                                                    {formData.attributes?.find(a => a.attributeId === attr.id) && (
+                                                        <div className="mt-2 flex flex-wrap gap-2">
+                                                            {(attr.values || []).map((v: AttributeValue) => {
+                                                                const selected = !!formData.attributes?.find(a => a.attributeId === attr.id && a.valueIds.includes(v.id))
+                                                                return (
+                                                                    <label key={v.id} className={`inline-flex items-center gap-2 px-2 py-1 rounded border ${selected ? 'bg-yellow-100' : 'bg-white'}`}>
+                                                                        <input type="checkbox" checked={selected} onChange={() => handleToggleAttributeValue(attr.id, v.id)} />
+                                                                        <span className="text-sm">{v.value}</span>
+                                                                    </label>
+                                                                )
+                                                            })}
+                                                        </div>
+                                                    )}
                                                 </div>
-                                                {formData.attributes?.find(a => a.attributeId === attr.id) && (
-                                                    <div className="mt-2 flex flex-wrap gap-2">
-                                                        {(attr.values || []).map((v: AttributeValue) => {
-                                                            const selected = !!formData.attributes?.find(a => a.attributeId === attr.id && a.valueIds.includes(v.id))
-                                                            return (
-                                                                <label key={v.id} className={`inline-flex items-center gap-2 px-2 py-1 rounded border ${selected ? 'bg-yellow-100' : 'bg-white'}`}>
-                                                                    <input type="checkbox" checked={selected} onChange={() => handleToggleAttributeValue(attr.id, v.id)} />
-                                                                    <span className="text-sm">{v.value}</span>
-                                                                </label>
-                                                            )
-                                                        })}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ))}
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -413,38 +531,29 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                                 </div>
                             </div>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="space-y-4">
                             {formData.variations.map((variation, index) => (
-                                <div key={index} ref={el => { variationRefs.current[index] = el }} className="border rounded-xl p-4 mb-4">
+                                <div key={index} ref={el => { variationRefs.current[index] = el }} className="border rounded-xl p-4 mb-4 space-y-3">
                                     <div className="flex justify-between items-center mb-2">
                                         <div className="font-medium">{variation.name || `Variação ${index + 1}`}</div>
                                         <div className="text-sm text-gray-500">R$ {Number(variation.price || 0).toFixed(2)}</div>
                                     </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                        <div>
-                                            <Label>Nome</Label>
-                                            <Input value={variation.name} onChange={e => updateVariation(index, 'name', e.target.value)} />
-                                        </div>
-                                        <div>
-                                            <Label>Preço (R$)</Label>
-                                            <Input type="number" step="0.01" value={variation.price} onChange={e => updateVariation(index, 'price', e.target.value)} />
-                                        </div>
-                                        <div>
-                                            <Label>Idioma</Label>
-                                            <Select value={variation.idioma || ''} onValueChange={val => updateVariation(index, 'idioma', val)}>
-                                                <SelectTrigger className="w-full"><SelectValue placeholder="Selecione" /></SelectTrigger>
-                                                <SelectContent>
-                                                    {LANGUAGE_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    </div>
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                                <div className="flex flex-col gap-2">
+                                                                    <Label>Nome</Label>
+                                                                    <Input value={variation.name} onChange={e => updateVariation(index, 'name', e.target.value)} />
+                                                                </div>
+                                                                <div className="flex flex-col gap-2">
+                                                                    <Label>Preço (R$)</Label>
+                                                                    <Input type="number" step="0.01" value={variation.price} onChange={e => updateVariation(index, 'price', e.target.value)} />
+                                                                </div>
+                                                            </div>
 
                                     {localAttributes.length > 0 && (
                                         <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
                                             {localAttributes.map(attr => (
-                                                <div key={attr.id}>
+                                                <div key={attr.id} className="flex flex-col gap-2">
                                                     <Label className="text-sm">{attr.name}</Label>
                                                     <Select value={variation.attributeValues?.find(av => av.attributeId === attr.id)?.valueId || ''} onValueChange={val => updateVariationAttributeValue(index, attr.id, val)}>
                                                         <SelectTrigger className="w-full"><SelectValue placeholder="Selecione" /></SelectTrigger>
@@ -455,29 +564,71 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                                         </div>
                                     )}
 
-                                    <div className="mt-3">
-                                        <Label>Arquivos da variação *</Label>
-                                        <div className="mt-2">
-                                            <label className="block w-full border-2 border-dashed rounded-lg p-4 text-center cursor-pointer">
-                                                <Upload className="mx-auto h-8 w-8" />
-                                                <input type="file" multiple accept=".pdf,image/*" onChange={e => e.target.files && handleFileUpload(index, e.target.files)} className="hidden" />
-                                            </label>
-                                        </div>
-                                        {variation.files.length > 0 && (
-                                            <div className="mt-3 space-y-2">
-                                                {variation.files.map((f, fi) => (
-                                                    <div key={fi} className="flex items-center justify-between bg-white border rounded p-3">
-                                                        <div className="flex items-center gap-3">
-                                                            <FileText className="w-4 h-4" />
-                                                            <div className="text-sm">{f.filename}</div>
-                                                        </div>
-                                                        <div>
-                                                            <Button type="button" variant="ghost" onClick={() => setFormData(prev => ({ ...prev, variations: prev.variations.map((v, i) => i === index ? { ...v, files: v.files.filter((_, idx) => idx !== fi) } : v) }))}><X className="w-4 h-4" /></Button>
-                                                        </div>
-                                                    </div>
-                                                ))}
+                                    <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <Label>Arquivos da variação (PDFs) *</Label>
+                                            <div className="mt-2">
+                                                <label className="block w-full border-2 border-dashed rounded-lg p-4 text-center cursor-pointer">
+                                                    <Upload className="mx-auto h-8 w-8" />
+                                                    <input type="file" multiple accept=".pdf" onChange={e => e.target.files && handleFileUpload(index, e.target.files)} className="hidden" />
+                                                </label>
                                             </div>
-                                        )}
+                                            {variation.files.length > 0 && (
+                                                <div className="mt-3 space-y-2">
+                                                    {variation.files.map((f, fi) => (
+                                                        <div key={fi} className="flex items-center justify-between bg-white border rounded p-3">
+                                                            <div className="flex items-center gap-3">
+                                                                <FileText className="w-4 h-4" />
+                                                                <div className="text-sm">{f.filename}</div>
+                                                            </div>
+                                                            <div>
+                                                                <Button type="button" variant="ghost" onClick={() => setFormData(prev => ({ ...prev, variations: prev.variations.map((v, i) => i === index ? { ...v, files: v.files.filter((_, idx) => idx !== fi) } : v) }))}><X className="w-4 h-4" /></Button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div>
+                                            <Label>Imagens da variação (preview)</Label>
+                                            <div className="mt-2">
+                                                <label className="block w-full border-2 border-dashed rounded-lg p-4 text-center cursor-pointer">
+                                                    <ImageIcon className="mx-auto h-8 w-8 text-gray-400" />
+                                                    <input type="file" multiple accept="image/*" onChange={e => e.target.files && handleVariationImageUpload(index, e.target.files)} className="hidden" />
+                                                </label>
+                                            </div>
+                                            {variation.images.length > 0 && (
+                                                <div className="mt-3 grid grid-cols-3 gap-2">
+                                                    {variation.images.map((img, ii) => (
+                                                        <div key={ii} draggable onDragStart={e => { variationDragRef.current = { variationIndex: index, imageIndex: ii }; e.dataTransfer!.effectAllowed = 'move' }} onDragOver={e => e.preventDefault()} onDrop={e => {
+                                                            e.preventDefault()
+                                                            const from = variationDragRef.current
+                                                            const to = ii
+                                                            if (!from) return
+                                                            if (from.variationIndex !== index) return // only allow reorder within same variation
+                                                            if (from.imageIndex === to) return
+                                                            setFormData(prev => {
+                                                                const newVars = prev.variations.map((v, vi) => {
+                                                                    if (vi !== index) return v
+                                                                    const imgs = [...v.images]
+                                                                    const [moved] = imgs.splice(from.imageIndex, 1)
+                                                                    imgs.splice(to, 0, moved)
+                                                                    return { ...v, images: imgs }
+                                                                })
+                                                                return { ...prev, variations: newVars }
+                                                            })
+                                                            variationDragRef.current = null
+                                                        }} className="relative border rounded overflow-hidden cursor-move">
+                                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                            <img src={img.previewUrl || ''} alt={img.filename} className="w-full h-24 object-cover" />
+                                                            {ii === 0 && <span className="absolute left-1 top-1 bg-yellow-300 text-black text-xs px-2 py-0.5 rounded">Capa</span>}
+                                                            <button type="button" aria-label="Remover imagem" onClick={() => removeVariationImage(index, ii)} className="absolute top-1 right-1 bg-white rounded-full p-1 shadow"><X className="w-3 h-3" /></button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             ))}

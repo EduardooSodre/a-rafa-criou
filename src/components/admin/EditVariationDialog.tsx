@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
     Dialog,
@@ -14,8 +14,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
-import { Edit, Loader2, FileText, Image as ImageIcon, Trash2, Upload } from 'lucide-react'
+import { Edit, Loader2, FileText, Image as ImageIcon, Trash2 } from 'lucide-react'
 import Image from 'next/image'
 
 
@@ -58,7 +57,7 @@ interface VariationData {
 }
 
 interface EditVariationDialogProps {
-    variation: any
+    variation: Partial<VariationData>
     productId: string
     onSuccess?: () => void
     trigger?: React.ReactNode
@@ -178,13 +177,7 @@ export default function EditVariationDialog({
             .trim()
     }
 
-    const handleNameChange = (name: string) => {
-        setFormData(prev => ({
-            ...prev,
-            name,
-            slug: generateSlug(name)
-        }))
-    }
+    // name -> slug logic handled inline when editing the input
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -222,7 +215,7 @@ export default function EditVariationDialog({
             }
             setOpen(false)
             onSuccess?.()
-        } catch (error) {
+        } catch {
             alert('Erro ao atualizar variação. Tente novamente.')
         } finally {
             setLoading(false)

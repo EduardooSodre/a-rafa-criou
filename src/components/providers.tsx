@@ -11,7 +11,8 @@ interface ProvidersProps {
 }
 
 export function Providers({ children }: ProvidersProps) {
-    const [i18nInstance, setI18nInstance] = useState<any | null>(null);
+    // initI18n returns an i18next instance; use a conservative typing
+    const [i18nInstance, setI18nInstance] = useState<import('i18next').i18n | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
