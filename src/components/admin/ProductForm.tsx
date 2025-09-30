@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { getPreviewSrc } from '@/lib/r2-utils'
 // Nested Dialog removed to keep a single outer modal during create/edit
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 
@@ -90,22 +91,13 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                 const url = ff.r2Key ? `/api/r2/download?r2Key=${encodeURIComponent(String(ff.r2Key))}` : (ff.url || undefined)
                 return { file: undefined as File | undefined, filename: ff.filename || ff.originalName || url?.split('/').pop() || '', r2Key: ff.r2Key || '', originalName: ff.originalName, fileSize: ff.fileSize, mimeType: ff.mimeType, url }
             }),
-            images: (v.images || []).map((img: string | { filename?: string; previewUrl?: string; data?: string; url?: string; mimeType?: string }, ii: number) => {
+                images: (v.images || []).map((img: string | { filename?: string; previewUrl?: string; data?: string; url?: string; mimeType?: string }, ii: number) => {
                 // image may be string or object { filename, previewUrl }
                 if (typeof img === 'string') return { file: undefined as File | undefined, filename: String(img).split('/').pop() || `var-${ii}`, previewUrl: img } as ImageFile
                 type ImgObj = { filename?: string; previewUrl?: string; data?: string; url?: string; mimeType?: string }
                 const io = img as ImgObj
                 const raw = io.data ? String(io.data) : io.previewUrl || io.url || ''
-                let preview = ''
-                if (raw) {
-                    if (raw.startsWith('data:')) {
-                        preview = raw
-                    } else {
-                        const looksLikeKey = raw.includes('/') || raw.includes('.') || raw.length < 200
-                        if (looksLikeKey) preview = raw.startsWith('/api/r2/download') ? raw : `/api/r2/download?r2Key=${encodeURIComponent(raw)}`
-                        else preview = `data:${io.mimeType || 'image/jpeg'};base64,${raw}`
-                    }
-                }
+                const preview = getPreviewSrc(raw, io.mimeType)
                 return { file: undefined as File | undefined, filename: img.filename || String(preview || '').split('/').pop() || `var-${ii}`, previewUrl: preview } as ImageFile
             })
         }))

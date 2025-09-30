@@ -115,3 +115,20 @@ export async function fileToBuffer(file: File): Promise<Buffer> {
   const arrayBuffer = await file.arrayBuffer();
   return Buffer.from(arrayBuffer);
 }
+
+/**
+ * Normalizes a raw image value into a usable src for <img> or <Image>.
+ * Accepts: full data: URI, plain base64 data, r2Key/path, or already-built /api/r2/download URL.
+ */
+export function getPreviewSrc(raw?: string | null, mimeType?: string): string {
+  if (!raw) return ''
+  const str = String(raw)
+  if (str.startsWith('data:')) return str
+  // treat already-built download urls as-is
+  if (str.startsWith('/api/r2/download') || str.startsWith('http')) return str
+  // Heuristic: path-like or short keys are R2 keys/paths
+  const looksLikeKey = str.includes('/') || str.includes('.') || str.length < 200
+  if (looksLikeKey) return `/api/r2/download?r2Key=${encodeURIComponent(str)}`
+  // Otherwise assume base64 without mime
+  return `data:${mimeType || 'image/jpeg'};base64,${str}`
+}

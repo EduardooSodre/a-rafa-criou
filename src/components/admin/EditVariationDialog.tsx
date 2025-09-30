@@ -1,4 +1,4 @@
-'use client'
+ 'use client'
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -16,6 +16,7 @@ import { Switch } from '@/components/ui/switch'
 // Select removed: 'Idioma' field was removed from variations
 import { Edit, Loader2, FileText, Image as ImageIcon, Trash2 } from 'lucide-react'
 import Image from 'next/image'
+import { getPreviewSrc } from '@/lib/r2-utils'
 
 
 interface UploadedImage {
@@ -28,6 +29,7 @@ interface UploadedImage {
     url?: string
     alt?: string
     order: number
+    mimeType?: string
 }
 
 interface UploadedFile {
@@ -77,6 +79,15 @@ export default function EditVariationDialog({
         // variation.files may come in a different shape (FileData). Cast to UploadedFile[] safely.
         files: (variation.files as unknown as UploadedFile[]) || [],
     } as VariationData)
+
+    // Helper: build a preview URL for an UploadedImage
+    function getImagePreview(img: UploadedImage) {
+        // If the image was uploaded in this session and has a File, create an object URL
+        if (img.file) return URL.createObjectURL(img.file)
+        const raw = img.data ? String(img.data) : img.url || ''
+        if (!raw) return ''
+        return getPreviewSrc(raw, img.mimeType)
+    }
     // Upload de arquivos (PDF ou imagem) - add File objects to formData.files
     const handleFileUpload = (files: FileList) => {
         const validFiles = Array.from(files).filter(file => {
@@ -354,15 +365,17 @@ export default function EditVariationDialog({
                             <div className="mt-3 grid grid-cols-2 md:grid-cols-3 gap-3">
                                 {(formData.images || []).map((img, i) => (
                                     <div key={img.id || i} className="relative group border rounded overflow-hidden bg-gray-50">
-                                        {img.data ? (
-                                            <Image src={img.data} alt={img.alt || formData.name} width={120} height={120} className="object-cover w-full h-24" />
-                                        ) : img.url ? (
-                                            <Image src={img.url} alt={img.alt || formData.name} width={120} height={120} className="object-cover w-full h-24" />
-                                        ) : (
-                                            <div className="flex items-center justify-center h-24 text-gray-400">
-                                                <ImageIcon className="w-8 h-8" />
-                                            </div>
-                                        )}
+                                        {
+                                            (() => {
+                                                const src = getImagePreview(img)
+                                                if (src) return <Image src={src} alt={img.alt || formData.name} width={120} height={120} className="object-cover w-full h-24" />
+                                                return (
+                                                    <div className="flex items-center justify-center h-24 text-gray-400">
+                                                        <ImageIcon className="w-8 h-8" />
+                                                    </div>
+                                                )
+                                            })()
+                                        }
                                         <button
                                             type="button"
                                             className="absolute top-1 right-1 bg-white rounded-full p-1 shadow hover:bg-red-100"
