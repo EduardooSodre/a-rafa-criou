@@ -253,7 +253,7 @@ export default function ProductsCardsView({
                                         <FileText className="h-8 w-8 text-gray-300" />
                                     </div>
                                 )}
-                                
+
                                 {/* Badge de status */}
                                 <div className="absolute top-1.5 right-1.5">
                                     <Badge
@@ -279,7 +279,7 @@ export default function ProductsCardsView({
                                     <div className="text-base font-bold text-[#FD9555]">
                                         {formatPrice(product.price)}
                                     </div>
-                                    
+
                                     {product.variations && product.variations.length > 0 && (
                                         <Badge variant="secondary" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
                                             {product.variations.length} var.
@@ -289,10 +289,10 @@ export default function ProductsCardsView({
 
                                 {/* Actions */}
                                 <div className="flex items-center gap-1.5">
-                                    <Button 
-                                        variant="outline" 
-                                        size="sm" 
-                                        className="flex-1 h-7 text-xs hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 cursor-pointer" 
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="flex-1 h-7 text-xs hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 cursor-pointer"
                                         asChild
                                     >
                                         <Link href={`/admin/products/${product.id}`}>

@@ -67,12 +67,12 @@ export default function ProductsPage() {
                     fetch('/api/admin/products/stats'),
                     fetch('/api/admin/categories')
                 ])
-                
+
                 if (statsRes.ok) {
                     const data = await statsRes.json()
                     setStats(data)
                 }
-                
+
                 if (categoriesRes.ok) {
                     const data = await categoriesRes.json()
                     setCategories(data.categories || [])

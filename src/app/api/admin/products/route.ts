@@ -173,7 +173,7 @@ export async function GET(request: NextRequest) {
     const productsWithDetails = await Promise.all(
       allProducts.map(async product => {
         const productFiles = await db.select().from(files).where(eq(files.productId, product.id));
-        
+
         // Buscar imagens do produto
         const productImagesList = await db
           .select()
@@ -195,12 +195,12 @@ export async function GET(request: NextRequest) {
                   .select()
                   .from(files)
                   .where(eq(files.variationId, variation.id));
-                
+
                 const variationImages = await db
                   .select()
                   .from(productImages)
                   .where(eq(productImages.variationId, variation.id));
-                
+
                 return {
                   ...variation,
                   files: variationFiles,
