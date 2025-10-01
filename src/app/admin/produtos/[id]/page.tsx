@@ -80,7 +80,7 @@ export default function ProductViewPage() {
             setError(null)
 
             const response = await fetch(`/api/admin/products/${productId}`)
-            
+
             if (!response.ok) {
                 throw new Error('Produto não encontrado')
             }
@@ -135,9 +135,9 @@ export default function ProductViewPage() {
                         {error || 'Produto não encontrado'}
                     </AlertDescription>
                 </Alert>
-                <Button 
-                    onClick={() => router.push('/admin/produtos')} 
-                    variant="outline" 
+                <Button
+                    onClick={() => router.push('/admin/produtos')}
+                    variant="outline"
                     className="mt-4"
                 >
                     <ArrowLeft className="h-4 w-4 mr-2" />
@@ -152,8 +152,8 @@ export default function ProductViewPage() {
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-4">
-                    <Button 
-                        onClick={() => router.push('/admin/produtos')} 
+                    <Button
+                        onClick={() => router.push('/admin/produtos')}
                         variant="outline"
                         size="sm"
                     >
@@ -165,7 +165,7 @@ export default function ProductViewPage() {
                         <p className="text-sm text-gray-500">ID: {product.id}</p>
                     </div>
                 </div>
-                <Button 
+                <Button
                     onClick={() => setIsEditDialogOpen(true)}
                     className="bg-[#FED466] text-gray-900 hover:bg-[#FD9555]"
                 >
@@ -303,9 +303,9 @@ export default function ProductViewPage() {
                                                 {variation.images.map((img, idx) => (
                                                     <div key={idx} className="relative aspect-square bg-gray-100 rounded overflow-hidden border">
                                                         {img.data ? (
-                                                            <Image 
-                                                                src={img.data} 
-                                                                alt={img.alt || ''} 
+                                                            <Image
+                                                                src={img.data}
+                                                                alt={img.alt || ''}
                                                                 fill
                                                                 className="object-cover"
                                                                 unoptimized

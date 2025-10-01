@@ -29,7 +29,7 @@ interface AttributeManagerProps {
 export default function AttributeManager({ selectedAttributes, onChange }: AttributeManagerProps) {
     console.log('[AttributeManager] RENDERIZANDO - selectedAttributes recebido:', selectedAttributes)
     console.log('[AttributeManager] Quantidade de atributos selecionados:', selectedAttributes?.length || 0)
-    
+
     const [availableAttributes, setAvailableAttributes] = useState<Attribute[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [isCreatingNew, setIsCreatingNew] = useState(false)

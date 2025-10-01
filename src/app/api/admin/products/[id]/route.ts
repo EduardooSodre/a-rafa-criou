@@ -83,36 +83,35 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       .select()
       .from(productVariations)
       .where(eq(productVariations.productId, id));
-    
+
     const variationIds = variationsRaw.map(v => v.id);
 
     // Buscar TODOS os atributos usados nas variações (mesmo que não estejam em product_attributes)
     let allAttributeIds: string[] = [];
-    
+
     if (variationIds.length > 0) {
       const allVariationAttrs = await db
         .select()
         .from(variationAttributeValues)
         .where(inArray(variationAttributeValues.variationId, variationIds));
-      
+
       // Pegar IDs únicos de atributos
       allAttributeIds = Array.from(new Set(allVariationAttrs.map(va => va.attributeId)));
-      
+
       console.log('[GET] Atributos encontrados nas variações:', allAttributeIds);
     }
 
     // Se não há em product_attributes mas há nas variações, usar das variações
-    const attributeIdsToUse = prodAttrs.length > 0 
-      ? prodAttrs.map(pa => pa.attributeId)
-      : allAttributeIds;
+    const attributeIdsToUse =
+      prodAttrs.length > 0 ? prodAttrs.map(pa => pa.attributeId) : allAttributeIds;
 
     // Para cada atributo, buscar TODOS os valores usados em TODAS as variações
     const attributesWithValues = await Promise.all(
-      attributeIdsToUse.map(async (attrId) => {
+      attributeIdsToUse.map(async attrId => {
         if (variationIds.length === 0) {
           return {
             attributeId: attrId,
-            valueIds: []
+            valueIds: [],
           };
         }
 
@@ -126,13 +125,13 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
               inArray(variationAttributeValues.variationId, variationIds)
             )
           );
-        
+
         // Pegar IDs únicos dos valores
         const uniqueValueIds = Array.from(new Set(valueRecords.map(vr => vr.valueId)));
 
         return {
           attributeId: attrId,
-          valueIds: uniqueValueIds
+          valueIds: uniqueValueIds,
         };
       })
     );
@@ -232,7 +231,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       attributesFromVariationsCount: allAttributeIds.length,
       attributesCount: attributesWithValues.length,
       attributes: attributesWithValues,
-      variationsCount: variations.length
+      variationsCount: variations.length,
     });
 
     return NextResponse.json(completeProduct);
@@ -246,11 +245,11 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   try {
     const { id } = await params;
     const body = await request.json();
-    
+
     console.log('[PUT /api/admin/products/[id]] Received update request for product:', id);
     console.log('[PUT /api/admin/products/[id]] Body keys:', Object.keys(body));
     console.log('[PUT /api/admin/products/[id]] Body:', JSON.stringify(body, null, 2));
-    
+
     const validatedData = updateProductSchema.parse(body);
 
     // Check if product exists
@@ -575,8 +574,14 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json(completeProduct);
   } catch (error) {
     console.error('[PUT /api/admin/products/[id]] Error updating product:', error);
-    console.error('[PUT /api/admin/products/[id]] Error stack:', error instanceof Error ? error.stack : 'No stack');
-    console.error('[PUT /api/admin/products/[id]] Error message:', error instanceof Error ? error.message : String(error));
+    console.error(
+      '[PUT /api/admin/products/[id]] Error stack:',
+      error instanceof Error ? error.stack : 'No stack'
+    );
+    console.error(
+      '[PUT /api/admin/products/[id]] Error message:',
+      error instanceof Error ? error.message : String(error)
+    );
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -585,10 +590,13 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       );
     }
 
-    return NextResponse.json({ 
-      error: 'Internal server error',
-      message: error instanceof Error ? error.message : String(error)
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Internal server error',
+        message: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 }
+    );
   }
 }
 

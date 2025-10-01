@@ -137,14 +137,14 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
             variations,
             attributes: source.attributes || [],
         }
-        
+
         console.log('[EditProductDialog] defaultValues gerado:', {
             id: result.id,
             name: result.name,
             attributesCount: result.attributes.length,
             attributes: result.attributes,
         })
-        
+
         return result
     }, [detailedProduct, product])
 

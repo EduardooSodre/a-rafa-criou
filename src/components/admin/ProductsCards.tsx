@@ -227,8 +227,8 @@ export default function ProductsCardsView({
                     <AlertDescription>{cardsError}</AlertDescription>
                 </Alert>
             )}
-            {/* Grid de Cards */}
-            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            {/* Grid de Cards - Mobile/Tablet: lista, Desktop: grid */}
+            <div className="space-y-3 md:space-y-0 md:grid md:gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 {products.map((product) => {
                     // Buscar primeira imagem de capa do produto (mesma da home)
                     const getProductImage = () => {
@@ -244,129 +244,155 @@ export default function ProductsCardsView({
                     }
 
                     const productImage = getProductImage()
-
                     return (
-                        <Card key={product.id} className="group hover:shadow-lg transition-all duration-200 border hover:border-[#FED466] overflow-hidden cursor-pointer">
-                            {/* Imagem do Produto */}
-                            <div className="relative h-36 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
-                                {productImage ? (
-                                    <Image
-                                        src={productImage}
-                                        alt={product.name}
-                                        fill
-                                        className="object-cover group-hover:scale-105 transition-transform duration-200"
-                                        unoptimized
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center">
-                                        <FileText className="h-10 w-10 text-gray-300" />
+                        <Card key={product.id} className="group hover:shadow-md transition-all duration-200 border border-gray-200 hover:border-[#FED466] overflow-hidden">
+                            {/* Layout Mobile/Tablet - Lista Horizontal */}
+                            <div className="md:hidden flex items-center gap-3 p-3">
+                                <Link href={`/admin/produtos/${product.id}`} className="flex-shrink-0">
+                                    <div className="relative w-20 h-20 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg overflow-hidden ring-1 ring-gray-200 hover:ring-[#FED466] transition-all">
+                                        {productImage ? (
+                                            <Image src={productImage} alt={product.name} fill className="object-cover" unoptimized />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center">
+                                                <FileText className="h-8 w-8 text-gray-300" />
+                                            </div>
+                                        )}
                                     </div>
-                                )}
+                                </Link>
 
-                                {/* Badge de status */}
-                                <div className="absolute top-1.5 right-1.5">
-                                    <Badge
-                                        className={`text-xs shadow-sm ${product.isActive
-                                            ? "bg-green-500 text-white"
-                                            : "bg-gray-500 text-white"
-                                            }`}
-                                    >
-                                        {product.isActive ? "Ativo" : "Inativo"}
-                                    </Badge>
+                                <div className="flex-1 min-w-0 space-y-1">
+                                    <Link href={`/admin/produtos/${product.id}`} className="block">
+                                        <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 leading-tight hover:text-[#FD9555] transition-colors">
+                                            {product.name}
+                                        </h3>
+                                    </Link>
+
+                                    <div className="flex items-center gap-2">
+                                        <Badge variant="outline" className={`text-xs font-medium ${product.isActive ? "border-green-200 bg-green-50 text-green-700" : "border-gray-200 bg-gray-50 text-gray-600"}`}>
+                                            {product.isActive ? "● Ativo" : "○ Inativo"}
+                                        </Badge>
+                                        {product.variations && product.variations.length > 0 && (
+                                            <Badge variant="outline" className="text-xs font-medium border-blue-200 bg-blue-50 text-blue-700">
+                                                {product.variations.length} var.
+                                            </Badge>
+                                        )}
+                                    </div>
+
+                                    <div className="text-lg font-bold text-[#FD9555]">{formatPrice(product.price)}</div>
+
+                                    <div className="flex items-center gap-1.5">
+                                        <Button variant="outline" size="sm" className="h-8 px-2.5 text-xs font-medium bg-blue-50 text-blue-700 border-blue-200 hover:border-[#FED466] hover:shadow-md cursor-pointer transition-all duration-200" asChild>
+                                            <Link href={`/admin/produtos/${product.id}`}>
+                                                <Eye className="h-3.5 w-3.5 mr-1.5" />
+                                                <span>Ver</span>
+                                            </Link>
+                                        </Button>
+                                        <Button variant="outline" size="sm" className="h-8 px-2.5 text-xs font-medium bg-[#FED466] text-gray-900 border-[#FD9555] hover:border-[#FED466] hover:shadow-md cursor-pointer transition-all duration-200" onClick={() => setEditingProduct(product)}>
+                                            <Pencil className="h-3.5 w-3.5 mr-1.5" />
+                                            <span>Editar</span>
+                                        </Button>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button variant="outline" size="sm" className="h-8 px-2.5 text-xs font-medium bg-red-50 text-red-700 border-red-200 hover:border-[#FED466] hover:shadow-md cursor-pointer transition-all duration-200" disabled={deletingProduct === product.id}>
+                                                    {deletingProduct === product.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <><Trash2 className="h-3.5 w-3.5 mr-1.5" /><span>Excluir</span></>}
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        Tem certeza que deseja excluir o produto &quot;{product.name}&quot;? Esta ação não pode ser desfeita.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel className="cursor-pointer">Cancelar</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={() => handleDelete(product.id)} className="bg-red-600 hover:bg-red-700 cursor-pointer">Excluir</AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </div>
                                 </div>
                             </div>
 
-                            <CardHeader className=" px-2">
-                                <CardTitle className="text-xs font-semibold text-gray-900 line-clamp-2 leading-tight">
-                                    {product.name}
-                                </CardTitle>
-                            </CardHeader>
+                            {/* Layout Desktop - Card Vertical */}
+                            <div className="hidden md:block">
+                                <div className="relative h-36 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
+                                    {productImage ? (
+                                        <Image src={productImage} alt={product.name} fill className="object-cover group-hover:scale-105 transition-transform duration-200" unoptimized />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center">
+                                            <FileText className="h-10 w-10 text-gray-300" />
+                                        </div>
+                                    )}
+                                    <div className="absolute top-1.5 right-1.5">
+                                        <Badge className={`text-xs shadow-sm ${product.isActive ? "bg-green-500 text-white" : "bg-gray-500 text-white"}`}>
+                                            {product.isActive ? "Ativo" : "Inativo"}
+                                        </Badge>
+                                    </div>
+                                </div>
 
-                            <CardContent className=" px-2 space-y-1">
-                                {/* Preço e Info */}
-                                <div className="flex items-center justify-between">
-                                    <div className="text-base font-bold text-[#FD9555]">
-                                        {formatPrice(product.price)}
+                                <CardHeader className="px-2">
+                                    <CardTitle className="text-xs font-semibold text-gray-900 line-clamp-2 leading-tight">{product.name}</CardTitle>
+                                </CardHeader>
+
+                                <CardContent className="px-2 space-y-1">
+                                    <div className="flex items-center justify-between">
+                                        <div className="text-base font-bold text-[#FD9555]">{formatPrice(product.price)}</div>
+                                        {product.variations && product.variations.length > 0 && (
+                                            <Badge variant="secondary" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                                                {product.variations.length} var.
+                                            </Badge>
+                                        )}
                                     </div>
 
-                                    {product.variations && product.variations.length > 0 && (
-                                        <Badge variant="secondary" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
-                                            {product.variations.length} var.
-                                        </Badge>
-                                    )}
-                                </div>
-
-                                {/* Actions */}
-                                <div className="flex items-center gap-1">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="flex-1 h-7 text-xs hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 cursor-pointer"
-                                        asChild
-                                    >
-                                        <Link href={`/admin/produtos/${product.id}`}>
-                                            <Eye className="h-3 w-3" />
-                                        </Link>
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="flex-1 h-7 text-xs hover:bg-[#FED466] hover:text-gray-900 hover:border-[#FD9555] cursor-pointer"
-                                        onClick={() => setEditingProduct(product)}
-                                    >
-                                        <Pencil className="h-3 w-3" />
-                                    </Button>
-                                    <AlertDialog>
-                                        <AlertDialogTrigger asChild>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className="h-7 w-7 p-0 hover:bg-red-50 hover:text-red-600 hover:border-red-300 cursor-pointer"
-                                                disabled={deletingProduct === product.id}
-                                            >
-                                                {deletingProduct === product.id ? (
-                                                    <Loader2 className="h-3 w-3 animate-spin" />
-                                                ) : (
-                                                    <Trash2 className="h-3 w-3" />
-                                                )}
-                                            </Button>
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent>
-                                            <AlertDialogHeader>
-                                                <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-                                                <AlertDialogDescription>
-                                                    Tem certeza que deseja excluir o produto &quot;{product.name}&quot;?
-                                                    Esta ação não pode ser desfeita.
-                                                </AlertDialogDescription>
-                                            </AlertDialogHeader>
-                                            <AlertDialogFooter>
-                                                <AlertDialogCancel className="cursor-pointer">Cancelar</AlertDialogCancel>
-                                                <AlertDialogAction
-                                                    onClick={() => handleDelete(product.id)}
-                                                    className="bg-red-600 hover:bg-red-700 cursor-pointer"
-                                                >
-                                                    Excluir
-                                                </AlertDialogAction>
-                                            </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                    </AlertDialog>
-                                </div>
-
-                                {/* EditProductDialog fora dos botões */}
-                                <EditProductDialog
-                                    product={editingProduct}
-                                    open={!!editingProduct}
-                                    onOpenChange={(open) => !open && setEditingProduct(null)}
-                                    onSuccess={() => {
-                                        setEditingProduct(null)
-                                        refreshProducts()
-                                    }}
-                                />
-                            </CardContent>
+                                    <div className="flex items-center gap-1">
+                                        <Button variant="outline" size="sm" className="flex-1 h-8 text-xs font-medium bg-blue-50 text-blue-700 border-blue-200 hover:border-[#FED466] hover:shadow-md cursor-pointer transition-all duration-200" asChild>
+                                            <Link href={`/admin/produtos/${product.id}`}>
+                                                <Eye className="h-3.5 w-3.5" />
+                                            </Link>
+                                        </Button>
+                                        <Button variant="outline" size="sm" className="flex-1 h-8 text-xs font-medium bg-[#FED466] text-gray-900 border-[#FD9555] hover:border-[#FED466] hover:shadow-md cursor-pointer transition-all duration-200" onClick={() => setEditingProduct(product)}>
+                                            <Pencil className="h-3.5 w-3.5" />
+                                        </Button>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-red-50 text-red-700 border-red-200 hover:border-[#FED466] hover:shadow-md cursor-pointer transition-all duration-200" disabled={deletingProduct === product.id}>
+                                                    {deletingProduct === product.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        Tem certeza que deseja excluir o produto &quot;{product.name}&quot;? Esta ação não pode ser desfeita.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel className="cursor-pointer">Cancelar</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={() => handleDelete(product.id)} className="bg-red-600 hover:bg-red-700 cursor-pointer">Excluir</AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </div>
+                                </CardContent>
+                            </div>
                         </Card>
                     )
                 })}
             </div>
+
+            {/* EditProductDialog - Movido para fora do loop */}
+            {editingProduct && (
+                <EditProductDialog
+                    product={editingProduct}
+                    open={!!editingProduct}
+                    onOpenChange={(open) => !open && setEditingProduct(null)}
+                    onSuccess={() => {
+                        setEditingProduct(null)
+                        refreshProducts()
+                    }}
+                />
+            )}
         </div>
     )
 }

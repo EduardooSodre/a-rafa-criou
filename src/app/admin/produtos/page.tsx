@@ -168,60 +168,60 @@ export default function ProductsPage() {
             </div>
 
             {/* Cards de Estatísticas */}
-            <div className="grid gap-4 md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 md:gap-4 md:grid-cols-4">
                 <Card className="border-l-4 border-l-blue-500">
-                    <CardContent className="p-6">
+                    <CardContent className="p-3 md:p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-gray-600">Total de Produtos</p>
-                                <p className="text-3xl font-bold text-gray-900">{stats.total}</p>
+                                <p className="text-xs md:text-sm font-medium text-gray-600">Total de Produtos</p>
+                                <p className="text-2xl md:text-3xl font-bold text-gray-900">{stats.total}</p>
                             </div>
-                            <div className="p-3 bg-blue-100 rounded-full">
-                                <Package className="w-6 h-6 text-blue-600" />
+                            <div className="p-2 md:p-3 bg-blue-100 rounded-full">
+                                <Package className="w-5 h-5 md:w-6 md:h-6 text-blue-600" />
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
                 <Card className="border-l-4 border-l-green-500">
-                    <CardContent className="p-6">
+                    <CardContent className="p-3 md:p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-gray-600">Produtos Ativos</p>
-                                <p className="text-3xl font-bold text-gray-900">{stats.active}</p>
+                                <p className="text-xs md:text-sm font-medium text-gray-600">Produtos Ativos</p>
+                                <p className="text-2xl md:text-3xl font-bold text-gray-900">{stats.active}</p>
                             </div>
-                            <div className="p-3 bg-green-100 rounded-full">
-                                <ShoppingBag className="w-6 h-6 text-green-600" />
+                            <div className="p-2 md:p-3 bg-green-100 rounded-full">
+                                <ShoppingBag className="w-5 h-5 md:w-6 md:h-6 text-green-600" />
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
                 <Card className="border-l-4 border-l-red-500">
-                    <CardContent className="p-6">
+                    <CardContent className="p-3 md:p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-gray-600">Produtos Inativos</p>
-                                <p className="text-3xl font-bold text-gray-900">{stats.inactive}</p>
+                                <p className="text-xs md:text-sm font-medium text-gray-600">Produtos Inativos</p>
+                                <p className="text-2xl md:text-3xl font-bold text-gray-900">{stats.inactive}</p>
                             </div>
-                            <div className="p-3 bg-red-100 rounded-full">
-                                <Trash2 className="w-6 h-6 text-red-600" />
+                            <div className="p-2 md:p-3 bg-red-100 rounded-full">
+                                <Trash2 className="w-5 h-5 md:w-6 md:h-6 text-red-600" />
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
                 <Card className="border-l-4 border-l-[#FED466]">
-                    <CardContent className="p-6">
+                    <CardContent className="p-3 md:p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-gray-600">Valor Médio</p>
-                                <p className="text-3xl font-bold text-gray-900">
+                                <p className="text-xs md:text-sm font-medium text-gray-600">Valor Médio</p>
+                                <p className="text-2xl md:text-3xl font-bold text-gray-900">
                                     R$ {stats.total > 0 ? (stats.revenue / stats.total).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}
                                 </p>
                             </div>
-                            <div className="p-3 bg-yellow-100 rounded-full">
-                                <DollarSign className="w-6 h-6 text-yellow-600" />
+                            <div className="p-2 md:p-3 bg-yellow-100 rounded-full">
+                                <DollarSign className="w-5 h-5 md:w-6 md:h-6 text-yellow-600" />
                             </div>
                         </div>
                     </CardContent>
