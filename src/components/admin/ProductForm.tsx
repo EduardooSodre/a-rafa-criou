@@ -75,18 +75,22 @@ export default function ProductForm({ defaultValues, categories = [], availableA
     const [isCreatingCategory, setIsCreatingCategory] = useState(false)
     const [categoryError, setCategoryError] = useState<string | null>(null)
 
-    const [formData, setFormData] = useState<ProductFormData>(() => ({
-        name: defaultValues?.name || '',
-        slug: defaultValues?.slug,
-        description: defaultValues?.description,
-        categoryId: defaultValues?.categoryId ?? null,
-        isActive: defaultValues?.isActive ?? true,
-        isFeatured: defaultValues?.isFeatured ?? false,
-        images: defaultValues?.images || [],
-        price: defaultValues?.price ? String(defaultValues.price) : '',
-        variations: defaultValues?.variations || [{ name: '', price: '', attributeValues: [], files: [], images: [] }],
-        attributes: defaultValues?.attributes || [],
-    }))
+    const [formData, setFormData] = useState<ProductFormData>(() => {
+        console.log('[ProductForm] Inicializando formData com defaultValues:', defaultValues)
+        console.log('[ProductForm] defaultValues.attributes:', defaultValues?.attributes)
+        return {
+            name: defaultValues?.name || '',
+            slug: defaultValues?.slug,
+            description: defaultValues?.description,
+            categoryId: defaultValues?.categoryId ?? null,
+            isActive: defaultValues?.isActive ?? true,
+            isFeatured: defaultValues?.isFeatured ?? false,
+            images: defaultValues?.images || [],
+            price: defaultValues?.price ? String(defaultValues.price) : '',
+            variations: defaultValues?.variations || [{ name: '', price: '', attributeValues: [], files: [], images: [] }],
+            attributes: defaultValues?.attributes || [],
+        }
+    })
 
     // Defensive: when the step changes or the form is reloaded for editing, close any inline panels
     useEffect(() => {
@@ -641,7 +645,8 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                 {/* Step 3 - Variações */}
                 {step === 3 && (
                     <>
-                        {/* Debug info */}
+                        {/* Debug info - Comentado, descomentar se necessário para debug */}
+                        {/* 
                         <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded">
                             <div className="text-sm font-semibold text-blue-900 mb-2">Debug - Atributos disponíveis:</div>
                             <div className="text-xs text-blue-800">
@@ -656,6 +661,7 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                                 </div>
                             </div>
                         </div>
+                        */}
 
                         {isLoadingAttributes ? (
                             <div className="p-8 text-center text-gray-500">

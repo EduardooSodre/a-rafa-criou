@@ -91,7 +91,36 @@ export default function VariationManager({ variations, attributes, onChange }: V
         ))
     }
 
-    function removeFile(variationIndex: number, fileIndex: number) {
+    async function removeFile(variationIndex: number, fileIndex: number) {
+        const variation = variations[variationIndex]
+        const file = variation.files[fileIndex]
+
+        // Se o arquivo já foi carregado no R2 (tem r2Key), deletar do R2 primeiro
+        if (file.r2Key) {
+            const confirmed = confirm(`Tem certeza que deseja deletar o arquivo "${file.filename}"?\nEle será removido permanentemente do Cloudflare R2.`)
+            if (!confirmed) return
+
+            try {
+                const response = await fetch(`/api/r2/delete?r2Key=${encodeURIComponent(file.r2Key)}`, {
+                    method: 'DELETE'
+                })
+
+                if (!response.ok) {
+                    const error = await response.json()
+                    console.error('Erro ao deletar do R2:', error)
+                    alert(`Erro ao deletar arquivo do R2: ${error.error || 'Erro desconhecido'}`)
+                    return
+                }
+
+                console.log(`✅ Arquivo ${file.filename} deletado do R2 com sucesso`)
+            } catch (error) {
+                console.error('Erro ao deletar arquivo do R2:', error)
+                alert('Erro ao deletar arquivo. Tente novamente.')
+                return
+            }
+        }
+
+        // Remover do estado local
         onChange(variations.map((v, i) =>
             i === variationIndex ? { ...v, files: v.files.filter((_, fi) => fi !== fileIndex) } : v
         ))
