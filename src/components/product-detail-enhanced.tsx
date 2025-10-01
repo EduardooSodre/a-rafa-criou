@@ -90,7 +90,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
     // Mantém a ordem consistente dos atributos
     const getAvailableAttributeGroups = () => {
         const compatibleVariations = getCompatibleVariations()
-        
+
         // Primeiro, coletar TODOS os nomes de atributos na ordem em que aparecem
         const attributeOrder: string[] = []
         const attributeGroups = new Map<string, Set<string>>()
