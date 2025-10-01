@@ -341,16 +341,16 @@ export async function POST(request: NextRequest) {
       if (Array.isArray(localAttrDefs) && localAttrDefs.length > 0) {
         for (const def of localAttrDefs) {
           const attrSlug = def.name.toLowerCase().replace(/\s+/g, '-');
-          
+
           // Verificar se o atributo já existe
           const existingAttr = await tx
             .select()
             .from(attributes)
             .where(eq(attributes.slug, attrSlug))
             .limit(1);
-          
+
           let attributeId: string;
-          
+
           if (existingAttr.length > 0) {
             // Reutilizar atributo existente
             attributeId = existingAttr[0].id;
@@ -367,14 +367,14 @@ export async function POST(request: NextRequest) {
               .returning();
             attributeId = createdAttr.id;
           }
-          
+
           localAttrIdToReal[def.id] = attributeId;
-          
+
           // Processar valores do atributo
           if (Array.isArray(def.values)) {
             for (const val of def.values) {
               const valSlug = val.value.toLowerCase().replace(/\s+/g, '-');
-              
+
               // Verificar se o valor já existe para este atributo
               const existingVal = await tx
                 .select()
@@ -386,9 +386,9 @@ export async function POST(request: NextRequest) {
                   )
                 )
                 .limit(1);
-              
+
               let valueId: string;
-              
+
               if (existingVal.length > 0) {
                 // Reutilizar valor existente
                 valueId = existingVal[0].id;
@@ -406,7 +406,7 @@ export async function POST(request: NextRequest) {
                   .returning();
                 valueId = createdVal.id;
               }
-              
+
               localValIdToReal[val.id] = valueId;
             }
           }
@@ -420,7 +420,7 @@ export async function POST(request: NextRequest) {
           let mimeType = 'image/jpeg';
           let base64Data = image.data;
           const dataStr = String(image.data);
-          
+
           if (dataStr.startsWith('data:')) {
             const match = dataStr.match(/^data:([^;]+);base64,(.+)$/);
             if (match) {
@@ -476,7 +476,7 @@ export async function POST(request: NextRequest) {
               let mimeType = 'image/jpeg';
               let base64Data = image.data;
               const dataStr = String(image.data);
-              
+
               if (dataStr.startsWith('data:')) {
                 const match = dataStr.match(/^data:([^;]+);base64,(.+)$/);
                 if (match) {

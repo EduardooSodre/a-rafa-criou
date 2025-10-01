@@ -34,7 +34,7 @@ export async function getProductBySlug(slug: string) {
     .from(productVariations)
     .where(eq(productVariations.productId, product.id));
 
-  // Para cada variação, buscar os valores de atributo associados
+  // Para cada variação, buscar os valores de atributo associados E as imagens
   const variationsWithAttributes = await Promise.all(
     variations.map(async v => {
       const mappings = await db
@@ -66,6 +66,19 @@ export async function getProductBySlug(slug: string) {
       // Buscar arquivos da variação (r2Key)
       const variationFiles = await db.select().from(files).where(eq(files.variationId, v.id));
 
+      // Buscar imagens da variação
+      const variationImagesResult = await db
+        .select()
+        .from(productImages)
+        .where(eq(productImages.variationId, v.id));
+      
+      const variationImages = variationImagesResult.map(img => {
+        const raw = img.data || '';
+        if (!raw) return '/file.svg';
+        if (String(raw).startsWith('data:')) return String(raw);
+        return `data:${img.mimeType || 'image/jpeg'};base64,${raw}`;
+      });
+
       return {
         id: v.id,
         name: v.name,
@@ -75,6 +88,7 @@ export async function getProductBySlug(slug: string) {
         fileSize: '-',
         attributeValues: valueDetails,
         files: variationFiles.map(f => ({ id: f.id, path: f.path, name: f.name })),
+        images: variationImages.length > 0 ? variationImages : undefined,
       };
     })
   );

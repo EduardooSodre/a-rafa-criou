@@ -1,4 +1,4 @@
-import { ProductDetailClient } from "@/components/product-detail-client";
+import { ProductDetailEnhanced } from "@/components/product-detail-enhanced";
 import { getProductBySlug } from "@/lib/db/products";
 import { notFound } from "next/navigation";
 
@@ -10,5 +10,5 @@ export default async function ProductPage({ params }: ProductPageProps) {
     const p = await params
     const product = await getProductBySlug(p.slug);
     if (!product) return notFound();
-    return <ProductDetailClient product={product} />;
+    return <ProductDetailEnhanced product={product} />;
 }

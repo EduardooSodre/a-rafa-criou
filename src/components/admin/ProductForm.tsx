@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Upload, X, Plus, Package, FolderPlus, Image as ImageIcon, FileText } from 'lucide-react'
+import { X, Package, FolderPlus, Image as ImageIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
@@ -10,6 +10,8 @@ import { getPreviewSrc } from '@/lib/r2-utils'
 // Nested Dialog removed to keep a single outer modal during create/edit
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+import AttributeManager from '@/components/admin/AttributeManager'
+import VariationManager from '@/components/admin/VariationManager'
 
 // Types used in this form
 interface Category { id: string; name: string }
@@ -28,9 +30,6 @@ export default function ProductForm({ defaultValues, categories = [], availableA
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [formError, setFormError] = useState<string | null>(null)
     const [isNewCategoryOpen, setIsNewCategoryOpen] = useState(false)
-    const [newAttrName, setNewAttrName] = useState('')
-    const [newAttrValues, setNewAttrValues] = useState<string[]>([])
-    const [newAttrValueInput, setNewAttrValueInput] = useState('')
 
     const [localAttributes, setLocalAttributes] = useState<Attribute[]>(availableAttributes)
     const [categoriesLocal, setCategoriesLocal] = useState<Category[]>(categories)
@@ -141,13 +140,9 @@ export default function ProductForm({ defaultValues, categories = [], availableA
     const dragIndexRef = useRef<number | null>(null)
     type DragPayload = { source: 'product'; imageIndex: number; image: ImageFile } | { source: 'variation'; variationIndex: number; imageIndex: number; image: ImageFile } | null
     const dragDataRef = useRef<DragPayload>(null)
-    const variationDragRef = useRef<{ variationIndex: number; imageIndex: number } | null>(null)
 
     const [productDraggingIndex, setProductDraggingIndex] = useState<number | null>(null)
     const [productDragOverIndex, setProductDragOverIndex] = useState<number | null>(null)
-
-    const [variationDraggingState, setVariationDraggingState] = useState<{ variationIndex: number; imageIndex: number } | null>(null)
-    const [variationDragOverState, setVariationDragOverState] = useState<{ variationIndex: number; overIndex: number } | null>(null)
 
     function handleProductImageUpload(files: FileList) {
         const list = Array.from(files).map(f => ({ file: f, filename: f.name, previewUrl: URL.createObjectURL(f) }))
@@ -166,37 +161,6 @@ export default function ProductForm({ defaultValues, categories = [], availableA
             return { ...prev, images: prev.images.filter(p => p !== previewUrl) }
         })
     }
-
-    function handleVariationImageUpload(variationIndex: number, files: FileList) {
-        const list = Array.from(files).map(f => ({ file: f, filename: f.name, previewUrl: URL.createObjectURL(f) }))
-        setFormData(prev => ({ ...prev, variations: prev.variations.map((v, i) => i === variationIndex ? { ...v, images: [...v.images, ...list] } : v) }))
-    }
-
-    function addVariation() {
-        setFormData(prev => ({ ...prev, variations: [...prev.variations, { name: '', price: '', attributeValues: [], files: [], images: [] }] }))
-        // scroll to new variation after slight delay (UI)
-        setTimeout(() => { const idx = formData.variations.length; variationRefs.current[idx]?.scrollIntoView({ behavior: 'smooth' }) }, 100)
-    }
-
-    function updateVariation<K extends keyof VariationForm | string>(index: number, key: K, value: unknown) {
-        setFormData(prev => ({
-            ...prev,
-            variations: prev.variations.map((v, i) =>
-                i === index
-                    ? {
-                        ...v,
-                        [key]: value as VariationForm[Extract<keyof VariationForm, string>]
-                    }
-                    : v
-            )
-        }))
-    }
-
-    /* eslint-disable @typescript-eslint/no-unused-vars */
-    function removeVariation(index: number) {
-        setFormData(prev => ({ ...prev, variations: prev.variations.filter((_, i) => i !== index) }))
-    }
-    /* eslint-enable @typescript-eslint/no-unused-vars */
 
     // Small Dropzone component (local) to provide drag/drop and click-to-select behavior
     type DropzoneProps = { accept?: string; multiple?: boolean; onFilesSelected: (files: FileList) => void; children?: React.ReactNode }
@@ -241,52 +205,6 @@ export default function ProductForm({ defaultValues, categories = [], availableA
             })()
         }
     }, [categories, categoriesLocal.length])
-    function removeVariationImage(variationIndex: number, imageIndex: number) {
-        setFormData(prev => {
-            const newVars = prev.variations.map((v, i) => {
-                if (i !== variationIndex) return v
-                const toRemove = v.images[imageIndex]
-                if (toRemove && toRemove.previewUrl) URL.revokeObjectURL(toRemove.previewUrl)
-                return { ...v, images: v.images.filter((_, idx) => idx !== imageIndex) }
-            })
-            return { ...prev, variations: newVars }
-        })
-    }
-
-    function updateVariationAttributeValue(index: number, attributeId: string, valueId: string) {
-        setFormData(prev => ({ ...prev, variations: prev.variations.map((v, i) => i === index ? { ...v, attributeValues: [...v.attributeValues.filter(av => av.attributeId !== attributeId), { attributeId, valueId }] } : v) }))
-    }
-
-    function handleFileUpload(variationIndex: number, files: FileList) {
-        const list = Array.from(files).map(f => ({ file: f, filename: f.name }))
-        setFormData(prev => ({ ...prev, variations: prev.variations.map((v, i) => i === variationIndex ? { ...v, files: [...v.files, ...list] } : v) }))
-    }
-
-    function handleToggleAttributeValue(attributeId: string, valueId: string) {
-        setFormData(prev => {
-            const arr = prev.attributes || []
-            const att = arr.find(a => a.attributeId === attributeId)
-            if (!att) return { ...prev, attributes: [...arr, { attributeId, valueIds: [valueId] }] }
-            const exists = att.valueIds.includes(valueId)
-            return { ...prev, attributes: arr.map(a => a.attributeId === attributeId ? { ...a, valueIds: exists ? a.valueIds.filter(v => v !== valueId) : [...a.valueIds, valueId] } : a) }
-        })
-    }
-
-    function handleCreateAttribute() {
-        if (!newAttrName) return
-        const values = newAttrValues.map(s => s.trim()).filter(Boolean)
-        if (values.length === 0) {
-            setFormError('Adicione pelo menos um valor para o atributo')
-            return
-        }
-        const id = `local-${Date.now()}`
-        const attr: Attribute = { id, name: newAttrName, values: values.map((v, i) => ({ id: `${id}-${i}`, value: v })) }
-        setLocalAttributes(prev => [attr, ...prev])
-        setNewAttrName('')
-        setNewAttrValues([])
-        setNewAttrValueInput('')
-        setIsNewCategoryOpen(false)
-    }
 
     function prevStep() { setStep(s => Math.max(1, s - 1)) }
     function nextStep() { setStep(s => Math.min(3, s + 1)) }
@@ -644,221 +562,23 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                     </Card>
                 )}
 
-                {/* Step 2 */}
+                {/* Step 2 - Atributos */}
                 {step === 2 && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Atributos do Produto</CardTitle>
-                            <CardDescription>Selecione atributos aplicáveis e valores. Você pode criar novos atributos.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="grid md:grid-cols-2 gap-4">
-                                <div>
-                                    <div className="flex flex-col gap-2">
-                                        <Label>Criar novo atributo</Label>
-                                        <div className="flex gap-2">
-                                            <Input placeholder="Nome do atributo" value={newAttrName} onChange={e => setNewAttrName(e.target.value)} />
-                                            <Button onClick={handleCreateAttribute} variant="default" className="bg-[#FED466] text-black hover:brightness-95 ring-1 ring-yellow-300" aria-label="Adicionar atributo">
-                                                <Plus className="w-4 h-4" />
-                                            </Button>
-                                        </div>
-                                        <div className="mt-2">
-                                            <div className="flex gap-2">
-                                                <Input className="flex-1" placeholder="Adicionar valor e pressionar Enter" value={newAttrValueInput} onChange={e => setNewAttrValueInput(e.target.value)} onKeyDown={e => {
-                                                    if (e.key === 'Enter') {
-                                                        e.preventDefault()
-                                                        const v = newAttrValueInput.trim()
-                                                        if (v) { setNewAttrValues(prev => [...prev, v]); setNewAttrValueInput('') }
-                                                    }
-                                                }} />
-                                                <Button type="button" onClick={() => {
-                                                    const v = newAttrValueInput.trim()
-                                                    if (!v) return
-                                                    setNewAttrValues(prev => [...prev, v])
-                                                    setNewAttrValueInput('')
-                                                }} className="bg-[#FED466] text-black hover:brightness-95">+</Button>
-                                            </div>
-                                            <div className="mt-2 flex flex-wrap gap-2">
-                                                {newAttrValues.map((v, i) => (
-                                                    <div key={i} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 border">
-                                                        <span className="text-sm">{v}</span>
-                                                        <button type="button" onClick={() => setNewAttrValues(prev => prev.filter((_, idx) => idx !== i))} className="text-gray-500">
-                                                            <X className="w-4 h-4" />
-                                                        </button>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div>
-                                        <Label>Atributos disponíveis</Label>
-                                        <div className="max-h-72 overflow-y-auto mt-2 space-y-3">
-                                            {localAttributes.map(attr => (
-                                                <div key={attr.id} className="border rounded p-3">
-                                                    <div className="flex items-center justify-between">
-                                                        <div className="font-medium">{attr.name}</div>
-                                                        <div>
-                                                            <input type="checkbox" checked={!!formData.attributes?.find(a => a.attributeId === attr.id)} onChange={e => {
-                                                                if (e.target.checked) setFormData(prev => ({ ...prev, attributes: [...(prev.attributes || []), { attributeId: attr.id, valueIds: [] }] }))
-                                                                else setFormData(prev => ({ ...prev, attributes: (prev.attributes || []).filter(a => a.attributeId !== attr.id) }))
-                                                            }} />
-                                                        </div>
-                                                    </div>
-                                                    {formData.attributes?.find(a => a.attributeId === attr.id) && (
-                                                        <div className="mt-2 flex flex-wrap gap-2">
-                                                            {(attr.values || []).map((v: AttributeValue) => {
-                                                                const selected = !!formData.attributes?.find(a => a.attributeId === attr.id && a.valueIds.includes(v.id))
-                                                                return (
-                                                                    <label key={v.id} className={`inline-flex items-center gap-2 px-2 py-1 rounded border ${selected ? 'bg-yellow-100' : 'bg-white'}`}>
-                                                                        <input type="checkbox" checked={selected} onChange={() => handleToggleAttributeValue(attr.id, v.id)} />
-                                                                        <span className="text-sm">{v.value}</span>
-                                                                    </label>
-                                                                )
-                                                            })}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
+                    <AttributeManager
+                        selectedAttributes={formData.attributes || []}
+                        onChange={attributes => setFormData(prev => ({ ...prev, attributes }))}
+                    />
                 )}
 
-                {/* Step 3 */}
+                {/* Step 3 - Variações */}
                 {step === 3 && (
-                    <Card>
-                        <CardHeader>
-                            <div className="flex justify-between items-center w-full">
-                                <div>
-                                    <CardTitle>Variações do Produto</CardTitle>
-                                    <CardDescription>Adicione variações, preços e arquivos. Cada variação precisa ter ao menos um arquivo.</CardDescription>
-                                </div>
-                                <div>
-                                    <Button type="button" onClick={addVariation} variant="outline" size="sm"><Plus className="w-4 h-4" /> Nova Variação</Button>
-                                </div>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            {formData.variations.map((variation, index) => (
-                                <div key={index} ref={el => { variationRefs.current[index] = el }} className="border rounded-xl p-4 mb-4 space-y-3">
-                                    <div className="flex justify-between items-center mb-2">
-                                        <div className="font-medium">{variation.name || `Variação ${index + 1}`}</div>
-                                        <div className="text-sm text-gray-500">R$ {Number(variation.price || 0).toFixed(2)}</div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                        <div className="flex flex-col gap-2">
-                                            <Label>Nome</Label>
-                                            <Input value={variation.name} onChange={e => updateVariation(index, 'name', e.target.value)} />
-                                        </div>
-                                        <div className="flex flex-col gap-2">
-                                            <Label>Preço (R$)</Label>
-                                            <Input type="number" step="0.01" value={variation.price} onChange={e => updateVariation(index, 'price', e.target.value)} />
-                                        </div>
-                                    </div>
-
-                                    {localAttributes.length > 0 && (
-                                        <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
-                                            {localAttributes.map(attr => (
-                                                <div key={attr.id} className="flex flex-col gap-2">
-                                                    <Label className="text-sm">{attr.name}</Label>
-                                                    <Select value={variation.attributeValues?.find(av => av.attributeId === attr.id)?.valueId || ''} onValueChange={val => updateVariationAttributeValue(index, attr.id, val)}>
-                                                        <SelectTrigger className="w-full"><SelectValue placeholder="Selecione" /></SelectTrigger>
-                                                        <SelectContent>{(attr.values || []).map((v: AttributeValue) => <SelectItem key={v.id} value={v.id}>{v.value}</SelectItem>)}</SelectContent>
-                                                    </Select>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-
-                                    <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <Label>Arquivos da variação (PDFs) *</Label>
-                                            <div className="mt-2">
-                                                <label className="block w-full border-2 border-dashed rounded-lg p-4 text-center cursor-pointer">
-                                                    <Upload className="mx-auto h-8 w-8" />
-                                                    <input type="file" multiple accept=".pdf" onChange={e => e.target.files && handleFileUpload(index, e.target.files)} className="hidden" />
-                                                </label>
-                                            </div>
-                                            {variation.files.length > 0 && (
-                                                <div className="mt-3 space-y-2">
-                                                    {variation.files.map((f, fi) => (
-                                                        <div key={fi} className="flex items-center justify-between bg-white border rounded p-3">
-                                                            <div className="flex items-center gap-3">
-                                                                <FileText className="w-4 h-4" />
-                                                                <div className="text-sm">{f.filename}</div>
-                                                            </div>
-                                                            <div>
-                                                                <Button type="button" variant="ghost" onClick={() => setFormData(prev => ({ ...prev, variations: prev.variations.map((v, i) => i === index ? { ...v, files: v.files.filter((_, idx) => idx !== fi) } : v) }))}><X className="w-4 h-4" /></Button>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        <div>
-                                            <Label>Imagens da variação (preview)</Label>
-                                            <div className="mt-2">
-                                                <label className="block w-full border-2 border-dashed rounded-lg p-4 text-center cursor-pointer">
-                                                    <ImageIcon className="mx-auto h-8 w-8 text-gray-400" />
-                                                    <input type="file" multiple accept="image/*" onChange={e => e.target.files && handleVariationImageUpload(index, e.target.files)} className="hidden" />
-                                                </label>
-                                            </div>
-                                            {variation.images.length > 0 && (
-                                                <div className="mt-3 grid grid-cols-3 gap-2">
-                                                    {variation.images.map((img, ii) => (
-                                                        <div key={ii}
-                                                            draggable
-                                                            onDragStart={e => {
-                                                                variationDragRef.current = { variationIndex: index, imageIndex: ii }
-                                                                setVariationDraggingState({ variationIndex: index, imageIndex: ii })
-                                                                e.dataTransfer!.effectAllowed = 'move'
-                                                            }}
-                                                            onDragEnd={() => { variationDragRef.current = null; setVariationDraggingState(null); setVariationDragOverState(null) }}
-                                                            onDragOver={e => { e.preventDefault(); setVariationDragOverState({ variationIndex: index, overIndex: ii }) }}
-                                                            onDragLeave={() => setVariationDragOverState(null)}
-                                                            onDrop={e => {
-                                                                e.preventDefault()
-                                                                const from = variationDragRef.current
-                                                                const to = ii
-                                                                if (!from) return
-                                                                if (from.variationIndex !== index) return // only allow reorder within same variation
-                                                                if (from.imageIndex === to) return
-                                                                setFormData(prev => {
-                                                                    const newVars = prev.variations.map((v, vi) => {
-                                                                        if (vi !== index) return v
-                                                                        const imgs = [...v.images]
-                                                                        const [moved] = imgs.splice(from.imageIndex, 1)
-                                                                        imgs.splice(to, 0, moved)
-                                                                        return { ...v, images: imgs }
-                                                                    })
-                                                                    return { ...prev, variations: newVars }
-                                                                })
-                                                                variationDragRef.current = null
-                                                                setVariationDraggingState(null)
-                                                                setVariationDragOverState(null)
-                                                            }}
-                                                            className={`relative border rounded overflow-hidden cursor-move transition-transform duration-150 ${variationDraggingState?.variationIndex === index && variationDraggingState.imageIndex === ii ? 'opacity-70 scale-95' : ''} ${variationDragOverState?.variationIndex === index && variationDragOverState.overIndex === ii ? 'ring-2 ring-yellow-300' : ''}`}>
-                                                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                            <img src={img.previewUrl || ''} alt={img.filename} className="w-full h-24 object-cover" />
-                                                            {ii === 0 && <span className="absolute left-1 top-1 bg-yellow-300 text-black text-xs px-2 py-0.5 rounded">Capa</span>}
-                                                            <button type="button" aria-label="Remover imagem" onClick={() => removeVariationImage(index, ii)} className="absolute top-1 right-1 bg-white rounded-full p-1 shadow"><X className="w-3 h-3" /></button>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </CardContent>
-                    </Card>
+                    <VariationManager
+                        variations={formData.variations}
+                        attributes={localAttributes.filter(attr => 
+                            formData.attributes?.some(a => a.attributeId === attr.id)
+                        )}
+                        onChange={variations => setFormData(prev => ({ ...prev, variations }))}
+                    />
                 )}
 
                 {/* Actions */}
