@@ -191,9 +191,15 @@ export default function AttributeManager({ selectedAttributes, onChange }: Attri
     function toggleAttribute(attributeId: string) {
         const exists = selectedAttributes.find(a => a.attributeId === attributeId)
         if (exists) {
-            onChange(selectedAttributes.filter(a => a.attributeId !== attributeId))
+            const newSelection = selectedAttributes.filter(a => a.attributeId !== attributeId)
+            console.log('Desmarcando atributo:', attributeId)
+            console.log('Nova seleção:', newSelection)
+            onChange(newSelection)
         } else {
-            onChange([...selectedAttributes, { attributeId, valueIds: [] }])
+            const newSelection = [...selectedAttributes, { attributeId, valueIds: [] }]
+            console.log('Marcando atributo:', attributeId)
+            console.log('Nova seleção:', newSelection)
+            onChange(newSelection)
         }
     }
 
@@ -202,18 +208,19 @@ export default function AttributeManager({ selectedAttributes, onChange }: Attri
         if (!attr) return
 
         const hasValue = attr.valueIds.includes(valueId)
-        onChange(
-            selectedAttributes.map(a =>
-                a.attributeId === attributeId
-                    ? {
-                        ...a,
-                        valueIds: hasValue
-                            ? a.valueIds.filter(v => v !== valueId)
-                            : [...a.valueIds, valueId]
-                    }
-                    : a
-            )
+        const newSelection = selectedAttributes.map(a =>
+            a.attributeId === attributeId
+                ? {
+                    ...a,
+                    valueIds: hasValue
+                        ? a.valueIds.filter(v => v !== valueId)
+                        : [...a.valueIds, valueId]
+                }
+                : a
         )
+        console.log('Toggle valor:', { attributeId, valueId, hasValue })
+        console.log('Nova seleção:', newSelection)
+        onChange(newSelection)
     }
 
     function addValueField() {

@@ -32,6 +32,42 @@ export default function ProductForm({ defaultValues, categories = [], availableA
     const [isNewCategoryOpen, setIsNewCategoryOpen] = useState(false)
 
     const [localAttributes, setLocalAttributes] = useState<Attribute[]>(availableAttributes)
+    const [isLoadingAttributes, setIsLoadingAttributes] = useState(false)
+
+    // Carregar atributos do banco de dados apenas uma vez ao montar
+    useEffect(() => {
+        let isMounted = true
+        
+        async function loadAttributesFromDB() {
+            // Se já tem atributos via prop, usar eles
+            if (availableAttributes.length > 0) {
+                setLocalAttributes(availableAttributes)
+                return
+            }
+            
+            try {
+                setIsLoadingAttributes(true)
+                const response = await fetch('/api/admin/attributes')
+                if (response.ok && isMounted) {
+                    const data = await response.json()
+                    setLocalAttributes(data)
+                }
+            } catch (error) {
+                console.error('Erro ao carregar atributos:', error)
+            } finally {
+                if (isMounted) {
+                    setIsLoadingAttributes(false)
+                }
+            }
+        }
+        
+        loadAttributesFromDB()
+        
+        return () => {
+            isMounted = false
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []) // Executa apenas uma vez ao montar
     const [categoriesLocal, setCategoriesLocal] = useState<Category[]>(categories)
     const [slugTouched, setSlugTouched] = useState(false)
     const [newCategoryName, setNewCategoryName] = useState('')
@@ -132,9 +168,6 @@ export default function ProductForm({ defaultValues, categories = [], availableA
         })
     }, [availableAttributes])
 
-    // Simple refs for variation blocks (used for scroll into view)
-    const variationRefs = useRef<Array<HTMLDivElement | null>>([])
-
     // Refs and state for image previews and drag-and-drop
     const imagePreviewsRef = useRef<ImageFile[]>([])
     const dragIndexRef = useRef<number | null>(null)
@@ -212,14 +245,31 @@ export default function ProductForm({ defaultValues, categories = [], availableA
     function validate(): string | null {
         // Clear previous error
         setFormError(null)
+        
+        // Verificar se há atributos selecionados no Step 2
+        const selectedAttributesCount = (formData.attributes || []).length
+        
         // Ensure every variation has at least one file
         for (const [idx, v] of formData.variations.entries()) {
-            if (!v.files || v.files.length === 0) return `Cada variação (linha ${idx + 1}) precisa ter pelo menos um arquivo.`
+            if (!v.files || v.files.length === 0) {
+                return `Cada variação (linha ${idx + 1}) precisa ter pelo menos um arquivo.`
+            }
+            
+            // Se há atributos selecionados, todas as variações DEVEM ter todos os atributos preenchidos
+            if (selectedAttributesCount > 0) {
+                const variationAttributesCount = v.attributeValues?.length || 0
+                if (variationAttributesCount < selectedAttributesCount) {
+                    return `Variação "${v.name || `#${idx + 1}`}" está incompleta! Selecione TODOS os atributos (${variationAttributesCount}/${selectedAttributesCount} selecionados). Isso garante que o cliente compre o produto correto.`
+                }
+            }
         }
+        
         if (!formData.name) return 'Nome do produto é obrigatório.'
+        
         // price must be present or at least one variation price
         const priceOk = !!formData.price || formData.variations.some(v => !!v.price)
         if (!priceOk) return 'Preço do produto é obrigatório (ou preencha preço nas variações).'
+        
         return null
     }
 
@@ -316,6 +366,17 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                     .filter(a => a.id.startsWith('local-'))
                     .map(a => ({ id: a.id, name: a.name, values: (a.values || []).map(v => ({ id: v.id, value: v.value })) })),
             }
+
+            console.log('=== PAYLOAD SENDO ENVIADO ===')
+            console.log('Variações:', variationsPayload.map(v => ({
+                name: v.name,
+                price: v.price,
+                attributeValues: v.attributeValues,
+                filesCount: v.files.length,
+                imagesCount: v.images?.length || 0
+            })))
+            console.log('Atributos do produto:', payload.attributes)
+            console.log('Atributos locais:', payload.attributeDefinitions)
 
             // Type-safe extraction of id from defaultValues: prefer explicit prop, fallback to defaultValues.id
             const dv = defaultValues as Partial<ProductFormData & { id?: string }> | undefined
@@ -564,21 +625,52 @@ export default function ProductForm({ defaultValues, categories = [], availableA
 
                 {/* Step 2 - Atributos */}
                 {step === 2 && (
-                    <AttributeManager
-                        selectedAttributes={formData.attributes || []}
-                        onChange={attributes => setFormData(prev => ({ ...prev, attributes }))}
-                    />
+                    <>
+                        {isLoadingAttributes && (
+                            <div className="p-4 bg-blue-50 border border-blue-200 rounded mb-4">
+                                <div className="text-sm text-blue-800">Carregando atributos do banco de dados...</div>
+                            </div>
+                        )}
+                        <AttributeManager
+                            selectedAttributes={formData.attributes || []}
+                            onChange={attributes => setFormData(prev => ({ ...prev, attributes }))}
+                        />
+                    </>
                 )}
 
                 {/* Step 3 - Variações */}
                 {step === 3 && (
-                    <VariationManager
-                        variations={formData.variations}
-                        attributes={localAttributes.filter(attr =>
-                            formData.attributes?.some(a => a.attributeId === attr.id)
+                    <>
+                        {/* Debug info */}
+                        <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded">
+                            <div className="text-sm font-semibold text-blue-900 mb-2">Debug - Atributos disponíveis:</div>
+                            <div className="text-xs text-blue-800">
+                                <div>Atributos selecionados no Step 2: {formData.attributes?.length || 0}</div>
+                                <div>IDs selecionados: {formData.attributes?.map(a => a.attributeId).join(', ') || 'nenhum'}</div>
+                                <div>Atributos em localAttributes: {localAttributes.length}</div>
+                                <div>IDs locais: {localAttributes.map(a => a.id).join(', ') || 'nenhum'}</div>
+                                <div className="mt-2 font-bold text-green-700">
+                                    Atributos sendo enviados ao VariationManager: {localAttributes.filter(attr =>
+                                        formData.attributes?.some(a => a.attributeId === attr.id)
+                                    ).length}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {isLoadingAttributes ? (
+                            <div className="p-8 text-center text-gray-500">
+                                Carregando atributos...
+                            </div>
+                        ) : (
+                            <VariationManager
+                                variations={formData.variations}
+                                attributes={localAttributes.filter(attr =>
+                                    formData.attributes?.some(a => a.attributeId === attr.id)
+                                )}
+                                onChange={variations => setFormData(prev => ({ ...prev, variations }))}
+                            />
                         )}
-                        onChange={variations => setFormData(prev => ({ ...prev, variations }))}
-                    />
+                    </>
                 )}
 
                 {/* Actions */}

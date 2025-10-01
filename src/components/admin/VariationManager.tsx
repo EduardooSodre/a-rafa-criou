@@ -188,7 +188,7 @@ export default function VariationManager({ variations, attributes, onChange }: V
                         {/* Atributos */}
                         {attributes.length > 0 && (
                             <div>
-                                <Label className="mb-2 block">Atributos da Variação</Label>
+                                <Label className="mb-2 block">Atributos da Variação *</Label>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                                     {attributes.map(attr => {
                                         const selectedValue = variation.attributeValues.find(
@@ -200,7 +200,10 @@ export default function VariationManager({ variations, attributes, onChange }: V
                                                 <Label className="text-sm text-gray-600">{attr.name}</Label>
                                                 <Select
                                                     value={selectedValue}
-                                                    onValueChange={val => updateAttributeValue(index, attr.id, val)}
+                                                    onValueChange={val => {
+                                                        console.log(`Selecionando atributo ${attr.name} = ${val} para variação ${index}`)
+                                                        updateAttributeValue(index, attr.id, val)
+                                                    }}
                                                 >
                                                     <SelectTrigger className="mt-1">
                                                         <SelectValue placeholder={`Selecione ${attr.name}`} />
@@ -217,6 +220,35 @@ export default function VariationManager({ variations, attributes, onChange }: V
                                         )
                                     })}
                                 </div>
+                                
+                                {/* Resumo dos atributos selecionados */}
+                                {variation.attributeValues.length > 0 && (
+                                    <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                                        <div className="text-sm font-semibold text-green-800 mb-2">
+                                            ✓ Atributos Selecionados:
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
+                                            {variation.attributeValues.map((av, avIndex) => {
+                                                const attr = attributes.find(a => a.id === av.attributeId)
+                                                const val = attr?.values?.find(v => v.id === av.valueId)
+                                                return (
+                                                    <Badge key={avIndex} variant="secondary" className="bg-green-100 text-green-800">
+                                                        {attr?.name}: {val?.value || 'N/A'}
+                                                    </Badge>
+                                                )
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                {/* Alerta se faltam atributos */}
+                                {attributes.length > variation.attributeValues.length && (
+                                    <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                                        <div className="text-sm font-semibold text-amber-800">
+                                            ⚠️ Selecione todos os atributos para garantir que o cliente compre o produto correto
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
 
