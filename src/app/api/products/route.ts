@@ -113,7 +113,7 @@ export async function GET(request: NextRequest) {
       // Imagem principal: prioriza isMain, senão pega a primeira
       const mainImageObj = images.find(img => img.isMain) || images[0];
 
-      return {
+        return {
         id: p.id,
         name: p.name,
         slug: p.slug,
@@ -127,12 +127,21 @@ export async function GET(request: NextRequest) {
         variations,
         mainImage: mainImageObj
           ? {
-              data: mainImageObj.data,
+              data: (function () {
+                const raw = mainImageObj.data || ''
+                if (String(raw).startsWith('data:')) return String(raw)
+                // Assume DB-stored raw is base64 and build data URI
+                return `data:image/jpeg;base64,${String(raw)}`
+              })(),
               alt: mainImageObj.alt || p.name,
             }
           : null,
         images: images.map(img => ({
-          data: img.data,
+          data: (function () {
+            const raw = img.data || ''
+            if (String(raw).startsWith('data:')) return String(raw)
+            return `data:image/jpeg;base64,${String(raw)}`
+          })(),
           alt: img.alt || p.name,
         })),
       };

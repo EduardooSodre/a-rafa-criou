@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { getPreviewSrc } from '@/lib/r2-utils'
 // Nested Dialog removed to keep a single outer modal during create/edit
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 
 // Types used in this form
 interface Category { id: string; name: string }
@@ -25,6 +26,7 @@ export default function ProductForm({ defaultValues, categories = [], availableA
     const router = useRouter()
     const [step, setStep] = useState<number>(1)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [formError, setFormError] = useState<string | null>(null)
     const [isNewCategoryOpen, setIsNewCategoryOpen] = useState(false)
     const [newAttrName, setNewAttrName] = useState('')
     const [newAttrValues, setNewAttrValues] = useState<string[]>([])
@@ -36,6 +38,7 @@ export default function ProductForm({ defaultValues, categories = [], availableA
     const [newCategoryName, setNewCategoryName] = useState('')
     const [newCategoryDescription, setNewCategoryDescription] = useState('')
     const [isCreatingCategory, setIsCreatingCategory] = useState(false)
+    const [categoryError, setCategoryError] = useState<string | null>(null)
 
     const [formData, setFormData] = useState<ProductFormData>(() => ({
         name: defaultValues?.name || '',
@@ -273,7 +276,7 @@ export default function ProductForm({ defaultValues, categories = [], availableA
         if (!newAttrName) return
         const values = newAttrValues.map(s => s.trim()).filter(Boolean)
         if (values.length === 0) {
-            alert('Adicione pelo menos um valor para o atributo')
+            setFormError('Adicione pelo menos um valor para o atributo')
             return
         }
         const id = `local-${Date.now()}`
@@ -289,9 +292,11 @@ export default function ProductForm({ defaultValues, categories = [], availableA
     function nextStep() { setStep(s => Math.min(3, s + 1)) }
 
     function validate(): string | null {
+        // Clear previous error
+        setFormError(null)
         // Ensure every variation has at least one file
-        for (const v of formData.variations) {
-            if (!v.files || v.files.length === 0) return 'Cada variação precisa ter pelo menos um arquivo.'
+        for (const [idx, v] of formData.variations.entries()) {
+            if (!v.files || v.files.length === 0) return `Cada variação (linha ${idx + 1}) precisa ter pelo menos um arquivo.`
         }
         if (!formData.name) return 'Nome do produto é obrigatório.'
         // price must be present or at least one variation price
@@ -304,12 +309,12 @@ export default function ProductForm({ defaultValues, categories = [], availableA
         e?.preventDefault()
         const err = validate()
         if (err) {
-            alert(err)
+            setFormError(err)
             return
         }
         setIsSubmitting(true)
         try {
-            // First: upload all variation files to R2
+            // First: upload all variation files (PDFs) to R2; images will be embedded as base64 and saved to DB
             type R2File = { filename: string; originalName: string; fileSize: number; mimeType: string; r2Key: string }
             type VariationPayload = { id?: string; name: string; price: number; isActive: boolean; files: R2File[]; images?: Array<{ data: string; alt?: string; isMain?: boolean; order?: number }>; attributeValues: VariationForm['attributeValues'] }
             const variationsPayload: VariationPayload[] = []
@@ -331,18 +336,17 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                     }
                 }
 
-                // Process variation images (upload to R2 if file present)
+                // Process variation images: convert File -> base64 data URI for DB storage; keep existing previewUrls as-is
                 const variationImagesPayload: Array<{ data: string; alt?: string; isMain?: boolean; order?: number }> = []
                 for (let viImg = 0; viImg < (variation.images || []).length; viImg++) {
                     const vimg = variation.images[viImg]
                     if (vimg.file) {
-                        const fd = new FormData()
-                        fd.append('file', vimg.file)
-                        const resImg = await fetch('/api/r2/upload', { method: 'POST', body: fd })
-                        if (!resImg.ok) throw new Error('Falha no upload de imagem da variação')
-                        const jimg = await resImg.json()
-                        const r2k = jimg?.data?.key ?? jimg?.data
-                        if (r2k) variationImagesPayload.push({ data: r2k, alt: vimg.filename || undefined, isMain: viImg === 0, order: viImg })
+                        // convert to base64
+                        const arr = await vimg.file.arrayBuffer()
+                        const b64 = Buffer.from(arr).toString('base64')
+                        const mime = vimg.file.type || 'image/jpeg'
+                        const dataUri = `data:${mime};base64,${b64}`
+                        variationImagesPayload.push({ data: dataUri, alt: vimg.filename || undefined, isMain: viImg === 0, order: viImg })
                         if (vimg.previewUrl) URL.revokeObjectURL(vimg.previewUrl)
                     } else if (vimg.previewUrl) {
                         variationImagesPayload.push({ data: vimg.previewUrl, alt: vimg.filename || undefined, isMain: viImg === 0, order: viImg })
@@ -361,22 +365,18 @@ export default function ProductForm({ defaultValues, categories = [], availableA
 
             // Product price: prefer explicit field, otherwise first variation
             const productPrice = formData.price ? parseFloat(formData.price) : (formData.variations[0] ? parseFloat(formData.variations[0].price || '0') : 0)
-            // Upload product images (if any previews present)
+            // Convert product images to base64 data URIs for DB storage (images are stored in product_images)
             const productImagesPayload: Array<{ data: string; alt?: string; isMain?: boolean; order?: number }> = []
             for (let i = 0; i < imagePreviewsRef.current.length; i++) {
                 const img = imagePreviewsRef.current[i]
                 if (img.file) {
-                    const fd = new FormData()
-                    fd.append('file', img.file)
-                    const resImg = await fetch('/api/r2/upload', { method: 'POST', body: fd })
-                    if (!resImg.ok) throw new Error('Falha no upload de imagem do produto')
-                    const jimg = await resImg.json()
-                    const r2k = jimg?.data?.key ?? jimg?.data
-                    if (r2k) productImagesPayload.push({ data: r2k, alt: img.filename || undefined, isMain: i === 0, order: i })
-                    // revoke preview URL after upload
+                    const arr = await img.file.arrayBuffer()
+                    const b64 = Buffer.from(arr).toString('base64')
+                    const mime = img.file.type || 'image/jpeg'
+                    const dataUri = `data:${mime};base64,${b64}`
+                    productImagesPayload.push({ data: dataUri, alt: img.filename || undefined, isMain: i === 0, order: i })
                     if (img.previewUrl) URL.revokeObjectURL(img.previewUrl)
                 } else if (img.previewUrl) {
-                    // If there's no File object (existing preview), send the preview URL or key as data
                     productImagesPayload.push({ data: img.previewUrl, alt: img.filename || undefined, isMain: i === 0, order: i })
                 }
             }
@@ -428,7 +428,7 @@ export default function ProductForm({ defaultValues, categories = [], availableA
         } catch (err: unknown) {
             setIsSubmitting(false)
             console.error(err)
-            alert('Erro ao salvar produto: ' + (err instanceof Error ? err.message : String(err)))
+            setFormError('Erro ao salvar produto: ' + (err instanceof Error ? err.message : String(err)))
         }
     }
 
@@ -437,6 +437,14 @@ export default function ProductForm({ defaultValues, categories = [], availableA
     return (
         <div className="max-w-4xl mx-auto space-y-6">
             <form onSubmit={handleSubmit} className="space-y-6">
+                {formError && (
+                    <div className="p-3 bg-red-50 border border-red-200 text-red-800 rounded">
+                        <div className="flex items-start justify-between">
+                            <div>{formError}</div>
+                            <button type="button" onClick={() => setFormError(null)} className="text-sm text-red-600 underline">Fechar</button>
+                        </div>
+                    </div>
+                )}
                 {/* Stepper header */}
                 <div className="flex items-center justify-between">
                     <div className="flex gap-2 items-center">
@@ -517,17 +525,26 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                                                                     setNewCategoryDescription('')
                                                                     setIsNewCategoryOpen(false)
                                                                 } else {
-                                                                    alert('Resposta inesperada ao criar categoria')
+                                                                    setCategoryError('Resposta inesperada ao criar categoria')
                                                                 }
                                                             } catch (err) {
                                                                 console.error(err)
-                                                                alert('Falha ao criar categoria')
+                                                                setCategoryError('Falha ao criar categoria')
                                                             } finally {
                                                                 setIsCreatingCategory(false)
                                                             }
                                                         }}>Criar</Button>
                                                     </div>
                                                 </div>
+                                            </div>
+                                        )}
+
+                                        {categoryError && (
+                                            <div className="mt-2">
+                                                <Alert variant="destructive">
+                                                    <AlertTitle>Erro</AlertTitle>
+                                                    <AlertDescription>{categoryError}</AlertDescription>
+                                                </Alert>
                                             </div>
                                         )}
                                     </div>

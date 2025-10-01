@@ -372,17 +372,27 @@ export async function POST(request: NextRequest) {
 
       // Insert product images if provided
       if (validated.images && validated.images.length > 0) {
-        const imageData = validated.images.map(image => ({
-          productId: insertedProduct.id,
-          name: `image-${Date.now()}.jpg`, // Nome temporário
-          originalName: `product-image.jpg`, // Nome temporário
-          mimeType: 'image/jpeg', // Tipo temporário - poderia ser extraído do base64
-          size: Math.round(image.data.length * 0.75), // Estimativa do tamanho baseado no base64
-          data: image.data,
-          alt: image.alt || validated.name,
-          isMain: image.isMain,
-          sortOrder: image.order,
-        }));
+        const imageData = validated.images.map(image => {
+          // Extrair mimeType do data URI se estiver presente
+          let mimeType = 'image/jpeg';
+          const dataStr = String(image.data);
+          if (dataStr.startsWith('data:')) {
+            const match = dataStr.match(/^data:([^;]+);/);
+            if (match) mimeType = match[1];
+          }
+          
+          return {
+            productId: insertedProduct.id,
+            name: `image-${Date.now()}.jpg`,
+            originalName: `product-image.jpg`,
+            mimeType: mimeType,
+            size: Math.round(image.data.length * 0.75),
+            data: image.data,
+            alt: image.alt || validated.name,
+            isMain: image.isMain,
+            sortOrder: image.order,
+          };
+        });
 
         await tx.insert(productImages).values(imageData);
       }
@@ -413,17 +423,27 @@ export async function POST(request: NextRequest) {
 
           // Insert variation images if provided
           if (variation.images && variation.images.length > 0) {
-            const variationImageData = variation.images.map(image => ({
-              variationId: insertedVariation.id,
-              name: `variation-image-${Date.now()}.jpg`,
-              originalName: `variation-image.jpg`,
-              mimeType: 'image/jpeg',
-              size: Math.round(image.data.length * 0.75),
-              data: image.data,
-              alt: image.alt || variation.name,
-              isMain: image.isMain,
-              sortOrder: image.order,
-            }));
+            const variationImageData = variation.images.map(image => {
+              // Extrair mimeType do data URI se estiver presente
+              let mimeType = 'image/jpeg';
+              const dataStr = String(image.data);
+              if (dataStr.startsWith('data:')) {
+                const match = dataStr.match(/^data:([^;]+);/);
+                if (match) mimeType = match[1];
+              }
+              
+              return {
+                variationId: insertedVariation.id,
+                name: `variation-image-${Date.now()}.jpg`,
+                originalName: `variation-image.jpg`,
+                mimeType: mimeType,
+                size: Math.round(image.data.length * 0.75),
+                data: image.data,
+                alt: image.alt || variation.name,
+                isMain: image.isMain,
+                sortOrder: image.order,
+              };
+            });
 
             await tx.insert(productImages).values(variationImageData);
           }

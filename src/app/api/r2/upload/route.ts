@@ -19,10 +19,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Nenhum arquivo fornecido' }, { status: 400 });
     }
 
-    // Validações do arquivo
-    if (!file.type.includes('pdf') && !file.type.includes('image/')) {
+    // Validações do arquivo - THIS ENDPOINT IS PDF-ONLY. Images must be stored in DB.
+    if (!file.type.includes('pdf')) {
       return NextResponse.json(
-        { error: 'Tipo de arquivo não suportado. Apenas PDFs e imagens são permitidos.' },
+        { error: 'Tipo de arquivo não suportado. Apenas PDFs são permitidos neste endpoint.' },
         { status: 400 }
       );
     }

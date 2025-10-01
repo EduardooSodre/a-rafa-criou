@@ -35,6 +35,7 @@ import {
 } from '@/components/ui/collapsible'
 import EditProductDialog from '@/components/admin/EditProductDialog'
 import EditVariationDialog from '@/components/admin/EditVariationDialog'
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 
 interface FileData {
     id: string
@@ -84,6 +85,7 @@ export default function ProductsCardsView({
     const [deletingProduct, setDeletingProduct] = useState<string | null>(null)
     const [deletingVariation, setDeletingVariation] = useState<string | null>(null)
     const [editingProduct, setEditingProduct] = useState<ProductData | null>(null)
+    const [cardsError, setCardsError] = useState<string | null>(null)
 
     // Fetch products from API
     useEffect(() => {
@@ -179,7 +181,7 @@ export default function ProductsCardsView({
             onRefresh?.()
         } catch (error) {
             console.error('Erro ao excluir produto:', error)
-            alert('Erro ao excluir produto. Tente novamente.')
+            setCardsError('Erro ao excluir produto. Tente novamente.')
         } finally {
             setDeletingProduct(null)
         }
@@ -200,7 +202,7 @@ export default function ProductsCardsView({
             onRefresh?.()
         } catch (error) {
             console.error('Erro ao excluir variação:', error)
-            alert('Erro ao excluir variação. Tente novamente.')
+            setCardsError('Erro ao excluir variação. Tente novamente.')
         } finally {
             setDeletingVariation(null)
         }
@@ -252,6 +254,12 @@ export default function ProductsCardsView({
 
     return (
         <div className="space-y-6">
+            {cardsError && (
+                <Alert variant="destructive">
+                    <AlertTitle>Erro</AlertTitle>
+                    <AlertDescription>{cardsError}</AlertDescription>
+                </Alert>
+            )}
             {/* Grid de Cards */}
             <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {products.map((product) => (

@@ -106,14 +106,25 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             r2Key: f.path,
           })),
           images: variationImages.map(img => ({
-            id: img.id,
-            name: img.name,
-            data: img.data,
-            mimeType: img.mimeType,
-            alt: img.alt,
-            isMain: img.isMain,
-            order: img.sortOrder,
-          })),
+              id: img.id,
+              name: img.name,
+              data: (function () {
+                const raw = img.data ?? ''
+                const s = String(raw)
+                if (!s) return ''
+                if (s.startsWith('data:')) return s
+                // If mimeType is image, build a data URI (we store images in DB)
+                if (img.mimeType && img.mimeType.startsWith('image/')) return `data:${img.mimeType};base64,${s}`
+                // Fallback: if it looks like base64, return data URI
+                if (!s.includes(' ')) return `data:${img.mimeType || 'image/jpeg'};base64,${s}`
+                // Otherwise assume it's an R2 path and convert to download URL
+                return `/api/r2/download?r2Key=${encodeURIComponent(s)}`
+              })(),
+              mimeType: img.mimeType,
+              alt: img.alt,
+              isMain: img.isMain,
+              order: img.sortOrder,
+            })),
           attributeValues,
         };
       })
@@ -131,7 +142,15 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       images: images.map(img => ({
         id: img.id,
         name: img.name,
-        data: img.data,
+        data: (function () {
+          const raw = img.data ?? ''
+          const s = String(raw)
+          if (!s) return ''
+          if (s.startsWith('data:')) return s
+          if (img.mimeType && img.mimeType.startsWith('image/')) return `data:${img.mimeType};base64,${s}`
+          if (!s.includes(' ')) return `data:${img.mimeType || 'image/jpeg'};base64,${s}`
+          return `/api/r2/download?r2Key=${encodeURIComponent(s)}`
+        })(),
         mimeType: img.mimeType,
         alt: img.alt,
         isMain: img.isMain,
@@ -211,11 +230,18 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
               (img: IncomingImage) => {
                 const data = img.data ?? '';
                 if (!data) return null;
+                // Extrair mimeType do data URI se estiver presente
+                let mimeType = 'image/jpeg';
+                const dataStr = String(data);
+                if (dataStr.startsWith('data:')) {
+                  const match = dataStr.match(/^data:([^;]+);/);
+                  if (match) mimeType = match[1];
+                }
                 return {
                   variationId: variation.id!,
                   name: `var-img-${Date.now()}.jpg`,
                   originalName: `var-img.jpg`,
-                  mimeType: 'image/jpeg',
+                  mimeType: mimeType,
                   size: Math.round(String(data).length * 0.75),
                   data,
                   alt: img.alt ?? null,
@@ -288,11 +314,18 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
               (img: IncomingImage) => {
                 const data = img.data ?? '';
                 if (!data) return null;
+                // Extrair mimeType do data URI se estiver presente
+                let mimeType = 'image/jpeg';
+                const dataStr = String(data);
+                if (dataStr.startsWith('data:')) {
+                  const match = dataStr.match(/^data:([^;]+);/);
+                  if (match) mimeType = match[1];
+                }
                 return {
                   variationId: newVar.id!,
                   name: `var-img-${Date.now()}.jpg`,
                   originalName: `var-img.jpg`,
-                  mimeType: 'image/jpeg',
+                  mimeType: mimeType,
                   size: Math.round(String(data).length * 0.75),
                   data,
                   alt: img.alt ?? null,
@@ -350,11 +383,18 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         (img: IncomingImage) => {
           const data = img.data ?? '';
           if (!data) return null;
+          // Extrair mimeType do data URI se estiver presente
+          let mimeType = 'image/jpeg';
+          const dataStr = String(data);
+          if (dataStr.startsWith('data:')) {
+            const match = dataStr.match(/^data:([^;]+);/);
+            if (match) mimeType = match[1];
+          }
           return {
             productId: id,
             name: `image-${Date.now()}.jpg`,
             originalName: `product-image.jpg`,
-            mimeType: 'image/jpeg',
+            mimeType: mimeType,
             size: Math.round(String(data).length * 0.75),
             data,
             alt: img.alt ?? null,

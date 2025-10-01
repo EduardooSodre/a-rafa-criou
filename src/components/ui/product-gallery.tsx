@@ -1,6 +1,7 @@
 import * as React from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { getPreviewSrc } from '@/lib/r2-utils'
 
 interface ProductGalleryProps {
     images: string[];
@@ -22,7 +23,7 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
                 aria-label={zoom ? "Fechar zoom" : "Ampliar imagem"}
             >
                 <Image
-                    src={Array.isArray(images) && images.length > 0 && images[selected] ? images[selected] : "/file.svg"}
+                    src={getPreviewSrc(Array.isArray(images) && images.length > 0 && images[selected] ? images[selected] : '/file.svg')}
                     alt={alt}
                     width={zoom ? 900 : 600}
                     height={zoom ? 900 : 600}
@@ -58,7 +59,7 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
                             aria-label={`Selecionar imagem ${i + 1}`}
                         >
                             <Image
-                                src={img}
+                                src={getPreviewSrc(img)}
                                 alt={alt + ` miniatura ${i + 1}`}
                                 width={64}
                                 height={64}

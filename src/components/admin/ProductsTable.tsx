@@ -38,6 +38,7 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from '@/components/ui/collapsible'
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 
 interface FileData {
     id: string
@@ -85,6 +86,7 @@ export default function ProductsTableClean({
     const [expandedRows, setExpandedRows] = useState(new Set<string>())
     const [deletingProduct, setDeletingProduct] = useState<string | null>(null)
     const [deletingVariation, setDeletingVariation] = useState<string | null>(null)
+    const [tableError, setTableError] = useState<string | null>(null)
 
     // Fetch products from API
     useEffect(() => {
@@ -186,7 +188,7 @@ export default function ProductsTableClean({
             onRefresh?.()
         } catch (error) {
             console.error('Erro ao excluir produto:', error)
-            alert('Erro ao excluir produto. Tente novamente.')
+            setTableError('Erro ao excluir produto. Tente novamente.')
         } finally {
             setDeletingProduct(null)
         }
@@ -222,7 +224,7 @@ export default function ProductsTableClean({
             onRefresh?.()
         } catch (error) {
             console.error('Erro ao excluir variação:', error)
-            alert('Erro ao excluir variação. Tente novamente.')
+            setTableError('Erro ao excluir variação. Tente novamente.')
         } finally {
             setDeletingVariation(null)
         }
@@ -242,6 +244,12 @@ export default function ProductsTableClean({
 
     return (
         <div className="space-y-4">
+            {tableError && (
+                <Alert variant="destructive">
+                    <AlertTitle>Erro</AlertTitle>
+                    <AlertDescription>{tableError}</AlertDescription>
+                </Alert>
+            )}
             {/* Tabela Principal */}
             <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
                 <Table>

@@ -25,6 +25,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 
 interface User {
     id: string
@@ -41,6 +42,7 @@ export default function UserManagement() {
     const [search, setSearch] = useState('')
     const [adminPassword, setAdminPassword] = useState('')
     const [actionLoading, setActionLoading] = useState<string | null>(null)
+    const [userMgmtError, setUserMgmtError] = useState<string | null>(null)
 
     // Buscar usuários reais da API
     useEffect(() => {
@@ -92,7 +94,7 @@ export default function UserManagement() {
 
     const handlePromoteUser = async (email: string, action: 'promote' | 'demote') => {
         if (!adminPassword) {
-            alert('Digite sua senha de admin para confirmar')
+            setUserMgmtError('Digite sua senha de admin para confirmar')
             return
         }
 
@@ -132,12 +134,12 @@ export default function UserManagement() {
                     : u
             ))
 
-            alert(`Usuário ${action === 'promote' ? 'promovido a admin' : 'rebaixado para usuário'} com sucesso!`)
+            window.alert(`Usuário ${action === 'promote' ? 'promovido a admin' : 'rebaixado para usuário'} com sucesso!`)
             setAdminPassword('')
 
         } catch (error) {
             console.error('Erro ao alterar permissão:', error)
-            alert(error instanceof Error ? error.message : 'Erro ao alterar permissão')
+            setUserMgmtError(error instanceof Error ? error.message : 'Erro ao alterar permissão')
         } finally {
             setActionLoading(null)
         }
@@ -171,6 +173,12 @@ export default function UserManagement() {
 
     return (
         <div className="space-y-6">
+            {userMgmtError && (
+                <Alert variant="destructive">
+                    <AlertTitle>Erro</AlertTitle>
+                    <AlertDescription>{userMgmtError}</AlertDescription>
+                </Alert>
+            )}
             {/* Cartão de Aviso de Segurança - Redesenhado */}
             <Card className="border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50">
                 <CardContent className="p-4">

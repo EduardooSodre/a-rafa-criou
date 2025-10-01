@@ -72,6 +72,7 @@ export default function EditVariationDialog({
 }: EditVariationDialogProps) {
     const [open, setOpen] = useState(false)
     const [loading, setLoading] = useState(false)
+    const [dialogError, setDialogError] = useState<string | null>(null)
     const [formData, setFormData] = useState<VariationData>({
         ...variation,
         price: variation.price?.toString() ?? '',
@@ -168,18 +169,18 @@ export default function EditVariationDialog({
             // validation: ensure at least one file (PDF) is present
             const filesArr = formData.files || []
             if (filesArr.length === 0) {
-                alert('Cada variação precisa ter ao menos um arquivo (PDF).')
+                setDialogError('Cada variação precisa ter ao menos um arquivo (PDF).')
                 setLoading(false)
                 return
             }
             const hasPdf = filesArr.some(f => (f.mimeType === 'application/pdf') || (f.file && f.file.type === 'application/pdf') || (f.filename && f.filename.toLowerCase().endsWith('.pdf')))
             if (!hasPdf) {
-                alert('Adicione pelo menos um arquivo PDF à variação.')
+                setDialogError('Adicione pelo menos um arquivo PDF à variação.')
                 setLoading(false)
                 return
             }
 
-            // First upload any files to R2 and collect r2Key
+            // First upload any files (PDFs) to R2 and collect r2Key; images will be converted to base64 and stored in DB
             const filesPayload: Array<{ filename: string; originalName: string; fileSize: number; mimeType: string; r2Key?: string }> = []
             for (const f of filesArr) {
                 if (f.file) {
@@ -195,18 +196,16 @@ export default function EditVariationDialog({
                 }
             }
 
-            // Upload images to R2 if File objects exist; otherwise use existing url/data
+            // Convert images to base64 data URIs for DB storage; preserve existing data/url values
             const imagesPayload: Array<{ data: string; alt?: string; order?: number }> = []
             for (let i = 0; i < (formData.images || []).length; i++) {
                 const img = formData.images![i]
                 if (img.file) {
-                    const fd = new FormData()
-                    fd.append('file', img.file)
-                    const resImg = await fetch('/api/r2/upload', { method: 'POST', body: fd })
-                    if (!resImg.ok) throw new Error('Falha no upload de imagem da variação')
-                    const jimg = await resImg.json()
-                    const r2k = jimg?.data?.key ?? jimg?.data
-                    imagesPayload.push({ data: r2k, alt: img.alt || undefined, order: img.order })
+                    const arr = await img.file.arrayBuffer()
+                    const b64 = Buffer.from(arr).toString('base64')
+                    const mime = img.mimeType || img.file.type || 'image/jpeg'
+                    const dataUri = `data:${mime};base64,${b64}`
+                    imagesPayload.push({ data: dataUri, alt: img.alt || undefined, order: img.order })
                 } else if (img.data) {
                     imagesPayload.push({ data: img.data, alt: img.alt || undefined, order: img.order })
                 } else if (img.url) {
@@ -237,7 +236,7 @@ export default function EditVariationDialog({
             onSuccess?.()
         } catch (err) {
             console.error(err)
-            alert('Erro ao atualizar variação. Tente novamente.')
+            setDialogError('Erro ao atualizar variação. Tente novamente.')
         } finally {
             setLoading(false)
         }
@@ -260,6 +259,14 @@ export default function EditVariationDialog({
                     </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-6">
+                    {dialogError && (
+                        <div className="p-2 bg-red-50 border border-red-200 text-red-800 rounded">
+                            <div className="flex items-start justify-between">
+                                <div className="text-sm">{dialogError}</div>
+                                <button type="button" onClick={() => setDialogError(null)} className="text-sm text-red-600 underline">Fechar</button>
+                            </div>
+                        </div>
+                    )}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <Label htmlFor="name">Nome da Variação *</Label>

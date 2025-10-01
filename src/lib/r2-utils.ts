@@ -126,9 +126,19 @@ export function getPreviewSrc(raw?: string | null, mimeType?: string): string {
   if (str.startsWith('data:')) return str;
   // treat already-built download urls as-is
   if (str.startsWith('/api/r2/download') || str.startsWith('http')) return str;
-  // Heuristic: path-like or short keys are R2 keys/paths
+  // If mimeType indicates an image, prefer returning a data URI (DB-stored images are base64)
+  if (mimeType && mimeType.startsWith('image/')) {
+    return `data:${mimeType};base64,${str}`;
+  }
+
+  // For unknown mimeType, try to be conservative: assume it's base64 image data
+  // (this ensures existing DB-stored image strings work)
+  const likelyBase64 = !str.includes(' ');
+  if (likelyBase64) return `data:${mimeType || 'image/jpeg'};base64,${str}`;
+
+  // Fallback: if it looks like a key/path and is not an image, treat as R2 key
   const looksLikeKey = str.includes('/') || str.includes('.') || str.length < 200;
   if (looksLikeKey) return `/api/r2/download?r2Key=${encodeURIComponent(str)}`;
-  // Otherwise assume base64 without mime
+
   return `data:${mimeType || 'image/jpeg'};base64,${str}`;
 }

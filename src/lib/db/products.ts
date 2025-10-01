@@ -84,9 +84,18 @@ export async function getProductBySlug(slug: string) {
     .select()
     .from(productImages)
     .where(eq(productImages.productId, product.id));
-  // Pega só o campo data (base64) ou path, ou monta url se necessário
+  // Converte base64 do banco para data URI
   const images =
-    imagesResult.length > 0 ? imagesResult.map(img => img.data || '/file.svg') : ['/file.svg'];
+    imagesResult.length > 0 
+      ? imagesResult.map(img => {
+          const raw = img.data || '';
+          if (!raw) return '/file.svg';
+          // Se já é data URI, retorna direto
+          if (String(raw).startsWith('data:')) return String(raw);
+          // Caso contrário, assume que é base64 e monta o data URI
+          return `data:${img.mimeType || 'image/jpeg'};base64,${raw}`;
+        })
+      : ['/file.svg'];
 
   // Monta objeto final para o ProductDetailClient
   return {

@@ -85,7 +85,11 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
         const src = detailedProduct || product
         if (!src) return undefined
         const source = src as AdminProduct
-        const images = (source.images || []).map(i => getPreviewSrc(i?.data ?? i?.r2Key ?? i?.url ?? '', i?.mimeType))
+        // ProductForm expects `images` as an array of string preview URLs
+        const images = (source.images || []).map(i => {
+            const raw = (i as ApiImage)?.data ?? (i as ApiImage)?.r2Key ?? (i as ApiImage)?.url ?? ''
+            return getPreviewSrc(String(raw || ''), (i as ApiImage)?.mimeType)
+        })
         type RawAttr = ApiAttributeValue & { attribute_id?: string; attribute_value_id?: string }
         type RawFile = ApiFile & { name?: string; path?: string; size?: number }
         const variations = (source.variations || []).map(v => {
@@ -94,7 +98,7 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
                 if (!img) return { filename: '', previewUrl: '' }
                 const ai = img as ApiImage
                 const raw = ai.data ?? ai.r2Key ?? ai.url ?? ''
-                const preview = getPreviewSrc(String(raw), ai.mimeType)
+                const preview = getPreviewSrc(String(raw || ''), ai.mimeType)
                 return { filename: ai.alt || ai.name || '', previewUrl: preview }
             })
             const attrVals = (vv.attributeValues || []).map((av: RawAttr) => ({ attributeId: av.attributeId || av.attribute_id || '', valueId: av.valueId || av.attribute_value_id || '' })).filter(a => a.attributeId && a.valueId)

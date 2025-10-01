@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { getPreviewSrc } from '@/lib/r2-utils';
 import { useTranslation } from 'react-i18next';
 import { useCart } from '@/contexts/cart-context';
 import { useToast } from '@/components/ui/toast';
@@ -78,9 +79,26 @@ export default function FeaturedProducts({
                 }
 
                 const data: ApiResponse = await response.json();
-                setProducts(data.products);
-                setHasMore(data.pagination.hasMore);
-                setOffset(initialLimit);
+
+                // If featured products list is smaller than the UI limit, fetch latest products
+                // and merge them to fill the UI slots so newly created non-featured items appear.
+                let productsList = Array.isArray(data.products) ? data.products.slice() : []
+                if (productsList.length < initialLimit) {
+                    const need = initialLimit - productsList.length
+                    console.info(`Featured returned ${productsList.length}; fetching ${need} latest to fill slots`)
+                    const fallbackRes = await fetch(`/api/products?limit=${need}&offset=0`)
+                    if (fallbackRes.ok) {
+                        const fallbackData: ApiResponse = await fallbackRes.json()
+                        const existingIds = new Set(productsList.map(p => p.id))
+                        const extras = (fallbackData.products || []).filter(p => !existingIds.has(p.id)).slice(0, need)
+                        productsList = [...productsList, ...extras]
+                    }
+                }
+
+                setProducts(productsList)
+                // Conservative hasMore: true if backend says so for featured OR if fallback indicates more
+                setHasMore(Boolean(data.pagination.hasMore))
+                setOffset(initialLimit)
             } catch (error) {
                 console.error('Error fetching products:', error);
             } finally {
@@ -104,8 +122,26 @@ export default function FeaturedProducts({
 
             const data: ApiResponse = await response.json();
 
-            setProducts(prev => [...prev, ...data.products]);
-            setHasMore(data.pagination.hasMore);
+            // If featured returns fewer items than requested, fetch extra latest products and append non-duplicates
+            let combined = Array.isArray(data.products) ? data.products.slice() : []
+            if (combined.length < loadMoreLimit) {
+                const need = loadMoreLimit - combined.length
+                const fallbackRes = await fetch(`/api/products?limit=${need}&offset=${offset}`)
+                if (fallbackRes.ok) {
+                    const fallbackData: ApiResponse = await fallbackRes.json()
+                    const existingIds = new Set(combined.map(p => p.id))
+                    const extras = (fallbackData.products || []).filter(p => !existingIds.has(p.id)).slice(0, need)
+                    combined = [...combined, ...extras]
+                    // Use conservative hasMore: true if either source indicates more
+                    setHasMore(Boolean(data.pagination.hasMore) || Boolean(fallbackData.pagination.hasMore))
+                } else {
+                    setHasMore(Boolean(data.pagination.hasMore))
+                }
+            } else {
+                setHasMore(data.pagination.hasMore)
+            }
+
+            setProducts(prev => [...prev, ...combined]);
             setOffset(offset + loadMoreLimit);
         } catch (error) {
             console.error('Error loading more products:', error);
@@ -199,7 +235,7 @@ export default function FeaturedProducts({
                                         <div className="aspect-square bg-gray-100 relative overflow-hidden group rounded-lg">
                                             {product.mainImage && product.mainImage.data ? (
                                                 <Image
-                                                    src={product.mainImage.data}
+                                                    src={getPreviewSrc(product.mainImage.data)}
                                                     alt={product.mainImage.alt || product.name}
                                                     fill
                                                     sizes="(max-width: 768px) 50vw, 25vw"

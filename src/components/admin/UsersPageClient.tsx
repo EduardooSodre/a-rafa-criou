@@ -63,6 +63,7 @@ import {
     TabsTrigger,
 } from '@/components/ui/tabs'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 
 interface User {
     id: string
@@ -88,6 +89,7 @@ export default function UsersPageClient() {
     const [roleFilter, setRoleFilter] = useState<string>('all')
     const [adminPassword, setAdminPassword] = useState('')
     const [actionLoading, setActionLoading] = useState<string | null>(null)
+    const [pageError, setPageError] = useState<string | null>(null)
 
     // Carregar dados reais
     useEffect(() => {
@@ -117,9 +119,9 @@ export default function UsersPageClient() {
                     users: userCount,
                     newThisMonth
                 })
-            } catch (error) {
+                } catch (error) {
                 console.error('Erro ao carregar usuários:', error)
-                alert('Falha ao carregar dados dos usuários')
+                setPageError('Falha ao carregar dados dos usuários')
             } finally {
                 setLoading(false)
             }
@@ -130,7 +132,7 @@ export default function UsersPageClient() {
 
     const handlePromoteUser = async (email: string, action: 'promote' | 'demote') => {
         if (!adminPassword) {
-            alert('Digite sua senha de administrador primeiro')
+            setPageError('Digite sua senha de administrador primeiro')
             return
         }
 
@@ -152,7 +154,8 @@ export default function UsersPageClient() {
                 throw new Error(result.error || 'Falha na operação')
             }
 
-            alert(result.message)
+            // keep success notification simple
+            window.alert(result.message)
 
             // Recarregar lista - fazer nova busca
             const response2 = await fetch('/api/admin/users')
@@ -176,7 +179,7 @@ export default function UsersPageClient() {
                 })
             }
         } catch (error) {
-            alert(`Erro: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
+            setPageError(`Erro: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
         } finally {
             setActionLoading(null)
         }
@@ -235,6 +238,14 @@ export default function UsersPageClient() {
 
     return (
         <div className="space-y-6">
+            {pageError && (
+                <div>
+                    <Alert variant="destructive">
+                        <AlertTitle>Erro</AlertTitle>
+                        <AlertDescription>{pageError}</AlertDescription>
+                    </Alert>
+                </div>
+            )}
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="flex items-center gap-3">
