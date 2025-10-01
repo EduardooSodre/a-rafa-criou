@@ -149,11 +149,11 @@ export default function AttributeManager({ selectedAttributes, onChange }: Attri
             selectedAttributes.map(a =>
                 a.attributeId === attributeId
                     ? {
-                          ...a,
-                          valueIds: hasValue
-                              ? a.valueIds.filter(v => v !== valueId)
-                              : [...a.valueIds, valueId]
-                      }
+                        ...a,
+                        valueIds: hasValue
+                            ? a.valueIds.filter(v => v !== valueId)
+                            : [...a.valueIds, valueId]
+                    }
                     : a
             )
         )
@@ -286,11 +286,10 @@ export default function AttributeManager({ selectedAttributes, onChange }: Attri
                             return (
                                 <div
                                     key={attr.id}
-                                    className={`border rounded-lg p-4 transition-all ${
-                                        isSelected
+                                    className={`border rounded-lg p-4 transition-all ${isSelected
                                             ? 'border-[#FED466] bg-[#FED466]/5'
                                             : 'border-gray-200'
-                                    }`}
+                                        }`}
                                 >
                                     <div className="flex items-center justify-between mb-3">
                                         <label className="flex items-center gap-3 cursor-pointer">
@@ -327,11 +326,10 @@ export default function AttributeManager({ selectedAttributes, onChange }: Attri
                                                     return (
                                                         <label
                                                             key={value.id}
-                                                            className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border-2 cursor-pointer transition-all ${
-                                                                isValueSelected
+                                                            className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border-2 cursor-pointer transition-all ${isValueSelected
                                                                     ? 'border-[#FD9555] bg-[#FED466]/20'
                                                                     : 'border-gray-300 hover:border-[#FED466]'
-                                                            }`}
+                                                                }`}
                                                         >
                                                             <input
                                                                 type="checkbox"

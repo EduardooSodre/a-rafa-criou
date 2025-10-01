@@ -574,7 +574,7 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                 {step === 3 && (
                     <VariationManager
                         variations={formData.variations}
-                        attributes={localAttributes.filter(attr => 
+                        attributes={localAttributes.filter(attr =>
                             formData.attributes?.some(a => a.attributeId === attr.id)
                         )}
                         onChange={variations => setFormData(prev => ({ ...prev, variations }))}

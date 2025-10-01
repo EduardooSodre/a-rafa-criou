@@ -49,7 +49,7 @@ interface VariationManagerProps {
 }
 
 export default function VariationManager({ variations, attributes, onChange }: VariationManagerProps) {
-    
+
     function addVariation() {
         onChange([...variations, {
             name: '',

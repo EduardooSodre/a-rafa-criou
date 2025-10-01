@@ -21,11 +21,11 @@ interface ProductVariation {
     downloadLimit: number
     fileSize: string
     images?: string[]  // Adicionado: imagens da variação
-    attributeValues?: { 
+    attributeValues?: {
         attributeId: string
         attributeName?: string | null
         valueId: string
-        value?: string | null 
+        value?: string | null
     }[]
 }
 
@@ -75,7 +75,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
 
     // Agrupar variações por atributos únicos
     const attributeGroups = new Map<string, Set<string>>()
-    
+
     validVariations.forEach(variation => {
         variation.attributeValues?.forEach(attr => {
             if (attr.attributeName && attr.value) {
@@ -128,13 +128,13 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
     }, [selectedVariation, currentVariation, product.images])
 
     const handlePrevImage = () => {
-        setCurrentImageIndex((prev) => 
+        setCurrentImageIndex((prev) =>
             prev === 0 ? displayedImages.length - 1 : prev - 1
         )
     }
 
     const handleNextImage = () => {
-        setCurrentImageIndex((prev) => 
+        setCurrentImageIndex((prev) =>
             prev === displayedImages.length - 1 ? 0 : prev + 1
         )
     }
@@ -156,7 +156,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
             image: displayedImages[0] || product.images[0]
         })
         showToast(
-            t('cart.addedToCart', { product: t(`productNames.${product.slug}`, { defaultValue: product.name }) }), 
+            t('cart.addedToCart', { product: t(`productNames.${product.slug}`, { defaultValue: product.name }) }),
             'success'
         )
     }
@@ -188,7 +188,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                             priority
                             sizes="(max-width: 768px) 100vw, 50vw"
                         />
-                        
+
                         {/* Botões de Navegação - GRANDES e VISÍVEIS para idosos */}
                         {displayedImages.length > 1 && (
                             <>
@@ -320,11 +320,11 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                                         </span>
                                                     )}
                                                 </div>
-                                                
+
                                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                                                     {Array.from(values).map(value => {
                                                         const isSelected = selectedFilters.get(attrName) === value
-                                                        
+
                                                         return (
                                                             <button
                                                                 key={value}
@@ -340,7 +340,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                                                 {isSelected && (
                                                                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                                                                 )}
-                                                                
+
                                                                 {/* Check icon quando selecionado */}
                                                                 {isSelected && (
                                                                     <div className="absolute -top-1 -right-1 w-6 h-6 bg-[#FD9555] rounded-full flex items-center justify-center shadow-md z-10">
@@ -349,7 +349,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                                                         </svg>
                                                                     </div>
                                                                 )}
-                                                                
+
                                                                 <div className="relative">
                                                                     <div className={cn(
                                                                         "font-bold text-base mb-1 transition-colors",
@@ -390,7 +390,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                                             </div>
                                                             <div className="flex flex-wrap gap-2">
                                                                 {Array.from(selectedFilters.entries()).map(([attr, value]) => (
-                                                                    <span 
+                                                                    <span
                                                                         key={attr}
                                                                         className="inline-flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-full border border-green-300 text-sm font-medium text-gray-700"
                                                                     >

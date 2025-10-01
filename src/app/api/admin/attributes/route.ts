@@ -43,7 +43,7 @@ export async function GET() {
 // POST - Criar novo atributo OU adicionar valor a existente
 export async function POST(req: Request) {
   const body = await req.json();
-  
+
   // Se contém attributeId, é para adicionar valor a atributo existente
   if (body.attributeId) {
     const parse = addValueSchema.safeParse(body);
@@ -60,7 +60,10 @@ export async function POST(req: Request) {
 
     const valueExists = existing.some(v => v.slug === slug);
     if (valueExists) {
-      return NextResponse.json({ error: 'Este valor já existe para este atributo' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Este valor já existe para este atributo' },
+        { status: 400 }
+      );
     }
 
     // Inserir novo valor

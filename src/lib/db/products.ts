@@ -71,7 +71,7 @@ export async function getProductBySlug(slug: string) {
         .select()
         .from(productImages)
         .where(eq(productImages.variationId, v.id));
-      
+
       const variationImages = variationImagesResult.map(img => {
         const raw = img.data || '';
         if (!raw) return '/file.svg';
