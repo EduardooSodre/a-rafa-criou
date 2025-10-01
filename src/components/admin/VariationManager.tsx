@@ -1,13 +1,23 @@
 'use client'
 
-import React from 'react'
-import { Trash2, Plus, Upload, X, FileText, ImageIcon } from 'lucide-react'
+import React, { useState } from 'react'
+import { Trash2, Plus, Upload, X, FileText, ImageIcon, AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 interface AttributeValue {
     id: string
@@ -49,6 +59,14 @@ interface VariationManagerProps {
 }
 
 export default function VariationManager({ variations, attributes, onChange }: VariationManagerProps) {
+    // Estado para controlar o dialog de confirmação
+    const [deleteDialog, setDeleteDialog] = useState<{
+        open: boolean
+        variationIndex: number
+        fileIndex: number
+        filename: string
+        hasR2Key: boolean
+    } | null>(null)
 
     function addVariation() {
         onChange([...variations, {
@@ -95,11 +113,25 @@ export default function VariationManager({ variations, attributes, onChange }: V
         const variation = variations[variationIndex]
         const file = variation.files[fileIndex]
 
-        // Se o arquivo já foi carregado no R2 (tem r2Key), deletar do R2 primeiro
-        if (file.r2Key) {
-            const confirmed = confirm(`Tem certeza que deseja deletar o arquivo "${file.filename}"?\nEle será removido permanentemente do Cloudflare R2.`)
-            if (!confirmed) return
+        // Abrir dialog de confirmação
+        setDeleteDialog({
+            open: true,
+            variationIndex,
+            fileIndex,
+            filename: file.filename || 'arquivo sem nome',
+            hasR2Key: !!file.r2Key
+        })
+    }
 
+    async function confirmRemoveFile() {
+        if (!deleteDialog) return
+
+        const { variationIndex, fileIndex } = deleteDialog
+        const variation = variations[variationIndex]
+        const file = variation.files[fileIndex]
+
+        // Se o arquivo já foi carregado no R2 (tem r2Key), deletar do R2 imediatamente
+        if (file.r2Key) {
             try {
                 const response = await fetch(`/api/r2/delete?r2Key=${encodeURIComponent(file.r2Key)}`, {
                     method: 'DELETE'
@@ -109,6 +141,7 @@ export default function VariationManager({ variations, attributes, onChange }: V
                     const error = await response.json()
                     console.error('Erro ao deletar do R2:', error)
                     alert(`Erro ao deletar arquivo do R2: ${error.error || 'Erro desconhecido'}`)
+                    setDeleteDialog(null)
                     return
                 }
 
@@ -116,6 +149,7 @@ export default function VariationManager({ variations, attributes, onChange }: V
             } catch (error) {
                 console.error('Erro ao deletar arquivo do R2:', error)
                 alert('Erro ao deletar arquivo. Tente novamente.')
+                setDeleteDialog(null)
                 return
             }
         }
@@ -124,6 +158,9 @@ export default function VariationManager({ variations, attributes, onChange }: V
         onChange(variations.map((v, i) =>
             i === variationIndex ? { ...v, files: v.files.filter((_, fi) => fi !== fileIndex) } : v
         ))
+
+        // Fechar dialog
+        setDeleteDialog(null)
     }
 
     function handleImageUpload(variationIndex: number, files: FileList) {
@@ -387,6 +424,47 @@ export default function VariationManager({ variations, attributes, onChange }: V
                     </div>
                 </Card>
             ))}
+
+            {/* Alert Dialog para confirmar exclusão de arquivo */}
+            <AlertDialog open={deleteDialog?.open || false} onOpenChange={(open) => !open && setDeleteDialog(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2">
+                            <AlertTriangle className="w-5 h-5 text-amber-500" />
+                            Remover arquivo
+                        </AlertDialogTitle>
+                        <AlertDialogDescription asChild>
+                            <div className="space-y-3">
+                                <div>
+                                    Deseja remover o arquivo <strong>{deleteDialog?.filename}</strong>?
+                                </div>
+                                {deleteDialog?.hasR2Key && (
+                                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-900">
+                                        <div className="flex items-start gap-2">
+                                            <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                                            <div>
+                                                <div className="font-semibold">⚠️ Atenção:</div>
+                                                <div className="mt-1">
+                                                    O arquivo será <strong>deletado permanentemente</strong> do Cloudflare R2 imediatamente.
+                                                </div>
+                                                <div className="mt-1">
+                                                    Esta ação não pode ser desfeita, mesmo se você cancelar a edição do produto.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmRemoveFile} className="bg-red-600 hover:bg-red-700">
+                            Remover
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     )
 }

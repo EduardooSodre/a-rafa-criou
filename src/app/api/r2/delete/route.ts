@@ -16,16 +16,18 @@ export async function DELETE(request: NextRequest) {
     const r2Key = searchParams.get('r2Key');
 
     if (!r2Key) {
-      return NextResponse.json(
-        { error: 'r2Key é obrigatório' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'r2Key é obrigatório' }, { status: 400 });
     }
 
     // Validação básica: não permitir tentativas de path traversal
     // Bloquear "../" ou "/.." (path traversal real)
     // Mas permitir ".." no nome do arquivo (ex: "arquivo..pdf")
-    if (r2Key.includes('../') || r2Key.includes('/..') || r2Key.startsWith('/') || r2Key.trim() === '') {
+    if (
+      r2Key.includes('../') ||
+      r2Key.includes('/..') ||
+      r2Key.startsWith('/') ||
+      r2Key.trim() === ''
+    ) {
       return NextResponse.json(
         { error: 'r2Key inválido: contém caracteres não permitidos' },
         { status: 400 }
