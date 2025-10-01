@@ -2,17 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import {
     Eye,
     Trash2,
-    ChevronDown,
-    ChevronUp,
     FileText,
-    Plus,
     Loader2,
     Package,
-    DollarSign,
-    Star
+    Pencil
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -28,13 +25,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import {
-    Collapsible,
-    CollapsibleContent,
-    CollapsibleTrigger,
-} from '@/components/ui/collapsible'
 import EditProductDialog from '@/components/admin/EditProductDialog'
-import EditVariationDialog from '@/components/admin/EditVariationDialog'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 
 interface FileData {
@@ -45,6 +36,13 @@ interface FileData {
     cloudflareId?: string
 }
 
+interface ImageData {
+    id: string
+    data?: string
+    mimeType?: string
+    alt?: string
+}
+
 interface VariationData {
     id: string
     productId: string
@@ -53,6 +51,7 @@ interface VariationData {
     price: number
     isActive: boolean
     files?: FileData[]
+    images?: ImageData[]
 }
 
 interface ProductData {
@@ -62,8 +61,10 @@ interface ProductData {
     price: number
     isActive: boolean
     isFeatured: boolean
+    categoryId?: string
     files?: FileData[]
     variations?: VariationData[]
+    images?: ImageData[]
 }
 
 interface ProductsTableProps {
@@ -81,9 +82,7 @@ export default function ProductsCardsView({
 }: ProductsTableProps) {
     const [products, setProducts] = useState<ProductData[]>([])
     const [loading, setLoading] = useState(true)
-    const [expandedCards, setExpandedCards] = useState(new Set<string>())
     const [deletingProduct, setDeletingProduct] = useState<string | null>(null)
-    const [deletingVariation, setDeletingVariation] = useState<string | null>(null)
     const [editingProduct, setEditingProduct] = useState<ProductData | null>(null)
     const [cardsError, setCardsError] = useState<string | null>(null)
 
@@ -118,31 +117,11 @@ export default function ProductsCardsView({
         fetchProducts()
     }, [search, category, page])
 
-    const toggleCard = (productId: string) => {
-        setExpandedCards(prev => {
-            const newSet = new Set(prev)
-            if (newSet.has(productId)) {
-                newSet.delete(productId)
-            } else {
-                newSet.add(productId)
-            }
-            return newSet
-        })
-    }
-
     const formatPrice = (price: number) => {
         return new Intl.NumberFormat('pt-BR', {
             style: 'currency',
             currency: 'BRL'
         }).format(price)
-    }
-
-    const formatFileSize = (bytes: number) => {
-        if (bytes === 0) return '0 B'
-        const k = 1024
-        const sizes = ['B', 'KB', 'MB', 'GB']
-        const i = Math.floor(Math.log(bytes) / Math.log(k))
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
     }
 
     const refreshProducts = async () => {
@@ -184,27 +163,6 @@ export default function ProductsCardsView({
             setCardsError('Erro ao excluir produto. Tente novamente.')
         } finally {
             setDeletingProduct(null)
-        }
-    }
-
-    const handleDeleteVariation = async (variationId: string, productId: string) => {
-        try {
-            setDeletingVariation(variationId)
-            const response = await fetch(`/api/admin/products/${productId}/variations/${variationId}`, {
-                method: 'DELETE',
-            })
-
-            if (!response.ok) {
-                throw new Error('Erro ao excluir variação')
-            }
-
-            await refreshProducts()
-            onRefresh?.()
-        } catch (error) {
-            console.error('Erro ao excluir variação:', error)
-            setCardsError('Erro ao excluir variação. Tente novamente.')
-        } finally {
-            setDeletingVariation(null)
         }
     }
 
@@ -261,118 +219,106 @@ export default function ProductsCardsView({
                 </Alert>
             )}
             {/* Grid de Cards */}
-            <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {products.map((product) => (
-                    <Card key={product.id} className="group hover:shadow-lg transition-all duration-300 border-gray-200">
-                        <CardHeader className="pb-3">
-                            <div className="flex items-start justify-between">
-                                <div className="flex items-center space-x-3 flex-1 min-w-0">
-                                    <div className="flex-shrink-0">
-                                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200">
-                                            <FileText className="h-5 w-5 text-blue-600" />
-                                        </div>
+            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                {products.map((product) => {
+                    // Buscar primeira imagem de capa do produto (mesma da home)
+                    const getProductImage = () => {
+                        if (product.images && product.images.length > 0) {
+                            // Buscar imagem principal (isMain) ou primeira
+                            const mainImage = product.images.find(img => img.data)
+                            if (mainImage && mainImage.data) {
+                                const mimeType = mainImage.mimeType || 'image/jpeg'
+                                return `data:${mimeType};base64,${mainImage.data}`
+                            }
+                        }
+                        return null
+                    }
+
+                    const productImage = getProductImage()
+
+                    return (
+                        <Card key={product.id} className="group hover:shadow-lg transition-all duration-200 border hover:border-[#FED466] overflow-hidden cursor-pointer">
+                            {/* Imagem do Produto */}
+                            <div className="relative h-24 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
+                                {productImage ? (
+                                    <Image
+                                        src={productImage}
+                                        alt={product.name}
+                                        fill
+                                        className="object-cover group-hover:scale-105 transition-transform duration-200"
+                                        unoptimized
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center">
+                                        <FileText className="h-8 w-8 text-gray-300" />
                                     </div>
-                                    <div className="min-w-0 flex-1">
-                                        <CardTitle className="text-base font-semibold text-gray-900 truncate">
-                                            {product.name}
-                                        </CardTitle>
-                                        <p className="text-sm text-gray-500 font-mono truncate">
-                                            {product.slug}
-                                        </p>
-                                    </div>
+                                )}
+                                
+                                {/* Badge de status */}
+                                <div className="absolute top-1.5 right-1.5">
+                                    <Badge
+                                        className={`text-xs shadow-sm ${product.isActive
+                                            ? "bg-green-500 text-white"
+                                            : "bg-gray-500 text-white"
+                                            }`}
+                                    >
+                                        {product.isActive ? "Ativo" : "Inativo"}
+                                    </Badge>
                                 </div>
-
-                                {/* Status Badge */}
-                                <Badge
-                                    variant={product.isActive ? "default" : "secondary"}
-                                    className={`ml-2 flex-shrink-0 ${product.isActive
-                                        ? "bg-green-100 text-green-800 border-green-200"
-                                        : "bg-red-100 text-red-800 border-red-200"
-                                        }`}
-                                >
-                                    {product.isActive ? "Ativo" : "Inativo"}
-                                </Badge>
                             </div>
 
-                            {/* Tags Row */}
-                            <div className="flex items-center gap-2 pt-2">
-                                {product.isFeatured && (
-                                    <Badge variant="outline" className="text-xs px-2 py-1 bg-yellow-50 text-yellow-700 border-yellow-200">
-                                        <Star className="h-3 w-3 mr-1" />
-                                        Destaque
-                                    </Badge>
-                                )}
-                                {product.variations && product.variations.length > 0 && (
-                                    <Badge variant="secondary" className="text-xs px-2 py-1 bg-blue-50 text-blue-700 border-blue-200">
-                                        {product.variations.length} variação{product.variations.length > 1 ? 'ões' : 'ão'}
-                                    </Badge>
-                                )}
-                            </div>
-                        </CardHeader>
+                            <CardHeader className="pb-1.5 pt-2 px-2.5">
+                                <CardTitle className="text-xs font-semibold text-gray-900 line-clamp-2 min-h-[2rem] leading-tight">
+                                    {product.name}
+                                </CardTitle>
+                            </CardHeader>
 
-                        <CardContent className="pt-0">
-                            {/* Price Section */}
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="flex items-center space-x-2">
-                                    <DollarSign className="h-4 w-4 text-green-600" />
-                                    <span className="text-xl font-bold text-gray-900">
+                            <CardContent className="pt-0 pb-2.5 px-2.5 space-y-1.5">
+                                {/* Preço e Info */}
+                                <div className="flex items-center justify-between">
+                                    <div className="text-base font-bold text-[#FD9555]">
                                         {formatPrice(product.price)}
-                                    </span>
-                                </div>
-
-                                {/* Files Info */}
-                                <div className="text-right">
-                                    <div className="flex items-center justify-end space-x-1 text-blue-600">
-                                        <FileText className="h-4 w-4" />
-                                        <span className="text-sm font-medium">
-                                            {product.files?.length || 0}
-                                        </span>
                                     </div>
-                                    {product.files && product.files.length > 0 && (
-                                        <div className="text-xs text-gray-500">
-                                            {formatFileSize(product.files.reduce((acc, file) => acc + file.size, 0))}
-                                        </div>
+                                    
+                                    {product.variations && product.variations.length > 0 && (
+                                        <Badge variant="secondary" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                                            {product.variations.length} var.
+                                        </Badge>
                                     )}
                                 </div>
-                            </div>
 
-                            {/* Actions */}
-                            <div className="flex items-center justify-between">
-                                <div className="flex space-x-1">
-                                    <Button variant="outline" size="sm" className="h-8 w-8 p-0 hover:bg-blue-50" asChild>
+                                {/* Actions */}
+                                <div className="flex items-center gap-1.5">
+                                    <Button 
+                                        variant="outline" 
+                                        size="sm" 
+                                        className="flex-1 h-7 text-xs hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 cursor-pointer" 
+                                        asChild
+                                    >
                                         <Link href={`/admin/products/${product.id}`}>
-                                            <Eye className="h-4 w-4 text-blue-600" />
+                                            <Eye className="h-3 w-3" />
                                         </Link>
                                     </Button>
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        className="h-8 w-8 p-0 hover:bg-green-50"
+                                        className="flex-1 h-7 text-xs hover:bg-[#FED466] hover:text-gray-900 hover:border-[#FD9555] cursor-pointer"
                                         onClick={() => setEditingProduct(product)}
                                     >
-                                        <FileText className="h-4 w-4 text-green-600" />
+                                        <Pencil className="h-3 w-3" />
                                     </Button>
-                                    <EditProductDialog
-                                        product={editingProduct}
-                                        open={!!editingProduct}
-                                        onOpenChange={(open) => !open && setEditingProduct(null)}
-                                        onSuccess={() => {
-                                            setEditingProduct(null)
-                                            refreshProducts()
-                                        }}
-                                    />
                                     <AlertDialog>
                                         <AlertDialogTrigger asChild>
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                className="h-7 w-7 p-0 hover:bg-red-50 hover:text-red-600 hover:border-red-300 cursor-pointer"
                                                 disabled={deletingProduct === product.id}
                                             >
                                                 {deletingProduct === product.id ? (
-                                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                                    <Loader2 className="h-3 w-3 animate-spin" />
                                                 ) : (
-                                                    <Trash2 className="h-4 w-4" />
+                                                    <Trash2 className="h-3 w-3" />
                                                 )}
                                             </Button>
                                         </AlertDialogTrigger>
@@ -385,10 +331,10 @@ export default function ProductsCardsView({
                                                 </AlertDialogDescription>
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
-                                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                                <AlertDialogCancel className="cursor-pointer">Cancelar</AlertDialogCancel>
                                                 <AlertDialogAction
                                                     onClick={() => handleDelete(product.id)}
-                                                    className="bg-red-600 hover:bg-red-700"
+                                                    className="bg-red-600 hover:bg-red-700 cursor-pointer"
                                                 >
                                                     Excluir
                                                 </AlertDialogAction>
@@ -397,177 +343,21 @@ export default function ProductsCardsView({
                                     </AlertDialog>
                                 </div>
 
-                                {/* Expand Variations Button */}
-                                {product.variations && product.variations.length > 0 && (
-                                    <Collapsible>
-                                        <CollapsibleTrigger asChild>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => toggleCard(product.id)}
-                                                className="text-xs"
-                                            >
-                                                {expandedCards.has(product.id) ? (
-                                                    <>
-                                                        <ChevronUp className="h-3 w-3 mr-1" />
-                                                        Ocultar
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <ChevronDown className="h-3 w-3 mr-1" />
-                                                        Ver Variações
-                                                    </>
-                                                )}
-                                            </Button>
-                                        </CollapsibleTrigger>
-                                    </Collapsible>
-                                )}
-                            </div>
-
-                            {/* Variations Section */}
-                            {product.variations && product.variations.length > 0 && (
-                                <Collapsible open={expandedCards.has(product.id)}>
-                                    <CollapsibleContent className="mt-4">
-                                        <div className="border-t border-gray-200 pt-4">
-                                            <div className="flex items-center justify-between mb-3">
-                                                <h4 className="text-sm font-semibold text-gray-900">
-                                                    Variações ({product.variations.length})
-                                                </h4>
-                                                <Button variant="outline" size="sm" className="text-xs" asChild>
-                                                    <Link href={`/admin/products/${product.id}/variations/new`}>
-                                                        <Plus className="h-3 w-3 mr-1" />
-                                                        Nova
-                                                    </Link>
-                                                </Button>
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                {product.variations.map((variation) => (
-                                                    <div
-                                                        key={variation.id}
-                                                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200"
-                                                    >
-                                                        <div className="flex-1 min-w-0">
-                                                            <div className="flex items-center justify-between">
-                                                                <div className="min-w-0 flex-1">
-                                                                    <p className="text-sm font-medium text-gray-900 truncate">
-                                                                        {variation.name}
-                                                                    </p>
-                                                                    <p className="text-xs text-gray-500 font-mono truncate">
-                                                                        {variation.slug}
-                                                                    </p>
-                                                                </div>
-                                                                <div className="flex items-center space-x-3 ml-4">
-                                                                    <div className="text-right">
-                                                                        <div className="font-semibold text-gray-900">
-                                                                            {formatPrice(variation.price)}
-                                                                        </div>
-                                                                        <div className="flex items-center justify-end space-x-1">
-                                                                            <Badge
-                                                                                variant={variation.isActive ? "default" : "secondary"}
-                                                                                className={`text-xs ${variation.isActive
-                                                                                    ? "bg-green-100 text-green-800 border-green-200"
-                                                                                    : "bg-red-100 text-red-800 border-red-200"
-                                                                                    }`}
-                                                                            >
-                                                                                {variation.isActive ? "Ativo" : "Inativo"}
-                                                                            </Badge>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            {/* Files for variation */}
-                                                            {variation.files && variation.files.length > 0 && (
-                                                                <div className="mt-2 flex items-center space-x-2">
-                                                                    <FileText className="h-3 w-3 text-blue-600" />
-                                                                    <span className="text-xs text-blue-600">
-                                                                        {variation.files.length} arquivo{variation.files.length > 1 ? 's' : ''}
-                                                                    </span>
-                                                                    <span className="text-xs text-gray-500">
-                                                                        ({formatFileSize(variation.files.reduce((acc, file) => acc + file.size, 0))})
-                                                                    </span>
-                                                                </div>
-                                                            )}
-                                                        </div>
-
-                                                        {/* Variation Actions */}
-                                                        <div className="flex space-x-1 ml-3">
-                                                            <EditVariationDialog
-                                                                variation={variation}
-                                                                productId={product.id}
-                                                                onSuccess={refreshProducts}
-                                                            />
-                                                            <AlertDialog>
-                                                                <AlertDialogTrigger asChild>
-                                                                    <Button
-                                                                        variant="outline"
-                                                                        size="sm"
-                                                                        className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
-                                                                        disabled={deletingVariation === variation.id}
-                                                                    >
-                                                                        {deletingVariation === variation.id ? (
-                                                                            <Loader2 className="h-3 w-3 animate-spin" />
-                                                                        ) : (
-                                                                            <Trash2 className="h-3 w-3" />
-                                                                        )}
-                                                                    </Button>
-                                                                </AlertDialogTrigger>
-                                                                <AlertDialogContent>
-                                                                    <AlertDialogHeader>
-                                                                        <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-                                                                        <AlertDialogDescription>
-                                                                            Tem certeza que deseja excluir a variação &quot;{variation.name}&quot;? Esta ação não pode ser desfeita.
-                                                                        </AlertDialogDescription>
-                                                                    </AlertDialogHeader>
-                                                                    <AlertDialogFooter>
-                                                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                                                        <AlertDialogAction
-                                                                            onClick={() => handleDeleteVariation(variation.id, product.id)}
-                                                                            className="bg-red-600 hover:bg-red-700"
-                                                                        >
-                                                                            Excluir
-                                                                        </AlertDialogAction>
-                                                                    </AlertDialogFooter>
-                                                                </AlertDialogContent>
-                                                            </AlertDialog>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </CollapsibleContent>
-                                </Collapsible>
-                            )}
-                        </CardContent>
-                    </Card>
-                ))}
+                                {/* EditProductDialog fora dos botões */}
+                                <EditProductDialog
+                                    product={editingProduct}
+                                    open={!!editingProduct}
+                                    onOpenChange={(open) => !open && setEditingProduct(null)}
+                                    onSuccess={() => {
+                                        setEditingProduct(null)
+                                        refreshProducts()
+                                    }}
+                                />
+                            </CardContent>
+                        </Card>
+                    )
+                })}
             </div>
-
-            {/* Footer com Estatísticas */}
-            {products && products.length > 0 && (
-                <div className="border-t border-gray-200 pt-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <div className="text-sm text-gray-600">
-                            Mostrando <span className="font-medium">{products.length}</span> produto{products.length > 1 ? 's' : ''}
-                        </div>
-                        <div className="flex flex-wrap gap-4 text-xs text-gray-500">
-                            <span className="flex items-center">
-                                <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                                {products.filter(p => p.isActive).length} ativo{products.filter(p => p.isActive).length !== 1 ? 's' : ''}
-                            </span>
-                            <span className="flex items-center">
-                                <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
-                                {products.filter(p => !p.isActive).length} inativo{products.filter(p => !p.isActive).length !== 1 ? 's' : ''}
-                            </span>
-                            <span className="flex items-center">
-                                <Star className="w-3 h-3 text-yellow-500 mr-1" />
-                                {products.filter(p => p.isFeatured).length} destaque{products.filter(p => p.isFeatured).length !== 1 ? 's' : ''}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     )
 }

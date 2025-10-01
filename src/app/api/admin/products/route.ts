@@ -173,6 +173,12 @@ export async function GET(request: NextRequest) {
     const productsWithDetails = await Promise.all(
       allProducts.map(async product => {
         const productFiles = await db.select().from(files).where(eq(files.productId, product.id));
+        
+        // Buscar imagens do produto
+        const productImagesList = await db
+          .select()
+          .from(productImages)
+          .where(eq(productImages.productId, product.id));
 
         let variations: object[] = [];
         if (include.includes('variations')) {
@@ -181,7 +187,7 @@ export async function GET(request: NextRequest) {
             .from(productVariations)
             .where(eq(productVariations.productId, product.id));
 
-          // Get files for each variation if requested
+          // Get files and images for each variation if requested
           if (include.includes('files')) {
             variations = await Promise.all(
               productVariationsList.map(async variation => {
@@ -189,9 +195,16 @@ export async function GET(request: NextRequest) {
                   .select()
                   .from(files)
                   .where(eq(files.variationId, variation.id));
+                
+                const variationImages = await db
+                  .select()
+                  .from(productImages)
+                  .where(eq(productImages.variationId, variation.id));
+                
                 return {
                   ...variation,
                   files: variationFiles,
+                  images: variationImages,
                 };
               })
             );
@@ -204,11 +217,11 @@ export async function GET(request: NextRequest) {
           ...product,
           files: productFiles,
           variations,
+          images: productImagesList,
           // Mock additional fields for compatibility
           status: product.isActive ? 'active' : 'draft',
           digitalProduct: true,
           category: 'digital',
-          images: [],
           tags: [],
         };
       })

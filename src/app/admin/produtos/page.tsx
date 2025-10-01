@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import {
     Plus,
     Search,
-    Filter,
     Package,
     ShoppingBag,
     DollarSign,
@@ -51,6 +50,8 @@ export default function ProductsPage() {
     const [stats, setStats] = useState<ProductStats>({ total: 0, active: 0, inactive: 0, revenue: 0 })
     const [loading, setLoading] = useState(true)
     const [refreshTrigger, setRefreshTrigger] = useState(0)
+    const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([])
+
 
     const handleRefresh = () => {
         setRefreshTrigger(prev => prev + 1)
@@ -58,23 +59,32 @@ export default function ProductsPage() {
         fetch('/api/admin/products/stats').then(res => res.json()).then(setStats)
     }
 
-    // Carregar estatísticas
+    // Carregar estatísticas e categorias
     useEffect(() => {
-        const fetchStats = async () => {
+        const fetchData = async () => {
             try {
-                const response = await fetch('/api/admin/products/stats')
-                if (response.ok) {
-                    const data = await response.json()
+                const [statsRes, categoriesRes] = await Promise.all([
+                    fetch('/api/admin/products/stats'),
+                    fetch('/api/admin/categories')
+                ])
+                
+                if (statsRes.ok) {
+                    const data = await statsRes.json()
                     setStats(data)
                 }
+                
+                if (categoriesRes.ok) {
+                    const data = await categoriesRes.json()
+                    setCategories(data.categories || [])
+                }
             } catch (error) {
-                console.error('Erro ao carregar estatísticas:', error)
+                console.error('Erro ao carregar dados:', error)
             } finally {
                 setLoading(false)
             }
         }
 
-        fetchStats()
+        fetchData()
     }, [])
 
     // Auto-aplicar filtros quando mudarem
@@ -247,17 +257,16 @@ export default function ProductsPage() {
                         </div>
                         <Select value={category} onValueChange={setCategory}>
                             <SelectTrigger className="w-full sm:w-48">
-                                <Filter className="w-4 h-4 mr-2" />
                                 <SelectValue placeholder="Filtrar categoria" />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">Todas as Categorias</SelectItem>
-                                <SelectItem value="sem-categoria">❓ Sem Categoria</SelectItem>
-                                <SelectItem value="planners">📋 Planners</SelectItem>
-                                <SelectItem value="adesivos">🏷️ Adesivos</SelectItem>
-                                <SelectItem value="etiquetas">🏪 Etiquetas</SelectItem>
-                                <SelectItem value="agenda">📅 Agendas</SelectItem>
-                                <SelectItem value="organizacao">📦 Organização</SelectItem>
+                                <SelectItem value="sem-categoria">Sem Categoria</SelectItem>
+                                {categories.map((cat) => (
+                                    <SelectItem key={cat.id} value={cat.id}>
+                                        {cat.name}
+                                    </SelectItem>
+                                ))}
                             </SelectContent>
                         </Select>
                     </div>
