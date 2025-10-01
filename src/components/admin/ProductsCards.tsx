@@ -239,7 +239,7 @@ export default function ProductsCardsView({
                     return (
                         <Card key={product.id} className="group hover:shadow-lg transition-all duration-200 border hover:border-[#FED466] overflow-hidden cursor-pointer">
                             {/* Imagem do Produto */}
-                            <div className="relative h-24 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
+                            <div className="relative h-36 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
                                 {productImage ? (
                                     <Image
                                         src={productImage}
@@ -250,7 +250,7 @@ export default function ProductsCardsView({
                                     />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center">
-                                        <FileText className="h-8 w-8 text-gray-300" />
+                                        <FileText className="h-10 w-10 text-gray-300" />
                                     </div>
                                 )}
 
@@ -267,13 +267,13 @@ export default function ProductsCardsView({
                                 </div>
                             </div>
 
-                            <CardHeader className="pb-1.5 pt-2 px-2.5">
-                                <CardTitle className="text-xs font-semibold text-gray-900 line-clamp-2 min-h-[2rem] leading-tight">
+                            <CardHeader className=" px-2">
+                                <CardTitle className="text-xs font-semibold text-gray-900 line-clamp-2 leading-tight">
                                     {product.name}
                                 </CardTitle>
                             </CardHeader>
 
-                            <CardContent className="pt-0 pb-2.5 px-2.5 space-y-1.5">
+                            <CardContent className=" px-2 space-y-1">
                                 {/* Preço e Info */}
                                 <div className="flex items-center justify-between">
                                     <div className="text-base font-bold text-[#FD9555]">
@@ -288,7 +288,7 @@ export default function ProductsCardsView({
                                 </div>
 
                                 {/* Actions */}
-                                <div className="flex items-center gap-1.5">
+                                <div className="flex items-center gap-1">
                                     <Button
                                         variant="outline"
                                         size="sm"
