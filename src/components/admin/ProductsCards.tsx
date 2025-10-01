@@ -153,14 +153,23 @@ export default function ProductsCardsView({
             })
 
             if (!response.ok) {
-                throw new Error('Erro ao excluir produto')
+                const errorData = await response.json()
+                throw new Error(errorData.error || 'Erro ao excluir produto')
+            }
+
+            const result = await response.json()
+            console.log('[DELETE PRODUCT] Produto excluído:', result)
+            
+            // Mostrar mensagem de sucesso com detalhes
+            if (result.deletedFiles > 0) {
+                console.log(`✓ ${result.deletedFiles} arquivo(s) deletado(s) do Cloudflare R2`)
             }
 
             await refreshProducts()
             onRefresh?.()
         } catch (error) {
             console.error('Erro ao excluir produto:', error)
-            setCardsError('Erro ao excluir produto. Tente novamente.')
+            setCardsError(error instanceof Error ? error.message : 'Erro ao excluir produto. Tente novamente.')
         } finally {
             setDeletingProduct(null)
         }

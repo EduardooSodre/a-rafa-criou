@@ -6,6 +6,7 @@ import { variationAttributeValues } from '@/lib/db/schema';
 import { productAttributes } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { productImages, productVariations } from '@/lib/db/schema';
+import { deleteFromR2 } from '@/lib/r2-utils';
 
 const updateProductSchema = z.object({
   name: z.string().min(1).max(255).optional(),
@@ -523,15 +524,68 @@ export async function DELETE(
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
-    // Delete related files first
-    await db.delete(files).where(eq(files.productId, id));
+    console.log(`[DELETE PRODUCT] Iniciando exclusão do produto ${id}`);
 
-    // Delete product
+    // 1. Buscar todos os arquivos do produto (do próprio produto e das variações)
+    const productFiles = await db.select().from(files).where(eq(files.productId, id));
+    console.log(`[DELETE PRODUCT] Encontrados ${productFiles.length} arquivos do produto`);
+
+    // 2. Buscar todas as variações do produto
+    const variations = await db.select().from(productVariations).where(eq(productVariations.productId, id));
+    console.log(`[DELETE PRODUCT] Encontradas ${variations.length} variações`);
+
+    // 3. Buscar todos os arquivos das variações
+    const variationFiles: typeof productFiles = [];
+    for (const variation of variations) {
+      const vFiles = await db.select().from(files).where(eq(files.variationId, variation.id));
+      variationFiles.push(...vFiles);
+    }
+    console.log(`[DELETE PRODUCT] Encontrados ${variationFiles.length} arquivos de variações`);
+
+    // 4. Deletar todos os arquivos do Cloudflare R2
+    const allFiles = [...productFiles, ...variationFiles];
+    const r2DeletionPromises = allFiles
+      .filter(file => file.path) // Apenas arquivos com r2Key
+      .map(async file => {
+        try {
+          console.log(`[DELETE PRODUCT] Deletando do R2: ${file.path}`);
+          await deleteFromR2(file.path);
+          console.log(`[DELETE PRODUCT] ✓ Deletado do R2: ${file.path}`);
+        } catch (error) {
+          console.error(`[DELETE PRODUCT] ✗ Erro ao deletar do R2: ${file.path}`, error);
+          // Continua mesmo se falhar (arquivo pode já ter sido deletado)
+        }
+      });
+
+    await Promise.all(r2DeletionPromises);
+    console.log(`[DELETE PRODUCT] Concluída exclusão de ${allFiles.length} arquivos do R2`);
+
+    // 5. Deletar do banco de dados (cascade vai cuidar das relações)
+    // O schema tem onDelete: 'cascade' então vai deletar automaticamente:
+    // - productImages (product_images)
+    // - productVariations (product_variations)
+    // - files (files)
+    // - productAttributes (product_attributes)
+    // - variationAttributeValues (variation_attribute_values) via cascade das variações
+    
+    console.log(`[DELETE PRODUCT] Deletando produto do banco de dados...`);
     await db.delete(products).where(eq(products.id, id));
+    console.log(`[DELETE PRODUCT] ✓ Produto deletado do banco de dados`);
 
-    return NextResponse.json({ message: 'Product deleted successfully' });
+    return NextResponse.json({ 
+      message: 'Produto excluído com sucesso',
+      deletedFiles: allFiles.length,
+      details: {
+        productFiles: productFiles.length,
+        variationFiles: variationFiles.length,
+        variations: variations.length
+      }
+    });
   } catch (error) {
-    console.error('Error deleting product:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('[DELETE PRODUCT] Erro ao excluir produto:', error);
+    return NextResponse.json({ 
+      error: 'Erro ao excluir produto',
+      details: error instanceof Error ? error.message : 'Erro desconhecido'
+    }, { status: 500 });
   }
 }
