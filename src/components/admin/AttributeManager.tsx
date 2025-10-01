@@ -344,8 +344,8 @@ export default function AttributeManager({ selectedAttributes, onChange }: Attri
                                 <div
                                     key={attr.id}
                                     className={`border rounded-lg p-4 transition-all ${isSelected
-                                            ? 'border-[#FED466] bg-[#FED466]/5'
-                                            : 'border-gray-200'
+                                        ? 'border-[#FED466] bg-[#FED466]/5'
+                                        : 'border-gray-200'
                                         }`}
                                 >
                                     <div className="flex items-center justify-between mb-3">
@@ -396,8 +396,8 @@ export default function AttributeManager({ selectedAttributes, onChange }: Attri
                                                         <div
                                                             key={value.id}
                                                             className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border-2 transition-all ${isValueSelected
-                                                                    ? 'border-[#FD9555] bg-[#FED466]/20'
-                                                                    : 'border-gray-300'
+                                                                ? 'border-[#FD9555] bg-[#FED466]/20'
+                                                                : 'border-gray-300'
                                                                 }`}
                                                         >
                                                             <label className="flex items-center gap-2 cursor-pointer">

@@ -135,10 +135,7 @@ export async function DELETE(req: Request) {
         .execute();
 
       // Depois deletar o atributo
-      const deleted = await db
-        .delete(attributes)
-        .where(eq(attributes.id, attributeId))
-        .returning();
+      const deleted = await db.delete(attributes).where(eq(attributes.id, attributeId)).returning();
 
       if (deleted.length === 0) {
         return NextResponse.json({ error: 'Atributo não encontrado' }, { status: 404 });
