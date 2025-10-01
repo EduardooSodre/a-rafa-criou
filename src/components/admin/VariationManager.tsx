@@ -220,7 +220,7 @@ export default function VariationManager({ variations, attributes, onChange }: V
                                         )
                                     })}
                                 </div>
-                                
+
                                 {/* Resumo dos atributos selecionados */}
                                 {variation.attributeValues.length > 0 && (
                                     <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
@@ -240,7 +240,7 @@ export default function VariationManager({ variations, attributes, onChange }: V
                                         </div>
                                     </div>
                                 )}
-                                
+
                                 {/* Alerta se faltam atributos */}
                                 {attributes.length > variation.attributeValues.length && (
                                     <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">

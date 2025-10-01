@@ -37,14 +37,14 @@ export default function ProductForm({ defaultValues, categories = [], availableA
     // Carregar atributos do banco de dados apenas uma vez ao montar
     useEffect(() => {
         let isMounted = true
-        
+
         async function loadAttributesFromDB() {
             // Se já tem atributos via prop, usar eles
             if (availableAttributes.length > 0) {
                 setLocalAttributes(availableAttributes)
                 return
             }
-            
+
             try {
                 setIsLoadingAttributes(true)
                 const response = await fetch('/api/admin/attributes')
@@ -60,9 +60,9 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                 }
             }
         }
-        
+
         loadAttributesFromDB()
-        
+
         return () => {
             isMounted = false
         }
@@ -245,16 +245,16 @@ export default function ProductForm({ defaultValues, categories = [], availableA
     function validate(): string | null {
         // Clear previous error
         setFormError(null)
-        
+
         // Verificar se há atributos selecionados no Step 2
         const selectedAttributesCount = (formData.attributes || []).length
-        
+
         // Ensure every variation has at least one file
         for (const [idx, v] of formData.variations.entries()) {
             if (!v.files || v.files.length === 0) {
                 return `Cada variação (linha ${idx + 1}) precisa ter pelo menos um arquivo.`
             }
-            
+
             // Se há atributos selecionados, todas as variações DEVEM ter todos os atributos preenchidos
             if (selectedAttributesCount > 0) {
                 const variationAttributesCount = v.attributeValues?.length || 0
@@ -263,13 +263,13 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                 }
             }
         }
-        
+
         if (!formData.name) return 'Nome do produto é obrigatório.'
-        
+
         // price must be present or at least one variation price
         const priceOk = !!formData.price || formData.variations.some(v => !!v.price)
         if (!priceOk) return 'Preço do produto é obrigatório (ou preencha preço nas variações).'
-        
+
         return null
     }
 
@@ -656,7 +656,7 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                                 </div>
                             </div>
                         </div>
-                        
+
                         {isLoadingAttributes ? (
                             <div className="p-8 text-center text-gray-500">
                                 Carregando atributos...
