@@ -141,7 +141,7 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto rounded-lg">
+            <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto rounded-lg" onInteractOutside={(e) => e.preventDefault()}>
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <span className="text-base font-semibold">Editar Produto</span>

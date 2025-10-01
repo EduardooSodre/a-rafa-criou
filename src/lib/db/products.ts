@@ -86,7 +86,7 @@ export async function getProductBySlug(slug: string) {
     .where(eq(productImages.productId, product.id));
   // Converte base64 do banco para data URI
   const images =
-    imagesResult.length > 0 
+    imagesResult.length > 0
       ? imagesResult.map(img => {
           const raw = img.data || '';
           if (!raw) return '/file.svg';

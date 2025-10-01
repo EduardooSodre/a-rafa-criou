@@ -32,6 +32,7 @@ interface Product {
         slug: string;
     } | null;
     isFeatured: boolean;
+    createdAt: Date | string;
     variations: ProductVariation[];
     mainImage: {
         data: string;
@@ -72,7 +73,8 @@ export default function FeaturedProducts({
         const fetchProducts = async () => {
             setLoading(true);
             try {
-                const response = await fetch(`/api/products?limit=${initialLimit}&offset=0&featured=true`);
+                // Buscar todos os produtos ordenados por data (mais recentes primeiro)
+                const response = await fetch(`/api/products?limit=${initialLimit}&offset=0`);
 
                 if (!response.ok) {
                     throw new Error('Failed to fetch products');
@@ -80,25 +82,9 @@ export default function FeaturedProducts({
 
                 const data: ApiResponse = await response.json();
 
-                // If featured products list is smaller than the UI limit, fetch latest products
-                // and merge them to fill the UI slots so newly created non-featured items appear.
-                let productsList = Array.isArray(data.products) ? data.products.slice() : []
-                if (productsList.length < initialLimit) {
-                    const need = initialLimit - productsList.length
-                    console.info(`Featured returned ${productsList.length}; fetching ${need} latest to fill slots`)
-                    const fallbackRes = await fetch(`/api/products?limit=${need}&offset=0`)
-                    if (fallbackRes.ok) {
-                        const fallbackData: ApiResponse = await fallbackRes.json()
-                        const existingIds = new Set(productsList.map(p => p.id))
-                        const extras = (fallbackData.products || []).filter(p => !existingIds.has(p.id)).slice(0, need)
-                        productsList = [...productsList, ...extras]
-                    }
-                }
-
-                setProducts(productsList)
-                // Conservative hasMore: true if backend says so for featured OR if fallback indicates more
-                setHasMore(Boolean(data.pagination.hasMore))
-                setOffset(initialLimit)
+                setProducts(Array.isArray(data.products) ? data.products : []);
+                setHasMore(Boolean(data.pagination.hasMore));
+                setOffset(initialLimit);
             } catch (error) {
                 console.error('Error fetching products:', error);
             } finally {
@@ -114,7 +100,8 @@ export default function FeaturedProducts({
 
         setLoading(true);
         try {
-            const response = await fetch(`/api/products?limit=${loadMoreLimit}&offset=${offset}&featured=true`);
+            // Buscar mais produtos ordenados por data (mais recentes primeiro)
+            const response = await fetch(`/api/products?limit=${loadMoreLimit}&offset=${offset}`);
 
             if (!response.ok) {
                 throw new Error('Failed to fetch products');
@@ -122,26 +109,8 @@ export default function FeaturedProducts({
 
             const data: ApiResponse = await response.json();
 
-            // If featured returns fewer items than requested, fetch extra latest products and append non-duplicates
-            let combined = Array.isArray(data.products) ? data.products.slice() : []
-            if (combined.length < loadMoreLimit) {
-                const need = loadMoreLimit - combined.length
-                const fallbackRes = await fetch(`/api/products?limit=${need}&offset=${offset}`)
-                if (fallbackRes.ok) {
-                    const fallbackData: ApiResponse = await fallbackRes.json()
-                    const existingIds = new Set(combined.map(p => p.id))
-                    const extras = (fallbackData.products || []).filter(p => !existingIds.has(p.id)).slice(0, need)
-                    combined = [...combined, ...extras]
-                    // Use conservative hasMore: true if either source indicates more
-                    setHasMore(Boolean(data.pagination.hasMore) || Boolean(fallbackData.pagination.hasMore))
-                } else {
-                    setHasMore(Boolean(data.pagination.hasMore))
-                }
-            } else {
-                setHasMore(data.pagination.hasMore)
-            }
-
-            setProducts(prev => [...prev, ...combined]);
+            setProducts(prev => [...prev, ...(Array.isArray(data.products) ? data.products : [])]);
+            setHasMore(Boolean(data.pagination.hasMore));
             setOffset(offset + loadMoreLimit);
         } catch (error) {
             console.error('Error loading more products:', error);
@@ -224,7 +193,7 @@ export default function FeaturedProducts({
             </div>
             <div className="container mx-auto px-4 mb-22">
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5 lg:gap-6 max-w-7xl mx-auto">
-                    {displayProducts.map((product) => (
+                    {displayProducts.map((product, index) => (
                         <div
                             key={product.id}
                             className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 flex flex-col justify-between"
@@ -246,8 +215,8 @@ export default function FeaturedProducts({
                                                     <span className="text-gray-400 text-sm">{t('product.noImage', 'Sem imagem')}</span>
                                                 </div>
                                             )}
-                                            {/* Badge para produtos novos (IDs 14, 15, 16) */}
-                                            {['14', '15', '16'].includes(product.id) && (
+                                            {/* Badge para os 2 produtos mais recentes */}
+                                            {index < 2 && (
                                                 <div className="absolute top-2 right-2 bg-[#FED466] text-xs font-bold px-2 py-1 md:px-3 md:py-1 rounded-full shadow-md">
                                                     {t('product.new', 'NOVO')}
                                                 </div>

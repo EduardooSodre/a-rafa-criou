@@ -20,7 +20,7 @@ type ImageDb = {
   alt?: string;
   isMain?: boolean;
 };
-import { eq, inArray } from 'drizzle-orm';
+import { eq, inArray, desc } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
   try {
@@ -35,11 +35,12 @@ export async function GET(request: NextRequest) {
       whereClause = eq(products.isFeatured, true);
     }
 
-    // Buscar produtos do banco
+    // Buscar produtos do banco (ordenado por mais recentes)
     const dbProducts = await db
       .select()
       .from(products)
       .where(whereClause)
+      .orderBy(desc(products.createdAt))
       .limit(limit)
       .offset(offset);
 
@@ -113,7 +114,7 @@ export async function GET(request: NextRequest) {
       // Imagem principal: prioriza isMain, senão pega a primeira
       const mainImageObj = images.find(img => img.isMain) || images[0];
 
-        return {
+      return {
         id: p.id,
         name: p.name,
         slug: p.slug,
@@ -124,23 +125,24 @@ export async function GET(request: NextRequest) {
         categoryId: p.categoryId,
         category: p.categoryId ? categoriesMap[p.categoryId] || null : null,
         isFeatured: p.isFeatured,
+        createdAt: p.createdAt,
         variations,
         mainImage: mainImageObj
           ? {
               data: (function () {
-                const raw = mainImageObj.data || ''
-                if (String(raw).startsWith('data:')) return String(raw)
+                const raw = mainImageObj.data || '';
+                if (String(raw).startsWith('data:')) return String(raw);
                 // Assume DB-stored raw is base64 and build data URI
-                return `data:image/jpeg;base64,${String(raw)}`
+                return `data:image/jpeg;base64,${String(raw)}`;
               })(),
               alt: mainImageObj.alt || p.name,
             }
           : null,
         images: images.map(img => ({
           data: (function () {
-            const raw = img.data || ''
-            if (String(raw).startsWith('data:')) return String(raw)
-            return `data:image/jpeg;base64,${String(raw)}`
+            const raw = img.data || '';
+            if (String(raw).startsWith('data:')) return String(raw);
+            return `data:image/jpeg;base64,${String(raw)}`;
           })(),
           alt: img.alt || p.name,
         })),

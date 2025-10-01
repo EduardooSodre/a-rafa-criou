@@ -251,7 +251,7 @@ export default function EditVariationDialog({
                     </Button>
                 )}
             </DialogTrigger>
-            <DialogContent className="max-w-lg">
+            <DialogContent className="max-w-lg" onInteractOutside={(e) => e.preventDefault()}>
                 <DialogHeader>
                     <DialogTitle>Editar Variação</DialogTitle>
                     <DialogDescription>

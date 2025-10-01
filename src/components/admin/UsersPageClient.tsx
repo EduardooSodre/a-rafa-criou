@@ -119,7 +119,7 @@ export default function UsersPageClient() {
                     users: userCount,
                     newThisMonth
                 })
-                } catch (error) {
+            } catch (error) {
                 console.error('Erro ao carregar usuários:', error)
                 setPageError('Falha ao carregar dados dos usuários')
             } finally {

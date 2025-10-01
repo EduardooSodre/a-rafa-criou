@@ -340,31 +340,74 @@ export async function POST(request: NextRequest) {
 
       if (Array.isArray(localAttrDefs) && localAttrDefs.length > 0) {
         for (const def of localAttrDefs) {
-          // insert attribute
-          const [createdAttr] = await tx
-            .insert(attributes)
-            .values({
-              name: def.name,
-              slug: def.name.toLowerCase().replace(/\s+/g, '-'),
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            })
-            .returning();
-          localAttrIdToReal[def.id] = createdAttr.id;
-          // insert values
+          const attrSlug = def.name.toLowerCase().replace(/\s+/g, '-');
+          
+          // Verificar se o atributo já existe
+          const existingAttr = await tx
+            .select()
+            .from(attributes)
+            .where(eq(attributes.slug, attrSlug))
+            .limit(1);
+          
+          let attributeId: string;
+          
+          if (existingAttr.length > 0) {
+            // Reutilizar atributo existente
+            attributeId = existingAttr[0].id;
+          } else {
+            // Criar novo atributo
+            const [createdAttr] = await tx
+              .insert(attributes)
+              .values({
+                name: def.name,
+                slug: attrSlug,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              })
+              .returning();
+            attributeId = createdAttr.id;
+          }
+          
+          localAttrIdToReal[def.id] = attributeId;
+          
+          // Processar valores do atributo
           if (Array.isArray(def.values)) {
             for (const val of def.values) {
-              const [createdVal] = await tx
-                .insert(attributeValues)
-                .values({
-                  attributeId: createdAttr.id,
-                  value: val.value,
-                  slug: val.value.toLowerCase().replace(/\s+/g, '-'),
-                  createdAt: new Date(),
-                  updatedAt: new Date(),
-                })
-                .returning();
-              localValIdToReal[val.id] = createdVal.id;
+              const valSlug = val.value.toLowerCase().replace(/\s+/g, '-');
+              
+              // Verificar se o valor já existe para este atributo
+              const existingVal = await tx
+                .select()
+                .from(attributeValues)
+                .where(
+                  and(
+                    eq(attributeValues.attributeId, attributeId),
+                    eq(attributeValues.slug, valSlug)
+                  )
+                )
+                .limit(1);
+              
+              let valueId: string;
+              
+              if (existingVal.length > 0) {
+                // Reutilizar valor existente
+                valueId = existingVal[0].id;
+              } else {
+                // Criar novo valor
+                const [createdVal] = await tx
+                  .insert(attributeValues)
+                  .values({
+                    attributeId: attributeId,
+                    value: val.value,
+                    slug: valSlug,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                  })
+                  .returning();
+                valueId = createdVal.id;
+              }
+              
+              localValIdToReal[val.id] = valueId;
             }
           }
         }
@@ -373,21 +416,26 @@ export async function POST(request: NextRequest) {
       // Insert product images if provided
       if (validated.images && validated.images.length > 0) {
         const imageData = validated.images.map(image => {
-          // Extrair mimeType do data URI se estiver presente
+          // Extrair mimeType e base64 puro do data URI
           let mimeType = 'image/jpeg';
+          let base64Data = image.data;
           const dataStr = String(image.data);
-          if (dataStr.startsWith('data:')) {
-            const match = dataStr.match(/^data:([^;]+);/);
-            if (match) mimeType = match[1];
-          }
           
+          if (dataStr.startsWith('data:')) {
+            const match = dataStr.match(/^data:([^;]+);base64,(.+)$/);
+            if (match) {
+              mimeType = match[1];
+              base64Data = match[2]; // Apenas o base64, sem o prefixo
+            }
+          }
+
           return {
             productId: insertedProduct.id,
             name: `image-${Date.now()}.jpg`,
             originalName: `product-image.jpg`,
             mimeType: mimeType,
-            size: Math.round(image.data.length * 0.75),
-            data: image.data,
+            size: Math.round(base64Data.length * 0.75),
+            data: base64Data, // Salva apenas o base64 puro
             alt: image.alt || validated.name,
             isMain: image.isMain,
             sortOrder: image.order,
@@ -424,21 +472,26 @@ export async function POST(request: NextRequest) {
           // Insert variation images if provided
           if (variation.images && variation.images.length > 0) {
             const variationImageData = variation.images.map(image => {
-              // Extrair mimeType do data URI se estiver presente
+              // Extrair mimeType e base64 puro do data URI
               let mimeType = 'image/jpeg';
+              let base64Data = image.data;
               const dataStr = String(image.data);
-              if (dataStr.startsWith('data:')) {
-                const match = dataStr.match(/^data:([^;]+);/);
-                if (match) mimeType = match[1];
-              }
               
+              if (dataStr.startsWith('data:')) {
+                const match = dataStr.match(/^data:([^;]+);base64,(.+)$/);
+                if (match) {
+                  mimeType = match[1];
+                  base64Data = match[2]; // Apenas o base64, sem o prefixo
+                }
+              }
+
               return {
                 variationId: insertedVariation.id,
                 name: `variation-image-${Date.now()}.jpg`,
                 originalName: `variation-image.jpg`,
                 mimeType: mimeType,
-                size: Math.round(image.data.length * 0.75),
-                data: image.data,
+                size: Math.round(base64Data.length * 0.75),
+                data: base64Data, // Salva apenas o base64 puro
                 alt: image.alt || variation.name,
                 isMain: image.isMain,
                 sortOrder: image.order,

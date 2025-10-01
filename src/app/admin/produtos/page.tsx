@@ -137,7 +137,7 @@ export default function ProductsPage() {
                             Novo Produto
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto rounded-lg">
+                    <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto rounded-lg" onInteractOutside={(e) => e.preventDefault()}>
                         <DialogHeader>
                             <DialogTitle className="flex items-center gap-2">
                                 <Package className="w-5 h-5" />
