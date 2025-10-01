@@ -87,10 +87,24 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
     }
 
     // Agrupar variações por atributos únicos - APENAS variações compatíveis
+    // Mantém a ordem consistente dos atributos
     const getAvailableAttributeGroups = () => {
         const compatibleVariations = getCompatibleVariations()
+        
+        // Primeiro, coletar TODOS os nomes de atributos na ordem em que aparecem
+        const attributeOrder: string[] = []
         const attributeGroups = new Map<string, Set<string>>()
 
+        // Iterar por TODAS as variações válidas (não apenas compatíveis) para manter ordem consistente
+        validVariations.forEach(variation => {
+            variation.attributeValues?.forEach(attr => {
+                if (attr.attributeName && !attributeOrder.includes(attr.attributeName)) {
+                    attributeOrder.push(attr.attributeName)
+                }
+            })
+        })
+
+        // Agora popular os valores apenas das variações compatíveis
         compatibleVariations.forEach(variation => {
             variation.attributeValues?.forEach(attr => {
                 if (attr.attributeName && attr.value) {
@@ -102,7 +116,15 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
             })
         })
 
-        return attributeGroups
+        // Retornar em ordem consistente
+        const orderedGroups = new Map<string, Set<string>>()
+        attributeOrder.forEach(attrName => {
+            if (attributeGroups.has(attrName)) {
+                orderedGroups.set(attrName, attributeGroups.get(attrName)!)
+            }
+        })
+
+        return orderedGroups
     }
 
     const attributeGroups = getAvailableAttributeGroups()
