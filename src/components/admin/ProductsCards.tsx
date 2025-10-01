@@ -304,7 +304,7 @@ export default function ProductsCardsView({
                                         className="flex-1 h-7 text-xs hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 cursor-pointer"
                                         asChild
                                     >
-                                        <Link href={`/admin/products/${product.id}`}>
+                                        <Link href={`/admin/produtos/${product.id}`}>
                                             <Eye className="h-3 w-3" />
                                         </Link>
                                     </Button>

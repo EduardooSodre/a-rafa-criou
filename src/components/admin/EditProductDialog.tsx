@@ -124,7 +124,7 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
                 images: imgs,
             }
         })
-        return {
+        const result = {
             id: source.id || undefined,
             name: source.name || '',
             slug: source.slug || '',
@@ -137,6 +137,15 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
             variations,
             attributes: source.attributes || [],
         }
+        
+        console.log('[EditProductDialog] defaultValues gerado:', {
+            id: result.id,
+            name: result.name,
+            attributesCount: result.attributes.length,
+            attributes: result.attributes,
+        })
+        
+        return result
     }, [detailedProduct, product])
 
     return (

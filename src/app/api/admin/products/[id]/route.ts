@@ -4,7 +4,7 @@ import { db } from '@/lib/db';
 import { products, files } from '@/lib/db/schema';
 import { variationAttributeValues } from '@/lib/db/schema';
 import { productAttributes } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and, inArray } from 'drizzle-orm';
 import { productImages, productVariations } from '@/lib/db/schema';
 import { deleteFromR2 } from '@/lib/r2-utils';
 
@@ -19,6 +19,12 @@ const updateProductSchema = z.object({
   isFeatured: z.boolean().optional(),
   seoTitle: z.string().optional().nullable(),
   seoDescription: z.string().optional().nullable(),
+  // Aceitar campos adicionais que serão processados mas não validados pelo schema básico
+  variations: z.any().optional(),
+  images: z.any().optional(),
+  files: z.any().optional(),
+  attributes: z.any().optional(),
+  attributeDefinitions: z.any().optional(),
 });
 
 // Incoming shapes from client
@@ -72,14 +78,69 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       .from(productAttributes)
       .where(eq(productAttributes.productId, id));
 
-    // Get product images (product_images table)
-    const images = await db.select().from(productImages).where(eq(productImages.productId, id));
-
-    // Get variations and for each variation include files, images and attribute mappings
+    // Get variations first to know their IDs
     const variationsRaw = await db
       .select()
       .from(productVariations)
       .where(eq(productVariations.productId, id));
+    
+    const variationIds = variationsRaw.map(v => v.id);
+
+    // Buscar TODOS os atributos usados nas variações (mesmo que não estejam em product_attributes)
+    let allAttributeIds: string[] = [];
+    
+    if (variationIds.length > 0) {
+      const allVariationAttrs = await db
+        .select()
+        .from(variationAttributeValues)
+        .where(inArray(variationAttributeValues.variationId, variationIds));
+      
+      // Pegar IDs únicos de atributos
+      allAttributeIds = Array.from(new Set(allVariationAttrs.map(va => va.attributeId)));
+      
+      console.log('[GET] Atributos encontrados nas variações:', allAttributeIds);
+    }
+
+    // Se não há em product_attributes mas há nas variações, usar das variações
+    const attributeIdsToUse = prodAttrs.length > 0 
+      ? prodAttrs.map(pa => pa.attributeId)
+      : allAttributeIds;
+
+    // Para cada atributo, buscar TODOS os valores usados em TODAS as variações
+    const attributesWithValues = await Promise.all(
+      attributeIdsToUse.map(async (attrId) => {
+        if (variationIds.length === 0) {
+          return {
+            attributeId: attrId,
+            valueIds: []
+          };
+        }
+
+        // Buscar todos os valores deste atributo para as variações deste produto
+        const valueRecords = await db
+          .select()
+          .from(variationAttributeValues)
+          .where(
+            and(
+              eq(variationAttributeValues.attributeId, attrId),
+              inArray(variationAttributeValues.variationId, variationIds)
+            )
+          );
+        
+        // Pegar IDs únicos dos valores
+        const uniqueValueIds = Array.from(new Set(valueRecords.map(vr => vr.valueId)));
+
+        return {
+          attributeId: attrId,
+          valueIds: uniqueValueIds
+        };
+      })
+    );
+
+    // Get product images (product_images table)
+    const images = await db.select().from(productImages).where(eq(productImages.productId, id));
+
+    // Get variations and for each variation include files, images and attribute mappings
     const variations = await Promise.all(
       variationsRaw.map(async v => {
         const variationFiles = await db.select().from(files).where(eq(files.variationId, v.id));
@@ -160,8 +221,19 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         order: img.sortOrder,
       })),
       variations,
-      attributes: prodAttrs.map(pa => ({ attributeId: pa.attributeId, valueIds: [] })),
+      // Retornar atributos com os valores reais buscados do banco
+      attributes: attributesWithValues,
     };
+
+    console.log('[GET /api/admin/products/[id]] Produto completo:', {
+      id: product.id,
+      name: product.name,
+      productAttributesCount: prodAttrs.length,
+      attributesFromVariationsCount: allAttributeIds.length,
+      attributesCount: attributesWithValues.length,
+      attributes: attributesWithValues,
+      variationsCount: variations.length
+    });
 
     return NextResponse.json(completeProduct);
   } catch (error) {
@@ -174,6 +246,11 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   try {
     const { id } = await params;
     const body = await request.json();
+    
+    console.log('[PUT /api/admin/products/[id]] Received update request for product:', id);
+    console.log('[PUT /api/admin/products/[id]] Body keys:', Object.keys(body));
+    console.log('[PUT /api/admin/products/[id]] Body:', JSON.stringify(body, null, 2));
+    
     const validatedData = updateProductSchema.parse(body);
 
     // Check if product exists
@@ -497,7 +574,9 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json(completeProduct);
   } catch (error) {
-    console.error('Error updating product:', error);
+    console.error('[PUT /api/admin/products/[id]] Error updating product:', error);
+    console.error('[PUT /api/admin/products/[id]] Error stack:', error instanceof Error ? error.stack : 'No stack');
+    console.error('[PUT /api/admin/products/[id]] Error message:', error instanceof Error ? error.message : String(error));
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -506,7 +585,10 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       );
     }
 
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      message: error instanceof Error ? error.message : String(error)
+    }, { status: 500 });
   }
 }
 
