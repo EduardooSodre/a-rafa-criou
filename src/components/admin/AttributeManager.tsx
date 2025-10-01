@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Plus, X, Check } from 'lucide-react'
+import { Plus, X, Check, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -128,6 +128,63 @@ export default function AttributeManager({ selectedAttributes, onChange }: Attri
         } catch (error) {
             console.error('Erro ao adicionar valor:', error)
             alert('Erro ao adicionar valor')
+        }
+    }
+
+    async function handleDeleteAttribute(attributeId: string, attributeName: string) {
+        if (!confirm(`Tem certeza que deseja deletar o atributo "${attributeName}"?\nTodos os valores serão removidos.`)) {
+            return
+        }
+
+        try {
+            const response = await fetch(`/api/admin/attributes?attributeId=${attributeId}`, {
+                method: 'DELETE'
+            })
+
+            if (response.ok) {
+                // Remover dos selecionados se estiver
+                onChange(selectedAttributes.filter(a => a.attributeId !== attributeId))
+                await loadAttributes()
+            } else {
+                const error = await response.json()
+                alert(error.error || 'Erro ao deletar atributo')
+            }
+        } catch (error) {
+            console.error('Erro ao deletar atributo:', error)
+            alert('Erro ao deletar atributo')
+        }
+    }
+
+    async function handleDeleteValue(valueId: string, valueName: string, attributeId: string) {
+        if (!confirm(`Tem certeza que deseja deletar o valor "${valueName}"?`)) {
+            return
+        }
+
+        try {
+            const response = await fetch(`/api/admin/attributes?valueId=${valueId}`, {
+                method: 'DELETE'
+            })
+
+            if (response.ok) {
+                // Remover dos selecionados se estiver
+                const attr = selectedAttributes.find(a => a.attributeId === attributeId)
+                if (attr && attr.valueIds.includes(valueId)) {
+                    onChange(
+                        selectedAttributes.map(a =>
+                            a.attributeId === attributeId
+                                ? { ...a, valueIds: a.valueIds.filter(v => v !== valueId) }
+                                : a
+                        )
+                    )
+                }
+                await loadAttributes()
+            } else {
+                const error = await response.json()
+                alert(error.error || 'Erro ao deletar valor')
+            }
+        } catch (error) {
+            console.error('Erro ao deletar valor:', error)
+            alert('Erro ao deletar valor')
         }
     }
 
@@ -292,7 +349,7 @@ export default function AttributeManager({ selectedAttributes, onChange }: Attri
                                         }`}
                                 >
                                     <div className="flex items-center justify-between mb-3">
-                                        <label className="flex items-center gap-3 cursor-pointer">
+                                        <label className="flex items-center gap-3 cursor-pointer flex-1">
                                             <input
                                                 type="checkbox"
                                                 checked={isSelected}
@@ -307,11 +364,23 @@ export default function AttributeManager({ selectedAttributes, onChange }: Attri
                                             </div>
                                         </label>
 
-                                        {isSelected && (
-                                            <Badge variant="secondary" className="bg-[#FED466]">
-                                                Selecionado
-                                            </Badge>
-                                        )}
+                                        <div className="flex items-center gap-2">
+                                            {isSelected && (
+                                                <Badge variant="secondary" className="bg-[#FED466]">
+                                                    Selecionado
+                                                </Badge>
+                                            )}
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => handleDeleteAttribute(attr.id, attr.name)}
+                                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                title="Deletar atributo"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </div>
                                     </div>
 
                                     {/* Valores do Atributo */}
@@ -324,21 +393,31 @@ export default function AttributeManager({ selectedAttributes, onChange }: Attri
                                                 {attr.values?.map(value => {
                                                     const isValueSelected = selectedAttr?.valueIds.includes(value.id)
                                                     return (
-                                                        <label
+                                                        <div
                                                             key={value.id}
-                                                            className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border-2 cursor-pointer transition-all ${isValueSelected
+                                                            className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border-2 transition-all ${isValueSelected
                                                                     ? 'border-[#FD9555] bg-[#FED466]/20'
-                                                                    : 'border-gray-300 hover:border-[#FED466]'
+                                                                    : 'border-gray-300'
                                                                 }`}
                                                         >
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={isValueSelected}
-                                                                onChange={() => toggleValue(attr.id, value.id)}
-                                                                className="w-4 h-4"
-                                                            />
-                                                            <span className="text-sm font-medium">{value.value}</span>
-                                                        </label>
+                                                            <label className="flex items-center gap-2 cursor-pointer">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={isValueSelected}
+                                                                    onChange={() => toggleValue(attr.id, value.id)}
+                                                                    className="w-4 h-4"
+                                                                />
+                                                                <span className="text-sm font-medium">{value.value}</span>
+                                                            </label>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleDeleteValue(value.id, value.value, attr.id)}
+                                                                className="text-red-500 hover:text-red-700 transition-colors"
+                                                                title="Deletar valor"
+                                                            >
+                                                                <X className="w-4 h-4" />
+                                                            </button>
+                                                        </div>
                                                     )
                                                 })}
                                             </div>

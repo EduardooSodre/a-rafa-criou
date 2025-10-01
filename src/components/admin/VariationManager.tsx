@@ -193,7 +193,7 @@ export default function VariationManager({ variations, attributes, onChange }: V
                                     {attributes.map(attr => {
                                         const selectedValue = variation.attributeValues.find(
                                             av => av.attributeId === attr.id
-                                        )?.valueId || ''
+                                        )?.valueId || undefined
 
                                         return (
                                             <div key={attr.id}>
@@ -206,7 +206,6 @@ export default function VariationManager({ variations, attributes, onChange }: V
                                                         <SelectValue placeholder={`Selecione ${attr.name}`} />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        <SelectItem value="">Nenhum</SelectItem>
                                                         {attr.values?.map(v => (
                                                             <SelectItem key={v.id} value={v.id}>
                                                                 {v.value}

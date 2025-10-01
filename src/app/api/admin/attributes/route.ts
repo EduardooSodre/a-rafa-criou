@@ -104,3 +104,52 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ ok: true, id: inserted.id, attribute: inserted });
 }
+
+// DELETE - Deletar atributo completo OU valor individual
+export async function DELETE(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const attributeId = searchParams.get('attributeId');
+    const valueId = searchParams.get('valueId');
+
+    // Caso 1: Deletar valor individual
+    if (valueId) {
+      const deleted = await db
+        .delete(attributeValues)
+        .where(eq(attributeValues.id, valueId))
+        .returning();
+
+      if (deleted.length === 0) {
+        return NextResponse.json({ error: 'Valor não encontrado' }, { status: 404 });
+      }
+
+      return NextResponse.json({ ok: true, message: 'Valor deletado com sucesso' });
+    }
+
+    // Caso 2: Deletar atributo completo (e todos os valores)
+    if (attributeId) {
+      // Primeiro deletar todos os valores do atributo
+      await db
+        .delete(attributeValues)
+        .where(eq(attributeValues.attributeId, attributeId))
+        .execute();
+
+      // Depois deletar o atributo
+      const deleted = await db
+        .delete(attributes)
+        .where(eq(attributes.id, attributeId))
+        .returning();
+
+      if (deleted.length === 0) {
+        return NextResponse.json({ error: 'Atributo não encontrado' }, { status: 404 });
+      }
+
+      return NextResponse.json({ ok: true, message: 'Atributo deletado com sucesso' });
+    }
+
+    return NextResponse.json({ error: 'ID não fornecido' }, { status: 400 });
+  } catch (error) {
+    console.error('Erro ao deletar:', error);
+    return NextResponse.json({ error: 'Erro ao deletar' }, { status: 500 });
+  }
+}
