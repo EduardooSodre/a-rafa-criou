@@ -73,19 +73,39 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
     const currentVariation = validVariations.find(v => v.id === selectedVariation)
     const currentPrice = currentVariation?.price || product.basePrice
 
-    // Agrupar variações por atributos únicos
-    const attributeGroups = new Map<string, Set<string>>()
+    // Filtrar variações compatíveis baseado nos filtros selecionados
+    const getCompatibleVariations = () => {
+        if (selectedFilters.size === 0) return validVariations
 
-    validVariations.forEach(variation => {
-        variation.attributeValues?.forEach(attr => {
-            if (attr.attributeName && attr.value) {
-                if (!attributeGroups.has(attr.attributeName)) {
-                    attributeGroups.set(attr.attributeName, new Set())
-                }
-                attributeGroups.get(attr.attributeName)?.add(attr.value)
-            }
+        return validVariations.filter(variation => {
+            return Array.from(selectedFilters.entries()).every(([attrName, value]) => {
+                return variation.attributeValues?.some(
+                    attr => attr.attributeName === attrName && attr.value === value
+                )
+            })
         })
-    })
+    }
+
+    // Agrupar variações por atributos únicos - APENAS variações compatíveis
+    const getAvailableAttributeGroups = () => {
+        const compatibleVariations = getCompatibleVariations()
+        const attributeGroups = new Map<string, Set<string>>()
+
+        compatibleVariations.forEach(variation => {
+            variation.attributeValues?.forEach(attr => {
+                if (attr.attributeName && attr.value) {
+                    if (!attributeGroups.has(attr.attributeName)) {
+                        attributeGroups.set(attr.attributeName, new Set())
+                    }
+                    attributeGroups.get(attr.attributeName)?.add(attr.value)
+                }
+            })
+        })
+
+        return attributeGroups
+    }
+
+    const attributeGroups = getAvailableAttributeGroups()
 
     // Handler para clique em filtro
     const handleFilterClick = (attributeName: string, value: string) => {
@@ -299,7 +319,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                         <div className="hidden sm:flex items-center gap-2 bg-[#FED466]/20 px-4 py-2 rounded-full border border-[#FED466]/50">
                                             <div className="w-2 h-2 bg-[#FD9555] rounded-full animate-pulse"></div>
                                             <span className="text-sm font-semibold text-gray-700">
-                                                {validVariations.length} opções
+                                                {getCompatibleVariations().length} {getCompatibleVariations().length === 1 ? 'opção disponível' : 'opções disponíveis'}
                                             </span>
                                         </div>
                                     </div>
@@ -382,7 +402,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                                     </div>
                                                     <div className="flex-1 min-w-0">
                                                         <h4 className="font-bold text-lg text-gray-900 mb-2">
-                                                            Sua escolha:
+                                                            ✓ Produto Selecionado
                                                         </h4>
                                                         <div className="space-y-2">
                                                             <div className="font-semibold text-xl text-gray-900">
@@ -406,6 +426,31 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                                                 </span>
                                                             </div>
                                                         </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Alerta quando houver seleção parcial */}
+                                        {selectedFilters.size > 0 && !currentVariation && (
+                                            <div className="mt-6 p-5 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300">
+                                                <div className="flex items-start gap-4">
+                                                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 shadow-md">
+                                                        <svg className="w-6 h-6 text-white" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                                        </svg>
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <h4 className="font-bold text-lg text-gray-900 mb-2">
+                                                            Continue selecionando
+                                                        </h4>
+                                                        <p className="text-sm text-gray-700">
+                                                            Selecione todas as opções necessárias para completar sua escolha.
+                                                            <br />
+                                                            <strong className="text-amber-700">
+                                                                {attributeGroups.size - selectedFilters.size} opção(ões) restante(s)
+                                                            </strong>
+                                                        </p>
                                                     </div>
                                                 </div>
                                             </div>
