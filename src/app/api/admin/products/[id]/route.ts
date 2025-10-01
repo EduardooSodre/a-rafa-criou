@@ -531,7 +531,10 @@ export async function DELETE(
     console.log(`[DELETE PRODUCT] Encontrados ${productFiles.length} arquivos do produto`);
 
     // 2. Buscar todas as variações do produto
-    const variations = await db.select().from(productVariations).where(eq(productVariations.productId, id));
+    const variations = await db
+      .select()
+      .from(productVariations)
+      .where(eq(productVariations.productId, id));
     console.log(`[DELETE PRODUCT] Encontradas ${variations.length} variações`);
 
     // 3. Buscar todos os arquivos das variações
@@ -567,25 +570,28 @@ export async function DELETE(
     // - files (files)
     // - productAttributes (product_attributes)
     // - variationAttributeValues (variation_attribute_values) via cascade das variações
-    
+
     console.log(`[DELETE PRODUCT] Deletando produto do banco de dados...`);
     await db.delete(products).where(eq(products.id, id));
     console.log(`[DELETE PRODUCT] ✓ Produto deletado do banco de dados`);
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       message: 'Produto excluído com sucesso',
       deletedFiles: allFiles.length,
       details: {
         productFiles: productFiles.length,
         variationFiles: variationFiles.length,
-        variations: variations.length
-      }
+        variations: variations.length,
+      },
     });
   } catch (error) {
     console.error('[DELETE PRODUCT] Erro ao excluir produto:', error);
-    return NextResponse.json({ 
-      error: 'Erro ao excluir produto',
-      details: error instanceof Error ? error.message : 'Erro desconhecido'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Erro ao excluir produto',
+        details: error instanceof Error ? error.message : 'Erro desconhecido',
+      },
+      { status: 500 }
+    );
   }
 }

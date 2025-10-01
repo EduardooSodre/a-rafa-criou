@@ -159,7 +159,7 @@ export default function ProductsCardsView({
 
             const result = await response.json()
             console.log('[DELETE PRODUCT] Produto excluído:', result)
-            
+
             // Mostrar mensagem de sucesso com detalhes
             if (result.deletedFiles > 0) {
                 console.log(`✓ ${result.deletedFiles} arquivo(s) deletado(s) do Cloudflare R2`)
