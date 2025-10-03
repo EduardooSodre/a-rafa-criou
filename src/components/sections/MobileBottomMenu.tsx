@@ -82,7 +82,7 @@ export default function MobileBottomMenu({
                             "rounded-xl"
                         )}
                         onClick={() => setCartOpen(true)}
-                        aria-label={t('nav.cartAria', `Carrinho ${totalItems > 0 ? `com ${totalItems} ${totalItems === 1 ? 'item' : 'itens'}` : 'vazio'}`)}  
+                        aria-label={t('nav.cartAria', `Carrinho ${totalItems > 0 ? `com ${totalItems} ${totalItems === 1 ? 'item' : 'itens'}` : 'vazio'}`)}
                     >
                         <div className="relative">
                             <ShoppingCart className="w-7 h-7" strokeWidth={2} />

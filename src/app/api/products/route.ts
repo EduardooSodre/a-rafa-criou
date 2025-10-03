@@ -32,11 +32,11 @@ export async function GET(request: NextRequest) {
 
     // Montar query base
     const whereClauses = [];
-    
+
     if (featured) {
       whereClauses.push(eq(products.isFeatured, true));
     }
-    
+
     if (search && search.trim()) {
       whereClauses.push(
         or(
@@ -47,11 +47,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const whereClause = whereClauses.length > 0 
-      ? whereClauses.length === 1 
-        ? whereClauses[0] 
-        : and(...whereClauses)
-      : undefined;
+    const whereClause =
+      whereClauses.length > 0
+        ? whereClauses.length === 1
+          ? whereClauses[0]
+          : and(...whereClauses)
+        : undefined;
 
     // Buscar produtos do banco (ordenado por mais recentes)
     const dbProducts = await db

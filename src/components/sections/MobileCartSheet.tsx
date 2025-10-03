@@ -32,7 +32,7 @@ export function MobileCartSheet({ open, onOpenChange }: MobileCartSheetProps) {
         <Sheet open={open} onOpenChange={onOpenChange}>
             <SheetContent side="right" className="w-[90vw] sm:w-[400px] p-0 flex flex-col">
                 <SheetTitle className="sr-only">Carrinho de Compras</SheetTitle>
-                
+
                 {/* Header */}
                 <div className="p-4 border-b bg-[#FD9555]">
                     <div className="flex items-center gap-2">

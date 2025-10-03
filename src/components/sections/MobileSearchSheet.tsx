@@ -74,7 +74,7 @@ export function MobileSearchSheet({ open, onOpenChange }: MobileSearchSheetProps
         <Drawer open={open} onOpenChange={onOpenChange}>
             <DrawerContent className="max-h-[30vh] p-0 flex flex-col bg-[#FD9555] rounded-t-3xl border-0">
                 <DrawerTitle className="sr-only">Buscar Produtos</DrawerTitle>
-                
+
                 {/* Header com Search Input */}
                 <div className="p-4 pt-6">
                     <div className="relative">
