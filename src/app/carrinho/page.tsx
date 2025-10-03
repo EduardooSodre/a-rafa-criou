@@ -79,7 +79,7 @@ export default function CarrinhoPage() {
     const formatPrice = (price: number) => {
         const locale = i18n.language === 'pt' ? 'pt-BR' : i18n.language === 'es' ? 'es-ES' : 'en-US'
         const currency = i18n.language === 'pt' ? 'BRL' : i18n.language === 'es' ? 'EUR' : 'USD'
-        
+
         return new Intl.NumberFormat(locale, {
             style: 'currency',
             currency: currency,
