@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useCart } from '@/contexts/cart-context'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -182,7 +182,7 @@ export default function CarrinhoPage() {
                                                             <Button
                                                                 variant="ghost"
                                                                 size="sm"
-                                                                className="h-10 w-10 p-0 hover:bg-[#FED466]/20 rounded-none border-r border-gray-300"
+                                                                className="h-10 w-10 p-0 hover:bg-[#FED466]/20 rounded-none border-r border-gray-300 cursor-pointer"
                                                                 onClick={() => updateQuantity(item.id, item.quantity - 1)}
                                                             >
                                                                 <Minus className="w-4 h-4 text-gray-700" />
@@ -193,7 +193,7 @@ export default function CarrinhoPage() {
                                                             <Button
                                                                 variant="ghost"
                                                                 size="sm"
-                                                                className="h-10 w-10 p-0 hover:bg-[#FED466]/20 rounded-none border-l border-gray-300"
+                                                                className="h-10 w-10 p-0 hover:bg-[#FED466]/20 rounded-none border-l border-gray-300 cursor-pointer"
                                                                 onClick={() => updateQuantity(item.id, item.quantity + 1)}
                                                             >
                                                                 <Plus className="w-4 h-4 text-gray-700" />
@@ -203,9 +203,9 @@ export default function CarrinhoPage() {
                                                         {/* Botão Editar */}
                                                         {hasVariations && (
                                                             <Button
-                                                                variant="outline"
+                                                                type="button"
                                                                 size="sm"
-                                                                className="h-10 px-3 sm:px-4 text-[#FD9555] hover:text-white hover:bg-[#FD9555] border-2 border-[#FD9555] font-medium transition-all duration-200"
+                                                                className="h-10 px-3 sm:px-4 !bg-white !text-[#FD9555] hover:!text-white hover:!bg-[#FD9555] border-2 !border-[#FD9555] font-medium transition-all duration-200 cursor-pointer"
                                                                 onClick={() => handleEditItem(item.id)}
                                                             >
                                                                 <Edit className="w-4 h-4 sm:mr-2" />
@@ -217,11 +217,11 @@ export default function CarrinhoPage() {
                                                         <Button
                                                             variant="ghost"
                                                             size="sm"
-                                                            className="h-10 px-3 sm:px-4 text-red-600 hover:text-red-700 hover:bg-red-50 font-medium"
+                                                            className="h-10 px-3 sm:px-4  !bg-red-100 !text-red-700 hover:!text-white hover:!bg-red-600 border-2 !border-red-300 hover:!border-red-600 font-semibold transition-all duration-200 cursor-pointer   "
                                                             onClick={() => removeItem(item.id)}
                                                         >
                                                             <Trash2 className="w-4 h-4 sm:mr-2" />
-                                                            <span className="hidden sm:inline">Remover</span>
+                                                            <span className="hidden sm:inline ">Remover</span>
                                                         </Button>
                                                     </div>
                                                 </div>
@@ -244,15 +244,18 @@ export default function CarrinhoPage() {
 
                             <div className="mt-6 pt-6 border-t-2 border-gray-200">
                                 <div className="flex flex-col sm:flex-row gap-3">
-                                    <Button variant="outline" asChild className="flex-1 h-12 font-semibold border-2 hover:bg-gray-50">
-                                        <Link href="/produtos">
+                                    <Link href="/produtos" className="flex-1">
+                                        <Button
+                                            type="button"
+                                            className="w-full h-12 !bg-[#FED466] hover:!bg-[#FED466]/80 !text-gray-900 font-semibold border-2 !border-[#FED466] hover:!border-[#FD9555] transition-all duration-200 cursor-pointer"
+                                        >
                                             Continuar Comprando
-                                        </Link>
-                                    </Button>
+                                        </Button>
+                                    </Link>
                                     <Button
-                                        variant="outline"
+                                        type="button"
                                         onClick={clearCart}
-                                        className="flex-1 h-12 text-red-600 hover:text-white hover:bg-red-600 border-2 border-red-300 hover:border-red-600 font-semibold transition-all duration-200"
+                                        className="flex-1 h-12 !bg-red-100 !text-red-700 hover:!text-white hover:!bg-red-600 border-2 !border-red-300 hover:!border-red-600 font-semibold transition-all duration-200 cursor-pointer"
                                     >
                                         <Trash2 className="w-4 h-4 mr-2" />
                                         Limpar Carrinho
@@ -263,11 +266,11 @@ export default function CarrinhoPage() {
 
                         {/* Resumo do Pedido */}
                         <div className="lg:col-span-1">
-                            <Card className="sticky top-4 bg-white border-2 border-gray-200 shadow-lg">
-                                <CardHeader className="bg-gradient-to-r from-[#FED466] to-[#FD9555] -m-[1px] rounded-t-lg">
-                                    <CardTitle className="text-gray-900 font-bold text-lg">Resumo do Pedido</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-5 pt-6">
+                            <Card className="sticky top-4 bg-white border-2 border-gray-200 shadow-lg overflow-hidden rounded-xl">
+                                <div className="bg-gradient-to-r from-[#FED466] to-[#FD9555] px-6 py-4">
+                                    <h3 className="text-gray-900 font-bold text-lg">Resumo do Pedido</h3>
+                                </div>
+                                <CardContent className="space-y-5 pt-6 pb-6">
                                     <div className="flex justify-between items-center">
                                         <span className="text-gray-600 font-medium">Subtotal ({totalItems} {totalItems === 1 ? 'item' : 'itens'})</span>
                                         <span className="text-lg font-bold text-gray-900">{formatPrice(totalPrice)}</span>
@@ -281,7 +284,11 @@ export default function CarrinhoPage() {
                                                 placeholder="Digite seu cupom"
                                                 className="flex-1 h-11 border-2 focus:border-[#FD9555]"
                                             />
-                                            <Button variant="outline" size="sm" className="h-11 px-4 border-2 font-semibold hover:bg-[#FD9555] hover:text-white hover:border-[#FD9555]">
+                                            <Button
+                                                type="button"
+                                                size="sm"
+                                                className="h-11 px-4 !bg-white !text-gray-900 border-2 !border-gray-300 font-semibold hover:!bg-[#FD9555] hover:!text-white hover:!border-[#FD9555] transition-all duration-200 cursor-pointer"
+                                            >
                                                 Aplicar
                                             </Button>
                                         </div>
@@ -296,7 +303,7 @@ export default function CarrinhoPage() {
 
                                     <Button
                                         asChild
-                                        className="w-full h-14 bg-gradient-to-r from-[#FD9555] to-[#FD9555]/90 hover:from-[#FD9555]/90 hover:to-[#FD9555] text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-200"
+                                        className="w-full h-14 bg-gradient-to-r from-[#FD9555] to-[#FD9555]/90 hover:from-[#FD9555]/90 hover:to-[#FD9555] text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer"
                                         size="lg"
                                     >
                                         <Link href="/checkout">
