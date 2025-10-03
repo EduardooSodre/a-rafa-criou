@@ -1,9 +1,11 @@
 'use client';
 
+import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Menu, Home, ShoppingCart, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from 'react-i18next';
+import { MobileMegaMenuSheet } from './MobileMegaMenuSheet';
 
 interface MobileBottomMenuProps {
     cartItemCount?: number;
@@ -16,37 +18,44 @@ interface MobileBottomMenuProps {
 
 export default function MobileBottomMenu({
     cartItemCount = 0,
-    onMenuClick,
     onHomeClick,
     onCartClick,
     onSearchClick,
     className
 }: MobileBottomMenuProps) {
     const { t } = useTranslation('common');
+    const [menuOpen, setMenuOpen] = useState(false);
+
+    const handleMenuClick = () => {
+        setMenuOpen(true);
+    };
 
     return (
-        <div className={cn(
-            "fixed bottom-0 left-0 right-0 z-50 bg-[#FD9555] md:hidden shadow-2xl border-t border-[#FD9555]/20",
-            "mx-2 mb-2 rounded-2xl backdrop-blur-sm",
-            className
-        )}>
-            <div className="grid grid-cols-4 h-18 items-center justify-center px-1 py-2">
-                {/* Menu */}
-                <Button
-                    variant="ghost"
-                    size="lg"
-                    className={cn(
-                        "flex flex-col items-center justify-center text-white py-3 px-2 h-auto gap-1",
-                        "hover:bg-white/10 hover:text-white active:bg-white/20 transition-all duration-200",
-                        "focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-0",
-                        "rounded-xl"
-                    )}
-                    onClick={onMenuClick}
-                    aria-label={t('nav.menuAria', 'Abrir menu')}
-                >
-                    <Menu className="w-7 h-7" strokeWidth={2} />
-                    <span className="text-[10px] font-bold tracking-wide">{t('nav.menu', 'MENU')}</span>
-                </Button>
+        <>
+            <MobileMegaMenuSheet open={menuOpen} onOpenChange={setMenuOpen} />
+
+            <div className={cn(
+                "fixed bottom-0 left-0 right-0 z-50 bg-[#FD9555] md:hidden shadow-2xl border-t border-[#FD9555]/20",
+                "mx-2 mb-2 rounded-2xl backdrop-blur-sm",
+                className
+            )}>
+                <div className="grid grid-cols-4 h-18 items-center justify-center px-1 py-2">
+                    {/* Menu */}
+                    <Button
+                        variant="ghost"
+                        size="lg"
+                        className={cn(
+                            "flex flex-col items-center justify-center text-white py-3 px-2 h-auto gap-1",
+                            "hover:bg-white/10 hover:text-white active:bg-white/20 transition-all duration-200",
+                            "focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-0",
+                            "rounded-xl"
+                        )}
+                        onClick={handleMenuClick}
+                        aria-label={t('nav.menuAria', 'Abrir menu')}
+                    >
+                        <Menu className="w-7 h-7" strokeWidth={2} />
+                        <span className="text-[10px] font-bold tracking-wide">{t('nav.menu', 'MENU')}</span>
+                    </Button>
 
                 {/* Início */}
                 <Button
@@ -111,5 +120,6 @@ export default function MobileBottomMenu({
                 </Button>
             </div>
         </div>
+        </>
     );
 }
