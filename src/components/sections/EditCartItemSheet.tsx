@@ -159,22 +159,22 @@ export function EditCartItemSheet({ open, onOpenChange, cartItem, productData }:
                 className="h-[85vh] sm:h-[90vh] max-h-screen overflow-hidden p-0 flex flex-col"
             >
                 {/* Header Fixo */}
-                <SheetHeader className="bg-gradient-to-r from-[#FED466] to-[#FD9555] px-4 sm:px-6 py-5 flex-shrink-0 border-b-4 border-[#FD9555]">
-                    <div className="flex items-start gap-3 sm:gap-4">
-                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-white shadow-lg flex-shrink-0 border-2 border-white">
+                <SheetHeader className="bg-gradient-to-r from-[#FED466] to-[#FD9555] px-4 sm:px-6 py-3 flex-shrink-0 border-b-2 border-[#FD9555]">
+                    <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden bg-white shadow-md flex-shrink-0 border border-white">
                             <Image
                                 src={productData.mainImage?.data || '/file.svg'}
                                 alt={productData.mainImage?.alt || productData.name}
-                                width={80}
-                                height={80}
+                                width={56}
+                                height={56}
                                 className="w-full h-full object-cover"
                             />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <SheetTitle className="text-white text-lg sm:text-xl font-bold mb-1">
+                            <SheetTitle className="text-white text-base sm:text-lg font-bold">
                                 Editar Produto
                             </SheetTitle>
-                            <p className="text-white/95 text-sm sm:text-base font-medium line-clamp-2">
+                            <p className="text-white/95 text-xs sm:text-sm font-medium line-clamp-1">
                                 {productData.name}
                             </p>
                         </div>
@@ -251,12 +251,12 @@ export function EditCartItemSheet({ open, onOpenChange, cartItem, productData }:
                 </div>
 
                 {/* Footer Fixo */}
-                <div className="flex-shrink-0 bg-white border-t-2 border-gray-200 p-4 sm:p-6 shadow-2xl">
-                    <div className="max-w-2xl mx-auto space-y-4">
+                <div className="flex-shrink-0 bg-white border-t-2 border-gray-200 p-3 sm:p-4 shadow-xl">
+                    <div className="max-w-2xl mx-auto space-y-3">
                         {selectedVariation && (
-                            <div className="flex items-center justify-between bg-[#FED466]/30 px-4 sm:px-6 py-4 rounded-xl border-2 border-[#FED466]">
-                                <span className="text-gray-700 font-semibold text-sm sm:text-base">Preço:</span>
-                                <span className="text-2xl sm:text-3xl font-bold text-[#FD9555]">
+                            <div className="flex items-center justify-between bg-[#FED466]/30 px-3 sm:px-4 py-2 rounded-lg border border-[#FED466]">
+                                <span className="text-gray-700 font-semibold text-xs sm:text-sm">Preço:</span>
+                                <span className="text-xl sm:text-2xl font-bold text-[#FD9555]">
                                     R$ {selectedVariation.price.toLocaleString('pt-BR', {
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2
@@ -268,14 +268,14 @@ export function EditCartItemSheet({ open, onOpenChange, cartItem, productData }:
                             onClick={handleUpdate}
                             disabled={!allAttributesSelected}
                             className={cn(
-                                "w-full h-14 sm:h-16 text-base sm:text-lg font-bold shadow-lg transition-all duration-200",
+                                "w-full h-11 sm:h-12 text-sm sm:text-base font-bold shadow-lg transition-all duration-200 cursor-pointer",
                                 allAttributesSelected
                                     ? "bg-gradient-to-r from-[#FD9555] to-[#FD9555]/90 hover:from-[#FD9555]/90 hover:to-[#FD9555] text-white hover:shadow-xl hover:scale-[1.02]"
                                     : "bg-gray-300 text-gray-500 cursor-not-allowed"
                             )}
                             size="lg"
                         >
-                            <Edit className="w-5 h-5 mr-2" />
+                            <Edit className="w-4 h-4 mr-2" />
                             {allAttributesSelected ? "Atualizar Produto" : "Selecione todos os atributos"}
                         </Button>
                     </div>

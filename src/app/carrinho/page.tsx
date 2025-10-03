@@ -266,11 +266,11 @@ export default function CarrinhoPage() {
 
                         {/* Resumo do Pedido */}
                         <div className="lg:col-span-1">
-                            <Card className="sticky top-4 bg-white border-2 border-gray-200 shadow-lg overflow-hidden rounded-xl">
+                            <Card className="sticky top-4 bg-white border-2 border-gray-200 shadow-lg overflow-hidden rounded-xl !p-0">
                                 <div className="bg-gradient-to-r from-[#FED466] to-[#FD9555] px-6 py-4">
                                     <h3 className="text-gray-900 font-bold text-lg">Resumo do Pedido</h3>
                                 </div>
-                                <CardContent className="space-y-5 pt-6 pb-6">
+                                <div className="space-y-5 p-6">
                                     <div className="flex justify-between items-center">
                                         <span className="text-gray-600 font-medium">Subtotal ({totalItems} {totalItems === 1 ? 'item' : 'itens'})</span>
                                         <span className="text-lg font-bold text-gray-900">{formatPrice(totalPrice)}</span>
@@ -317,7 +317,7 @@ export default function CarrinhoPage() {
                                             Download imediato após pagamento
                                         </p>
                                     </div>
-                                </CardContent>
+                                </div>
                             </Card>
                         </div>
                     </div>
