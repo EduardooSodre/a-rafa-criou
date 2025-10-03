@@ -21,6 +21,12 @@ interface Product {
         data: string
         alt: string
     } | null
+    variations?: Array<{
+        id: string
+        name: string
+        price: number
+        isActive: boolean
+    }>
 }
 
 interface MobileSearchSheetProps {
@@ -62,6 +68,18 @@ export function MobileSearchSheet({ open, onOpenChange }: MobileSearchSheetProps
             style: 'currency',
             currency: 'BRL'
         }).format(price)
+    }
+
+    const getPriceDisplay = (product: Product) => {
+        if (product.variations && product.variations.length > 1) {
+            const prices = product.variations.map(v => v.price)
+            const min = Math.min(...prices)
+            const max = Math.max(...prices)
+            return min !== max
+                ? `R$ ${min.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} - R$ ${max.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+                : `R$ ${min.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+        }
+        return formatPrice(product.price)
     }
 
     const handleProductClick = () => {
@@ -148,7 +166,7 @@ export function MobileSearchSheet({ open, onOpenChange }: MobileSearchSheetProps
                                             </p>
                                         )}
                                         <p className="text-sm font-bold text-[#FD9555]">
-                                            {formatPrice(product.price)}
+                                            {getPriceDisplay(product)}
                                         </p>
                                     </div>
                                 </Link>
