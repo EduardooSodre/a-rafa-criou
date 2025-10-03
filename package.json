@@ -21,6 +21,7 @@
     "@auth/drizzle-adapter": "^1.10.0",
     "@aws-sdk/client-s3": "^3.891.0",
     "@aws-sdk/s3-request-presigner": "^3.891.0",
+    "@babel/runtime": "^7.28.4",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
