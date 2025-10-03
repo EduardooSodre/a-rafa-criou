@@ -10,6 +10,10 @@ import {
   attributeValues,
 } from '@/lib/db/schema';
 
+// Cache de 1 hora para produtos, mas rota dinâmica
+export const revalidate = 3600;
+export const dynamic = 'force-dynamic'; // Necessário porque usa searchParams
+
 type VariationDb = {
   id: string;
   productId: string;

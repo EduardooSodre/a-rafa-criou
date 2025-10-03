@@ -28,90 +28,112 @@ export async function getProductBySlug(slug: string) {
     category = catResult[0]?.name || null;
   }
 
-  // Busca variações
+  // Busca variações do produto
   const variations = await db
     .select()
     .from(productVariations)
     .where(eq(productVariations.productId, product.id));
 
-  // Para cada variação, buscar os valores de atributo associados E as imagens
-  const variationsWithAttributes = await Promise.all(
-    variations.map(async v => {
-      const mappings = await db
-        .select()
-        .from(variationAttributeValues)
-        .where(eq(variationAttributeValues.variationId, v.id));
-      // Buscar os value records
-      const valueDetails = await Promise.all(
-        mappings.map(async m => {
-          const [val] = await db
-            .select()
-            .from(attributeValues)
-            .where(eq(attributeValues.id, m.valueId))
-            .limit(1);
-          const [attr] = await db
-            .select()
-            .from(attributes)
-            .where(eq(attributes.id, m.attributeId))
-            .limit(1);
-          return {
-            attributeId: m.attributeId,
-            attributeName: attr?.name || null,
-            valueId: m.valueId,
-            value: val?.value || null,
-          };
-        })
-      );
+  const variationIds = variations.map(v => v.id);
 
-      // Buscar arquivos da variação (r2Key)
-      const variationFiles = await db.select().from(files).where(eq(files.variationId, v.id));
+  // Busca TODOS os dados de uma vez (otimização N+1 → 4 queries fixas)
+  const [allMappings, allValues, allAttrs, allFiles, allVariationImages] = await Promise.all([
+    // 1. Todos os mappings de atributos para estas variações
+    variationIds.length > 0
+      ? Promise.all(variationIds.map(vId =>
+          db.select().from(variationAttributeValues).where(eq(variationAttributeValues.variationId, vId))
+        )).then(results => results.flat())
+      : Promise.resolve([]),
 
-      // Buscar imagens da variação
-      const variationImagesResult = await db
-        .select()
-        .from(productImages)
-        .where(eq(productImages.variationId, v.id));
+    // 2. Todos os valores de atributos
+    db.select().from(attributeValues),
 
-      const variationImages = variationImagesResult.map(img => {
-        const raw = img.data || '';
-        if (!raw) return '/file.svg';
-        if (String(raw).startsWith('data:')) return String(raw);
-        return `data:${img.mimeType || 'image/jpeg'};base64,${raw}`;
-      });
+    // 3. Todos os atributos
+    db.select().from(attributes),
 
+    // 4. Todos os arquivos destas variações
+    variationIds.length > 0
+      ? Promise.all(variationIds.map(vId => db.select().from(files).where(eq(files.variationId, vId)))).then(r =>
+          r.flat()
+        )
+      : Promise.resolve([]),
+
+    // 5. Todas as imagens das variações
+    variationIds.length > 0
+      ? Promise.all(
+          variationIds.map(vId => db.select().from(productImages).where(eq(productImages.variationId, vId)))
+        ).then(r => r.flat())
+      : Promise.resolve([]),
+  ]);
+
+  // Mapeia em objetos para acesso rápido O(1)
+  const valuesMap = new Map(allValues.map(v => [v.id, v]));
+  const attrsMap = new Map(allAttrs.map(a => [a.id, a]));
+  const filesMap = new Map<string, typeof allFiles>();
+  const imagesMap = new Map<string, typeof allVariationImages>();
+
+  allFiles.forEach(f => {
+    if (!f.variationId) return;
+    if (!filesMap.has(f.variationId)) filesMap.set(f.variationId, []);
+    filesMap.get(f.variationId)!.push(f);
+  });
+
+  allVariationImages.forEach(img => {
+    if (!img.variationId) return;
+    if (!imagesMap.has(img.variationId)) imagesMap.set(img.variationId, []);
+    imagesMap.get(img.variationId)!.push(img);
+  });
+
+  // Monta variações com seus atributos (agora tudo em memória, sem queries extras)
+  const variationsWithAttributes = variations.map(v => {
+    const mappings = allMappings.filter(m => m.variationId === v.id);
+    const valueDetails = mappings.map(m => {
+      const val = valuesMap.get(m.valueId);
+      const attr = attrsMap.get(m.attributeId);
       return {
-        id: v.id,
-        name: v.name,
-        price: Number(v.price),
-        description: v.slug,
-        downloadLimit: 10,
-        fileSize: '-',
-        attributeValues: valueDetails,
-        files: variationFiles.map(f => ({ id: f.id, path: f.path, name: f.name })),
-        images: variationImages.length > 0 ? variationImages : undefined,
+        attributeId: m.attributeId,
+        attributeName: attr?.name || null,
+        valueId: m.valueId,
+        value: val?.value || null,
       };
-    })
-  );
+    });
 
-  // Busca imagens
-  const imagesResult = await db
-    .select()
-    .from(productImages)
-    .where(eq(productImages.productId, product.id));
-  // Converte base64 do banco para data URI
+    const variationFiles = filesMap.get(v.id) || [];
+    const variationImagesResult = imagesMap.get(v.id) || [];
+
+    const variationImages = variationImagesResult.map(img => {
+      const raw = img.data || '';
+      if (!raw) return '/file.svg';
+      if (String(raw).startsWith('data:')) return String(raw);
+      return `data:${img.mimeType || 'image/jpeg'};base64,${raw}`;
+    });
+
+    return {
+      id: v.id,
+      name: v.name,
+      price: Number(v.price),
+      description: v.slug,
+      downloadLimit: 10,
+      fileSize: '-',
+      attributeValues: valueDetails,
+      files: variationFiles.map(f => ({ id: f.id, path: f.path, name: f.name })),
+      images: variationImages.length > 0 ? variationImages : undefined,
+    };
+  });
+
+  // Busca imagens principais do produto (1 query)
+  const imagesResult = await db.select().from(productImages).where(eq(productImages.productId, product.id));
+  
   const images =
     imagesResult.length > 0
       ? imagesResult.map(img => {
           const raw = img.data || '';
           if (!raw) return '/file.svg';
-          // Se já é data URI, retorna direto
           if (String(raw).startsWith('data:')) return String(raw);
-          // Caso contrário, assume que é base64 e monta o data URI
           return `data:${img.mimeType || 'image/jpeg'};base64,${raw}`;
         })
       : ['/file.svg'];
 
-  // Monta objeto final para o ProductDetailClient
   return {
     id: product.id,
     name: product.name,
@@ -120,7 +142,7 @@ export async function getProductBySlug(slug: string) {
     longDescription: product.description || '',
     basePrice: Number(product.price),
     category: category || '',
-    tags: [], // Adapte se houver tags
+    tags: [],
     images,
     variations: variationsWithAttributes,
   };
