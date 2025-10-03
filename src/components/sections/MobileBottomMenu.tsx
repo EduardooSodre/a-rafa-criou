@@ -57,69 +57,69 @@ export default function MobileBottomMenu({
                         <span className="text-[10px] font-bold tracking-wide">{t('nav.menu', 'MENU')}</span>
                     </Button>
 
-                {/* Início */}
-                <Button
-                    variant="ghost"
-                    size="lg"
-                    className={cn(
-                        "flex flex-col items-center justify-center text-white py-3 px-2 h-auto gap-1",
-                        "hover:bg-white/10 hover:text-white active:bg-white/20 transition-all duration-200",
-                        "focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-0",
-                        "rounded-xl"
-                    )}
-                    onClick={onHomeClick}
-                    aria-label={t('nav.home', 'Início')}
-                >
-                    <Home className="w-7 h-7" strokeWidth={2} />
-                    <span className="text-[10px] font-bold tracking-wide">{t('nav.home', 'INÍCIO')}</span>
-                </Button>
-
-                {/* Carrinho */}
-                <Button
-                    variant="ghost"
-                    size="lg"
-                    className={cn(
-                        "flex flex-col items-center justify-center text-white py-3 px-2 h-auto gap-1 relative",
-                        "hover:bg-white/10 hover:text-white active:bg-white/20 transition-all duration-200",
-                        "focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-0",
-                        "rounded-xl"
-                    )}
-                    onClick={onCartClick}
-                    aria-label={t('nav.cartAria', `Carrinho ${cartItemCount > 0 ? `com ${cartItemCount} ${cartItemCount === 1 ? 'item' : 'itens'}` : 'vazio'}`)}
-                >
-                    <div className="relative">
-                        <ShoppingCart className="w-7 h-7" strokeWidth={2} />
-                        {cartItemCount > 0 && (
-                            <div className={cn(
-                                "absolute -top-1 -right-1 bg-white text-[#FD9555] text-[9px] font-black rounded-full",
-                                "min-w-[18px] h-[18px] flex items-center justify-center border-2 border-[#FD9555]",
-                                "shadow-lg animate-pulse"
-                            )}>
-                                {cartItemCount > 99 ? '99+' : cartItemCount}
-                            </div>
+                    {/* Início */}
+                    <Button
+                        variant="ghost"
+                        size="lg"
+                        className={cn(
+                            "flex flex-col items-center justify-center text-white py-3 px-2 h-auto gap-1",
+                            "hover:bg-white/10 hover:text-white active:bg-white/20 transition-all duration-200",
+                            "focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-0",
+                            "rounded-xl"
                         )}
-                    </div>
-                    <span className="text-[10px] font-bold tracking-wide">{t('nav.cart', 'CARRINHO')}</span>
-                </Button>
+                        onClick={onHomeClick}
+                        aria-label={t('nav.home', 'Início')}
+                    >
+                        <Home className="w-7 h-7" strokeWidth={2} />
+                        <span className="text-[10px] font-bold tracking-wide">{t('nav.home', 'INÍCIO')}</span>
+                    </Button>
 
-                {/* Busca */}
-                <Button
-                    variant="ghost"
-                    size="lg"
-                    className={cn(
-                        "flex flex-col items-center justify-center text-white py-3 px-2 h-auto gap-1",
-                        "hover:bg-white/10 hover:text-white active:bg-white/20 transition-all duration-200",
-                        "focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-0",
-                        "rounded-xl"
-                    )}
-                    onClick={onSearchClick}
-                    aria-label={t('nav.searchAria', 'Buscar produtos')}
-                >
-                    <Search className="w-7 h-7" strokeWidth={2} />
-                    <span className="text-[10px] font-bold tracking-wide">{t('nav.search', 'BUSCA')}</span>
-                </Button>
+                    {/* Carrinho */}
+                    <Button
+                        variant="ghost"
+                        size="lg"
+                        className={cn(
+                            "flex flex-col items-center justify-center text-white py-3 px-2 h-auto gap-1 relative",
+                            "hover:bg-white/10 hover:text-white active:bg-white/20 transition-all duration-200",
+                            "focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-0",
+                            "rounded-xl"
+                        )}
+                        onClick={onCartClick}
+                        aria-label={t('nav.cartAria', `Carrinho ${cartItemCount > 0 ? `com ${cartItemCount} ${cartItemCount === 1 ? 'item' : 'itens'}` : 'vazio'}`)}
+                    >
+                        <div className="relative">
+                            <ShoppingCart className="w-7 h-7" strokeWidth={2} />
+                            {cartItemCount > 0 && (
+                                <div className={cn(
+                                    "absolute -top-1 -right-1 bg-white text-[#FD9555] text-[9px] font-black rounded-full",
+                                    "min-w-[18px] h-[18px] flex items-center justify-center border-2 border-[#FD9555]",
+                                    "shadow-lg animate-pulse"
+                                )}>
+                                    {cartItemCount > 99 ? '99+' : cartItemCount}
+                                </div>
+                            )}
+                        </div>
+                        <span className="text-[10px] font-bold tracking-wide">{t('nav.cart', 'CARRINHO')}</span>
+                    </Button>
+
+                    {/* Busca */}
+                    <Button
+                        variant="ghost"
+                        size="lg"
+                        className={cn(
+                            "flex flex-col items-center justify-center text-white py-3 px-2 h-auto gap-1",
+                            "hover:bg-white/10 hover:text-white active:bg-white/20 transition-all duration-200",
+                            "focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-0",
+                            "rounded-xl"
+                        )}
+                        onClick={onSearchClick}
+                        aria-label={t('nav.searchAria', 'Buscar produtos')}
+                    >
+                        <Search className="w-7 h-7" strokeWidth={2} />
+                        <span className="text-[10px] font-bold tracking-wide">{t('nav.search', 'BUSCA')}</span>
+                    </Button>
+                </div>
             </div>
-        </div>
         </>
     );
 }

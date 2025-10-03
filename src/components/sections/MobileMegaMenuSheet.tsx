@@ -78,29 +78,26 @@ export function MobileMegaMenuSheet({ open, onOpenChange }: MobileMegaMenuSheetP
                                         {/* Categoria principal - clicável para expandir */}
                                         <button
                                             onClick={() => toggleCategory(category.id)}
-                                            className={`w-full flex items-center justify-between gap-3 transition-all py-2.5 px-3 rounded-lg ${
-                                                expandedCategories.includes(category.id)
+                                            className={`w-full flex items-center justify-between gap-3 transition-all py-2.5 px-3 rounded-lg ${expandedCategories.includes(category.id)
                                                     ? 'bg-[#FD9555]/10 text-[#FD9555]'
                                                     : 'text-gray-600 hover:text-[#FD9555] hover:bg-gray-50'
-                                            }`}
+                                                }`}
                                         >
                                             <div className="flex items-center gap-3">
                                                 <span className="text-xl flex-shrink-0" style={{ filter: 'brightness(1.1)' }}>
                                                     {getCategoryIcon(category.slug)}
                                                 </span>
-                                                <span className={`font-medium text-sm ${
-                                                    expandedCategories.includes(category.id) ? 'text-[#FD9555]' : 'text-gray-700'
-                                                }`}>
+                                                <span className={`font-medium text-sm ${expandedCategories.includes(category.id) ? 'text-[#FD9555]' : 'text-gray-700'
+                                                    }`}>
                                                     {category.name.toUpperCase()}
                                                 </span>
                                             </div>
                                             {category.subcategories && category.subcategories.length > 0 && (
                                                 <ChevronDown
-                                                    className={`w-4 h-4 transition-transform ${
-                                                        expandedCategories.includes(category.id) 
-                                                            ? 'rotate-180 text-[#FD9555]' 
+                                                    className={`w-4 h-4 transition-transform ${expandedCategories.includes(category.id)
+                                                            ? 'rotate-180 text-[#FD9555]'
                                                             : 'text-gray-400'
-                                                    }`}
+                                                        }`}
                                                 />
                                             )}
                                         </button>
