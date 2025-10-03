@@ -20,7 +20,7 @@ type ImageDb = {
   alt?: string;
   isMain?: boolean;
 };
-import { eq, inArray, desc } from 'drizzle-orm';
+import { eq, inArray, desc, like, or, and } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
   try {
@@ -28,12 +28,30 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10');
     const offset = parseInt(searchParams.get('offset') || '0');
     const featured = searchParams.get('featured') === 'true';
+    const search = searchParams.get('search');
 
     // Montar query base
-    let whereClause = undefined;
+    const whereClauses = [];
+    
     if (featured) {
-      whereClause = eq(products.isFeatured, true);
+      whereClauses.push(eq(products.isFeatured, true));
     }
+    
+    if (search && search.trim()) {
+      whereClauses.push(
+        or(
+          like(products.name, `%${search}%`),
+          like(products.description, `%${search}%`),
+          like(products.shortDescription, `%${search}%`)
+        )
+      );
+    }
+
+    const whereClause = whereClauses.length > 0 
+      ? whereClauses.length === 1 
+        ? whereClauses[0] 
+        : and(...whereClauses)
+      : undefined;
 
     // Buscar produtos do banco (ordenado por mais recentes)
     const dbProducts = await db

@@ -6,33 +6,30 @@ import { Menu, Home, ShoppingCart, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from 'react-i18next';
 import { MobileMegaMenuSheet } from './MobileMegaMenuSheet';
+import { MobileCartSheet } from './MobileCartSheet';
+import { MobileSearchSheet } from './MobileSearchSheet';
+import { useCart } from '@/contexts/cart-context';
 
 interface MobileBottomMenuProps {
-    cartItemCount?: number;
-    onMenuClick?: () => void;
     onHomeClick?: () => void;
-    onCartClick?: () => void;
-    onSearchClick?: () => void;
     className?: string;
 }
 
 export default function MobileBottomMenu({
-    cartItemCount = 0,
     onHomeClick,
-    onCartClick,
-    onSearchClick,
     className
 }: MobileBottomMenuProps) {
     const { t } = useTranslation('common');
+    const { totalItems } = useCart();
     const [menuOpen, setMenuOpen] = useState(false);
-
-    const handleMenuClick = () => {
-        setMenuOpen(true);
-    };
+    const [cartOpen, setCartOpen] = useState(false);
+    const [searchOpen, setSearchOpen] = useState(false);
 
     return (
         <>
             <MobileMegaMenuSheet open={menuOpen} onOpenChange={setMenuOpen} />
+            <MobileCartSheet open={cartOpen} onOpenChange={setCartOpen} />
+            <MobileSearchSheet open={searchOpen} onOpenChange={setSearchOpen} />
 
             <div className={cn(
                 "fixed bottom-0 left-0 right-0 z-50 bg-[#FD9555] md:hidden shadow-2xl border-t border-[#FD9555]/20",
@@ -50,7 +47,7 @@ export default function MobileBottomMenu({
                             "focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-0",
                             "rounded-xl"
                         )}
-                        onClick={handleMenuClick}
+                        onClick={() => setMenuOpen(true)}
                         aria-label={t('nav.menuAria', 'Abrir menu')}
                     >
                         <Menu className="w-7 h-7" strokeWidth={2} />
@@ -84,18 +81,18 @@ export default function MobileBottomMenu({
                             "focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-0",
                             "rounded-xl"
                         )}
-                        onClick={onCartClick}
-                        aria-label={t('nav.cartAria', `Carrinho ${cartItemCount > 0 ? `com ${cartItemCount} ${cartItemCount === 1 ? 'item' : 'itens'}` : 'vazio'}`)}
+                        onClick={() => setCartOpen(true)}
+                        aria-label={t('nav.cartAria', `Carrinho ${totalItems > 0 ? `com ${totalItems} ${totalItems === 1 ? 'item' : 'itens'}` : 'vazio'}`)}  
                     >
                         <div className="relative">
                             <ShoppingCart className="w-7 h-7" strokeWidth={2} />
-                            {cartItemCount > 0 && (
+                            {totalItems > 0 && (
                                 <div className={cn(
                                     "absolute -top-1 -right-1 bg-white text-[#FD9555] text-[9px] font-black rounded-full",
                                     "min-w-[18px] h-[18px] flex items-center justify-center border-2 border-[#FD9555]",
                                     "shadow-lg animate-pulse"
                                 )}>
-                                    {cartItemCount > 99 ? '99+' : cartItemCount}
+                                    {totalItems > 99 ? '99+' : totalItems}
                                 </div>
                             )}
                         </div>
@@ -112,7 +109,7 @@ export default function MobileBottomMenu({
                             "focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-0",
                             "rounded-xl"
                         )}
-                        onClick={onSearchClick}
+                        onClick={() => setSearchOpen(true)}
                         aria-label={t('nav.searchAria', 'Buscar produtos')}
                     >
                         <Search className="w-7 h-7" strokeWidth={2} />
