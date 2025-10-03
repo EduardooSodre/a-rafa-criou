@@ -560,9 +560,9 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                             <CardContent className="p-6 md:p-8">
                                 <div
                                     className="prose prose-lg max-w-none text-gray-800"
-                                    dangerouslySetInnerHTML={{ 
-                                        __html: t(`productDescriptions.${product.slug}`, { 
-                                            defaultValue: product.longDescription 
+                                    dangerouslySetInnerHTML={{
+                                        __html: t(`productDescriptions.${product.slug}`, {
+                                            defaultValue: product.longDescription
                                         })
                                     }}
                                 />
