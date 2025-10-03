@@ -142,7 +142,7 @@ export function EditCartItemSheet({ open, onOpenChange, cartItem, productData }:
             })) || []
         })
 
-        showToast('Produto atualizado com sucesso!', 'success')
+        showToast(t('cart.productUpdated'), 'success')
         onOpenChange(false)
     }
 

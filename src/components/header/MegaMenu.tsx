@@ -60,7 +60,7 @@ export function MegaMenu() {
         >
             {/* Botão Menu */}
             <button className="flex items-center gap-2 text-white hover:text-[#FD9555] transition-colors font-bold px-4 py-2 rounded-md hover:bg-white/10 cursor-pointer text-lg">
-                Menu
+                {t('nav.menu')}
                 <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
             </button>
 
@@ -75,7 +75,7 @@ export function MegaMenu() {
                         {/* Coluna 1: CATEGORIAS */}
                         <div className="bg-white rounded-3xl p-6 flex-shrink-0" style={{ width: '320px' }}>
                             <h3 className="text-xl font-bold text-[#8B4513] mb-5 text-center tracking-wide">
-                                CATEGORIAS
+                                {t('menu.categories')}
                             </h3>
                             <div className="space-y-2">
                                 {categories.map((category) => (
@@ -116,12 +116,12 @@ export function MegaMenu() {
                                 <span className="text-2xl bg-white rounded-full w-9 h-9 flex items-center justify-center">
                                     👤
                                 </span>
-                                MINHA CONTA
+                                {t('menu.myAccount')}
                             </h3>
                             <div className="bg-white rounded-2xl p-8 shadow-inner flex-1 flex items-center justify-center">
                                 {status === 'loading' ? (
                                     <div className="text-center">
-                                        <p className="text-gray-600 text-sm">Carregando...</p>
+                                        <p className="text-gray-600 text-sm">{t('loading')}</p>
                                     </div>
                                 ) : session ? (
                                     // Usuário logado: Mostrar informações do usuário
@@ -136,21 +136,21 @@ export function MegaMenu() {
                                                 className="flex items-center justify-center gap-2 text-sm text-gray-600 hover:text-[#FD9555] transition-colors py-1"
                                             >
                                                 <Settings className="w-4 h-4" />
-                                                Minha Conta
+                                                {t('headerDropdown.account')}
                                             </Link>
                                             <Link
                                                 href="/conta/pedidos"
                                                 className="flex items-center justify-center gap-2 text-sm text-gray-600 hover:text-[#FD9555] transition-colors py-1"
                                             >
                                                 <ShoppingBag className="w-4 h-4" />
-                                                Meus Pedidos
+                                                {t('headerDropdown.orders')}
                                             </Link>
                                             <button
                                                 onClick={handleSignOut}
                                                 className="flex items-center justify-center gap-2 text-sm text-red-600 hover:text-red-700 transition-colors mt-2 py-1"
                                             >
                                                 <LogOut className="w-4 h-4" />
-                                                Sair
+                                                {t('headerDropdown.signOut')}
                                             </button>
                                         </div>
                                     </div>
@@ -158,13 +158,13 @@ export function MegaMenu() {
                                     // Usuário não logado: Mostrar prompt de login
                                     <div className="text-center">
                                         <p className="text-gray-600 text-sm mb-4">
-                                            Faça login para acessar sua conta
+                                            {t('auth.loginSubtitle')}
                                         </p>
                                         <Link
                                             href="/auth/login"
                                             className="inline-block px-6 py-2.5 bg-[#FD9555] text-white font-bold rounded-lg hover:bg-[#E88544] transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 no-underline text-sm"
                                         >
-                                            {t('auth.login', 'Entrar')}
+                                            {t('auth.login')}
                                         </Link>
                                     </div>
                                 )}
@@ -174,7 +174,7 @@ export function MegaMenu() {
                         {/* Coluna 3: ÚTEIS */}
                         <div className="bg-white rounded-3xl p-6 flex-shrink-0" style={{ width: '320px' }}>
                             <h3 className="text-xl font-bold text-[#8B4513] mb-5 text-center tracking-wide">
-                                ÚTEIS
+                                {t('menu.useful')}
                             </h3>
                             <div className="space-y-2">
                                 <Link
@@ -185,7 +185,7 @@ export function MegaMenu() {
                                         ©️
                                     </span>
                                     <span className="font-medium text-sm text-gray-600 leading-tight group-hover:text-[#FD9555]">
-                                        DIREITOS AUTORAIS
+                                        {t('menu.copyrights')}
                                     </span>
                                 </Link>
                                 <Link
@@ -196,7 +196,7 @@ export function MegaMenu() {
                                         📞
                                     </span>
                                     <span className="font-medium text-sm text-gray-600 leading-tight group-hover:text-[#FD9555]">
-                                        CONTATO
+                                        {t('menu.contact')}
                                     </span>
                                 </Link>
                                 <Link
@@ -207,7 +207,7 @@ export function MegaMenu() {
                                         ❓
                                     </span>
                                     <span className="font-medium text-sm text-gray-600 leading-tight group-hover:text-[#FD9555]">
-                                        PERGUNTAS<br />FREQUENTES
+                                        {t('menu.faq')}
                                     </span>
                                 </Link>
                                 <Link
@@ -218,7 +218,7 @@ export function MegaMenu() {
                                         🔄
                                     </span>
                                     <span className="font-medium text-sm text-gray-600 leading-tight group-hover:text-[#FD9555]">
-                                        TROCA, DEVOLUÇÃO E<br />REEMBOLSO
+                                        {t('menu.returns')}
                                     </span>
                                 </Link>
                             </div>

@@ -15,7 +15,7 @@ import { EditCartItemSheet } from '@/components/sections/EditCartItemSheet'
 import { useTranslation } from 'react-i18next'
 
 export default function CarrinhoPage() {
-    const { t } = useTranslation('common')
+    const { t, i18n } = useTranslation('common')
     const { items, totalItems, totalPrice, updateQuantity, removeItem, clearCart } = useCart()
     const [editingItem, setEditingItem] = useState<string | null>(null)
     const [productData, setProductData] = useState<Map<string, {
@@ -77,7 +77,15 @@ export default function CarrinhoPage() {
     }, [items.length])
 
     const formatPrice = (price: number) => {
-        return `R$ ${price.toFixed(2).replace('.', ',')}`
+        const locale = i18n.language === 'pt' ? 'pt-BR' : i18n.language === 'es' ? 'es-ES' : 'en-US'
+        const currency = i18n.language === 'pt' ? 'BRL' : i18n.language === 'es' ? 'EUR' : 'USD'
+        
+        return new Intl.NumberFormat(locale, {
+            style: 'currency',
+            currency: currency,
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(price)
     }
 
     const handleEditItem = (itemId: string) => {

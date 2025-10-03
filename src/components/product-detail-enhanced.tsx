@@ -331,17 +331,17 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                             </div>
                                             <div>
                                                 <h3 className="font-bold text-xl text-gray-900">
-                                                    {t('productInfo.chooseVariation', 'Personalize sua escolha')}
+                                                    {t('productInfo.chooseVariation')}
                                                 </h3>
                                                 <p className="text-sm text-gray-600">
-                                                    Selecione as opções desejadas
+                                                    {t('productInfo.selectOptions')}
                                                 </p>
                                             </div>
                                         </div>
                                         <div className="hidden sm:flex items-center gap-2 bg-[#FED466]/20 px-4 py-2 rounded-full border border-[#FED466]/50">
                                             <div className="w-2 h-2 bg-[#FD9555] rounded-full animate-pulse"></div>
                                             <span className="text-sm font-semibold text-gray-700">
-                                                {getCompatibleVariations().length} {getCompatibleVariations().length === 1 ? 'opção disponível' : 'opções disponíveis'}
+                                                {getCompatibleVariations().length} {getCompatibleVariations().length === 1 ? t('productInfo.optionAvailable') : t('productInfo.optionsAvailable')}
                                             </span>
                                         </div>
                                     </div>
@@ -358,7 +358,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                                     </label>
                                                     {selectedFilters.has(attrName) && (
                                                         <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold">
-                                                            ✓ Selecionado
+                                                            {t('productInfo.selected')}
                                                         </span>
                                                     )}
                                                 </div>
@@ -403,7 +403,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                                                         "text-xs font-medium transition-colors",
                                                                         isSelected ? "text-[#FD9555]" : "text-gray-500"
                                                                     )}>
-                                                                        {isSelected ? 'Selecionado' : 'Selecione'}
+                                                                        {isSelected ? t('productInfo.selected').replace('✓ ', '') : t('productInfo.select')}
                                                                     </div>
                                                                 </div>
                                                             </button>
@@ -424,7 +424,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                                     </div>
                                                     <div className="flex-1 min-w-0">
                                                         <h4 className="font-bold text-lg text-gray-900 mb-2">
-                                                            ✓ Produto Selecionado
+                                                            {t('productInfo.productSelected')}
                                                         </h4>
                                                         <div className="space-y-2">
                                                             <div className="font-semibold text-xl text-gray-900">
@@ -442,7 +442,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                                                 ))}
                                                             </div>
                                                             <div className="flex items-center gap-3 pt-2 mt-2 border-t border-green-200">
-                                                                <span className="text-sm text-gray-600">Preço:</span>
+                                                                <span className="text-sm text-gray-600">{t('productInfo.price')}:</span>
                                                                 <span className="text-2xl font-black text-[#FD9555]">
                                                                     R$ {currentVariation.price.toFixed(2).replace('.', ',')}
                                                                 </span>
@@ -464,13 +464,13 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                                     </div>
                                                     <div className="flex-1">
                                                         <h4 className="font-bold text-lg text-gray-900 mb-2">
-                                                            Continue selecionando
+                                                            {t('productInfo.continueSelecting')}
                                                         </h4>
                                                         <p className="text-sm text-gray-700">
-                                                            Selecione todas as opções necessárias para completar sua escolha.
+                                                            {t('productInfo.selectAllOptions')}
                                                             <br />
                                                             <strong className="text-amber-700">
-                                                                {attributeGroups.size - selectedFilters.size} opção(ões) restante(s)
+                                                                {attributeGroups.size - selectedFilters.size} {t('productInfo.optionsRemaining')}
                                                             </strong>
                                                         </p>
                                                     </div>
@@ -487,7 +487,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                                     </svg>
                                                 </div>
                                                 <p className="text-gray-600 font-medium">
-                                                    Selecione as opções acima para personalizar seu produto
+                                                    {t('productInfo.selectAboveOptions')}
                                                 </p>
                                             </div>
                                         )}
