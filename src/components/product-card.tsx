@@ -25,7 +25,7 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
   // Verifica se tem múltiplas variações com atributos
-  const hasVariations = product.variations && product.variations.length > 1 && 
+  const hasVariations = product.variations && product.variations.length > 1 &&
     product.variations.some(v => v.isActive && v.attributeValues && v.attributeValues.length > 0);
 
   return (
@@ -67,7 +67,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
           <div className='flex gap-2'>
             {hasVariations ? (
-              <Button 
+              <Button
                 onClick={() => setShowAddToCart(true)}
                 className='w-full bg-primary hover:bg-secondary'
               >
@@ -84,7 +84,7 @@ export function ProductCard({ product }: ProductCardProps) {
         </CardContent>
       </Card>
 
-      <AddToCartSheet 
+      <AddToCartSheet
         open={showAddToCart}
         onOpenChange={setShowAddToCart}
         product={product}

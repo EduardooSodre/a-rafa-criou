@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { products, categories, productVariations, productImages, variationAttributeValues, attributes, attributeValues } from '@/lib/db/schema';
+import {
+  products,
+  categories,
+  productVariations,
+  productImages,
+  variationAttributeValues,
+  attributes,
+  attributeValues,
+} from '@/lib/db/schema';
 
 type VariationDb = {
   id: string;
@@ -75,7 +83,7 @@ export async function GET(request: NextRequest) {
     const productIds = dbProducts.map(p => p.id);
     let allVariations: VariationDb[] = [];
     let allVariationAttributes: AttributeValueDb[] = [];
-    
+
     if (productIds.length > 0) {
       const rawVariations = await db
         .select()
@@ -106,7 +114,7 @@ export async function GET(request: NextRequest) {
           .leftJoin(attributes, eq(variationAttributeValues.attributeId, attributes.id))
           .leftJoin(attributeValues, eq(variationAttributeValues.valueId, attributeValues.id))
           .where(inArray(variationAttributeValues.variationId, variationIds));
-        
+
         allVariationAttributes = rawAttrValues.map(attr => ({
           variationId: attr.variationId!,
           attributeId: attr.attributeId!,
@@ -157,7 +165,7 @@ export async function GET(request: NextRequest) {
         .map(v => {
           // Buscar attributeValues desta variação
           const varAttrs = allVariationAttributes.filter(attr => attr.variationId === v.id);
-          
+
           return {
             id: v.id,
             name: v.name,

@@ -145,7 +145,7 @@ export function EditCartItemSheet({ open, onOpenChange, cartItem, productData }:
     }
 
     // Verificar se todos os atributos foram selecionados
-    const allAttributesSelected = attributeGroups.size > 0 && 
+    const allAttributesSelected = attributeGroups.size > 0 &&
         selectedFilters.size === attributeGroups.size
 
     if (validVariations.length === 0) {
@@ -154,8 +154,8 @@ export function EditCartItemSheet({ open, onOpenChange, cartItem, productData }:
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
-            <SheetContent 
-                side="bottom" 
+            <SheetContent
+                side="bottom"
                 className="h-[85vh] sm:h-[90vh] max-h-screen overflow-hidden p-0 flex flex-col"
             >
                 {/* Header Fixo */}
@@ -190,8 +190,8 @@ export function EditCartItemSheet({ open, onOpenChange, cartItem, productData }:
                                 <div className="flex items-center gap-3">
                                     <div className={cn(
                                         "w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg",
-                                        allAttributesSelected 
-                                            ? "bg-green-500 text-white" 
+                                        allAttributesSelected
+                                            ? "bg-green-500 text-white"
                                             : "bg-blue-500 text-white"
                                     )}>
                                         {allAttributesSelected ? "✓" : selectedFilters.size}
@@ -213,40 +213,40 @@ export function EditCartItemSheet({ open, onOpenChange, cartItem, productData }:
                             </div>
                         </div>
 
-                    {/* Seções de atributos */}
-                    {Array.from(attributeGroups.entries()).map(([attributeName, values]) => (
-                        <div key={attributeName} className="bg-white rounded-xl p-4 sm:p-5 shadow-md border border-gray-200">
-                            <div className="flex items-center justify-between mb-4">
-                                <label className="font-bold text-gray-900 text-base sm:text-lg">
-                                    {attributeName}
-                                </label>
-                                {selectedFilters.has(attributeName) && (
-                                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300 font-semibold px-3 py-1">
-                                        ✓ {selectedFilters.get(attributeName)}
-                                    </Badge>
-                                )}
+                        {/* Seções de atributos */}
+                        {Array.from(attributeGroups.entries()).map(([attributeName, values]) => (
+                            <div key={attributeName} className="bg-white rounded-xl p-4 sm:p-5 shadow-md border border-gray-200">
+                                <div className="flex items-center justify-between mb-4">
+                                    <label className="font-bold text-gray-900 text-base sm:text-lg">
+                                        {attributeName}
+                                    </label>
+                                    {selectedFilters.has(attributeName) && (
+                                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300 font-semibold px-3 py-1">
+                                            ✓ {selectedFilters.get(attributeName)}
+                                        </Badge>
+                                    )}
+                                </div>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+                                    {Array.from(values).map(value => {
+                                        const isSelected = selectedFilters.get(attributeName) === value
+                                        return (
+                                            <button
+                                                key={value}
+                                                onClick={() => handleFilterClick(attributeName, value)}
+                                                className={cn(
+                                                    'px-3 sm:px-4 py-3 sm:py-4 rounded-xl border-2 text-sm sm:text-base font-semibold transition-all duration-200 hover:scale-105 active:scale-95',
+                                                    isSelected
+                                                        ? 'border-[#FD9555] bg-[#FD9555] text-white shadow-lg'
+                                                        : 'border-gray-300 bg-white text-gray-700 hover:border-[#FD9555] hover:bg-[#FD9555]/10'
+                                                )}
+                                            >
+                                                {value}
+                                            </button>
+                                        )
+                                    })}
+                                </div>
                             </div>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
-                                {Array.from(values).map(value => {
-                                    const isSelected = selectedFilters.get(attributeName) === value
-                                    return (
-                                        <button
-                                            key={value}
-                                            onClick={() => handleFilterClick(attributeName, value)}
-                                            className={cn(
-                                                'px-3 sm:px-4 py-3 sm:py-4 rounded-xl border-2 text-sm sm:text-base font-semibold transition-all duration-200 hover:scale-105 active:scale-95',
-                                                isSelected
-                                                    ? 'border-[#FD9555] bg-[#FD9555] text-white shadow-lg'
-                                                    : 'border-gray-300 bg-white text-gray-700 hover:border-[#FD9555] hover:bg-[#FD9555]/10'
-                                            )}
-                                        >
-                                            {value}
-                                        </button>
-                                    )
-                                })}
-                            </div>
-                        </div>
-                    ))}
+                        ))}
                     </div>
                 </div>
 
@@ -257,9 +257,9 @@ export function EditCartItemSheet({ open, onOpenChange, cartItem, productData }:
                             <div className="flex items-center justify-between bg-[#FED466]/30 px-4 sm:px-6 py-4 rounded-xl border-2 border-[#FED466]">
                                 <span className="text-gray-700 font-semibold text-sm sm:text-base">Preço:</span>
                                 <span className="text-2xl sm:text-3xl font-bold text-[#FD9555]">
-                                    R$ {selectedVariation.price.toLocaleString('pt-BR', { 
+                                    R$ {selectedVariation.price.toLocaleString('pt-BR', {
                                         minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2 
+                                        maximumFractionDigits: 2
                                     })}
                                 </span>
                             </div>

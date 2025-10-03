@@ -43,7 +43,7 @@ export default function CarrinhoPage() {
             const uniqueProductIds = [...new Set(items.map(item => item.productId))]
             const newProductData = new Map(productData)
             let hasChanges = false
-            
+
             for (const productId of uniqueProductIds) {
                 if (newProductData.has(productId)) continue
 
@@ -53,7 +53,7 @@ export default function CarrinhoPage() {
 
                     const response = await fetch(`/api/products?slug=${item.name.toLowerCase().replace(/\s+/g, '-')}`)
                     const data = await response.json()
-                    
+
                     if (data.products && data.products.length > 0) {
                         newProductData.set(productId, data.products[0])
                         hasChanges = true
@@ -83,8 +83,8 @@ export default function CarrinhoPage() {
     }
 
     const currentEditingItem = items.find(item => item.id === editingItem)
-    const currentEditingProductData = currentEditingItem 
-        ? productData.get(currentEditingItem.productId) 
+    const currentEditingProductData = currentEditingItem
+        ? productData.get(currentEditingItem.productId)
         : null
 
     if (items.length === 0) {
@@ -128,117 +128,118 @@ export default function CarrinhoPage() {
                         <div className="lg:col-span-2 space-y-4">
                             {items.map((item) => {
                                 const hasAttributes = item.attributes && item.attributes.length > 0
-                                const hasVariations = productData.get(item.productId)?.variations?.some(v => 
+                                const hasVariations = productData.get(item.productId)?.variations?.some(v =>
                                     v.attributeValues && v.attributeValues.length > 0
                                 )
 
                                 return (
-                                <Card key={item.id} className="bg-white hover:shadow-lg transition-all duration-200 border-gray-200">
-                                    <CardContent className="p-4 md:p-6">
-                                        <div className="flex gap-4">
-                                            {/* Imagem do Produto */}
-                                            <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-xl overflow-hidden bg-gray-50 border border-gray-200 flex-shrink-0">
-                                                <Image
-                                                    src={item.image}
-                                                    alt={item.name}
-                                                    width={112}
-                                                    height={112}
-                                                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
-                                                />
-                                            </div>
+                                    <Card key={item.id} className="bg-white hover:shadow-lg transition-all duration-200 border-gray-200">
+                                        <CardContent className="p-4 md:p-6">
+                                            <div className="flex gap-4">
+                                                {/* Imagem do Produto */}
+                                                <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-xl overflow-hidden bg-gray-50 border border-gray-200 flex-shrink-0">
+                                                    <Image
+                                                        src={item.image}
+                                                        alt={item.name}
+                                                        width={112}
+                                                        height={112}
+                                                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
+                                                    />
+                                                </div>
 
-                                            {/* Informações do Produto */}
-                                            <div className="flex-1 min-w-0 space-y-3">
-                                                <div>
-                                                    <h3 className="font-bold text-base md:text-lg text-gray-900 mb-2 line-clamp-2">
-                                                        {item.name}
-                                                    </h3>
-                                                
-                                                    {/* Mostrar atributos ou nome da variação */}
-                                                    {hasAttributes ? (
-                                                        <div className="flex flex-wrap gap-2">
-                                                            {item.attributes!.map((attr, idx) => (
-                                                                <Badge
-                                                                    key={idx}
-                                                                    variant="outline"
-                                                                    className="bg-[#FED466]/30 text-gray-900 border-[#FED466] text-xs font-semibold px-3 py-1 rounded-md"
-                                                                >
-                                                                    <span className="opacity-70">{attr.name}:</span>
-                                                                    <span className="ml-1.5">{attr.value}</span>
-                                                                </Badge>
-                                                            ))}
+                                                {/* Informações do Produto */}
+                                                <div className="flex-1 min-w-0 space-y-3">
+                                                    <div>
+                                                        <h3 className="font-bold text-base md:text-lg text-gray-900 mb-2 line-clamp-2">
+                                                            {item.name}
+                                                        </h3>
+
+                                                        {/* Mostrar atributos ou nome da variação */}
+                                                        {hasAttributes ? (
+                                                            <div className="flex flex-wrap gap-2">
+                                                                {item.attributes!.map((attr, idx) => (
+                                                                    <Badge
+                                                                        key={idx}
+                                                                        variant="outline"
+                                                                        className="bg-[#FED466]/30 text-gray-900 border-[#FED466] text-xs font-semibold px-3 py-1 rounded-md"
+                                                                    >
+                                                                        <span className="opacity-70">{attr.name}:</span>
+                                                                        <span className="ml-1.5">{attr.value}</span>
+                                                                    </Badge>
+                                                                ))}
+                                                            </div>
+                                                        ) : (
+                                                            <p className="text-sm text-gray-600 font-medium">
+                                                                {item.variationName}
+                                                            </p>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Controles: Quantidade, Editar e Remover */}
+                                                    <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                                                        {/* Quantidade */}
+                                                        <div className="flex items-center border-2 border-gray-300 rounded-lg overflow-hidden">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="h-10 w-10 p-0 hover:bg-[#FED466]/20 rounded-none border-r border-gray-300"
+                                                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                                            >
+                                                                <Minus className="w-4 h-4 text-gray-700" />
+                                                            </Button>
+                                                            <span className="h-10 w-12 sm:w-14 flex items-center justify-center text-sm font-bold text-gray-900">
+                                                                {item.quantity}
+                                                            </span>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="h-10 w-10 p-0 hover:bg-[#FED466]/20 rounded-none border-l border-gray-300"
+                                                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                                            >
+                                                                <Plus className="w-4 h-4 text-gray-700" />
+                                                            </Button>
                                                         </div>
-                                                    ) : (
-                                                        <p className="text-sm text-gray-600 font-medium">
-                                                            {item.variationName}
-                                                        </p>
-                                                    )}
-                                            </div>
-                                            
-                                                {/* Controles: Quantidade, Editar e Remover */}
-                                                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                                                    {/* Quantidade */}
-                                                    <div className="flex items-center border-2 border-gray-300 rounded-lg overflow-hidden">
+
+                                                        {/* Botão Editar */}
+                                                        {hasVariations && (
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                className="h-10 px-3 sm:px-4 text-[#FD9555] hover:text-white hover:bg-[#FD9555] border-2 border-[#FD9555] font-medium transition-all duration-200"
+                                                                onClick={() => handleEditItem(item.id)}
+                                                            >
+                                                                <Edit className="w-4 h-4 sm:mr-2" />
+                                                                <span className="hidden sm:inline">Editar</span>
+                                                            </Button>
+                                                        )}
+
+                                                        {/* Botão Remover */}
                                                         <Button
                                                             variant="ghost"
                                                             size="sm"
-                                                            className="h-10 w-10 p-0 hover:bg-[#FED466]/20 rounded-none border-r border-gray-300"
-                                                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                                            className="h-10 px-3 sm:px-4 text-red-600 hover:text-red-700 hover:bg-red-50 font-medium"
+                                                            onClick={() => removeItem(item.id)}
                                                         >
-                                                            <Minus className="w-4 h-4 text-gray-700" />
-                                                        </Button>
-                                                        <span className="h-10 w-12 sm:w-14 flex items-center justify-center text-sm font-bold text-gray-900">
-                                                            {item.quantity}
-                                                        </span>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="h-10 w-10 p-0 hover:bg-[#FED466]/20 rounded-none border-l border-gray-300"
-                                                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                                        >
-                                                            <Plus className="w-4 h-4 text-gray-700" />
+                                                            <Trash2 className="w-4 h-4 sm:mr-2" />
+                                                            <span className="hidden sm:inline">Remover</span>
                                                         </Button>
                                                     </div>
-                                                    
-                                                    {/* Botão Editar */}
-                                                    {hasVariations && (
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            className="h-10 px-3 sm:px-4 text-[#FD9555] hover:text-white hover:bg-[#FD9555] border-2 border-[#FD9555] font-medium transition-all duration-200"
-                                                            onClick={() => handleEditItem(item.id)}
-                                                        >
-                                                            <Edit className="w-4 h-4 sm:mr-2" />
-                                                            <span className="hidden sm:inline">Editar</span>
-                                                        </Button>
-                                                    )}
-                                                    
-                                                    {/* Botão Remover */}
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="h-10 px-3 sm:px-4 text-red-600 hover:text-red-700 hover:bg-red-50 font-medium"
-                                                        onClick={() => removeItem(item.id)}
-                                                    >
-                                                        <Trash2 className="w-4 h-4 sm:mr-2" />
-                                                        <span className="hidden sm:inline">Remover</span>
-                                                    </Button>
                                                 </div>
-                                        </div>
 
-                                            {/* Preço */}
-                                            <div className="ml-auto text-right space-y-1 flex-shrink-0">
-                                                <div className="text-lg md:text-2xl font-bold text-[#FD9555]">
-                                                    {formatPrice(item.price * item.quantity)}
-                                                </div>
-                                                <div className="text-xs md:text-sm text-gray-500 font-medium">
-                                                    {formatPrice(item.price)} cada
+                                                {/* Preço */}
+                                                <div className="ml-auto text-right space-y-1 flex-shrink-0">
+                                                    <div className="text-lg md:text-2xl font-bold text-[#FD9555]">
+                                                        {formatPrice(item.price * item.quantity)}
+                                                    </div>
+                                                    <div className="text-xs md:text-sm text-gray-500 font-medium">
+                                                        {formatPrice(item.price)} cada
+                                                    </div>
                                                 </div>
                                             </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        )})}
+                                        </CardContent>
+                                    </Card>
+                                )
+                            })}
 
 
                             <div className="mt-6 pt-6 border-t-2 border-gray-200">
@@ -258,7 +259,7 @@ export default function CarrinhoPage() {
                                     </Button>
                                 </div>
                             </div>
-                    </div>
+                        </div>
 
                         {/* Resumo do Pedido */}
                         <div className="lg:col-span-1">
@@ -309,9 +310,9 @@ export default function CarrinhoPage() {
                                             Download imediato após pagamento
                                         </p>
                                     </div>
-                            </CardContent>
-                        </Card>
-                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
                     </div>
                 </div>
             </div>

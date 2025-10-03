@@ -131,7 +131,7 @@ export default function FeaturedProducts({
 
     const handleAddToCart = (product: Product) => {
         // Verificar se tem variações com atributos
-        const hasVariationsWithAttributes = product.variations && product.variations.length > 1 && 
+        const hasVariationsWithAttributes = product.variations && product.variations.length > 1 &&
             product.variations.some(v => v.isActive && v.attributeValues && v.attributeValues.length > 0);
 
         if (hasVariationsWithAttributes) {

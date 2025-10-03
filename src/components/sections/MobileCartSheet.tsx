@@ -71,12 +71,12 @@ export function MobileCartSheet({ open, onOpenChange }: MobileCartSheetProps) {
                                         <h3 className="font-semibold text-sm text-gray-800 mb-1 line-clamp-2">
                                             {item.name}
                                         </h3>
-                                        
+
                                         {/* Atributos selecionados */}
                                         {item.attributes && item.attributes.length > 0 ? (
                                             <div className="flex flex-wrap gap-1 mb-2">
                                                 {item.attributes.map((attr, idx) => (
-                                                    <span 
+                                                    <span
                                                         key={idx}
                                                         className="text-xs bg-[#FED466]/30 text-gray-700 px-2 py-0.5 rounded-full border border-[#FED466]/50"
                                                     >
@@ -87,7 +87,7 @@ export function MobileCartSheet({ open, onOpenChange }: MobileCartSheetProps) {
                                         ) : (
                                             <p className="text-xs text-gray-500 mb-2">{item.variationName}</p>
                                         )}
-                                        
+
                                         <p className="text-sm font-bold text-[#FD9555]">
                                             {formatPrice(item.price)}
                                         </p>
