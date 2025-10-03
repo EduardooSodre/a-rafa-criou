@@ -8,6 +8,7 @@ import { getPreviewSrc } from '@/lib/r2-utils';
 import { useTranslation } from 'react-i18next';
 import { useCart } from '@/contexts/cart-context';
 import { useToast } from '@/components/ui/toast';
+import { AddToCartSheet } from '@/components/sections/AddToCartSheet';
 
 interface ProductVariation {
     id: string;
@@ -15,6 +16,13 @@ interface ProductVariation {
     slug: string;
     price: number;
     isActive: boolean;
+    sortOrder: number;
+    attributeValues?: {
+        attributeId: string;
+        attributeName: string | null;
+        valueId: string;
+        value: string | null;
+    }[];
 }
 
 interface Product {
@@ -64,6 +72,8 @@ export default function FeaturedProducts({
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(false);
     const [offset, setOffset] = useState(0);
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+    const [showAddToCart, setShowAddToCart] = useState(false);
 
     // Limite fixo para evitar problemas de hidratação
     const initialLimit = 8;
@@ -120,21 +130,35 @@ export default function FeaturedProducts({
     };
 
     const handleAddToCart = (product: Product) => {
-        // Se tem variações, usa a primeira ativa
-        const variation = product.variations.find(v => v.isActive);
+        // Verificar se tem variações com atributos
+        const hasVariationsWithAttributes = product.variations && product.variations.length > 1 && 
+            product.variations.some(v => v.isActive && v.attributeValues && v.attributeValues.length > 0);
 
-        addItem({
-            id: variation ? `${product.id}-${variation.id}` : product.id,
-            productId: product.id,
-            variationId: variation?.id || 'default',
-            name: t(`productNames.${product.slug}`, { defaultValue: product.name }),
-            price: variation?.price || product.price,
-            variationName: variation?.name || 'Padrão',
-            image: product.mainImage?.data || ''
-        });
+        if (hasVariationsWithAttributes) {
+            // Abrir sheet de seleção
+            setSelectedProduct(product);
+            setShowAddToCart(true);
+        } else {
+            // Se não tem variações ou atributos, adiciona direto
+            const variation = product.variations.find(v => v.isActive);
 
-        // Mostrar toast de confirmação
-        showToast(t('cart.addedToCart', { product: t(`productNames.${product.slug}`, { defaultValue: product.name }) }), 'success');
+            addItem({
+                id: variation ? `${product.id}-${variation.id}` : product.id,
+                productId: product.id,
+                variationId: variation?.id || 'default',
+                name: t(`productNames.${product.slug}`, { defaultValue: product.name }),
+                price: variation?.price || product.price,
+                variationName: variation?.name || 'Padrão',
+                image: product.mainImage?.data || '',
+                attributes: variation?.attributeValues?.map(attr => ({
+                    name: attr.attributeName || '',
+                    value: attr.value || ''
+                })) || []
+            });
+
+            // Mostrar toast de confirmação
+            showToast(t('cart.addedToCart', { product: t(`productNames.${product.slug}`, { defaultValue: product.name }) }), 'success');
+        }
     };
 
     // Produtos fallback simples
@@ -317,6 +341,25 @@ export default function FeaturedProducts({
                     </div>
                 )}
             </div>
+
+            {/* Sheet de seleção de atributos */}
+            {selectedProduct && (
+                <AddToCartSheet
+                    open={showAddToCart}
+                    onOpenChange={setShowAddToCart}
+                    product={{
+                        id: selectedProduct.id,
+                        name: selectedProduct.name,
+                        slug: selectedProduct.slug,
+                        price: selectedProduct.price,
+                        mainImage: selectedProduct.mainImage ? {
+                            data: selectedProduct.mainImage.data,
+                            alt: selectedProduct.mainImage.alt || selectedProduct.name
+                        } : null,
+                        variations: selectedProduct.variations
+                    }}
+                />
+            )}
         </section>
     );
 }

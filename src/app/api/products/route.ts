@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { products, categories, productVariations, productImages } from '@/lib/db/schema';
+import { products, categories, productVariations, productImages, variationAttributeValues, attributes, attributeValues } from '@/lib/db/schema';
 
 type VariationDb = {
   id: string;
@@ -10,6 +10,14 @@ type VariationDb = {
   price: string | number;
   isActive: boolean;
   sortOrder: number;
+};
+
+type AttributeValueDb = {
+  variationId: string;
+  attributeId: string;
+  attributeName: string | null;
+  valueId: string;
+  value: string | null;
 };
 
 type ImageDb = {
@@ -66,6 +74,8 @@ export async function GET(request: NextRequest) {
     // Buscar variações de todos os produtos retornados
     const productIds = dbProducts.map(p => p.id);
     let allVariations: VariationDb[] = [];
+    let allVariationAttributes: AttributeValueDb[] = [];
+    
     if (productIds.length > 0) {
       const rawVariations = await db
         .select()
@@ -80,6 +90,31 @@ export async function GET(request: NextRequest) {
         isActive: v.isActive,
         sortOrder: v.sortOrder ?? 0,
       }));
+
+      // Buscar attributeValues das variações
+      const variationIds = allVariations.map(v => v.id);
+      if (variationIds.length > 0) {
+        const rawAttrValues = await db
+          .select({
+            variationId: variationAttributeValues.variationId,
+            attributeId: variationAttributeValues.attributeId,
+            attributeName: attributes.name,
+            valueId: variationAttributeValues.valueId,
+            value: attributeValues.value,
+          })
+          .from(variationAttributeValues)
+          .leftJoin(attributes, eq(variationAttributeValues.attributeId, attributes.id))
+          .leftJoin(attributeValues, eq(variationAttributeValues.valueId, attributeValues.id))
+          .where(inArray(variationAttributeValues.variationId, variationIds));
+        
+        allVariationAttributes = rawAttrValues.map(attr => ({
+          variationId: attr.variationId!,
+          attributeId: attr.attributeId!,
+          attributeName: attr.attributeName,
+          valueId: attr.valueId!,
+          value: attr.value,
+        }));
+      }
     }
 
     // Buscar todas as imagens de todos os produtos
@@ -119,14 +154,25 @@ export async function GET(request: NextRequest) {
       // Variações deste produto
       const variations = allVariations
         .filter(v => v.productId === p.id)
-        .map(v => ({
-          id: v.id,
-          name: v.name,
-          slug: v.slug,
-          price: Number(v.price),
-          isActive: v.isActive,
-          sortOrder: v.sortOrder,
-        }));
+        .map(v => {
+          // Buscar attributeValues desta variação
+          const varAttrs = allVariationAttributes.filter(attr => attr.variationId === v.id);
+          
+          return {
+            id: v.id,
+            name: v.name,
+            slug: v.slug,
+            price: Number(v.price),
+            isActive: v.isActive,
+            sortOrder: v.sortOrder,
+            attributeValues: varAttrs.map(attr => ({
+              attributeId: attr.attributeId,
+              attributeName: attr.attributeName,
+              valueId: attr.valueId,
+              value: attr.value,
+            })),
+          };
+        });
 
       // Todas as imagens deste produto
       const images = allImages.filter(img => img.productId === p.id);

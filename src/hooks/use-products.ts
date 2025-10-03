@@ -15,6 +15,10 @@ export interface Product {
   createdAt: Date;
   updatedAt: Date;
   variations?: ProductVariation[];
+  mainImage?: {
+    data: string;
+    alt: string;
+  } | null;
 }
 
 export interface ProductVariation {
@@ -25,6 +29,12 @@ export interface ProductVariation {
   price: number;
   isActive: boolean;
   sortOrder: number;
+  attributeValues?: {
+    attributeId: string;
+    attributeName: string | null;
+    valueId: string;
+    value: string | null;
+  }[];
 }
 
 // Hook para buscar produtos
