@@ -65,10 +65,9 @@ export function MegaMenu() {
             </button>
 
             {/* Mega Menu Dropdown - Com delay para permitir navegação */}
-            <div 
-                className={`absolute left-1/2 transform -translate-x-1/2 top-full pt-2 z-50 transition-all duration-200 ${
-                    isOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
-                }`}
+            <div
+                className={`absolute left-1/2 transform -translate-x-1/2 top-full pt-2 z-50 transition-all duration-200 ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
+                    }`}
                 style={{ width: '1100px' }}
             >
                 <div className="bg-[#FD9555] rounded-3xl shadow-2xl p-5 overflow-hidden">
@@ -132,21 +131,21 @@ export function MegaMenu() {
                                             <p className="font-semibold text-gray-800">{session.user?.name}</p>
                                         </div>
                                         <div className="flex flex-col gap-2 mt-4">
-                                            <Link 
-                                                href="/conta" 
+                                            <Link
+                                                href="/conta"
                                                 className="flex items-center justify-center gap-2 text-sm text-gray-600 hover:text-[#FD9555] transition-colors py-1"
                                             >
                                                 <Settings className="w-4 h-4" />
                                                 Minha Conta
                                             </Link>
-                                            <Link 
-                                                href="/conta/pedidos" 
+                                            <Link
+                                                href="/conta/pedidos"
                                                 className="flex items-center justify-center gap-2 text-sm text-gray-600 hover:text-[#FD9555] transition-colors py-1"
                                             >
                                                 <ShoppingBag className="w-4 h-4" />
                                                 Meus Pedidos
                                             </Link>
-                                            <button 
+                                            <button
                                                 onClick={handleSignOut}
                                                 className="flex items-center justify-center gap-2 text-sm text-red-600 hover:text-red-700 transition-colors mt-2 py-1"
                                             >
