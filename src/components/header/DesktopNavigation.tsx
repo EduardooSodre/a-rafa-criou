@@ -14,7 +14,6 @@ import {
 } from '@/components/ui/dropdown-menu'
 import {
     Home,
-    Package,
     LogOut,
     Settings,
     ShoppingBag,
@@ -23,6 +22,7 @@ import {
 } from 'lucide-react'
 import { getDisplayName } from '@/lib/utils/user'
 import { useTranslation } from 'react-i18next'
+import { MegaMenu } from './MegaMenu'
 
 interface ExtendedUser {
     id: string
@@ -42,7 +42,6 @@ export function DesktopNavigation() {
 
     const navigation = [
         { name: t('nav.home', 'Início'), href: '/', icon: Home },
-        { name: t('nav.products'), href: '/produtos', icon: Package },
         { name: t('nav.favorites', 'Favoritos'), href: '/favoritos', icon: Heart },
     ]
 
@@ -57,7 +56,7 @@ export function DesktopNavigation() {
                                 <Link
                                     key={item.name}
                                     href={item.href}
-                                    className="flex items-center gap-2 text-white hover:text-white/80 transition-colors font-bold px-4 py-2 rounded-md hover:bg-white/10 cursor-pointer no-underline"
+                                    className="flex items-center gap-2 text-white hover:text-[#FD9555] transition-colors font-bold px-4 py-2 rounded-md hover:bg-white/10 cursor-pointer no-underline"
                                 >
                                     <Icon className="w-4 h-4" />
                                     {item.name}
@@ -65,11 +64,14 @@ export function DesktopNavigation() {
                             )
                         })}
 
+                        {/* Mega Menu */}
+                        <MegaMenu />
+
                         {/* User menu no menu verde */}
                         {status === 'loading' ? null : session ? (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" className="flex items-center gap-2 text-white hover:text-white/80 transition-colors font-bold px-4 py-2 rounded-md hover:bg-white/10 cursor-pointer">
+                                    <Button variant="ghost" className="flex items-center gap-2 text-white hover:text-[#FD9555] transition-colors font-bold px-4 py-2 rounded-md hover:bg-white/10 cursor-pointer">
                                         <Avatar
                                             imageUrl={(session.user as ExtendedUser)?.image}
                                             name={session.user?.name}
@@ -111,7 +113,7 @@ export function DesktopNavigation() {
                         ) : (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" className="text-md flex items-center gap-2 text-white hover:text-white/80 transition-colors font-bold px-4 py-2 rounded-md hover:bg-white/10 cursor-pointer">
+                                    <Button variant="ghost" className="text-md flex items-center gap-2 text-white hover:text-[#FD9555] transition-colors font-bold px-4 py-2 rounded-md hover:bg-white/10 cursor-pointer">
                                         <CircleUserRound className="w-4 h-4" />
                                         {t('nav.login')}
                                     </Button>

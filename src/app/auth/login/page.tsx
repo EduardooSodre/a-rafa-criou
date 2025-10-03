@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from 'react';
-import { signIn } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,8 +19,16 @@ function LoginContent() {
     const [successMessage, setSuccessMessage] = useState('');
     const router = useRouter();
     const searchParams = useSearchParams();
+    const { status } = useSession();
 
     const { t } = useTranslation('common');
+
+    // Redirecionar usuários já autenticados para a home
+    useEffect(() => {
+        if (status === 'authenticated') {
+            router.push('/');
+        }
+    }, [status, router]);
 
     useEffect(() => {
         const message = searchParams.get('message');
@@ -28,6 +36,20 @@ function LoginContent() {
             setSuccessMessage(message);
         }
     }, [searchParams]);
+
+    // Mostrar loading enquanto verifica a sessão
+    if (status === 'loading') {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <p className="text-gray-600">Carregando...</p>
+            </div>
+        );
+    }
+
+    // Não renderizar o formulário se já estiver autenticado
+    if (status === 'authenticated') {
+        return null;
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
