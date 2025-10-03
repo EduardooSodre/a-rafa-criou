@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import { useCart, CartItem } from '@/contexts/cart-context'
 import { useToast } from '@/components/ui/toast'
+import { useTranslation } from 'react-i18next'
 
 interface ProductVariation {
     id: string
@@ -39,6 +40,7 @@ interface EditCartItemSheetProps {
 }
 
 export function EditCartItemSheet({ open, onOpenChange, cartItem, productData }: EditCartItemSheetProps) {
+    const { t } = useTranslation('common')
     const { updateItem } = useCart()
     const { showToast } = useToast()
     const [selectedFilters, setSelectedFilters] = useState<Map<string, string>>(new Map())
@@ -172,7 +174,7 @@ export function EditCartItemSheet({ open, onOpenChange, cartItem, productData }:
                         </div>
                         <div className="flex-1 min-w-0">
                             <SheetTitle className="text-white text-base sm:text-lg font-bold">
-                                Editar Produto
+                                {t('cart.editProduct')}
                             </SheetTitle>
                             <p className="text-white/95 text-xs sm:text-sm font-medium line-clamp-1">
                                 {productData.name}
@@ -198,16 +200,16 @@ export function EditCartItemSheet({ open, onOpenChange, cartItem, productData }:
                                     </div>
                                     <div>
                                         <p className="font-bold text-gray-900 text-sm sm:text-base">
-                                            {allAttributesSelected ? "Seleção Completa!" : "Selecione os Atributos"}
+                                            {allAttributesSelected ? t('cart.selectionComplete') : t('cart.selectAttributes')}
                                         </p>
                                         <p className="text-xs sm:text-sm text-gray-600">
-                                            {selectedFilters.size} de {attributeGroups.size} selecionados
+                                            {selectedFilters.size} {t('cart.of')} {attributeGroups.size} {t('cart.selected')}
                                         </p>
                                     </div>
                                 </div>
                                 {allAttributesSelected && (
                                     <Badge className="bg-green-500 text-white px-3 py-1 text-xs sm:text-sm font-bold">
-                                        Pronto ✓
+                                        {t('cart.ready')} ✓
                                     </Badge>
                                 )}
                             </div>
@@ -255,7 +257,7 @@ export function EditCartItemSheet({ open, onOpenChange, cartItem, productData }:
                     <div className="max-w-2xl mx-auto space-y-3">
                         {selectedVariation && (
                             <div className="flex items-center justify-between bg-[#FED466]/30 px-3 sm:px-4 py-2 rounded-lg border border-[#FED466]">
-                                <span className="text-gray-700 font-semibold text-xs sm:text-sm">Preço:</span>
+                                <span className="text-gray-700 font-semibold text-xs sm:text-sm">{t('cart.price')}:</span>
                                 <span className="text-xl sm:text-2xl font-bold text-[#FD9555]">
                                     R$ {selectedVariation.price.toLocaleString('pt-BR', {
                                         minimumFractionDigits: 2,
@@ -276,7 +278,7 @@ export function EditCartItemSheet({ open, onOpenChange, cartItem, productData }:
                             size="lg"
                         >
                             <Edit className="w-4 h-4 mr-2" />
-                            {allAttributesSelected ? "Atualizar Produto" : "Selecione todos os atributos"}
+                            {allAttributesSelected ? t('cart.updateProduct') : t('cart.selectAllAttributes')}
                         </Button>
                     </div>
                 </div>

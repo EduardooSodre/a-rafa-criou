@@ -12,8 +12,10 @@ import { ShoppingCart, Plus, Minus, Trash2, ShoppingBag, Edit } from 'lucide-rea
 import Image from 'next/image'
 import Link from 'next/link'
 import { EditCartItemSheet } from '@/components/sections/EditCartItemSheet'
+import { useTranslation } from 'react-i18next'
 
 export default function CarrinhoPage() {
+    const { t } = useTranslation('common')
     const { items, totalItems, totalPrice, updateQuantity, removeItem, clearCart } = useCart()
     const [editingItem, setEditingItem] = useState<string | null>(null)
     const [productData, setProductData] = useState<Map<string, {
@@ -92,13 +94,13 @@ export default function CarrinhoPage() {
             <div className="container mx-auto px-4 py-16">
                 <div className="max-w-md mx-auto text-center">
                     <ShoppingBag className="w-24 h-24 mx-auto text-gray-300 mb-6" />
-                    <h1 className="text-2xl font-bold text-gray-900 mb-4">Seu carrinho está vazio</h1>
+                    <h1 className="text-2xl font-bold text-gray-900 mb-4">{t('cart.empty')}</h1>
                     <p className="text-gray-600 mb-6">
-                        Que tal adicionar alguns produtos incríveis?
+                        {t('cart.emptyMessage')}
                     </p>
                     <Button asChild className="bg-primary hover:bg-secondary text-black">
                         <Link href="/produtos">
-                            Continuar Comprando
+                            {t('cart.continueShopping')}
                         </Link>
                     </Button>
                 </div>
@@ -115,10 +117,10 @@ export default function CarrinhoPage() {
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                             <h1 className="text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-3">
                                 <ShoppingCart className="w-7 h-7 md:w-8 md:h-8 text-[#FD9555]" />
-                                Meu Carrinho
+                                {t('cart.title')}
                             </h1>
                             <Badge variant="secondary" className="w-fit bg-[#FED466] text-gray-900 px-4 py-2 text-sm font-medium">
-                                {totalItems} {totalItems === 1 ? 'item' : 'itens'}
+                                {totalItems} {totalItems === 1 ? t('cart.item') : t('cart.items')}
                             </Badge>
                         </div>
                     </div>
@@ -209,7 +211,7 @@ export default function CarrinhoPage() {
                                                                 onClick={() => handleEditItem(item.id)}
                                                             >
                                                                 <Edit className="w-4 h-4 sm:mr-2" />
-                                                                <span className="hidden sm:inline">Editar</span>
+                                                                <span className="hidden sm:inline">{t('cart.edit')}</span>
                                                             </Button>
                                                         )}
 
@@ -221,7 +223,7 @@ export default function CarrinhoPage() {
                                                             onClick={() => removeItem(item.id)}
                                                         >
                                                             <Trash2 className="w-4 h-4 sm:mr-2" />
-                                                            <span className="hidden sm:inline ">Remover</span>
+                                                            <span className="hidden sm:inline ">{t('cart.remove')}</span>
                                                         </Button>
                                                     </div>
                                                 </div>
@@ -232,7 +234,7 @@ export default function CarrinhoPage() {
                                                         {formatPrice(item.price * item.quantity)}
                                                     </div>
                                                     <div className="text-xs md:text-sm text-gray-500 font-medium">
-                                                        {formatPrice(item.price)} cada
+                                                        {formatPrice(item.price)} {t('cart.each')}
                                                     </div>
                                                 </div>
                                             </div>
@@ -249,7 +251,7 @@ export default function CarrinhoPage() {
                                             type="button"
                                             className="w-full h-12 !bg-[#FED466] hover:!bg-[#FED466]/80 !text-gray-900 font-semibold border-2 !border-[#FED466] hover:!border-[#FD9555] transition-all duration-200 cursor-pointer"
                                         >
-                                            Continuar Comprando
+                                            {t('cart.continueShopping')}
                                         </Button>
                                     </Link>
                                     <Button
@@ -258,7 +260,7 @@ export default function CarrinhoPage() {
                                         className="flex-1 h-12 !bg-red-100 !text-red-700 hover:!text-white hover:!bg-red-600 border-2 !border-red-300 hover:!border-red-600 font-semibold transition-all duration-200 cursor-pointer"
                                     >
                                         <Trash2 className="w-4 h-4 mr-2" />
-                                        Limpar Carrinho
+                                        {t('cart.clearCart')}
                                     </Button>
                                 </div>
                             </div>
@@ -268,20 +270,20 @@ export default function CarrinhoPage() {
                         <div className="lg:col-span-1">
                             <Card className="sticky top-4 bg-white border-2 border-gray-200 shadow-lg overflow-hidden rounded-xl !p-0">
                                 <div className="bg-gradient-to-r from-[#FED466] to-[#FD9555] px-6 py-4">
-                                    <h3 className="text-gray-900 font-bold text-lg">Resumo do Pedido</h3>
+                                    <h3 className="text-gray-900 font-bold text-lg">{t('cart.orderSummary')}</h3>
                                 </div>
                                 <div className="space-y-5 p-6">
                                     <div className="flex justify-between items-center">
-                                        <span className="text-gray-600 font-medium">Subtotal ({totalItems} {totalItems === 1 ? 'item' : 'itens'})</span>
+                                        <span className="text-gray-600 font-medium">{t('cart.subtotal')} ({totalItems} {totalItems === 1 ? t('cart.item') : t('cart.items')})</span>
                                         <span className="text-lg font-bold text-gray-900">{formatPrice(totalPrice)}</span>
                                     </div>
 
                                     <div className="space-y-3 bg-gray-50 p-4 rounded-lg">
-                                        <Label htmlFor="coupon" className="text-sm font-semibold text-gray-700">Cupom de Desconto</Label>
+                                        <Label htmlFor="coupon" className="text-sm font-semibold text-gray-700">{t('cart.coupon')}</Label>
                                         <div className="flex gap-2">
                                             <Input
                                                 id="coupon"
-                                                placeholder="Digite seu cupom"
+                                                placeholder={t('cart.couponPlaceholder')}
                                                 className="flex-1 h-11 border-2 focus:border-[#FD9555]"
                                             />
                                             <Button
@@ -289,7 +291,7 @@ export default function CarrinhoPage() {
                                                 size="sm"
                                                 className="h-11 px-4 !bg-white !text-gray-900 border-2 !border-gray-300 font-semibold hover:!bg-[#FD9555] hover:!text-white hover:!border-[#FD9555] transition-all duration-200 cursor-pointer"
                                             >
-                                                Aplicar
+                                                {t('cart.apply')}
                                             </Button>
                                         </div>
                                     </div>
@@ -297,7 +299,7 @@ export default function CarrinhoPage() {
                                     <Separator className="my-4" />
 
                                     <div className="flex justify-between items-center py-3 bg-[#FED466]/20 px-4 rounded-lg">
-                                        <span className="font-bold text-gray-900 text-lg">Total</span>
+                                        <span className="font-bold text-gray-900 text-lg">{t('cart.total')}</span>
                                         <span className="text-2xl font-bold text-[#FD9555]">{formatPrice(totalPrice)}</span>
                                     </div>
 
@@ -307,14 +309,14 @@ export default function CarrinhoPage() {
                                         size="lg"
                                     >
                                         <Link href="/checkout">
-                                            Finalizar Compra
+                                            {t('cart.checkout')}
                                         </Link>
                                     </Button>
 
                                     <div className="text-xs text-gray-600 text-center space-y-1 pt-2">
                                         <p className="flex items-center justify-center gap-1">
                                             <span className="text-green-600 font-bold">✓</span>
-                                            Download imediato após pagamento
+                                            {t('cart.immediateDownload')}
                                         </p>
                                     </div>
                                 </div>
