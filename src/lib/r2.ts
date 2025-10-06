@@ -29,10 +29,6 @@ if (missing.length === 0) {
     },
   };
   r2Client = stub as S3Client;
-  // Log a developer-friendly warning
-  console.warn(
-    `Warning: Cloudflare R2 not configured. Missing env: ${missing.join(', ')}. R2 operations will fail if called.`
-  );
 }
 
 export const r2 = r2Client;

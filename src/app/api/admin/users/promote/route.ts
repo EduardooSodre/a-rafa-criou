@@ -87,8 +87,7 @@ export async function POST(request: NextRequest) {
       success: true,
       message: `Usuário ${targetUser[0].name || email} foi ${actionText} com sucesso`,
     });
-  } catch (error) {
-    console.error('Erro ao alterar role do usuário:', error);
+  } catch {
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 }

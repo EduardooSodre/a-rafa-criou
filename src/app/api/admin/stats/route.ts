@@ -79,9 +79,7 @@ export async function GET() {
     };
 
     return NextResponse.json(stats);
-  } catch (error) {
-    console.error('Error fetching dashboard stats:', error);
-
+  } catch {
     // Return mock data on error to prevent dashboard breaking
     return NextResponse.json({
       totalProdutos: 0,

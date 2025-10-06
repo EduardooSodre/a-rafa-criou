@@ -24,9 +24,7 @@ export async function uploadToR2(
         ACL: 'private', // Sempre privado para segurança
       })
     );
-    console.log(`✅ Upload successful: ${key}`);
   } catch (error) {
-    console.error(`❌ Upload failed for ${key}:`, error);
     throw error;
   }
 }
@@ -51,10 +49,8 @@ export async function getR2SignedUrl(
       { expiresIn: expiresInSeconds }
     );
 
-    console.log(`✅ Signed URL generated for: ${key} (expires in ${expiresInSeconds}s)`);
     return url;
   } catch (error) {
-    console.error(`❌ Failed to generate signed URL for ${key}:`, error);
     throw error;
   }
 }
@@ -72,9 +68,7 @@ export async function deleteFromR2(key: string): Promise<void> {
         Key: key,
       })
     );
-    console.log(`✅ Delete successful: ${key}`);
   } catch (error) {
-    console.error(`❌ Delete failed for ${key}:`, error);
     throw error;
   }
 }

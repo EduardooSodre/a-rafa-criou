@@ -74,8 +74,7 @@ export async function GET(request: NextRequest) {
         pages: Math.ceil(totalQuery.length / limit),
       },
     });
-  } catch (error) {
-    console.error('Error fetching users:', error);
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -120,8 +119,6 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json(updatedUser);
   } catch (error) {
-    console.error('Error updating user:', error);
-
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Validation error', details: error.issues },

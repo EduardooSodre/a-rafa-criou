@@ -145,8 +145,7 @@ export async function DELETE(req: Request) {
     }
 
     return NextResponse.json({ error: 'ID não fornecido' }, { status: 400 });
-  } catch (error) {
-    console.error('Erro ao deletar:', error);
+  } catch {
     return NextResponse.json({ error: 'Erro ao deletar' }, { status: 500 });
   }
 }

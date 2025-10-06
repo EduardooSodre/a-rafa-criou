@@ -97,8 +97,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
       // Pegar IDs únicos de atributos
       allAttributeIds = Array.from(new Set(allVariationAttrs.map(va => va.attributeId)));
-
-      console.log('[GET] Atributos encontrados nas variações:', allAttributeIds);
     }
 
     // Se não há em product_attributes mas há nas variações, usar das variações
@@ -224,19 +222,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       attributes: attributesWithValues,
     };
 
-    console.log('[GET /api/admin/products/[id]] Produto completo:', {
-      id: product.id,
-      name: product.name,
-      productAttributesCount: prodAttrs.length,
-      attributesFromVariationsCount: allAttributeIds.length,
-      attributesCount: attributesWithValues.length,
-      attributes: attributesWithValues,
-      variationsCount: variations.length,
-    });
-
     return NextResponse.json(completeProduct);
-  } catch (error) {
-    console.error('Error fetching product:', error);
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -245,10 +232,6 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   try {
     const { id } = await params;
     const body = await request.json();
-
-    console.log('[PUT /api/admin/products/[id]] Received update request for product:', id);
-    console.log('[PUT /api/admin/products/[id]] Body keys:', Object.keys(body));
-    console.log('[PUT /api/admin/products/[id]] Body:', JSON.stringify(body, null, 2));
 
     const validatedData = updateProductSchema.parse(body);
 
@@ -573,16 +556,6 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json(completeProduct);
   } catch (error) {
-    console.error('[PUT /api/admin/products/[id]] Error updating product:', error);
-    console.error(
-      '[PUT /api/admin/products/[id]] Error stack:',
-      error instanceof Error ? error.stack : 'No stack'
-    );
-    console.error(
-      '[PUT /api/admin/products/[id]] Error message:',
-      error instanceof Error ? error.message : String(error)
-    );
-
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Validation error', details: error.issues },
@@ -614,18 +587,14 @@ export async function DELETE(
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
-    console.log(`[DELETE PRODUCT] Iniciando exclusão do produto ${id}`);
-
     // 1. Buscar todos os arquivos do produto (do próprio produto e das variações)
     const productFiles = await db.select().from(files).where(eq(files.productId, id));
-    console.log(`[DELETE PRODUCT] Encontrados ${productFiles.length} arquivos do produto`);
 
     // 2. Buscar todas as variações do produto
     const variations = await db
       .select()
       .from(productVariations)
       .where(eq(productVariations.productId, id));
-    console.log(`[DELETE PRODUCT] Encontradas ${variations.length} variações`);
 
     // 3. Buscar todos os arquivos das variações
     const variationFiles: typeof productFiles = [];
@@ -633,7 +602,6 @@ export async function DELETE(
       const vFiles = await db.select().from(files).where(eq(files.variationId, variation.id));
       variationFiles.push(...vFiles);
     }
-    console.log(`[DELETE PRODUCT] Encontrados ${variationFiles.length} arquivos de variações`);
 
     // 4. Deletar todos os arquivos do Cloudflare R2
     const allFiles = [...productFiles, ...variationFiles];
@@ -641,17 +609,13 @@ export async function DELETE(
       .filter(file => file.path) // Apenas arquivos com r2Key
       .map(async file => {
         try {
-          console.log(`[DELETE PRODUCT] Deletando do R2: ${file.path}`);
           await deleteFromR2(file.path);
-          console.log(`[DELETE PRODUCT] ✓ Deletado do R2: ${file.path}`);
-        } catch (error) {
-          console.error(`[DELETE PRODUCT] ✗ Erro ao deletar do R2: ${file.path}`, error);
+        } catch {
           // Continua mesmo se falhar (arquivo pode já ter sido deletado)
         }
       });
 
     await Promise.all(r2DeletionPromises);
-    console.log(`[DELETE PRODUCT] Concluída exclusão de ${allFiles.length} arquivos do R2`);
 
     // 5. Deletar do banco de dados (cascade vai cuidar das relações)
     // O schema tem onDelete: 'cascade' então vai deletar automaticamente:
@@ -661,9 +625,7 @@ export async function DELETE(
     // - productAttributes (product_attributes)
     // - variationAttributeValues (variation_attribute_values) via cascade das variações
 
-    console.log(`[DELETE PRODUCT] Deletando produto do banco de dados...`);
     await db.delete(products).where(eq(products.id, id));
-    console.log(`[DELETE PRODUCT] ✓ Produto deletado do banco de dados`);
 
     return NextResponse.json({
       message: 'Produto excluído com sucesso',
@@ -675,7 +637,6 @@ export async function DELETE(
       },
     });
   } catch (error) {
-    console.error('[DELETE PRODUCT] Erro ao excluir produto:', error);
     return NextResponse.json(
       {
         error: 'Erro ao excluir produto',

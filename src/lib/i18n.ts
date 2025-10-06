@@ -44,7 +44,7 @@ export async function initI18n(locale = 'pt') {
     i18n.addResourceBundle(locale, 'common', common, true, true);
     await i18n.changeLanguage(locale);
   } catch {
-    console.error('i18n init error');
+    // i18n initialization failed
   }
 
   return i18n;

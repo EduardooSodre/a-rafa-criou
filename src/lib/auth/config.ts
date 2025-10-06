@@ -50,8 +50,7 @@ export const authOptions: NextAuthOptions = {
             name: dbUser.name || undefined,
             role: dbUser.role,
           };
-        } catch (error) {
-          console.error('Auth error:', error);
+        } catch {
           return null;
         }
       },

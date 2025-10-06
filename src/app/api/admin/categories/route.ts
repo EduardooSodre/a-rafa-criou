@@ -12,8 +12,7 @@ export async function GET() {
       categories: categoriesList,
       total: categoriesList.length,
     });
-  } catch (error) {
-    console.error('Erro ao buscar categorias:', error);
+  } catch {
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 }
@@ -59,8 +58,7 @@ export async function POST(request: NextRequest) {
       .returning();
 
     return NextResponse.json(newCategory, { status: 201 });
-  } catch (error) {
-    console.error('Erro ao criar categoria:', error);
+  } catch {
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 }

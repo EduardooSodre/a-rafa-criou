@@ -70,8 +70,7 @@ export async function GET(
     };
 
     return NextResponse.json(completeVariation);
-  } catch (error) {
-    console.error('Error fetching variation:', error);
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -125,8 +124,6 @@ export async function PUT(
 
     return NextResponse.json(completeVariation);
   } catch (error) {
-    console.error('Error updating variation:', error);
-
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Validation error', details: error.issues },
@@ -167,8 +164,7 @@ export async function DELETE(
     await db.delete(productVariations).where(eq(productVariations.id, variationId));
 
     return NextResponse.json({ message: 'Variation deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting variation:', error);
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

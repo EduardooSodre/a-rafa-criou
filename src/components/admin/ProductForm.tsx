@@ -52,8 +52,8 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                     const data = await response.json()
                     setLocalAttributes(data)
                 }
-            } catch (error) {
-                console.error('Erro ao carregar atributos:', error)
+            } catch {
+                // Failed to load attributes
             } finally {
                 if (isMounted) {
                     setIsLoadingAttributes(false)
@@ -76,8 +76,6 @@ export default function ProductForm({ defaultValues, categories = [], availableA
     const [categoryError, setCategoryError] = useState<string | null>(null)
 
     const [formData, setFormData] = useState<ProductFormData>(() => {
-        console.log('[ProductForm] Inicializando formData com defaultValues:', defaultValues)
-        console.log('[ProductForm] defaultValues.attributes:', defaultValues?.attributes)
         return {
             name: defaultValues?.name || '',
             slug: defaultValues?.slug,
@@ -236,8 +234,8 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                     if (!res.ok) return
                     const j = await res.json()
                     setCategoriesLocal(j.categories || [])
-                } catch (err) {
-                    console.error('Falha ao buscar categorias', err)
+                } catch {
+                    // Failed to fetch categories
                 }
             })()
         }
@@ -371,17 +369,6 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                     .map(a => ({ id: a.id, name: a.name, values: (a.values || []).map(v => ({ id: v.id, value: v.value })) })),
             }
 
-            console.log('=== PAYLOAD SENDO ENVIADO ===')
-            console.log('Variações:', variationsPayload.map(v => ({
-                name: v.name,
-                price: v.price,
-                attributeValues: v.attributeValues,
-                filesCount: v.files.length,
-                imagesCount: v.images?.length || 0
-            })))
-            console.log('Atributos do produto:', payload.attributes)
-            console.log('Atributos locais:', payload.attributeDefinitions)
-
             // Type-safe extraction of id from defaultValues: prefer explicit prop, fallback to defaultValues.id
             const dv = defaultValues as Partial<ProductFormData & { id?: string }> | undefined
             const effectiveProductId = productId ?? dv?.id
@@ -403,14 +390,12 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                 const txt = await res.text()
                 throw new Error(`Erro na API de produtos: ${res.status} ${txt}`)
             }
-            const saved = await res.json()
-            console.log('Produto salvo', saved)
+            await res.json()
             setIsSubmitting(false)
             if (onSuccess) onSuccess()
             else router.push('/admin/produtos')
         } catch (err: unknown) {
             setIsSubmitting(false)
-            console.error(err)
             setFormError('Erro ao salvar produto: ' + (err instanceof Error ? err.message : String(err)))
         }
     }
@@ -510,8 +495,7 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                                                                 } else {
                                                                     setCategoryError('Resposta inesperada ao criar categoria')
                                                                 }
-                                                            } catch (err) {
-                                                                console.error(err)
+                                                            } catch {
                                                                 setCategoryError('Falha ao criar categoria')
                                                             } finally {
                                                                 setIsCreatingCategory(false)

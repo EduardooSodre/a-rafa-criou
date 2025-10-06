@@ -15,8 +15,7 @@ export async function GET() {
     };
 
     return NextResponse.json(stats);
-  } catch (error) {
-    console.error('Erro ao buscar estatísticas de produtos:', error);
+  } catch {
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 }

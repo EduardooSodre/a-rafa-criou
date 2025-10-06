@@ -29,11 +29,6 @@ interface Attribute {
 export default function EditProductDialog({ product, open, onOpenChange, onSuccess }: EditProductDialogProps) {
     const [availableAttributes, setAvailableAttributes] = useState<Attribute[]>([])
 
-    // Debug: log when the edit dialog open state changes
-    useEffect(() => {
-        console.debug('[EditProductDialog] open=', open, 'productId=', product?.id)
-    }, [open, product?.id])
-
     useEffect(() => {
         let mounted = true
             ; (async () => {
@@ -54,8 +49,8 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
                         return { id: String(obj.id), name: String(obj.name), values }
                     }) : []
                     setAvailableAttributes(attrs)
-                } catch (err) {
-                    console.error('Failed to fetch attributes', err)
+                } catch {
+                    // Failed to fetch attributes
                 }
             })()
         return () => { mounted = false }
@@ -74,8 +69,8 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
                     const j = await res.json()
                     if (!mounted) return
                     setDetailedProduct(j)
-                } catch (err) {
-                    console.error('Failed to fetch product details', err)
+                } catch {
+                    // Failed to fetch product details
                 }
             })()
         return () => { mounted = false }
@@ -137,13 +132,6 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
             variations,
             attributes: source.attributes || [],
         }
-
-        console.log('[EditProductDialog] defaultValues gerado:', {
-            id: result.id,
-            name: result.name,
-            attributesCount: result.attributes.length,
-            attributes: result.attributes,
-        })
 
         return result
     }, [detailedProduct, product])

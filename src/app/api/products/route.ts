@@ -235,8 +235,7 @@ export async function GET(request: NextRequest) {
         hasMore,
       },
     });
-  } catch (error) {
-    console.error('Error fetching products:', error);
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

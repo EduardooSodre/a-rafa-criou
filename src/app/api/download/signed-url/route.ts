@@ -19,9 +19,7 @@ export async function POST(request: NextRequest) {
       expiresIn: expires,
       expiresAt: new Date(Date.now() + expires * 1000).toISOString(),
     });
-  } catch (error) {
-    console.error('Erro ao gerar URL assinada:', error);
-
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
+  } catch {
+    return NextResponse.json({ error: 'Erro ao gerar URL assinada' }, { status: 500 });
   }
 }

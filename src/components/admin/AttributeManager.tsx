@@ -27,9 +27,6 @@ interface AttributeManagerProps {
 }
 
 export default function AttributeManager({ selectedAttributes, onChange }: AttributeManagerProps) {
-    console.log('[AttributeManager] RENDERIZANDO - selectedAttributes recebido:', selectedAttributes)
-    console.log('[AttributeManager] Quantidade de atributos selecionados:', selectedAttributes?.length || 0)
-
     const [availableAttributes, setAvailableAttributes] = useState<Attribute[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [isCreatingNew, setIsCreatingNew] = useState(false)
@@ -51,8 +48,8 @@ export default function AttributeManager({ selectedAttributes, onChange }: Attri
                 const data = await response.json()
                 setAvailableAttributes(data)
             }
-        } catch (error) {
-            console.error('Erro ao carregar atributos:', error)
+        } catch {
+            // Failed to load attributes
         } finally {
             setIsLoading(false)
         }
@@ -100,8 +97,7 @@ export default function AttributeManager({ selectedAttributes, onChange }: Attri
                 const error = await response.json()
                 alert(error.error || 'Erro ao criar atributo')
             }
-        } catch (error) {
-            console.error('Erro ao criar atributo:', error)
+        } catch {
             alert('Erro ao criar atributo')
         }
     }
@@ -128,8 +124,7 @@ export default function AttributeManager({ selectedAttributes, onChange }: Attri
                 const error = await response.json()
                 alert(error.error || 'Erro ao adicionar valor')
             }
-        } catch (error) {
-            console.error('Erro ao adicionar valor:', error)
+        } catch {
             alert('Erro ao adicionar valor')
         }
     }
@@ -152,8 +147,7 @@ export default function AttributeManager({ selectedAttributes, onChange }: Attri
                 const error = await response.json()
                 alert(error.error || 'Erro ao deletar atributo')
             }
-        } catch (error) {
-            console.error('Erro ao deletar atributo:', error)
+        } catch {
             alert('Erro ao deletar atributo')
         }
     }
@@ -185,8 +179,7 @@ export default function AttributeManager({ selectedAttributes, onChange }: Attri
                 const error = await response.json()
                 alert(error.error || 'Erro ao deletar valor')
             }
-        } catch (error) {
-            console.error('Erro ao deletar valor:', error)
+        } catch {
             alert('Erro ao deletar valor')
         }
     }
@@ -195,13 +188,9 @@ export default function AttributeManager({ selectedAttributes, onChange }: Attri
         const exists = selectedAttributes.find(a => a.attributeId === attributeId)
         if (exists) {
             const newSelection = selectedAttributes.filter(a => a.attributeId !== attributeId)
-            console.log('Desmarcando atributo:', attributeId)
-            console.log('Nova seleção:', newSelection)
             onChange(newSelection)
         } else {
             const newSelection = [...selectedAttributes, { attributeId, valueIds: [] }]
-            console.log('Marcando atributo:', attributeId)
-            console.log('Nova seleção:', newSelection)
             onChange(newSelection)
         }
     }
@@ -221,8 +210,6 @@ export default function AttributeManager({ selectedAttributes, onChange }: Attri
                 }
                 : a
         )
-        console.log('Toggle valor:', { attributeId, valueId, hasValue })
-        console.log('Nova seleção:', newSelection)
         onChange(newSelection)
     }
 

@@ -51,8 +51,7 @@ export async function GET(request: NextRequest) {
 
       return NextResponse.json(mainCategories);
     }
-  } catch (error) {
-    console.error('Erro ao buscar categorias:', error);
+  } catch {
     return NextResponse.json({ error: 'Erro ao buscar categorias' }, { status: 500 });
   }
 }

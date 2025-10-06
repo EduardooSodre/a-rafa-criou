@@ -5,8 +5,6 @@ import { eq } from 'drizzle-orm';
 
 export async function POST() {
   try {
-    console.log('🌱 Iniciando seed de categorias e subcategorias...');
-
     // Definir categorias principais com suas subcategorias
     const categoriesData = [
       {
@@ -107,7 +105,6 @@ export async function POST() {
       results,
     });
   } catch (error) {
-    console.error('❌ Erro ao fazer seed:', error);
     return NextResponse.json(
       {
         success: false,

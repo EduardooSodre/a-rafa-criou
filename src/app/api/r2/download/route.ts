@@ -15,14 +15,12 @@ export async function GET(request: NextRequest) {
     // This avoids redirect-following issues when the Next/Image optimizer requests the URL.
     const fetched = await fetch(signed);
     if (!fetched.ok) {
-      console.error('Failed to fetch signed URL:', fetched.status, await fetched.text());
       return NextResponse.json({ error: 'Failed to fetch file from storage' }, { status: 502 });
     }
 
     // Validate content-type (basic guard)
     const contentType = fetched.headers.get('content-type') || 'application/octet-stream';
     if (!contentType.startsWith('image/') && !contentType.startsWith('application/pdf')) {
-      console.warn('Requested resource is not an image/pdf:', contentType);
       // Still proxy it, but clients that expect an image may complain; return 415 to be explicit
       return NextResponse.json({ error: 'Resource is not an image or pdf' }, { status: 415 });
     }
@@ -35,8 +33,7 @@ export async function GET(request: NextRequest) {
     };
 
     return new NextResponse(Buffer.from(body), { headers });
-  } catch (err) {
-    console.error('Error generating R2 signed URL:', err);
+  } catch {
     return NextResponse.json({ error: 'Failed to generate signed URL' }, { status: 500 });
   }
 }

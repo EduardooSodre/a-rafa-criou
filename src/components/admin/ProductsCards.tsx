@@ -106,8 +106,7 @@ export default function ProductsCardsView({
                 }
                 const data = await response.json()
                 setProducts(data.products || data)
-            } catch (error) {
-                console.error('Erro ao buscar produtos:', error)
+            } catch {
                 setProducts([])
             } finally {
                 setLoading(false)
@@ -140,8 +139,8 @@ export default function ProductsCardsView({
                 const data = await response.json()
                 setProducts(data.products || data)
             }
-        } catch (error) {
-            console.error('Erro ao atualizar produtos:', error)
+        } catch {
+            // Failed to refresh products
         }
     }
 
@@ -157,18 +156,11 @@ export default function ProductsCardsView({
                 throw new Error(errorData.error || 'Erro ao excluir produto')
             }
 
-            const result = await response.json()
-            console.log('[DELETE PRODUCT] Produto excluído:', result)
-
-            // Mostrar mensagem de sucesso com detalhes
-            if (result.deletedFiles > 0) {
-                console.log(`✓ ${result.deletedFiles} arquivo(s) deletado(s) do Cloudflare R2`)
-            }
+            await response.json()
 
             await refreshProducts()
             onRefresh?.()
         } catch (error) {
-            console.error('Erro ao excluir produto:', error)
             setCardsError(error instanceof Error ? error.message : 'Erro ao excluir produto. Tente novamente.')
         } finally {
             setDeletingProduct(null)

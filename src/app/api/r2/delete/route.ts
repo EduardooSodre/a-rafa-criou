@@ -46,19 +46,12 @@ export async function DELETE(request: NextRequest) {
     // Deletar do R2
     await deleteFromR2(r2Key);
 
-    console.log('R2 Delete Success:', {
-      r2Key,
-      deletedBy: session.user.email || session.user.id,
-    });
-
     return NextResponse.json({
       success: true,
       message: 'Arquivo deletado com sucesso',
       data: { r2Key },
     });
   } catch (error) {
-    console.error('Erro ao deletar do R2:', error);
-
     const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
 
     // Se o erro for "Not Found", retornar 404

@@ -43,8 +43,7 @@ export async function POST() {
       message: `Categories initialized successfully. ${inserted} categories added.`,
       categories: allCategories,
     });
-  } catch (error) {
-    console.error('Error initializing categories:', error);
+  } catch {
     return NextResponse.json({ error: 'Failed to initialize categories' }, { status: 500 });
   }
 }

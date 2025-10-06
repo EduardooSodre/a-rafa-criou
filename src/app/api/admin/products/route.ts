@@ -235,8 +235,7 @@ export async function GET(request: NextRequest) {
         total: allProducts.length,
       },
     });
-  } catch (error) {
-    console.error('Error fetching products:', error);
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -251,37 +250,11 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    console.log('=== RECEBIDO NA API ===');
-    console.log('Product data:', {
-      name: body.name,
-      description: body.description,
-      price: body.price,
-      categoryId: body.categoryId,
-      filesCount: body.files?.length || 0,
-      imagesCount: body.images?.length || 0,
-      variationsCount: body.variations?.length || 0,
-    });
-    console.log('Files:', body.files?.length || 0);
-    console.log('Variations:', body.variations?.length || 0);
-    if (body.variations) {
-      body.variations.forEach(
-        (v: { name: string; files?: { filename: string; r2Key: string }[] }, i: number) => {
-          console.log(`Variation ${i} (${v.name}): ${v.files?.length || 0} files`);
-          if (v.files) {
-            v.files.forEach((f: { filename: string; r2Key: string }, fi: number) => {
-              console.log(`  File ${fi}: ${f.filename} -> r2Key: ${f.r2Key}`);
-            });
-          }
-        }
-      );
-    }
-
     let validatedData;
     try {
       // validate with extended schema to accept attributeDefinitions
       validatedData = createProductSchemaWithDefs.parse(body as unknown);
     } catch (error) {
-      console.error('Validation error:', error);
       if (error instanceof z.ZodError) {
         return NextResponse.json(
           {
@@ -610,13 +583,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
-    // Log with stack if available to aid debugging
-    console.error(
-      'Error creating product:',
-      error instanceof Error ? error.message : String(error)
-    );
-    if (error instanceof Error && (error as Error).stack) console.error((error as Error).stack);
-
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Validation error', details: error.issues },

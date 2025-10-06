@@ -13,8 +13,7 @@ export function getMessages(locale?: string) {
   try {
     const raw = fs.readFileSync(file, 'utf8');
     return JSON.parse(raw);
-  } catch (err) {
-    console.error('Failed to load messages for', lc, err);
+  } catch {
     return {};
   }
 }

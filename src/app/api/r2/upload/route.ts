@@ -40,13 +40,6 @@ export async function POST(request: NextRequest) {
     // URL pública do arquivo (será implementada quando necessário)
     const publicUrl = `${process.env.R2_PUBLIC_URL || ''}/${fileKey}`;
 
-    console.log('R2 Upload Success:', {
-      fileKey,
-      originalName: file.name,
-      size: file.size,
-      type: file.type,
-    });
-
     const response = {
       success: true,
       data: {
@@ -58,17 +51,8 @@ export async function POST(request: NextRequest) {
       },
     };
 
-    console.log('R2 Upload Success:', {
-      key: fileKey,
-      size: file.size,
-      type: file.type,
-      url: publicUrl,
-    });
-
     return NextResponse.json(response);
   } catch (error) {
-    console.error('Erro no upload para R2:', error);
-
     const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
 
     return NextResponse.json(
