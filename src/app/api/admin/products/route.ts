@@ -8,7 +8,7 @@ import {
   attributes,
   attributeValues,
 } from '@/lib/db/schema';
-import { eq, desc, or, and, ilike, isNull } from 'drizzle-orm';
+import { eq, desc, or, and, ilike, isNull, inArray } from 'drizzle-orm';
 
 const createProductSchema = z.object({
   name: z.string().min(1).max(255),
@@ -179,63 +179,84 @@ export async function GET(request: NextRequest) {
         .offset(offset);
     }
 
-    // Get related files and variations for each product
-    const productsWithDetails = await Promise.all(
-      allProducts.map(async product => {
-        const productFiles = await db.select().from(files).where(eq(files.productId, product.id));
+    // ============================================================================
+    // OTIMIZAÇÃO: Buscar TODOS os dados relacionados de UMA VEZ (evita N+1 queries)
+    // ============================================================================
+    
+    const productIds = allProducts.map(p => p.id);
+    
+    // Buscar todos os files de uma vez
+    const allProductFiles = productIds.length > 0
+      ? await db.select().from(files).where(inArray(files.productId, productIds))
+      : [];
 
-        // Buscar imagens do produto
-        const productImagesList = await db
+    // Buscar todas as imagens de produtos de uma vez
+    const allProductImages = productIds.length > 0
+      ? await db.select().from(productImages).where(inArray(productImages.productId, productIds))
+      : [];
+
+    // Buscar todas as variações de uma vez se necessário
+    let allVariations: typeof productVariations.$inferSelect[] = [];
+    let allVariationFiles: typeof files.$inferSelect[] = [];
+    let allVariationImages: typeof productImages.$inferSelect[] = [];
+    
+    if (include.includes('variations') && productIds.length > 0) {
+      allVariations = await db
+        .select()
+        .from(productVariations)
+        .where(inArray(productVariations.productId, productIds));
+
+      const variationIds = allVariations.map(v => v.id);
+
+      if (include.includes('files') && variationIds.length > 0) {
+        allVariationFiles = await db
+          .select()
+          .from(files)
+          .where(inArray(files.variationId, variationIds));
+
+        allVariationImages = await db
           .select()
           .from(productImages)
-          .where(eq(productImages.productId, product.id));
+          .where(inArray(productImages.variationId, variationIds));
+      }
+    }
 
-        let variations: object[] = [];
-        if (include.includes('variations')) {
-          const productVariationsList = await db
-            .select()
-            .from(productVariations)
-            .where(eq(productVariations.productId, product.id));
+    // Montar produtos com detalhes usando os dados em memória
+    const productsWithDetails = allProducts.map(product => {
+      const productFiles = allProductFiles.filter(f => f.productId === product.id);
+      const productImagesList = allProductImages.filter(img => img.productId === product.id);
 
-          // Get files and images for each variation if requested
-          if (include.includes('files')) {
-            variations = await Promise.all(
-              productVariationsList.map(async variation => {
-                const variationFiles = await db
-                  .select()
-                  .from(files)
-                  .where(eq(files.variationId, variation.id));
+      let variations: object[] = [];
+      if (include.includes('variations')) {
+        const productVariationsList = allVariations.filter(v => v.productId === product.id);
 
-                const variationImages = await db
-                  .select()
-                  .from(productImages)
-                  .where(eq(productImages.variationId, variation.id));
+        if (include.includes('files')) {
+          variations = productVariationsList.map(variation => {
+            const variationFiles = allVariationFiles.filter(f => f.variationId === variation.id);
+            const variationImages = allVariationImages.filter(img => img.variationId === variation.id);
 
-                return {
-                  ...variation,
-                  files: variationFiles,
-                  images: variationImages,
-                };
-              })
-            );
-          } else {
-            variations = productVariationsList;
-          }
+            return {
+              ...variation,
+              files: variationFiles,
+              images: variationImages,
+            };
+          });
+        } else {
+          variations = productVariationsList;
         }
+      }
 
-        return {
-          ...product,
-          files: productFiles,
-          variations,
-          images: productImagesList,
-          // Mock additional fields for compatibility
-          status: product.isActive ? 'active' : 'draft',
-          digitalProduct: true,
-          category: 'digital',
-          tags: [],
-        };
-      })
-    );
+      return {
+        ...product,
+        files: productFiles,
+        variations,
+        images: productImagesList,
+        status: product.isActive ? 'active' : 'draft',
+        digitalProduct: true,
+        category: 'digital',
+        tags: [],
+      };
+    });
 
     return NextResponse.json({
       products: productsWithDetails,

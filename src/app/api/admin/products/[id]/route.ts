@@ -148,49 +148,59 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     // Get product images (product_images table)
     const images = await db.select().from(productImages).where(eq(productImages.productId, id));
 
-    // Get variations and for each variation include files, images and attribute mappings
-    const variations = await Promise.all(
-      variationsRaw.map(async v => {
-        const variationFiles = await db.select().from(files).where(eq(files.variationId, v.id));
-        const variationImages = await db
-          .select()
-          .from(productImages)
-          .where(eq(productImages.variationId, v.id));
-        const mappings = await db
-          .select()
-          .from(variationAttributeValues)
-          .where(eq(variationAttributeValues.variationId, v.id));
+    // ============================================================================
+    // OTIMIZAÇÃO: Buscar TODOS os dados das variações de UMA VEZ (evita N+1)
+    // ============================================================================
+    // (variationIds já foi declarado acima na linha 98)
+    
+    // Buscar todos os files, images e mappings de todas as variações de uma vez
+    const allVariationFiles = variationIds.length > 0
+      ? await db.select().from(files).where(inArray(files.variationId, variationIds))
+      : [];
+    
+    const allVariationImages = variationIds.length > 0
+      ? await db.select().from(productImages).where(inArray(productImages.variationId, variationIds))
+      : [];
+    
+    const allVariationMappings = variationIds.length > 0
+      ? await db.select().from(variationAttributeValues).where(inArray(variationAttributeValues.variationId, variationIds))
+      : [];
 
-        const attributeValues = mappings.map(m => ({
-          attributeId: m.attributeId,
-          valueId: m.valueId,
-        }));
+    // Montar variações usando os dados em memória
+    const variations = variationsRaw.map(v => {
+      const variationFiles = allVariationFiles.filter(f => f.variationId === v.id);
+      const variationImages = allVariationImages.filter(img => img.variationId === v.id);
+      const mappings = allVariationMappings.filter(m => m.variationId === v.id);
 
-        return {
-          ...v,
-          files: variationFiles.map(f => ({
-            filename: f.name,
-            originalName: f.originalName,
-            fileSize: f.size,
-            mimeType: f.mimeType,
-            r2Key: f.path,
-          })),
-          images: variationImages.map(img => ({
-            id: img.id,
-            cloudinaryId: img.cloudinaryId,
-            url: img.url,
-            width: img.width,
-            height: img.height,
-            format: img.format,
-            size: img.size,
-            alt: img.alt,
-            isMain: img.isMain,
-            order: img.sortOrder,
-          })),
-          attributeValues,
-        };
-      })
-    );
+      const attributeValues = mappings.map(m => ({
+        attributeId: m.attributeId,
+        valueId: m.valueId,
+      }));
+
+      return {
+        ...v,
+        files: variationFiles.map(f => ({
+          filename: f.name,
+          originalName: f.originalName,
+          fileSize: f.size,
+          mimeType: f.mimeType,
+          r2Key: f.path,
+        })),
+        images: variationImages.map(img => ({
+          id: img.id,
+          cloudinaryId: img.cloudinaryId,
+          url: img.url,
+          width: img.width,
+          height: img.height,
+          format: img.format,
+          size: img.size,
+          alt: img.alt,
+          isMain: img.isMain,
+          order: img.sortOrder,
+        })),
+        attributeValues,
+      };
+    });
 
     const completeProduct = {
       ...product,
