@@ -23,13 +23,13 @@ export async function cleanupProductImages(
 
     // Filtrar imagens que serão deletadas (não estão na nova lista)
     const imagesToDelete = currentImages.filter(
-      (img) => !newCloudinaryIds.includes(img.cloudinaryId)
+      img => !newCloudinaryIds.includes(img.cloudinaryId)
     );
 
     if (imagesToDelete.length === 0) return 0;
 
     // Deletar do Cloudinary
-    const cloudinaryIds = imagesToDelete.map((img) => img.cloudinaryId);
+    const cloudinaryIds = imagesToDelete.map(img => img.cloudinaryId);
     const deletedCount = await deleteMultipleImagesFromCloudinary(cloudinaryIds);
 
     // Deletar do banco de dados
@@ -63,13 +63,13 @@ export async function cleanupVariationImages(
 
     // Filtrar imagens que serão deletadas
     const imagesToDelete = currentImages.filter(
-      (img) => !newCloudinaryIds.includes(img.cloudinaryId)
+      img => !newCloudinaryIds.includes(img.cloudinaryId)
     );
 
     if (imagesToDelete.length === 0) return 0;
 
     // Deletar do Cloudinary
-    const cloudinaryIds = imagesToDelete.map((img) => img.cloudinaryId);
+    const cloudinaryIds = imagesToDelete.map(img => img.cloudinaryId);
     const deletedCount = await deleteMultipleImagesFromCloudinary(cloudinaryIds);
 
     // Deletar do banco de dados
@@ -100,7 +100,7 @@ export async function deleteAllProductImages(productId: string): Promise<number>
     if (images.length === 0) return 0;
 
     // Deletar do Cloudinary
-    const cloudinaryIds = images.map((img) => img.cloudinaryId);
+    const cloudinaryIds = images.map(img => img.cloudinaryId);
     const deletedCount = await deleteMultipleImagesFromCloudinary(cloudinaryIds);
 
     // Deletar do banco de dados
@@ -129,7 +129,7 @@ export async function deleteAllVariationImages(variationId: string): Promise<num
     if (images.length === 0) return 0;
 
     // Deletar do Cloudinary
-    const cloudinaryIds = images.map((img) => img.cloudinaryId);
+    const cloudinaryIds = images.map(img => img.cloudinaryId);
     const deletedCount = await deleteMultipleImagesFromCloudinary(cloudinaryIds);
 
     // Deletar do banco de dados

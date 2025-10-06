@@ -43,7 +43,7 @@ export function ProductCard({ product }: ProductCardProps) {
               />
             </div>
           )}
-          
+
           {product.isFeatured && (
             <Badge className='mb-2 w-fit bg-secondary text-secondary-foreground'>
               {t('product.featured', 'Destaque')}

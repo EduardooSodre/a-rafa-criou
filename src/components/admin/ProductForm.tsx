@@ -119,7 +119,7 @@ export default function ProductForm({ defaultValues, categories = [], availableA
             // imgData is an object with cloudinaryId and url
             const imgObj = imgData as { cloudinaryId?: string; url?: string; alt?: string }
             const previewUrl = imgObj.url || ''
-            
+
             return {
                 file: undefined as File | undefined,
                 filename: imgObj.alt || imgObj.url?.split('/').pop() || `img-${i}`,
@@ -336,7 +336,7 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                         const b64 = Buffer.from(arr).toString('base64')
                         const mime = vimg.file.type || 'image/jpeg'
                         const dataUri = `data:${mime};base64,${b64}`
-                        
+
                         const cloudinaryRes = await fetch('/api/cloudinary/upload', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -344,7 +344,7 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                         })
                         if (!cloudinaryRes.ok) throw new Error('Falha no upload da imagem para Cloudinary')
                         const cloudinaryData = await cloudinaryRes.json()
-                        
+
                         variationImagesPayload.push({
                             cloudinaryId: cloudinaryData.cloudinaryId,
                             url: cloudinaryData.url,
@@ -395,7 +395,7 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                     const b64 = Buffer.from(arr).toString('base64')
                     const mime = img.file.type || 'image/jpeg'
                     const dataUri = `data:${mime};base64,${b64}`
-                    
+
                     const cloudinaryRes = await fetch('/api/cloudinary/upload', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -403,7 +403,7 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                     })
                     if (!cloudinaryRes.ok) throw new Error('Falha no upload da imagem para Cloudinary')
                     const cloudinaryData = await cloudinaryRes.json()
-                    
+
                     productImagesPayload.push({
                         cloudinaryId: cloudinaryData.cloudinaryId,
                         url: cloudinaryData.url,

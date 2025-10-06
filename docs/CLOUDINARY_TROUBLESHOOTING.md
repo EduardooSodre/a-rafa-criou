@@ -5,6 +5,7 @@
 ### ✅ SOLUÇÃO (passo a passo):
 
 1. **Verifique o `.env.local`** - Deve ter:
+
    ```bash
    NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=dr2fs6urk
    CLOUDINARY_API_KEY=772792428618415
@@ -13,12 +14,13 @@
    ```
 
 2. **🔴 REINICIE o servidor dev** (OBRIGATÓRIO!):
+
    ```bash
    # Pare o servidor atual (Ctrl+C)
    # Depois:
    npm run dev
    ```
-   
+
    ⚠️ **Variáveis de ambiente só são carregadas quando o servidor inicia!**
 
 3. **Teste novamente**:
@@ -37,12 +39,15 @@
 ## 🔍 Verificações Adicionais
 
 ### A) Credenciais Cloudinary corretas?
+
 - Login: https://cloudinary.com/console
 - Dashboard > Settings > Access Keys
 - Confira se os valores batem com o `.env.local`
 
 ### B) Variáveis carregadas?
+
 Adicione temporariamente no início do `src/lib/cloudinary.ts`:
+
 ```typescript
 console.log('Cloudinary Config:', {
   cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
@@ -52,6 +57,7 @@ console.log('Cloudinary Config:', {
 ```
 
 ### C) Formato da imagem OK?
+
 - Formatos suportados: JPEG, PNG, WebP, GIF
 - Tamanho máximo recomendado: 10MB
 - Se a imagem for muito grande, reduza antes do upload
@@ -61,6 +67,7 @@ console.log('Cloudinary Config:', {
 ## 📝 Logs que Você Deve Ver
 
 ### ✅ Sucesso:
+
 ```
 uploadImageToCloudinary - Iniciando...
 Fazendo upload para: a-rafa-criou/images/products
@@ -68,21 +75,27 @@ Upload bem-sucedido: { publicId: '...', format: 'webp', size: 123456 }
 ```
 
 ### ❌ Erro de Configuração:
+
 ```
 Cloudinary não configurado. Variáveis faltando: { cloudName: false, ... }
 ```
+
 → **Solução**: Verifique `.env.local` e reinicie o servidor
 
 ### ❌ Erro de Autenticação:
+
 ```
 Unauthorized (401)
 ```
+
 → **Solução**: Faça login no sistema antes de criar produto
 
 ### ❌ Erro de Credenciais:
+
 ```
 Invalid API credentials
 ```
+
 → **Solução**: Verifique API Key e API Secret no Cloudinary Console
 
 ---
@@ -90,7 +103,7 @@ Invalid API credentials
 ## 🎯 Checklist Rápido
 
 - [ ] `.env.local` tem as 4 variáveis do Cloudinary
-- [ ] Variáveis começam com `NEXT_PUBLIC_` (cloud_name) e `CLOUDINARY_` (api_key, api_secret)
+- [ ] Variáveis começam com `NEXT_PUBLIC_` (cloud*name) e `CLOUDINARY*` (api_key, api_secret)
 - [ ] Servidor dev foi **reiniciado** após editar `.env.local`
 - [ ] Credenciais são válidas (testar no Cloudinary Console)
 - [ ] Você está logado como **admin** no sistema

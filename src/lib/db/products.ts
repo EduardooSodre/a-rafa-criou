@@ -40,9 +40,14 @@ export async function getProductBySlug(slug: string) {
   const [allMappings, allValues, allAttrs, allFiles, allVariationImages] = await Promise.all([
     // 1. Todos os mappings de atributos para estas variações
     variationIds.length > 0
-      ? Promise.all(variationIds.map(vId =>
-          db.select().from(variationAttributeValues).where(eq(variationAttributeValues.variationId, vId))
-        )).then(results => results.flat())
+      ? Promise.all(
+          variationIds.map(vId =>
+            db
+              .select()
+              .from(variationAttributeValues)
+              .where(eq(variationAttributeValues.variationId, vId))
+          )
+        ).then(results => results.flat())
       : Promise.resolve([]),
 
     // 2. Todos os valores de atributos
@@ -53,15 +58,17 @@ export async function getProductBySlug(slug: string) {
 
     // 4. Todos os arquivos destas variações
     variationIds.length > 0
-      ? Promise.all(variationIds.map(vId => db.select().from(files).where(eq(files.variationId, vId)))).then(r =>
-          r.flat()
-        )
+      ? Promise.all(
+          variationIds.map(vId => db.select().from(files).where(eq(files.variationId, vId)))
+        ).then(r => r.flat())
       : Promise.resolve([]),
 
     // 5. Todas as imagens das variações
     variationIds.length > 0
       ? Promise.all(
-          variationIds.map(vId => db.select().from(productImages).where(eq(productImages.variationId, vId)))
+          variationIds.map(vId =>
+            db.select().from(productImages).where(eq(productImages.variationId, vId))
+          )
         ).then(r => r.flat())
       : Promise.resolve([]),
   ]);
@@ -120,8 +127,11 @@ export async function getProductBySlug(slug: string) {
   });
 
   // Busca imagens principais do produto (1 query)
-  const imagesResult = await db.select().from(productImages).where(eq(productImages.productId, product.id));
-  
+  const imagesResult = await db
+    .select()
+    .from(productImages)
+    .where(eq(productImages.productId, product.id));
+
   const images =
     imagesResult.length > 0
       ? imagesResult.map(img => {

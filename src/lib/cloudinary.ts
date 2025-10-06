@@ -100,7 +100,10 @@ export async function uploadImageToCloudinary(
         hasApiSecret: !!process.env.CLOUDINARY_API_SECRET,
       },
     });
-    throw new Error('Falha no upload da imagem para Cloudinary: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    throw new Error(
+      'Falha no upload da imagem para Cloudinary: ' +
+        (error instanceof Error ? error.message : 'Unknown error')
+    );
   }
 }
 
@@ -138,8 +141,9 @@ export async function deleteMultipleImagesFromCloudinary(publicIds: string[]): P
     });
 
     // Contar quantas foram deletadas com sucesso
-    const deleted = Object.values(result.deleted || {}).filter((status) => status === 'deleted')
-      .length;
+    const deleted = Object.values(result.deleted || {}).filter(
+      status => status === 'deleted'
+    ).length;
 
     return deleted;
   } catch (error) {

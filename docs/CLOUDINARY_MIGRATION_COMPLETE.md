@@ -3,6 +3,7 @@
 ## ✅ O que já foi feito
 
 ### 1. **Infraestrutura Cloudinary**
+
 - ✅ Instalado pacote `cloudinary`
 - ✅ Criado `src/lib/cloudinary.ts` com funções:
   - `uploadImageToCloudinary()` - Upload com otimização automática (max 1200x1200, quality auto, WebP)
@@ -11,10 +12,12 @@
   - `isCloudinaryConfigured()` - Validação de configuração
 
 ### 2. **API Routes**
+
 - ✅ `/api/cloudinary/upload` (POST) - Upload de imagens com autenticação admin
 - ✅ `/api/cloudinary/delete` (DELETE) - Remoção de imagens com validação de segurança
 
 ### 3. **Schema do Banco**
+
 - ✅ Atualizado `product_images` table:
   - ❌ Removido: `data` (base64), `name`, `original_name`, `mime_type`
   - ✅ Adicionado: `cloudinary_id`, `url`, `width`, `height`, `format`
@@ -22,6 +25,7 @@
 - ✅ Migração aplicada (drizzle-kit push)
 
 ### 4. **Utilities**
+
 - ✅ `src/lib/utils/image-cleanup-cloudinary.ts`:
   - `cleanupProductImages()` - Limpa imagens antigas ao atualizar produto
   - `cleanupVariationImages()` - Limpa imagens antigas ao atualizar variação
@@ -29,6 +33,7 @@
   - `deleteAllVariationImages()` - Deleta todas as imagens ao deletar variação
 
 ### 5. **Frontend (ProductForm)**
+
 - ✅ Atualizado para fazer upload para Cloudinary via `/api/cloudinary/upload`
 - ✅ Removido todo código de conversão base64
 - ✅ Suporte para imagens existentes (cloudinaryId + url)
@@ -37,6 +42,7 @@
   - Imagens de variações → pasta `a-rafa-criou/images/variations`
 
 ### 6. **APIs Públicas**
+
 - ✅ `/api/products` (GET) - Retorna `img.url` do Cloudinary
 - ✅ `src/lib/db/products.ts` (`getProductBySlug`) - Retorna `img.url` do Cloudinary
 
@@ -51,6 +57,7 @@ Você precisa atualizar manualmente:
 #### 1. **src/app/api/admin/products/route.ts** (POST e PUT)
 
 **Localizar a validação Zod (linha ~24):**
+
 ```typescript
 // ANTES (base64):
 images: z
@@ -66,6 +73,7 @@ images: z
 ```
 
 **Substituir por (Cloudinary):**
+
 ```typescript
 // DEPOIS (Cloudinary):
 images: z
@@ -86,6 +94,7 @@ images: z
 ```
 
 **Localizar a inserção de imagens (linha ~404):**
+
 ```typescript
 // ANTES (base64):
 const imageData = validated.images.map(image => {
@@ -95,7 +104,7 @@ const imageData = validated.images.map(image => {
     originalName: image.alt || 'product-image',
     mimeType: 'image/jpeg',
     size: 0,
-    data: image.data,  // ❌ Base64
+    data: image.data, // ❌ Base64
     alt: image.alt,
     isMain: image.isMain ?? false,
     sortOrder: image.order ?? 0,
@@ -104,13 +113,14 @@ const imageData = validated.images.map(image => {
 ```
 
 **Substituir por (Cloudinary):**
+
 ```typescript
 // DEPOIS (Cloudinary):
 const imageData = validated.images.map(image => {
   return {
     productId: newProduct.id,
-    cloudinaryId: image.cloudinaryId,  // ✅ Public ID
-    url: image.url,                     // ✅ URL
+    cloudinaryId: image.cloudinaryId, // ✅ Public ID
+    url: image.url, // ✅ URL
     width: image.width,
     height: image.height,
     format: image.format,
@@ -123,6 +133,7 @@ const imageData = validated.images.map(image => {
 ```
 
 **Fazer o mesmo para variações (linha ~460):**
+
 ```typescript
 // Procure por variationImageData e aplique a mesma lógica
 ```
@@ -130,6 +141,7 @@ const imageData = validated.images.map(image => {
 #### 2. **src/app/api/admin/products/[id]/route.ts** (PUT e DELETE)
 
 **No método PUT - adicionar cleanup antes de atualizar:**
+
 ```typescript
 import { cleanupProductImages, deleteAllProductImages } from '@/lib/utils/image-cleanup-cloudinary';
 
@@ -141,6 +153,7 @@ if (validated.images) {
 ```
 
 **No método DELETE - adicionar cleanup antes de deletar:**
+
 ```typescript
 import { deleteAllProductImages } from '@/lib/utils/image-cleanup-cloudinary';
 
@@ -153,6 +166,7 @@ await deleteAllProductImages(id);
 #### 3. **src/app/api/admin/products/[id]/variations/[variationId]/route.ts**
 
 **No método PUT - adicionar cleanup:**
+
 ```typescript
 import { cleanupVariationImages } from '@/lib/utils/image-cleanup-cloudinary';
 
@@ -164,6 +178,7 @@ if (variationData.images) {
 ```
 
 **No método DELETE - adicionar cleanup:**
+
 ```typescript
 import { deleteAllVariationImages } from '@/lib/utils/image-cleanup-cloudinary';
 
@@ -176,10 +191,12 @@ await deleteAllVariationImages(variationId);
 ## 🔑 Configuração do Cloudinary
 
 ### 1. **Criar conta gratuita**
+
 - Acesse: https://cloudinary.com/users/register_free
 - Plano grátis: **25GB storage + 25GB bandwidth/mês**
 
 ### 2. **Obter credenciais**
+
 - Login: https://cloudinary.com/console
 - Dashboard > Settings > Access Keys
 - Copiar:
@@ -188,6 +205,7 @@ await deleteAllVariationImages(variationId);
   - **API Secret**
 
 ### 3. **Adicionar ao `.env.local`**
+
 ```bash
 # Cloudinary Configuration (Images Only)
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name_here
@@ -203,6 +221,7 @@ CLOUDINARY_FOLDER=a-rafa-criou
 ## 🧪 Testes Recomendados
 
 ### 1. **Criar Produto com Imagem**
+
 ```
 1. Acesse: /admin/produtos
 2. Clique em "Novo Produto"
@@ -217,6 +236,7 @@ CLOUDINARY_FOLDER=a-rafa-criou
 ```
 
 ### 2. **Editar Produto e Trocar Imagem**
+
 ```
 1. Edite produto existente
 2. Remova imagem antiga
@@ -230,6 +250,7 @@ CLOUDINARY_FOLDER=a-rafa-criou
 ```
 
 ### 3. **Deletar Produto**
+
 ```
 1. Delete um produto com imagens
 2. Verificar no Cloudinary
@@ -240,6 +261,7 @@ CLOUDINARY_FOLDER=a-rafa-criou
 ```
 
 ### 4. **Variações com Imagens**
+
 ```
 Mesmo fluxo para produtos, mas com variações
 ```
@@ -266,17 +288,20 @@ a-rafa-criou/
 ## ✨ Benefícios da Migração
 
 ### Performance
+
 - ✅ **CDN Global**: Imagens servidas do edge mais próximo do usuário
 - ✅ **Otimização Automática**: WebP, AVIF, resize, compressão
 - ✅ **Lazy Loading**: Carregamento progressivo automático
 - ✅ **Banco Leve**: Sem base64, queries ~90% mais rápidas
 
 ### Escalabilidade
+
 - ✅ **25GB grátis/mês**: Comporta ~25.000 imagens otimizadas
 - ✅ **Transformações On-the-Fly**: Resize, crop, watermark sem re-upload
 - ✅ **Backups Automáticos**: Cloudinary cuida da redundância
 
 ### Manutenção
+
 - ✅ **Painel Visual**: Gerenciar imagens via UI do Cloudinary
 - ✅ **Busca Integrada**: Encontrar imagens por tags, metadados
 - ✅ **Logs de Acesso**: Análise de uso de imagens
@@ -286,20 +311,24 @@ a-rafa-criou/
 ## 🚨 Troubleshooting
 
 ### **Erro: "Cloudinary não configurado"**
+
 - ✅ Verifique se as 3 variáveis estão no `.env.local`
 - ✅ Reinicie o servidor dev: `npm run dev`
 
 ### **Imagens não aparecem**
+
 - ✅ Abra Network tab no DevTools
 - ✅ Verifique se a URL é `https://res.cloudinary.com/...`
 - ✅ Se não, verifique se a API está retornando `img.url`
 
 ### **Upload falha**
+
 - ✅ Verifique credenciais Cloudinary
 - ✅ Verifique tamanho da imagem (limite: ~10MB)
 - ✅ Verifique formato (JPEG, PNG, WebP, GIF)
 
 ### **Cleanup não funciona**
+
 - ✅ Verifique se `cleanupProductImages()` foi integrado no PUT
 - ✅ Verifique logs no console (servidor Node.js)
 
