@@ -7,6 +7,11 @@ import { productAttributes } from '@/lib/db/schema';
 import { eq, and, inArray } from 'drizzle-orm';
 import { productImages, productVariations } from '@/lib/db/schema';
 import { deleteFromR2 } from '@/lib/r2-utils';
+import {
+  cleanupProductImages,
+  cleanupVariationImages,
+  deleteAllProductImages,
+} from '@/lib/utils/image-cleanup-cloudinary';
 
 const updateProductSchema = z.object({
   name: z.string().min(1).max(255).optional(),
@@ -275,6 +280,12 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
           // replace variation images if provided
           if (variation.images && Array.isArray(variation.images)) {
+            // Limpar imagens antigas do Cloudinary antes de deletar do banco
+            const newVariationCloudinaryIds = variation.images
+              .filter((img: IncomingImage) => img.cloudinaryId)
+              .map((img: IncomingImage) => img.cloudinaryId!);
+            await cleanupVariationImages(variation.id, newVariationCloudinaryIds);
+            
             await db
               .delete(productImages)
               .where(eq(productImages.variationId, variation.id))
@@ -425,6 +436,12 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     }
     // Sync product images if provided
     if (body.images && Array.isArray(body.images)) {
+      // Limpar imagens antigas do Cloudinary antes de deletar do banco
+      const newCloudinaryIds = body.images
+        .filter((img: IncomingImage) => img.cloudinaryId)
+        .map((img: IncomingImage) => img.cloudinaryId!);
+      await cleanupProductImages(id, newCloudinaryIds);
+      
       await db.delete(productImages).where(eq(productImages.productId, id)).execute();
       const imgsRaw2: Array<ProductImageInsert | null> = (body.images || []).map(
         (img: IncomingImage) => {
@@ -598,6 +615,9 @@ export async function DELETE(
       });
 
     await Promise.all(r2DeletionPromises);
+
+    // 4.5. Deletar TODAS as imagens do Cloudinary
+    await deleteAllProductImages(id);
 
     // 5. Deletar do banco de dados (cascade vai cuidar das relações)
     // O schema tem onDelete: 'cascade' então vai deletar automaticamente:
