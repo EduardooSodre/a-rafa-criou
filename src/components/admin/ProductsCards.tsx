@@ -39,8 +39,11 @@ interface FileData {
 interface ImageData {
     id: string
     data?: string
+    url?: string
+    cloudinaryId?: string
     mimeType?: string
     alt?: string
+    isMain?: boolean
 }
 
 interface VariationData {
@@ -225,11 +228,23 @@ export default function ProductsCardsView({
                     // Buscar primeira imagem de capa do produto (mesma da home)
                     const getProductImage = () => {
                         if (product.images && product.images.length > 0) {
-                            // Buscar imagem principal (isMain) ou primeira
-                            const mainImage = product.images.find(img => img.data)
-                            if (mainImage && mainImage.data) {
-                                const mimeType = mainImage.mimeType || 'image/jpeg'
-                                return `data:${mimeType};base64,${mainImage.data}`
+                            // Buscar imagem principal (isMain) ou primeira com URL válida
+                            const mainImage = product.images.find(img => img.url || img.data)
+                            if (mainImage) {
+                                // Se tem URL do Cloudinary, usar direto
+                                if (mainImage.url) {
+                                    return mainImage.url
+                                }
+                                // Fallback: se ainda tiver base64 (imagens antigas)
+                                if (mainImage.data) {
+                                    // Verificar se já é uma URL (http/https) ou data URI
+                                    if (mainImage.data.startsWith('http') || mainImage.data.startsWith('data:')) {
+                                        return mainImage.data
+                                    }
+                                    // Se for base64 puro, montar data URI
+                                    const mimeType = mainImage.mimeType || 'image/jpeg'
+                                    return `data:${mimeType};base64,${mainImage.data}`
+                                }
                             }
                         }
                         return null

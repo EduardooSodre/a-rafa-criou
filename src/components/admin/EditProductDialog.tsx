@@ -6,7 +6,7 @@ import ProductForm from './ProductForm'
 import { getPreviewSrc } from '@/lib/r2-utils'
 
 // Types used only to map API product into ProductForm default values
-interface ApiImage { id?: string; name?: string; r2Key?: string; url?: string; data?: string; mimeType?: string; alt?: string }
+interface ApiImage { id?: string; name?: string; r2Key?: string; url?: string; data?: string; mimeType?: string; alt?: string; cloudinaryId?: string; width?: number; height?: number; format?: string; size?: number }
 interface ApiFile { filename?: string; originalName?: string; fileSize?: number; mimeType?: string; r2Key?: string; url?: string }
 interface ApiAttributeValue { attributeId?: string; valueId?: string; attribute_id?: string; attribute_value_id?: string }
 interface ApiVariation { id?: string; name?: string; price?: number | string; isActive?: boolean; images?: ApiImage[]; files?: ApiFile[]; attributeValues?: ApiAttributeValue[] }
@@ -80,10 +80,20 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
         const src = detailedProduct || product
         if (!src) return undefined
         const source = src as AdminProduct
-        // ProductForm expects `images` as an array of string preview URLs
+        // ProductForm expects `images` as an array of objects with cloudinaryId, url, alt (will be converted to string URLs internally)
         const images = (source.images || []).map(i => {
-            const raw = (i as ApiImage)?.data ?? (i as ApiImage)?.r2Key ?? (i as ApiImage)?.url ?? ''
-            return getPreviewSrc(String(raw || ''), (i as ApiImage)?.mimeType)
+            const apiImg = i as ApiImage
+            // Se tem cloudinaryId e url, retorna o objeto completo
+            if (apiImg.cloudinaryId && apiImg.url) {
+                return {
+                    cloudinaryId: apiImg.cloudinaryId,
+                    url: apiImg.url,
+                    alt: apiImg.alt || source.name,
+                }
+            }
+            // Fallback: retorna apenas a URL
+            const raw = apiImg.data ?? apiImg.r2Key ?? apiImg.url ?? ''
+            return getPreviewSrc(String(raw || ''), apiImg.mimeType)
         })
         type RawAttr = ApiAttributeValue & { attribute_id?: string; attribute_value_id?: string }
         type RawFile = ApiFile & { name?: string; path?: string; size?: number }
@@ -92,6 +102,15 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
             const imgs = (vv.images || []).map(img => {
                 if (!img) return { filename: '', previewUrl: '' }
                 const ai = img as ApiImage
+                // Se tem cloudinaryId e url, preserva os dados
+                if (ai.cloudinaryId && ai.url) {
+                    return {
+                        filename: ai.alt || ai.name || '',
+                        previewUrl: ai.url,
+                        cloudinaryId: ai.cloudinaryId,
+                    }
+                }
+                // Fallback para compatibilidade com imagens antigas
                 const raw = ai.data ?? ai.r2Key ?? ai.url ?? ''
                 const preview = getPreviewSrc(String(raw || ''), ai.mimeType)
                 return { filename: ai.alt || ai.name || '', previewUrl: preview }
@@ -149,7 +168,7 @@ export default function EditProductDialog({ product, open, onOpenChange, onSucce
                 </DialogHeader>
                 <div className="mt-4">
                     <ProductForm
-                        defaultValues={defaultValues}
+                        defaultValues={defaultValues as typeof defaultValues & { images: string[] }}
                         availableAttributes={availableAttributes}
                         isEditing={!!product}
                         productId={product?.id}

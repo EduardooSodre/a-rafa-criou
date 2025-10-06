@@ -24,7 +24,12 @@ const createProductSchema = z.object({
   images: z
     .array(
       z.object({
-        data: z.string(), // Base64 data
+        cloudinaryId: z.string(), // Cloudinary public_id
+        url: z.string(), // Cloudinary secure URL
+        width: z.number().optional(),
+        height: z.number().optional(),
+        format: z.string().optional(),
+        size: z.number().optional(),
         alt: z.string().optional(),
         isMain: z.boolean().default(false),
         order: z.number().default(0),
@@ -40,7 +45,12 @@ const createProductSchema = z.object({
         images: z
           .array(
             z.object({
-              data: z.string(), // Base64 data
+              cloudinaryId: z.string(), // Cloudinary public_id
+              url: z.string(), // Cloudinary secure URL
+              width: z.number().optional(),
+              height: z.number().optional(),
+              format: z.string().optional(),
+              size: z.number().optional(),
               alt: z.string().optional(),
               isMain: z.boolean().default(false),
               order: z.number().default(0),
@@ -401,32 +411,18 @@ export async function POST(request: NextRequest) {
 
       // Insert product images if provided
       if (validated.images && validated.images.length > 0) {
-        const imageData = validated.images.map(image => {
-          // Extrair mimeType e base64 puro do data URI
-          let mimeType = 'image/jpeg';
-          let base64Data = image.data;
-          const dataStr = String(image.data);
-
-          if (dataStr.startsWith('data:')) {
-            const match = dataStr.match(/^data:([^;]+);base64,(.+)$/);
-            if (match) {
-              mimeType = match[1];
-              base64Data = match[2]; // Apenas o base64, sem o prefixo
-            }
-          }
-
-          return {
-            productId: insertedProduct.id,
-            name: `image-${Date.now()}.jpg`,
-            originalName: `product-image.jpg`,
-            mimeType: mimeType,
-            size: Math.round(base64Data.length * 0.75),
-            data: base64Data, // Salva apenas o base64 puro
-            alt: image.alt || validated.name,
-            isMain: image.isMain,
-            sortOrder: image.order,
-          };
-        });
+        const imageData = validated.images.map(image => ({
+          productId: insertedProduct.id,
+          cloudinaryId: image.cloudinaryId,
+          url: image.url,
+          width: image.width || null,
+          height: image.height || null,
+          format: image.format || null,
+          size: image.size || null,
+          alt: image.alt || validated.name,
+          isMain: image.isMain,
+          sortOrder: image.order,
+        }));
 
         await tx.insert(productImages).values(imageData);
       }
@@ -457,32 +453,18 @@ export async function POST(request: NextRequest) {
 
           // Insert variation images if provided
           if (variation.images && variation.images.length > 0) {
-            const variationImageData = variation.images.map(image => {
-              // Extrair mimeType e base64 puro do data URI
-              let mimeType = 'image/jpeg';
-              let base64Data = image.data;
-              const dataStr = String(image.data);
-
-              if (dataStr.startsWith('data:')) {
-                const match = dataStr.match(/^data:([^;]+);base64,(.+)$/);
-                if (match) {
-                  mimeType = match[1];
-                  base64Data = match[2]; // Apenas o base64, sem o prefixo
-                }
-              }
-
-              return {
-                variationId: insertedVariation.id,
-                name: `variation-image-${Date.now()}.jpg`,
-                originalName: `variation-image.jpg`,
-                mimeType: mimeType,
-                size: Math.round(base64Data.length * 0.75),
-                data: base64Data, // Salva apenas o base64 puro
-                alt: image.alt || variation.name,
-                isMain: image.isMain,
-                sortOrder: image.order,
-              };
-            });
+            const variationImageData = variation.images.map(image => ({
+              variationId: insertedVariation.id,
+              cloudinaryId: image.cloudinaryId,
+              url: image.url,
+              width: image.width || null,
+              height: image.height || null,
+              format: image.format || null,
+              size: image.size || null,
+              alt: image.alt || variation.name,
+              isMain: image.isMain,
+              sortOrder: image.order,
+            }));
 
             await tx.insert(productImages).values(variationImageData);
           }

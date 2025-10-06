@@ -32,6 +32,18 @@ export function ProductCard({ product }: ProductCardProps) {
     <>
       <Card className='group h-full transition-all hover:shadow-lg'>
         <CardHeader className='pb-3'>
+          {/* Imagem do produto */}
+          {product.mainImage?.data && (
+            <div className='relative aspect-square w-full overflow-hidden rounded-lg mb-3'>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={product.mainImage.data}
+                alt={product.mainImage.alt || product.name}
+                className='w-full h-full object-cover transition-transform group-hover:scale-105'
+              />
+            </div>
+          )}
+          
           {product.isFeatured && (
             <Badge className='mb-2 w-fit bg-secondary text-secondary-foreground'>
               {t('product.featured', 'Destaque')}

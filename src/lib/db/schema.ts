@@ -136,11 +136,12 @@ export const productImages = pgTable('product_images', {
   id: uuid('id').defaultRandom().primaryKey(),
   productId: uuid('product_id').references(() => products.id, { onDelete: 'cascade' }),
   variationId: uuid('variation_id').references(() => productVariations.id, { onDelete: 'cascade' }),
-  name: varchar('name', { length: 255 }).notNull(),
-  originalName: varchar('original_name', { length: 255 }).notNull(),
-  mimeType: varchar('mime_type', { length: 100 }).notNull(),
-  size: integer('size').notNull(), // bytes
-  data: text('data').notNull(), // imagem em base64
+  cloudinaryId: text('cloudinary_id').notNull(), // public_id do Cloudinary
+  url: text('url').notNull(), // URL segura da imagem no Cloudinary
+  width: integer('width'), // largura da imagem
+  height: integer('height'), // altura da imagem
+  format: varchar('format', { length: 10 }), // webp, jpg, png, etc.
+  size: integer('size'), // bytes
   alt: varchar('alt', { length: 255 }), // texto alternativo para acessibilidade
   sortOrder: integer('sort_order').default(0),
   isMain: boolean('is_main').default(false), // imagem principal do produto/variação

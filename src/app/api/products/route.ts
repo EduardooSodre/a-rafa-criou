@@ -36,7 +36,8 @@ type ImageDb = {
   id: string;
   productId: string;
   variationId?: string;
-  data: string;
+  cloudinaryId: string;
+  url: string;
   alt?: string;
   isMain?: boolean;
 };
@@ -140,7 +141,8 @@ export async function GET(request: NextRequest) {
         id: img.id,
         productId: img.productId!,
         variationId: img.variationId || undefined,
-        data: img.data,
+        cloudinaryId: img.cloudinaryId,
+        url: img.url,
         alt: img.alt || undefined,
         isMain: !!img.isMain,
       }));
@@ -206,21 +208,12 @@ export async function GET(request: NextRequest) {
         variations,
         mainImage: mainImageObj
           ? {
-              data: (function () {
-                const raw = mainImageObj.data || '';
-                if (String(raw).startsWith('data:')) return String(raw);
-                // Assume DB-stored raw is base64 and build data URI
-                return `data:image/jpeg;base64,${String(raw)}`;
-              })(),
+              data: mainImageObj.url, // URL do Cloudinary (compatibilidade com frontend existente)
               alt: mainImageObj.alt || p.name,
             }
           : null,
         images: images.map(img => ({
-          data: (function () {
-            const raw = img.data || '';
-            if (String(raw).startsWith('data:')) return String(raw);
-            return `data:image/jpeg;base64,${String(raw)}`;
-          })(),
+          data: img.url, // URL do Cloudinary
           alt: img.alt || p.name,
         })),
       };

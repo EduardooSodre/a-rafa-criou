@@ -102,10 +102,8 @@ export async function getProductBySlug(slug: string) {
     const variationImagesResult = imagesMap.get(v.id) || [];
 
     const variationImages = variationImagesResult.map(img => {
-      const raw = img.data || '';
-      if (!raw) return '/file.svg';
-      if (String(raw).startsWith('data:')) return String(raw);
-      return `data:${img.mimeType || 'image/jpeg'};base64,${raw}`;
+      // Retornar URL do Cloudinary diretamente
+      return img.url || '/file.svg';
     });
 
     return {
@@ -127,10 +125,8 @@ export async function getProductBySlug(slug: string) {
   const images =
     imagesResult.length > 0
       ? imagesResult.map(img => {
-          const raw = img.data || '';
-          if (!raw) return '/file.svg';
-          if (String(raw).startsWith('data:')) return String(raw);
-          return `data:${img.mimeType || 'image/jpeg'};base64,${raw}`;
+          // Retornar URL do Cloudinary diretamente
+          return img.url || '/file.svg';
         })
       : ['/file.svg'];
 

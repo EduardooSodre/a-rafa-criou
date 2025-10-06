@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { getPreviewSrc } from '@/lib/r2-utils'
 // Nested Dialog removed to keep a single outer modal during create/edit
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
@@ -113,7 +112,21 @@ export default function ProductForm({ defaultValues, categories = [], availableA
 
         // prepare image preview objects for product images so drag/reorder/removal work
         const prodImages = defaultValues?.images || []
-        imagePreviewsRef.current = prodImages.map((url, i) => ({ file: undefined as File | undefined, filename: String(url).split('/').pop() || `img-${i}`, previewUrl: String(url) } as ImageFile))
+        imagePreviewsRef.current = prodImages.map((imgData, i) => {
+            if (typeof imgData === 'string') {
+                return { file: undefined as File | undefined, filename: String(imgData).split('/').pop() || `img-${i}`, previewUrl: String(imgData) } as ImageFile
+            }
+            // imgData is an object with cloudinaryId and url
+            const imgObj = imgData as { cloudinaryId?: string; url?: string; alt?: string }
+            const previewUrl = imgObj.url || ''
+            
+            return {
+                file: undefined as File | undefined,
+                filename: imgObj.alt || imgObj.url?.split('/').pop() || `img-${i}`,
+                previewUrl,
+                cloudinaryId: imgObj.cloudinaryId
+            } as ImageFile & { cloudinaryId?: string }
+        }).filter(img => img.previewUrl) // Remove imagens sem URL válida
 
         // map variations: ensure images are ImageFile objects and keep files as-is
         type InFile = { filename?: string; originalName?: string; fileSize?: number; mimeType?: string; r2Key?: string; url?: string }
@@ -131,16 +144,22 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                 const url = ff.r2Key ? `/api/r2/download?r2Key=${encodeURIComponent(String(ff.r2Key))}` : (ff.url || undefined)
                 return { file: undefined as File | undefined, filename: ff.filename || ff.originalName || url?.split('/').pop() || '', r2Key: ff.r2Key || '', originalName: ff.originalName, fileSize: ff.fileSize, mimeType: ff.mimeType, url }
             }),
-            images: (v.images || []).map((img: string | { filename?: string; previewUrl?: string; data?: string; url?: string; mimeType?: string }, ii: number) => {
-                // image may be string or object { filename, previewUrl }
+            images: (v.images || []).map((img: string | { filename?: string; previewUrl?: string; url?: string; cloudinaryId?: string; alt?: string }, ii: number) => {
+                // image may be string or object { cloudinaryId, url, alt }
                 if (typeof img === 'string') return { file: undefined as File | undefined, filename: String(img).split('/').pop() || `var-${ii}`, previewUrl: img } as ImageFile
-                type ImgObj = { filename?: string; previewUrl?: string; data?: string; url?: string; mimeType?: string }
+                type ImgObj = { filename?: string; previewUrl?: string; url?: string; cloudinaryId?: string; alt?: string }
                 const io = img as ImgObj
-                const raw = io.data ? String(io.data) : io.previewUrl || io.url || ''
-                const preview = getPreviewSrc(raw, io.mimeType)
-                return { file: undefined as File | undefined, filename: img.filename || String(preview || '').split('/').pop() || `var-${ii}`, previewUrl: preview } as ImageFile
-            })
+                const preview = io.url || io.previewUrl || ''
+                return {
+                    file: undefined as File | undefined,
+                    filename: io.alt || io.filename || String(preview || '').split('/').pop() || `var-${ii}`,
+                    previewUrl: preview,
+                    cloudinaryId: io.cloudinaryId
+                } as ImageFile & { cloudinaryId?: string }
+            }).filter(img => img.previewUrl && img.previewUrl.trim()) // Remove imagens sem URL válida
         }))
+
+        const finalImages = imagePreviewsRef.current.map(img => img.previewUrl || '').filter(url => url.trim())
 
         setFormData({
             name: defaultValues?.name || '',
@@ -149,7 +168,7 @@ export default function ProductForm({ defaultValues, categories = [], availableA
             categoryId: defaultValues?.categoryId ?? null,
             isActive: defaultValues?.isActive ?? true,
             isFeatured: defaultValues?.isFeatured ?? false,
-            images: prodImages,
+            images: finalImages,
             price: defaultValues?.price ? String(defaultValues.price) : '',
             variations: mappedVariations.length > 0 ? mappedVariations : [{ name: '', price: '', attributeValues: [], files: [], images: [] }],
             attributes: defaultValues?.attributes || [],
@@ -284,9 +303,10 @@ export default function ProductForm({ defaultValues, categories = [], availableA
         }
         setIsSubmitting(true)
         try {
-            // First: upload all variation files (PDFs) to R2; images will be embedded as base64 and saved to DB
+            // First: upload all variation files (PDFs) to R2; images will be uploaded to Cloudinary
             type R2File = { filename: string; originalName: string; fileSize: number; mimeType: string; r2Key: string }
-            type VariationPayload = { id?: string; name: string; price: number; isActive: boolean; files: R2File[]; images?: Array<{ data: string; alt?: string; isMain?: boolean; order?: number }>; attributeValues: VariationForm['attributeValues'] }
+            type CloudinaryImage = { cloudinaryId: string; url: string; width?: number; height?: number; format?: string; size?: number; alt?: string; isMain?: boolean; order?: number }
+            type VariationPayload = { id?: string; name: string; price: number; isActive: boolean; files: R2File[]; images?: CloudinaryImage[]; attributeValues: VariationForm['attributeValues'] }
             const variationsPayload: VariationPayload[] = []
             for (let vi = 0; vi < formData.variations.length; vi++) {
                 const variation = formData.variations[vi]
@@ -306,20 +326,50 @@ export default function ProductForm({ defaultValues, categories = [], availableA
                     }
                 }
 
-                // Process variation images: convert File -> base64 data URI for DB storage; keep existing previewUrls as-is
-                const variationImagesPayload: Array<{ data: string; alt?: string; isMain?: boolean; order?: number }> = []
+                // Process variation images: upload to Cloudinary
+                const variationImagesPayload: CloudinaryImage[] = []
                 for (let viImg = 0; viImg < (variation.images || []).length; viImg++) {
                     const vimg = variation.images[viImg]
                     if (vimg.file) {
-                        // convert to base64
+                        // Upload to Cloudinary
                         const arr = await vimg.file.arrayBuffer()
                         const b64 = Buffer.from(arr).toString('base64')
                         const mime = vimg.file.type || 'image/jpeg'
                         const dataUri = `data:${mime};base64,${b64}`
-                        variationImagesPayload.push({ data: dataUri, alt: vimg.filename || undefined, isMain: viImg === 0, order: viImg })
+                        
+                        const cloudinaryRes = await fetch('/api/cloudinary/upload', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ image: dataUri, folder: 'variations' })
+                        })
+                        if (!cloudinaryRes.ok) throw new Error('Falha no upload da imagem para Cloudinary')
+                        const cloudinaryData = await cloudinaryRes.json()
+                        
+                        variationImagesPayload.push({
+                            cloudinaryId: cloudinaryData.cloudinaryId,
+                            url: cloudinaryData.url,
+                            width: cloudinaryData.width,
+                            height: cloudinaryData.height,
+                            format: cloudinaryData.format,
+                            size: cloudinaryData.size,
+                            alt: vimg.filename || undefined,
+                            isMain: viImg === 0,
+                            order: viImg
+                        })
                         if (vimg.previewUrl) URL.revokeObjectURL(vimg.previewUrl)
-                    } else if (vimg.previewUrl) {
-                        variationImagesPayload.push({ data: vimg.previewUrl, alt: vimg.filename || undefined, isMain: viImg === 0, order: viImg })
+                    } else if (vimg.previewUrl && vimg.previewUrl.startsWith('http')) {
+                        // Existing Cloudinary image - extract cloudinaryId from URL if possible
+                        // Format: https://res.cloudinary.com/{cloud_name}/image/upload/{public_id}
+                        const cloudinaryId = (vimg as unknown as { cloudinaryId?: string }).cloudinaryId || ''
+                        if (cloudinaryId) {
+                            variationImagesPayload.push({
+                                cloudinaryId,
+                                url: vimg.previewUrl,
+                                alt: vimg.filename || undefined,
+                                isMain: viImg === 0,
+                                order: viImg
+                            })
+                        }
                     }
                 }
 
@@ -335,19 +385,49 @@ export default function ProductForm({ defaultValues, categories = [], availableA
 
             // Product price: prefer explicit field, otherwise first variation
             const productPrice = formData.price ? parseFloat(formData.price) : (formData.variations[0] ? parseFloat(formData.variations[0].price || '0') : 0)
-            // Convert product images to base64 data URIs for DB storage (images are stored in product_images)
-            const productImagesPayload: Array<{ data: string; alt?: string; isMain?: boolean; order?: number }> = []
+            // Upload product images to Cloudinary
+            const productImagesPayload: CloudinaryImage[] = []
             for (let i = 0; i < imagePreviewsRef.current.length; i++) {
                 const img = imagePreviewsRef.current[i]
                 if (img.file) {
+                    // Upload to Cloudinary
                     const arr = await img.file.arrayBuffer()
                     const b64 = Buffer.from(arr).toString('base64')
                     const mime = img.file.type || 'image/jpeg'
                     const dataUri = `data:${mime};base64,${b64}`
-                    productImagesPayload.push({ data: dataUri, alt: img.filename || undefined, isMain: i === 0, order: i })
+                    
+                    const cloudinaryRes = await fetch('/api/cloudinary/upload', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ image: dataUri, folder: 'products' })
+                    })
+                    if (!cloudinaryRes.ok) throw new Error('Falha no upload da imagem para Cloudinary')
+                    const cloudinaryData = await cloudinaryRes.json()
+                    
+                    productImagesPayload.push({
+                        cloudinaryId: cloudinaryData.cloudinaryId,
+                        url: cloudinaryData.url,
+                        width: cloudinaryData.width,
+                        height: cloudinaryData.height,
+                        format: cloudinaryData.format,
+                        size: cloudinaryData.size,
+                        alt: img.filename || undefined,
+                        isMain: i === 0,
+                        order: i
+                    })
                     if (img.previewUrl) URL.revokeObjectURL(img.previewUrl)
-                } else if (img.previewUrl) {
-                    productImagesPayload.push({ data: img.previewUrl, alt: img.filename || undefined, isMain: i === 0, order: i })
+                } else if (img.previewUrl && img.previewUrl.startsWith('http')) {
+                    // Existing Cloudinary image
+                    const cloudinaryId = (img as unknown as { cloudinaryId?: string }).cloudinaryId || ''
+                    if (cloudinaryId) {
+                        productImagesPayload.push({
+                            cloudinaryId,
+                            url: img.previewUrl,
+                            alt: img.filename || undefined,
+                            isMain: i === 0,
+                            order: i
+                        })
+                    }
                 }
             }
 
@@ -562,8 +642,8 @@ export default function ProductForm({ defaultValues, categories = [], availableA
 
                                             {formData.images.length > 0 && (
                                                 <div className="mt-3 grid grid-cols-4 gap-2">
-                                                    {formData.images.map((url, idx) => (
-                                                        <div key={url}
+                                                    {formData.images.filter(url => typeof url === 'string' && url.trim()).map((url, idx) => (
+                                                        <div key={url || idx}
                                                             draggable
                                                             onDragStart={e => {
                                                                 dragIndexRef.current = idx

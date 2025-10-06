@@ -383,12 +383,12 @@ export default function VariationManager({ variations, attributes, onChange }: V
                                 </div>
                                 {variation.images.length > 0 && (
                                     <div className="mt-2 grid grid-cols-2 gap-2">
-                                        {variation.images.map((img, ii) => (
+                                        {variation.images.filter(img => img.previewUrl && img.previewUrl.trim()).map((img, ii) => (
                                             <div key={ii} className="relative group">
                                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                                 <img
-                                                    src={img.previewUrl}
-                                                    alt={img.filename}
+                                                    src={img.previewUrl || '/file.svg'}
+                                                    alt={img.filename || 'preview'}
                                                     className="w-full h-24 object-cover rounded-lg border"
                                                 />
                                                 <Button
