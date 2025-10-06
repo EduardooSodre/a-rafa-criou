@@ -102,13 +102,13 @@ export async function deleteAllProductImages(productId: string): Promise<number>
 
     // 2. Buscar TODAS as imagens (produto direto + todas variações)
     const allImages = [];
-    
+
     // Imagens diretas do produto (productId preenchido, variationId NULL)
     const productDirectImages = await db
       .select()
       .from(productImages)
       .where(and(eq(productImages.productId, productId), isNull(productImages.variationId)));
-    
+
     allImages.push(...productDirectImages);
 
     // Imagens das variações (variationId preenchido)
@@ -117,7 +117,7 @@ export async function deleteAllProductImages(productId: string): Promise<number>
         .select()
         .from(productImages)
         .where(inArray(productImages.variationId, variationIds));
-      
+
       allImages.push(...variationImages);
     }
 
@@ -126,7 +126,9 @@ export async function deleteAllProductImages(productId: string): Promise<number>
       return 0;
     }
 
-    console.log(`Deletando ${allImages.length} imagens do produto ${productId} (${productDirectImages.length} diretas + ${allImages.length - productDirectImages.length} de variações)`);
+    console.log(
+      `Deletando ${allImages.length} imagens do produto ${productId} (${productDirectImages.length} diretas + ${allImages.length - productDirectImages.length} de variações)`
+    );
 
     // 3. Deletar do Cloudinary
     const cloudinaryIds = allImages.map(img => img.cloudinaryId);
@@ -134,13 +136,13 @@ export async function deleteAllProductImages(productId: string): Promise<number>
 
     // 4. Deletar do banco de dados
     // Deletar imagens diretas do produto
-    await db.delete(productImages)
+    await db
+      .delete(productImages)
       .where(and(eq(productImages.productId, productId), isNull(productImages.variationId)));
-    
+
     // Deletar imagens das variações (o cascade do schema já fará isso, mas por garantia)
     if (variationIds.length > 0) {
-      await db.delete(productImages)
-        .where(inArray(productImages.variationId, variationIds));
+      await db.delete(productImages).where(inArray(productImages.variationId, variationIds));
     }
 
     console.log(`${deletedCount} imagens deletadas do Cloudinary com sucesso`);

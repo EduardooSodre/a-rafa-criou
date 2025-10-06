@@ -285,7 +285,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
               .filter((img: IncomingImage) => img.cloudinaryId)
               .map((img: IncomingImage) => img.cloudinaryId!);
             await cleanupVariationImages(variation.id, newVariationCloudinaryIds);
-            
+
             await db
               .delete(productImages)
               .where(eq(productImages.variationId, variation.id))
@@ -441,7 +441,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         .filter((img: IncomingImage) => img.cloudinaryId)
         .map((img: IncomingImage) => img.cloudinaryId!);
       await cleanupProductImages(id, newCloudinaryIds);
-      
+
       await db.delete(productImages).where(eq(productImages.productId, id)).execute();
       const imgsRaw2: Array<ProductImageInsert | null> = (body.images || []).map(
         (img: IncomingImage) => {
