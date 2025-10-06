@@ -228,7 +228,15 @@ export default function ProductForm({ defaultValues, categories = [], availableA
 
         return (
             <div onDragOver={e => e.preventDefault()} onDrop={onDrop} onClick={() => inputRef.current?.click()}>
-                <input ref={inputRef} type="file" accept={accept} multiple={multiple} onChange={e => e.target.files && onFilesSelected(e.target.files)} className="hidden" />
+                <input
+                    ref={inputRef}
+                    type="file"
+                    accept={accept}
+                    multiple={multiple}
+                    onChange={e => e.target.files && onFilesSelected(e.target.files)}
+                    className="hidden"
+                    title="Selecionar arquivos"
+                />
                 {children}
             </div>
         )
