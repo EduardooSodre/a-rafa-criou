@@ -182,24 +182,26 @@ export async function GET(request: NextRequest) {
     // ============================================================================
     // OTIMIZAÇÃO: Buscar TODOS os dados relacionados de UMA VEZ (evita N+1 queries)
     // ============================================================================
-    
+
     const productIds = allProducts.map(p => p.id);
-    
+
     // Buscar todos os files de uma vez
-    const allProductFiles = productIds.length > 0
-      ? await db.select().from(files).where(inArray(files.productId, productIds))
-      : [];
+    const allProductFiles =
+      productIds.length > 0
+        ? await db.select().from(files).where(inArray(files.productId, productIds))
+        : [];
 
     // Buscar todas as imagens de produtos de uma vez
-    const allProductImages = productIds.length > 0
-      ? await db.select().from(productImages).where(inArray(productImages.productId, productIds))
-      : [];
+    const allProductImages =
+      productIds.length > 0
+        ? await db.select().from(productImages).where(inArray(productImages.productId, productIds))
+        : [];
 
     // Buscar todas as variações de uma vez se necessário
-    let allVariations: typeof productVariations.$inferSelect[] = [];
-    let allVariationFiles: typeof files.$inferSelect[] = [];
-    let allVariationImages: typeof productImages.$inferSelect[] = [];
-    
+    let allVariations: (typeof productVariations.$inferSelect)[] = [];
+    let allVariationFiles: (typeof files.$inferSelect)[] = [];
+    let allVariationImages: (typeof productImages.$inferSelect)[] = [];
+
     if (include.includes('variations') && productIds.length > 0) {
       allVariations = await db
         .select()
@@ -233,7 +235,9 @@ export async function GET(request: NextRequest) {
         if (include.includes('files')) {
           variations = productVariationsList.map(variation => {
             const variationFiles = allVariationFiles.filter(f => f.variationId === variation.id);
-            const variationImages = allVariationImages.filter(img => img.variationId === variation.id);
+            const variationImages = allVariationImages.filter(
+              img => img.variationId === variation.id
+            );
 
             return {
               ...variation,

@@ -152,19 +152,28 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     // OTIMIZAÇÃO: Buscar TODOS os dados das variações de UMA VEZ (evita N+1)
     // ============================================================================
     // (variationIds já foi declarado acima na linha 98)
-    
+
     // Buscar todos os files, images e mappings de todas as variações de uma vez
-    const allVariationFiles = variationIds.length > 0
-      ? await db.select().from(files).where(inArray(files.variationId, variationIds))
-      : [];
-    
-    const allVariationImages = variationIds.length > 0
-      ? await db.select().from(productImages).where(inArray(productImages.variationId, variationIds))
-      : [];
-    
-    const allVariationMappings = variationIds.length > 0
-      ? await db.select().from(variationAttributeValues).where(inArray(variationAttributeValues.variationId, variationIds))
-      : [];
+    const allVariationFiles =
+      variationIds.length > 0
+        ? await db.select().from(files).where(inArray(files.variationId, variationIds))
+        : [];
+
+    const allVariationImages =
+      variationIds.length > 0
+        ? await db
+            .select()
+            .from(productImages)
+            .where(inArray(productImages.variationId, variationIds))
+        : [];
+
+    const allVariationMappings =
+      variationIds.length > 0
+        ? await db
+            .select()
+            .from(variationAttributeValues)
+            .where(inArray(variationAttributeValues.variationId, variationIds))
+        : [];
 
     // Montar variações usando os dados em memória
     const variations = variationsRaw.map(v => {
