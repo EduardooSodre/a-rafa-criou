@@ -5,6 +5,7 @@
 O pagamento é processado pelo Stripe, mas o **webhook não está criando o pedido no banco**.
 
 **Evidência nos logs:**
+
 ```
 🔍 Últimos pedidos no banco: []  ← BANCO VAZIO!
 ```
@@ -29,6 +30,7 @@ stripe listen --forward-to localhost:3000/api/stripe/webhook
 ```
 
 **Você verá:**
+
 ```
 > Ready! Your webhook signing secret is whsec_xxxxx
 ```
@@ -43,7 +45,8 @@ stripe listen --forward-to localhost:3000/api/stripe/webhook
 stripe listen --forward-to localhost:3000/api/stripe/webhook
 ```
 
-**IMPORTANTE:** 
+**IMPORTANTE:**
+
 - ✅ Deixe este terminal **aberto e rodando**
 - ✅ Não feche durante os testes
 - ✅ Você verá eventos em tempo real aqui
@@ -61,6 +64,7 @@ npm run dev
 ### Quando fizer novo pagamento:
 
 **Terminal Stripe CLI mostrará:**
+
 ```
 2025-10-07 15:50:00   --> charge.succeeded [evt_xxx]
 2025-10-07 15:50:00   --> payment_intent.succeeded [evt_xxx]
@@ -68,12 +72,14 @@ npm run dev
 ```
 
 **Terminal Next.js mostrará:**
+
 ```
 Webhook recebido: payment_intent.succeeded
 ✅ Order created: 123e4567-e89b-12d3-a456-426614174000
 ```
 
 **Página /obrigado mostrará:**
+
 ```
 ✅ Parabéns! Compra realizada com sucesso
 [Dados do pedido]
@@ -124,6 +130,7 @@ https://github.com/stripe/stripe-cli/releases/latest
 **Solução:**
 
 1. Verifique instalação:
+
    ```bash
    stripe --version
    ```

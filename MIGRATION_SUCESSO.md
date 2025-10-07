@@ -3,11 +3,11 @@
 ## 🎉 Coluna Criada
 
 ```sql
-ALTER TABLE "orders" 
+ALTER TABLE "orders"
 ADD COLUMN "stripe_payment_intent_id" varchar(255);
 
-ALTER TABLE "orders" 
-ADD CONSTRAINT "orders_stripe_payment_intent_id_unique" 
+ALTER TABLE "orders"
+ADD CONSTRAINT "orders_stripe_payment_intent_id_unique"
 UNIQUE("stripe_payment_intent_id");
 ```
 
@@ -52,12 +52,14 @@ npm run dev
 ## 📊 O que Acontecerá Agora
 
 ### Terminal Stripe CLI:
+
 ```
 --> payment_intent.succeeded [evt_xxx]
 <-- [200] POST http://localhost:3000/api/stripe/webhook
 ```
 
 ### Terminal Next.js:
+
 ```
 Webhook recebido: payment_intent.succeeded
 ✅ Pedido criado com sucesso: [uuid]
@@ -66,6 +68,7 @@ Webhook recebido: payment_intent.succeeded
 ```
 
 ### Navegador (/obrigado):
+
 ```
 ✅ Parabéns! Compra realizada com sucesso
 
@@ -94,6 +97,7 @@ npm run db:studio
 Abra: http://localhost:4983
 
 Vá para tabela `orders` e verifique:
+
 - ✅ Coluna `stripe_payment_intent_id` existe
 - ✅ Novos pedidos terão essa coluna preenchida
 

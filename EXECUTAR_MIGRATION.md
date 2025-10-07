@@ -54,11 +54,12 @@ npm run dev
 Adicionará a coluna na tabela `orders`:
 
 ```sql
-ALTER TABLE "orders" 
+ALTER TABLE "orders"
 ADD COLUMN "stripe_payment_intent_id" VARCHAR(255) UNIQUE;
 ```
 
 Essa coluna é **essencial** para:
+
 - ✅ Idempotência (evitar pedidos duplicados)
 - ✅ Buscar pedido na página /obrigado
 - ✅ Webhook identificar pedidos existentes
@@ -70,6 +71,7 @@ Essa coluna é **essencial** para:
 ### Erro: "Cannot connect to database"
 
 **Solução:**
+
 1. Verifique `DATABASE_URL` no `.env.local`
 2. Confirme que o banco PostgreSQL está acessível
 3. Teste a conexão:
@@ -107,13 +109,14 @@ Vá para tabela `orders` e verifique se a coluna `stripe_payment_intent_id` exis
 ### 2. Via SQL Direto (opcional)
 
 ```sql
-SELECT column_name, data_type 
-FROM information_schema.columns 
-WHERE table_name = 'orders' 
+SELECT column_name, data_type
+FROM information_schema.columns
+WHERE table_name = 'orders'
 AND column_name = 'stripe_payment_intent_id';
 ```
 
 Deve retornar:
+
 ```
 column_name              | data_type
 stripe_payment_intent_id | character varying

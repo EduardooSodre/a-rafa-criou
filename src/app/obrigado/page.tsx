@@ -38,7 +38,7 @@ interface OrderData {
 export default function ObrigadoPage() {
     const searchParams = useSearchParams()
     const paymentIntent = searchParams.get('payment_intent')
-    
+
     const [orderData, setOrderData] = useState<OrderData | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -61,9 +61,9 @@ export default function ObrigadoPage() {
             try {
                 console.log(`🔍 Tentativa ${attempt}/${maxRetries} - Buscando pedido...`);
                 setRetryCount(attempt);
-                
+
                 const response = await fetch(`/api/orders/by-payment-intent?payment_intent=${paymentIntent}`)
-                
+
                 if (response.ok) {
                     const data = await response.json()
                     setOrderData(data)
@@ -71,7 +71,7 @@ export default function ObrigadoPage() {
                     console.log('✅ Pedido encontrado!', data);
                     return // Sucesso!
                 }
-                
+
                 // Se não encontrou e ainda tem tentativas
                 if (attempt < maxRetries) {
                     console.log(`⏳ Pedido não encontrado, aguardando webhook... (tentativa ${attempt}/${maxRetries})`);
@@ -81,13 +81,13 @@ export default function ObrigadoPage() {
                     }, 2000)
                     return
                 }
-                
+
                 // Esgotou todas tentativas
                 throw new Error('Pedido ainda está sendo processado')
-                
+
             } catch (err) {
                 console.error('Erro ao buscar pedido:', err)
-                
+
                 if (attempt < maxRetries) {
                     // Ainda tem tentativas, aguardar e tentar novamente
                     setTimeout(() => {

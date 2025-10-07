@@ -9,11 +9,13 @@ A página `/obrigado` está retornando erro "Pedido não encontrado" ao tentar b
 ### 1. Webhook não criou o pedido
 
 **Verificar:**
+
 - Stripe CLI está rodando?
 - Webhook foi recebido e processado?
 - Houve erro no webhook?
 
 **Terminal Stripe CLI deve mostrar:**
+
 ```
 --> payment_intent.succeeded [evt_xxx]
 <-- [200] POST http://localhost:3000/api/stripe/webhook
@@ -26,6 +28,7 @@ Se mostra `[500]` ou `[400]`, há erro no webhook.
 O Stripe redireciona **imediatamente** após o pagamento, mas o webhook pode demorar alguns segundos para processar e criar o pedido no banco.
 
 **Fluxo problemático:**
+
 ```
 1. Cliente confirma pagamento (t=0s)
 2. Stripe redireciona para /obrigado (t=0.5s)
@@ -49,30 +52,28 @@ Tentar buscar o pedido múltiplas vezes com delay.
 const fetchOrder = async (retries = 5, delay = 2000) => {
   for (let i = 0; i < retries; i++) {
     try {
-      const response = await fetch(
-        `/api/orders/by-payment-intent?payment_intent=${paymentIntent}`
-      )
-      
+      const response = await fetch(`/api/orders/by-payment-intent?payment_intent=${paymentIntent}`);
+
       if (response.ok) {
-        const data = await response.json()
-        setOrderData(data)
-        return // Sucesso!
+        const data = await response.json();
+        setOrderData(data);
+        return; // Sucesso!
       }
-      
+
       // Se não encontrou, aguardar e tentar novamente
       if (i < retries - 1) {
-        console.log(`⏳ Tentativa ${i + 1}/${retries} - Aguardando webhook...`)
-        await new Promise(resolve => setTimeout(resolve, delay))
+        console.log(`⏳ Tentativa ${i + 1}/${retries} - Aguardando webhook...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
       }
     } catch (err) {
-      console.error('Erro ao buscar pedido:', err)
+      console.error('Erro ao buscar pedido:', err);
     }
   }
-  
+
   // Após todas tentativas, mostrar erro
-  setError('Pedido ainda está sendo processado. Aguarde alguns segundos e recarregue a página.')
-  setIsLoading(false)
-}
+  setError('Pedido ainda está sendo processado. Aguarde alguns segundos e recarregue a página.');
+  setIsLoading(false);
+};
 ```
 
 ### Solução 2: Verificar logs do webhook
@@ -85,6 +86,7 @@ Webhook recebido: payment_intent.succeeded
 ```
 
 **Se não aparecer:**
+
 - Webhook não está rodando
 - Webhook deu erro
 - Event type diferente
@@ -152,14 +154,14 @@ Vou implementar retry automático com feedback visual:
 
 ```tsx
 // Mostrar mensagem enquanto aguarda webhook
-"⏳ Processando seu pedido... Aguarde alguns segundos."
+'⏳ Processando seu pedido... Aguarde alguns segundos.';
 ```
 
 Após 3 tentativas de 2 segundos cada (6 segundos total), se ainda não encontrar:
 
 ```tsx
-"⚠️ Seu pedido está sendo processado. 
-Recarregue esta página em alguns segundos ou 
+"⚠️ Seu pedido está sendo processado.
+Recarregue esta página em alguns segundos ou
 verifique seu email para confirmação."
 ```
 

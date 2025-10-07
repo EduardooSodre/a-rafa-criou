@@ -11,10 +11,7 @@ export async function GET(req: NextRequest) {
     console.log('🔍 Buscando pedido com payment_intent:', paymentIntentId);
 
     if (!paymentIntentId) {
-      return NextResponse.json(
-        { error: 'Payment Intent ID não fornecido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Payment Intent ID não fornecido' }, { status: 400 });
     }
 
     // Buscar pedido pelo Payment Intent ID
@@ -24,18 +21,24 @@ export async function GET(req: NextRequest) {
       .where(eq(orders.stripePaymentIntentId, paymentIntentId))
       .limit(1);
 
-    console.log('📦 Resultado da busca:', orderResult.length > 0 ? 'Pedido encontrado!' : 'Pedido NÃO encontrado');
-    
+    console.log(
+      '📦 Resultado da busca:',
+      orderResult.length > 0 ? 'Pedido encontrado!' : 'Pedido NÃO encontrado'
+    );
+
     if (orderResult.length === 0) {
       // Buscar todos pedidos para debug
-      const allOrders = await db.select({
-        id: orders.id,
-        stripePaymentIntentId: orders.stripePaymentIntentId,
-        createdAt: orders.createdAt
-      }).from(orders).limit(5);
-      
+      const allOrders = await db
+        .select({
+          id: orders.id,
+          stripePaymentIntentId: orders.stripePaymentIntentId,
+          createdAt: orders.createdAt,
+        })
+        .from(orders)
+        .limit(5);
+
       console.log('🔍 Últimos pedidos no banco:', allOrders);
-      
+
       return NextResponse.json(
         { error: 'Pedido não encontrado', debug: { paymentIntentId, allOrders } },
         { status: 404 }
@@ -76,7 +79,7 @@ export async function GET(req: NextRequest) {
         paidAt: order.paidAt,
         createdAt: order.createdAt,
       },
-      items: items.map((item) => ({
+      items: items.map(item => ({
         id: item.id,
         name: item.name,
         price: item.price,
@@ -88,9 +91,6 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error('Erro ao buscar pedido:', error);
-    return NextResponse.json(
-      { error: 'Erro ao buscar pedido' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Erro ao buscar pedido' }, { status: 500 });
   }
 }
