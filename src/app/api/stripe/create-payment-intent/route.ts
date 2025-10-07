@@ -23,23 +23,17 @@ export async function POST(req: NextRequest) {
     const { items, userId, email } = createPaymentIntentSchema.parse(body);
 
     // 1. Buscar produtos reais do banco (NUNCA confiar no frontend)
-    const productIds = items.map((item) => item.productId);
-    const dbProducts = await db
-      .select()
-      .from(products)
-      .where(inArray(products.id, productIds));
+    const productIds = items.map(item => item.productId);
+    const dbProducts = await db.select().from(products).where(inArray(products.id, productIds));
 
     if (dbProducts.length !== productIds.length) {
-      return Response.json(
-        { error: 'Um ou mais produtos não encontrados' },
-        { status: 400 }
-      );
+      return Response.json({ error: 'Um ou mais produtos não encontrados' }, { status: 400 });
     }
 
     // 2. Calcular total REAL (preços do banco)
     let total = 0;
     for (const item of items) {
-      const product = dbProducts.find((p) => p.id === item.productId);
+      const product = dbProducts.find(p => p.id === item.productId);
       if (!product) {
         return Response.json(
           { error: `Produto ${item.productId} não encontrado` },
@@ -69,16 +63,10 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return Response.json(
-        { error: 'Dados inválidos', details: error.issues },
-        { status: 400 }
-      );
+      return Response.json({ error: 'Dados inválidos', details: error.issues }, { status: 400 });
     }
 
     console.error('Erro ao criar Payment Intent:', error);
-    return Response.json(
-      { error: 'Erro interno do servidor' },
-      { status: 500 }
-    );
+    return Response.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 }

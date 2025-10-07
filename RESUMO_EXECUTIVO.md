@@ -28,12 +28,14 @@
 ### ✅ O que está COMPLETO
 
 #### Infraestrutura (100%)
+
 - Next.js 15 + TypeScript + Tailwind + Shadcn UI
 - PostgreSQL + Drizzle ORM
 - Auth.js (login/registro/roles)
 - Database schema completo (24 tabelas)
 
 #### Admin Panel (100%) ⭐ OTIMIZADO
+
 - Dashboard com estatísticas
 - CRUD de produtos completo
 - CRUD de categorias
@@ -46,6 +48,7 @@
   - Queries: 40+ → 5 fixas
 
 #### Cloudinary CDN (100%) ⭐ NOVO
+
 - Migração completa de base64 → Cloudinary
 - Upload otimizado (1200x1200, WebP/AVIF auto)
 - Cleanup automático (delete ao editar/deletar produto)
@@ -53,6 +56,7 @@
 - Edge caching global
 
 #### Cloudflare R2 (70%)
+
 - ✅ Upload/download de PDFs
 - ✅ URLs assinadas (TTL configurável)
 - ❌ Entrega automática pós-pagamento
@@ -61,6 +65,7 @@
 ### ❌ O que está PENDENTE (BLOQUEADORES)
 
 #### 🔴 Sistema de Pagamentos (0%) - CRÍTICO
+
 **Status:** Não implementado  
 **Impacto:** Impossível vender produtos  
 **Tempo estimado:** 1-1.5 semanas
@@ -71,6 +76,7 @@
 - Criar pedido no banco após confirmação
 
 #### 🔴 Entrega de PDFs (0%) - CRÍTICO
+
 **Status:** Não implementado  
 **Impacto:** Cliente paga mas não recebe produto  
 **Tempo estimado:** 1 semana
@@ -81,6 +87,7 @@
 - URLs assinadas R2 no e-mail
 
 #### 🔴 Área do Cliente (0%) - CRÍTICO
+
 **Status:** Página vazia  
 **Impacto:** Cliente não pode ver pedidos/downloads  
 **Tempo estimado:** 3-4 dias
@@ -97,6 +104,7 @@
 ### SPRINT 1: Pagamentos e Entrega (2-3 semanas) - START NOW
 
 #### Semana 1: Pagamentos
+
 1. **Dias 1-2:** Setup Stripe (conta, chaves API, instalar SDK)
 2. **Dias 3-4:** Backend (create-payment-intent endpoint)
 3. **Dias 5-7:** Frontend (Stripe Elements no checkout)
@@ -104,6 +112,7 @@
 **Entregável:** Cliente pode pagar com cartão de crédito
 
 #### Semana 2: Webhooks e Pedidos
+
 1. **Dias 1-3:** Webhook Stripe (receber confirmação)
 2. **Dias 1-3:** Criar pedido no banco (orders + order_items)
 3. **Dias 4-5:** Testes de integração
@@ -112,6 +121,7 @@
 **Entregável:** Pagamento aprovado cria pedido automaticamente
 
 #### Semana 3: E-mail e Downloads
+
 1. **Dias 1-2:** Setup Resend (conta, verificar domínio)
 2. **Dias 3-4:** Templates de e-mail (React Email)
 3. **Dias 5-6:** API de e-mail (enviar após pagamento)
@@ -123,12 +133,12 @@
 
 ## 📈 Métricas de Sucesso (Performance Alcançada)
 
-| Métrica | Antes | Depois | Melhoria |
-|---------|-------|--------|----------|
-| Admin - Lista produtos | 2000ms | 300ms | **85% ↓** |
-| Admin - Editar produto | 1500ms | 250ms | **83% ↓** |
-| Database queries | 40+ | 5 | **88% ↓** |
-| Cloudinary cleanup | Manual | Automático | **100% confiável** |
+| Métrica                | Antes  | Depois     | Melhoria           |
+| ---------------------- | ------ | ---------- | ------------------ |
+| Admin - Lista produtos | 2000ms | 300ms      | **85% ↓**          |
+| Admin - Editar produto | 1500ms | 250ms      | **83% ↓**          |
+| Database queries       | 40+    | 5          | **88% ↓**          |
+| Cloudinary cleanup     | Manual | Automático | **100% confiável** |
 
 ---
 
@@ -137,6 +147,7 @@
 ### Total encontrado: 45 comentários
 
 **TODOs reais (5):**
+
 - `src/app/api/admin/products/route.ts:112` - Add proper authentication (P2)
 - `src/app/api/admin/products/route.ts:280` - Add proper authentication (P2)
 - `src/app/api/admin/stats/route.ts:70` - Get actual product names (P3)
@@ -154,6 +165,7 @@
 ### Problema: N+1 Queries
 
 **ANTES:**
+
 ```typescript
 const products = await db.select().from(products);
 await Promise.all(products.map(async p => {
@@ -164,15 +176,19 @@ await Promise.all(products.map(async p => {
 ```
 
 **DEPOIS:**
+
 ```typescript
 const productIds = products.map(p => p.id);
-const allFiles = await db.select().from(files).where(inArray(files.productId, productIds));  // 1 query
-const allImages = await db.select().from(productImages).where(inArray(productImages.productId, productIds));  // 1 query
+const allFiles = await db.select().from(files).where(inArray(files.productId, productIds)); // 1 query
+const allImages = await db
+  .select()
+  .from(productImages)
+  .where(inArray(productImages.productId, productIds)); // 1 query
 
 const productsWithData = products.map(p => ({
   ...p,
-  files: allFiles.filter(f => f.productId === p.id),  // In-memory (fast)
-  images: allImages.filter(img => img.productId === p.id)
+  files: allFiles.filter(f => f.productId === p.id), // In-memory (fast)
+  images: allImages.filter(img => img.productId === p.id),
 }));
 // Total: 5 queries
 ```
@@ -216,12 +232,14 @@ const productsWithData = products.map(p => ({
 ### ⚡ COMECE AGORA: SPRINT 1 - Pagamentos
 
 **Por quê?**
+
 1. **Bloqueante de negócio:** Sem pagamento, não pode vender
 2. **Alta prioridade:** Cliente esperando lançamento
 3. **Fundação completa:** Admin e infraestrutura prontos
 4. **Performance otimizada:** Sistema estável e rápido
 
 **Como começar?**
+
 1. Abra `docs/SPRINT_1_ACTION_PLAN.md`
 2. Siga passo a passo (Semana 1 - Dias 1-2)
 3. Crie conta Stripe: https://dashboard.stripe.com/register
@@ -229,6 +247,7 @@ const productsWithData = products.map(p => ({
 5. Instale SDK: `npm install stripe @stripe/stripe-js`
 
 **Primeira tarefa:**
+
 ```bash
 # Criar arquivo de configuração Stripe
 mkdir -p src/lib
@@ -236,6 +255,7 @@ touch src/lib/stripe.ts
 ```
 
 **Conteúdo inicial:**
+
 ```typescript
 import Stripe from 'stripe';
 
@@ -319,6 +339,7 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 5. ✅ Crie primeiro endpoint
 
 **Comando para começar:**
+
 ```bash
 npm install stripe @stripe/stripe-js
 ```

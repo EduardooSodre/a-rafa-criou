@@ -119,7 +119,7 @@ Se ainda houver erro, verifique:
 
 ```typescript
 // No console do navegador (F12)
-console.log(localStorage.getItem('cart'))
+console.log(localStorage.getItem('cart'));
 ```
 
 ### 2. Produtos existem no banco?

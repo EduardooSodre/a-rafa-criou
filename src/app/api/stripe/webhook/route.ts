@@ -16,17 +16,10 @@ export async function POST(req: NextRequest) {
   let event: Stripe.Event;
 
   try {
-    event = stripe.webhooks.constructEvent(
-      body,
-      signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
-    );
+    event = stripe.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET!);
   } catch (err) {
     console.error('❌ Webhook signature verification failed:', err);
-    return Response.json(
-      { error: 'Webhook signature verification failed' },
-      { status: 400 }
-    );
+    return Response.json({ error: 'Webhook signature verification failed' }, { status: 400 });
   }
 
   // Processar evento: payment_intent.succeeded

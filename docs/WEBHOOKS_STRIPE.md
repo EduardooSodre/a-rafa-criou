@@ -253,12 +253,12 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_live_xxx"
 
 Você pode escutar outros eventos além de `payment_intent.succeeded`:
 
-| Evento | Quando usar |
-|--------|-------------|
-| `payment_intent.succeeded` | ✅ Criar pedido (JÁ IMPLEMENTADO) |
-| `payment_intent.payment_failed` | ❌ Notificar cliente sobre falha |
-| `charge.refunded` | 💰 Processar reembolso |
-| `customer.subscription.created` | 📅 Assinaturas recorrentes |
+| Evento                          | Quando usar                       |
+| ------------------------------- | --------------------------------- |
+| `payment_intent.succeeded`      | ✅ Criar pedido (JÁ IMPLEMENTADO) |
+| `payment_intent.payment_failed` | ❌ Notificar cliente sobre falha  |
+| `charge.refunded`               | 💰 Processar reembolso            |
+| `customer.subscription.created` | 📅 Assinaturas recorrentes        |
 
 ---
 

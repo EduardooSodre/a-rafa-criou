@@ -91,6 +91,7 @@
   - [ ] Atualizar contadores (vendas do produto)
 
 **Arquivos a criar:**
+
 - `src/app/api/stripe/create-payment-intent/route.ts`
 - `src/app/api/stripe/webhook/route.ts`
 - `src/app/api/paypal/create-order/route.ts`
@@ -112,10 +113,11 @@
     - `email/download-ready.tsx`
     - `email/order-confirmation.tsx`
   - [ ] API `/api/email/send-download-link`
+
     ```typescript
     import { Resend } from 'resend';
     const resend = new Resend(process.env.RESEND_API_KEY);
-    
+
     await resend.emails.send({
       from: 'vendas@arafacriou.com.br',
       to: customer.email,
@@ -123,6 +125,7 @@
       react: DownloadReadyEmail({ order, downloadLinks }),
     });
     ```
+
   - [ ] Chamar API após pagamento aprovado (webhook)
 
 - [ ] **Área do Cliente (`/conta`)**
@@ -158,22 +161,22 @@
     VALUES (?, ?, ?, ?, ?)
     ```
   - [ ] Contador de downloads:
+
     ```typescript
     const downloadCount = await db
       .select({ count: sql<number>`count(*)` })
       .from(downloads)
-      .where(and(
-        eq(downloads.userId, userId),
-        eq(downloads.fileId, fileId)
-      ));
-    
+      .where(and(eq(downloads.userId, userId), eq(downloads.fileId, fileId)));
+
     if (downloadCount[0].count >= MAX_DOWNLOADS) {
       return { error: 'Limite de downloads atingido' };
     }
     ```
+
   - [ ] Rate limiting (1 download a cada 5 segundos)
 
 **Arquivos a criar:**
+
 - `src/lib/email/resend.ts`
 - `src/email/purchase-confirmation.tsx`
 - `src/email/download-ready.tsx`
@@ -216,9 +219,7 @@
     ```
   - [ ] Recalcular total com desconto
     ```typescript
-    const discount = coupon.type === 'percentage'
-      ? (subtotal * coupon.value) / 100
-      : coupon.value;
+    const discount = coupon.type === 'percentage' ? (subtotal * coupon.value) / 100 : coupon.value;
     const total = subtotal - discount;
     ```
   - [ ] Feedback visual (cupom aplicado/inválido)
@@ -232,6 +233,7 @@
   - [ ] Incrementar contador de uso no cupom
 
 **Arquivos a criar:**
+
 - `src/app/admin/cupons/page.tsx`
 - `src/components/admin/CouponForm.tsx`
 - `src/app/api/admin/coupons/route.ts`
@@ -297,6 +299,7 @@
   - [ ] Limite 4-6 produtos
 
 **Arquivos a atualizar:**
+
 - `src/app/produtos/page.tsx`
 - `src/app/produtos/[slug]/page.tsx`
 - `src/components/product-card.tsx`
@@ -313,6 +316,7 @@
   - [ ] Incluir produtos, categorias, páginas estáticas
 
 - [ ] robots.txt
+
   ```
   User-agent: *
   Allow: /
@@ -381,30 +385,36 @@
 ## 📦 Recursos OPCIONAIS (Backlog)
 
 ### Notificações Avançadas
+
 - WhatsApp (Meta API)
 - SMS (Twilio)
 - Web Push (OneSignal)
 
 ### Afiliação
+
 - CRUD de afiliados
 - Links únicos (UTM tracking)
 - Painel do afiliado
 
 ### CMS Embutido
+
 - Editor TipTap
 - Upload de imagens
 - Versionamento
 
 ### Proteção de PDFs
+
 - Watermark dinâmica
 - Fingerprint invisível
 
 ### i18n Completo
+
 - Traduções completas PT/EN/ES
 - Seletor de idioma
 - Conversor de moeda
 
 ### PWA
+
 - Manifest
 - Service Worker
 - Add to Home
@@ -414,12 +424,14 @@
 ## 🎯 Métricas de Sucesso
 
 ### Performance
+
 - ✅ Admin list: **< 300ms** (antes: 2000ms) - ATINGIDO
 - ✅ Product GET: **< 250ms** (antes: 1500ms) - ATINGIDO
 - 🎯 Checkout: < 2s (incluindo pagamento)
 - 🎯 Home page: < 1s
 
 ### Negócio
+
 - 🎯 100% dos pedidos com e-mail de download
 - 🎯 < 1% de carrinho abandonado no checkout
 - 🎯 0 reclamações de download (links sempre válidos)

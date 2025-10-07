@@ -3,6 +3,7 @@
 ## 🎯 Checklist Rápido
 
 ### ☐ PASSO 1: Criar .env.local
+
 ```bash
 # Copie .env.example para .env.local
 cp .env.example .env.local
@@ -18,12 +19,14 @@ cp .env.example .env.local
    - Secret key: `sk_test_...` (clique "Reveal")
 
 5. **Adicionar ao .env.local:**
+
 ```env
 STRIPE_SECRET_KEY="sk_test_sua_chave_aqui"
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_sua_chave_aqui"
 ```
 
 ### ☐ PASSO 3: Migration (1 min)
+
 ```bash
 npm run db:generate
 npm run db:migrate
@@ -32,6 +35,7 @@ npm run db:migrate
 ### ☐ PASSO 4: Instalar Stripe CLI (1 min)
 
 **Windows:**
+
 ```powershell
 scoop bucket add stripe https://github.com/stripe/scoop-stripe-cli.git
 scoop install stripe
@@ -42,17 +46,20 @@ scoop install stripe
 ### ☐ PASSO 5: Configurar Webhook Local (1 min)
 
 **Terminal 1 - Stripe CLI:**
+
 ```bash
 stripe login
 stripe listen --forward-to localhost:3000/api/stripe/webhook
 ```
 
 Copie o `whsec_...` que aparecer e adicione ao `.env.local`:
+
 ```env
 STRIPE_WEBHOOK_SECRET="whsec_sua_chave_aqui"
 ```
 
 **Terminal 2 - Next.js:**
+
 ```bash
 npm run dev
 ```
@@ -68,6 +75,7 @@ npm run dev
 5. **Clicar:** "Finalizar Pagamento"
 
 ### Resultado Esperado:
+
 - ✅ Redireciona para `/obrigado`
 - ✅ Terminal Stripe CLI mostra: `[200] POST /api/stripe/webhook`
 - ✅ Terminal Next.js mostra: `✅ Pedido criado`
@@ -77,12 +85,12 @@ npm run dev
 
 ## 🚨 Erros Comuns
 
-| Erro | Solução |
-|------|---------|
+| Erro                           | Solução                                       |
+| ------------------------------ | --------------------------------------------- |
 | "STRIPE_SECRET_KEY is not set" | Reinicie `npm run dev` após editar .env.local |
-| "Webhook signature failed" | Copie novo `whsec_...` do terminal Stripe CLI |
-| Migration falha | Verifique `DATABASE_URL` no .env.local |
-| Checkout vazio | Adicione produto ao carrinho primeiro |
+| "Webhook signature failed"     | Copie novo `whsec_...` do terminal Stripe CLI |
+| Migration falha                | Verifique `DATABASE_URL` no .env.local        |
+| Checkout vazio                 | Adicione produto ao carrinho primeiro         |
 
 ---
 

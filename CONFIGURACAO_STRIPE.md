@@ -56,7 +56,6 @@ RESEND_FROM_EMAIL=""
 1. No Dashboard, clique em **Developers** (canto superior direito)
 2. Clique em **API keys** no menu lateral
 3. Você verá duas chaves:
-
    - **Publishable key** (começa com `pk_test_...`)
    - **Secret key** (clique em "Reveal test key" - começa com `sk_test_...`)
 
@@ -81,6 +80,7 @@ npm run db:migrate
 Isso criará o campo `stripePaymentIntentId` na tabela `orders`.
 
 **Se der erro:**
+
 - Verifique se `DATABASE_URL` está correto no `.env.local`
 - Certifique-se de que o banco PostgreSQL está rodando
 
@@ -91,6 +91,7 @@ Isso criará o campo `stripePaymentIntentId` na tabela `orders`.
 ### 4.1. Instalar Stripe CLI
 
 **Windows (PowerShell como Admin):**
+
 ```powershell
 # Usando Scoop
 scoop bucket add stripe https://github.com/stripe/scoop-stripe-cli.git
@@ -158,13 +159,14 @@ npm run dev
 
 Use estes **cartões de teste** fornecidos pelo Stripe:
 
-| Número do Cartão | Resultado |
-|------------------|-----------|
-| `4242 4242 4242 4242` | ✅ **Pagamento aprovado** |
-| `4000 0000 0000 0002` | ❌ Cartão recusado |
+| Número do Cartão      | Resultado                        |
+| --------------------- | -------------------------------- |
+| `4242 4242 4242 4242` | ✅ **Pagamento aprovado**        |
+| `4000 0000 0000 0002` | ❌ Cartão recusado               |
 | `4000 0025 0000 3155` | 🔐 Requer autenticação 3D Secure |
 
 **Outros campos:**
+
 - **Data de validade:** Qualquer data futura (ex: 12/25)
 - **CVC:** Qualquer 3 dígitos (ex: 123)
 - **Nome:** Qualquer nome
@@ -195,11 +197,13 @@ E no terminal do servidor Next.js:
 Abra seu banco de dados e verifique:
 
 **Tabela `orders`:**
+
 - Novo registro com `status = 'completed'`
 - Campo `stripePaymentIntentId` preenchido
 - Campos `total`, `subtotal`, `paymentProvider = 'stripe'`
 
 **Tabela `order_items`:**
+
 - Registros dos itens do pedido vinculados ao `orderId`
 
 ---
@@ -249,6 +253,7 @@ Abra seu banco de dados e verifique:
 ### ❌ Erro: "STRIPE_SECRET_KEY is not set"
 
 **Solução:**
+
 - Verifique se `.env.local` existe na raiz do projeto
 - Confirme que a chave está sem aspas extras
 - Reinicie o servidor: `npm run dev`
@@ -256,13 +261,15 @@ Abra seu banco de dados e verifique:
 ### ❌ Erro: "Invalid API Key provided"
 
 **Solução:**
+
 - Verifique se copiou a chave correta do Dashboard Stripe
-- Certifique-se de que está usando chaves de **Test Mode** (pk_test_ e sk_test_)
+- Certifique-se de que está usando chaves de **Test Mode** (pk*test* e sk*test*)
 - Gere novas chaves se necessário
 
 ### ❌ Erro: "Webhook signature verification failed"
 
 **Solução:**
+
 - Confirme que `STRIPE_WEBHOOK_SECRET` está correto no `.env.local`
 - Verifique se o Stripe CLI está rodando: `stripe listen --forward-to localhost:3000/api/stripe/webhook`
 - Copie o novo webhook secret toda vez que reiniciar o Stripe CLI
@@ -270,6 +277,7 @@ Abra seu banco de dados e verifique:
 ### ❌ Pedido não é criado após pagamento
 
 **Solução:**
+
 - Verifique logs do Stripe CLI (terminal onde está rodando `stripe listen`)
 - Verifique logs do servidor Next.js (busque por "✅ Pedido criado" ou erros)
 - Confirme que migration do banco foi executada
@@ -278,6 +286,7 @@ Abra seu banco de dados e verifique:
 ### ❌ Erro: "Cannot read properties of undefined (reading 'id')"
 
 **Solução:**
+
 - Verifique se produtos existem no banco de dados
 - Confirme que `productId` e `variationId` do carrinho são válidos
 - Execute seed de produtos: `npm run seed:products` (se disponível)
@@ -298,6 +307,7 @@ Abra seu banco de dados e verifique:
 ### Logs Stripe CLI
 
 No terminal onde `stripe listen` está rodando:
+
 - Verde `[200]`: Webhook recebido e processado com sucesso
 - Vermelho `[500]`: Erro ao processar webhook
 

@@ -71,12 +71,12 @@ Faça um pagamento de teste com o cartão `4242 4242 4242 4242`.
 
 ## 📚 Guias Disponíveis
 
-| Arquivo | Quando Usar |
-|---------|-------------|
-| `SETUP_RAPIDO_STRIPE.md` | ⚡ **COMECE AQUI** - Checklist rápido de 5 min |
-| `CONFIGURACAO_STRIPE.md` | 📖 Guia completo com troubleshooting |
-| `docs/WEBHOOKS_STRIPE.md` | 🔧 Tudo sobre webhooks (dev + produção) |
-| `.env.example` | 📋 Template de variáveis de ambiente |
+| Arquivo                   | Quando Usar                                    |
+| ------------------------- | ---------------------------------------------- |
+| `SETUP_RAPIDO_STRIPE.md`  | ⚡ **COMECE AQUI** - Checklist rápido de 5 min |
+| `CONFIGURACAO_STRIPE.md`  | 📖 Guia completo com troubleshooting           |
+| `docs/WEBHOOKS_STRIPE.md` | 🔧 Tudo sobre webhooks (dev + produção)        |
+| `.env.example`            | 📋 Template de variáveis de ambiente           |
 
 ---
 
@@ -129,10 +129,10 @@ return <div>Checkout - Em desenvolvimento</div>;
 
 ## 🧪 Cartões de Teste
 
-| Número | Resultado |
-|--------|-----------|
-| `4242 4242 4242 4242` | ✅ Sucesso |
-| `4000 0000 0000 0002` | ❌ Recusado |
+| Número                | Resultado           |
+| --------------------- | ------------------- |
+| `4242 4242 4242 4242` | ✅ Sucesso          |
+| `4000 0000 0000 0002` | ❌ Recusado         |
 | `4000 0025 0000 3155` | 🔐 Requer 3D Secure |
 
 **Outros campos:** Qualquer valor futuro funciona (12/25, 123, etc.)
@@ -181,14 +181,14 @@ return <div>Checkout - Em desenvolvimento</div>;
 
 ### Desenvolvimento
 
-- ✅ Use chaves de **TEST** (pk_test_, sk_test_)
+- ✅ Use chaves de **TEST** (pk*test*, sk*test*)
 - ✅ Mantenha Stripe CLI rodando durante testes
 - ✅ Reinicie Next.js após mudar .env.local
 - ✅ Verifique logs em ambos terminais
 
 ### Produção (quando fazer deploy)
 
-- 🔄 Troque para chaves **LIVE** (pk_live_, sk_live_)
+- 🔄 Troque para chaves **LIVE** (pk*live*, sk*live*)
 - 🔄 Configure webhook no Dashboard Stripe
 - 🔄 Adicione domínio verificado
 - 🔄 Teste com cartões reais (valores baixos)

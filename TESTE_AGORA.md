@@ -11,11 +11,13 @@ O erro no checkout foi **resolvido**. A API estava exigindo email obrigatório, 
 ### 1️⃣ Certifique-se que o Stripe CLI está rodando
 
 **Terminal "stripe":**
+
 ```bash
 stripe listen --forward-to localhost:3000/api/stripe/webhook
 ```
 
 Você deve ver:
+
 ```
 > Ready! Your webhook signing secret is whsec_...
 ```
@@ -25,11 +27,13 @@ Você deve ver:
 ### 2️⃣ Inicie o servidor Next.js
 
 **Terminal "node":**
+
 ```bash
 npm run dev
 ```
 
 Aguarde até ver:
+
 ```
 ✓ Ready in Xms
 ○ Local:        http://localhost:3000
@@ -38,12 +42,14 @@ Aguarde até ver:
 ### 3️⃣ Teste o checkout!
 
 **Opção A - Se já tem produtos no carrinho:**
+
 1. Acesse: http://localhost:3000/checkout
 2. Use cartão: `4242 4242 4242 4242`
 3. Data: `12/25` | CVC: `123`
 4. Clique "Finalizar Pagamento"
 
 **Opção B - Adicionar produtos primeiro:**
+
 1. Acesse: http://localhost:3000/produtos
 2. Clique em um produto
 3. Adicione ao carrinho
@@ -91,6 +97,7 @@ Webhook recebido: payment_intent.succeeded
 **Causa:** Carrinho tem produtos que não existem no banco.
 
 **Solução:**
+
 ```bash
 # Limpar carrinho
 # No console do navegador (F12):
@@ -103,6 +110,7 @@ localStorage.clear()
 **Causa:** Formato incorreto dos dados.
 
 **Solução:**
+
 1. Verifique logs do Next.js para ver detalhes
 2. Confirme que produtos no carrinho têm UUIDs válidos
 
@@ -111,6 +119,7 @@ localStorage.clear()
 **Causa:** Webhook secret incorreto.
 
 **Solução:**
+
 1. Copie o `whsec_...` do terminal Stripe CLI
 2. Cole no `.env.local`:
    ```env
@@ -131,6 +140,7 @@ npm run db:studio
 Abra: http://localhost:4983
 
 Vá para tabela `orders` e verifique:
+
 - Novos pedidos com `payment_status = 'completed'`
 - Campo `stripe_payment_intent_id` preenchido
 

@@ -20,10 +20,10 @@ Todos os arquivos necessários para integração Stripe foram criados:
 2. Crie uma conta Stripe (modo test)
 3. No Dashboard, vá em **Developers → API keys**
 4. Copie as chaves:
-   - **Publishable key** (pk_test_...)
-   - **Secret key** (sk_test_...)
+   - **Publishable key** (pk*test*...)
+   - **Secret key** (sk*test*...)
 
-5. Adicione ao [`.env.local`](.env.local ):
+5. Adicione ao [`.env.local`](.env.local):
 
 ```env
 STRIPE_SECRET_KEY=sk_test_xxxxx
@@ -53,7 +53,7 @@ stripe login
 stripe listen --forward-to localhost:3000/api/stripe/webhook
 ```
 
-Copie o **webhook secret** (`whsec_...`) exibido e adicione ao [`.env.local`](.env.local ):
+Copie o **webhook secret** (`whsec_...`) exibido e adicione ao [`.env.local`](.env.local):
 
 ```env
 STRIPE_WEBHOOK_SECRET=whsec_xxxxx
@@ -80,10 +80,10 @@ npm run dev
 
 ## 🧪 Cartões de Teste
 
-| Cartão | Resultado |
-|--------|-----------|
-| `4242 4242 4242 4242` | ✅ Pagamento aprovado |
-| `4000 0000 0000 0002` | ❌ Pagamento declinado |
+| Cartão                | Resultado                          |
+| --------------------- | ---------------------------------- |
+| `4242 4242 4242 4242` | ✅ Pagamento aprovado              |
+| `4000 0000 0000 0002` | ❌ Pagamento declinado             |
 | `4000 0025 0000 3155` | 🔐 Requer autenticação (3D Secure) |
 
 ## 🔧 Troubleshooting

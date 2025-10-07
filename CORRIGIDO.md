@@ -11,16 +11,19 @@
 ## TESTE AGORA (2 comandos)
 
 ### Terminal 1 - Stripe
+
 ```bash
 stripe listen --forward-to localhost:3000/api/stripe/webhook
 ```
 
 ### Terminal 2 - Next.js
+
 ```bash
 npm run dev
 ```
 
 ### Navegador
+
 ```
 http://localhost:3000/checkout
 ```

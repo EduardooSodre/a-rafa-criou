@@ -32,6 +32,7 @@ E-commerce moderno para venda de produtos digitais (PDFs) com foco em acessibili
 ## ✅ Status de Implementação
 
 ### 🟢 **1. FUNDAÇÃO** (COMPLETO - 100%)
+
 - ✅ Next.js 15 + TypeScript + Tailwind configurado
 - ✅ Shadcn UI com cores customizadas (#FED466, #FD9555, #F4F4F4)
 - ✅ Drizzle ORM + PostgreSQL funcionando
@@ -40,6 +41,7 @@ E-commerce moderno para venda de produtos digitais (PDFs) com foco em acessibili
 - ✅ Variáveis de ambiente documentadas (`.env.example`)
 
 ### 🟢 **2. BANCO DE DADOS** (COMPLETO - 100%)
+
 - ✅ **Auth:** `users`, `accounts`, `sessions`, `verification_tokens`
 - ✅ **Produtos:** `products`, `product_variations`, `product_images` (Cloudinary), `files`, `categories`
 - ✅ **Atributos:** `attributes`, `attribute_values`, `product_attributes`, `variation_attribute_values`
@@ -52,6 +54,7 @@ E-commerce moderno para venda de produtos digitais (PDFs) com foco em acessibili
 - ❌ **Traduções:** `product_translations` (FALTA)
 
 ### 🟡 **3. AUTENTICAÇÃO** (PARCIAL - 60%)
+
 - ✅ Auth.js configurado e funcional
 - ✅ Login com Credentials (email + senha)
 - ✅ Registro de usuários
@@ -63,6 +66,7 @@ E-commerce moderno para venda de produtos digitais (PDFs) com foco em acessibili
 - ❌ Rehash automático de senhas legadas (FALTA)
 
 ### 🟢 **4. PAINEL ADMINISTRATIVO** (COMPLETO - 100%)
+
 - ✅ Layout admin (`/admin`)
 - ✅ Dashboard com estatísticas
 - ✅ **Produtos:**
@@ -87,6 +91,7 @@ E-commerce moderno para venda de produtos digitais (PDFs) com foco em acessibili
 - ❌ **Relatórios:** Analytics e vendas (FALTA)
 
 ### 🟢 **5. CLOUDINARY (Otimização de Imagens)** (COMPLETO - 100%)
+
 - ✅ Migração completa de base64 → Cloudinary
 - ✅ Upload otimizado (max 1200x1200, quality auto, WebP/AVIF)
 - ✅ API `/api/cloudinary/upload` e `/api/cloudinary/delete`
@@ -98,6 +103,7 @@ E-commerce moderno para venda de produtos digitais (PDFs) com foco em acessibili
 - ✅ Performance: Imagens carregam **instantaneamente** via CDN
 
 ### 🟡 **6. CATÁLOGO E PRODUTOS** (PARCIAL - 40%)
+
 - ✅ Estrutura `/produtos` criada
 - ✅ Estrutura `/produtos/[slug]` criada
 - ✅ API de produtos **OTIMIZADA** funcionando
@@ -110,6 +116,7 @@ E-commerce moderno para venda de produtos digitais (PDFs) com foco em acessibili
 - ❌ Breadcrumbs e navegação (FALTA)
 
 ### � **7. CARRINHO E CHECKOUT - STRIPE** (COMPLETO - 100%) ✨ **NOVO**
+
 - ✅ Context API para carrinho
 - ✅ localStorage para persistência
 - ✅ Página `/carrinho`
@@ -137,6 +144,7 @@ E-commerce moderno para venda de produtos digitais (PDFs) com foco em acessibili
 - ❌ E-mail pós-compra (SPRINT 1.2)
 
 ### 🟡 **7. CLOUDFLARE R2 (Storage)** (PARCIAL - 70%)
+
 - ✅ Configuração R2 (variáveis `.env`)
 - ✅ Upload de PDFs (`/api/r2/upload`)
 - ✅ Delete de arquivos (`/api/r2/delete`)
@@ -148,6 +156,7 @@ E-commerce moderno para venda de produtos digitais (PDFs) com foco em acessibili
 - ❌ Proteção: watermark, limite de downloads, logs (FALTA)
 
 ### 🔴 **8. SISTEMA DE CUPONS** (NÃO INICIADO - 0%)
+
 - ✅ Estrutura no banco criada
 - ❌ CRUD no painel admin (FALTA)
 - ❌ Validação backend no checkout (FALTA)
@@ -156,6 +165,7 @@ E-commerce moderno para venda de produtos digitais (PDFs) com foco em acessibili
 - ❌ Limites de uso e datas (FALTA)
 
 ### 🔴 **9. CMS EMBUTIDO** (NÃO INICIADO - 0%)
+
 - ✅ Estrutura no banco criada
 - ❌ Editor (TipTap/Editor.js) (FALTA)
 - ❌ Upload de imagens (FALTA)
@@ -164,6 +174,7 @@ E-commerce moderno para venda de produtos digitais (PDFs) com foco em acessibili
 - ❌ Versionamento de conteúdo (FALTA)
 
 ### 🔴 **10. NOTIFICAÇÕES EXTERNAS** (NÃO INICIADO - 0%)
+
 - ❌ Tabelas `notifications`, `notification_settings` (FALTA)
 - ❌ E-mail transacional (Resend) (FALTA)
 - ❌ WhatsApp (API Meta) opcional (FALTA)
@@ -173,6 +184,7 @@ E-commerce moderno para venda de produtos digitais (PDFs) com foco em acessibili
 - ❌ DND (Não Perturbe) (FALTA)
 
 ### 🔴 **11. SISTEMA DE AFILIAÇÃO** (NÃO INICIADO - 0%)
+
 - ❌ Tabelas `affiliates`, `affiliate_links`, `affiliate_commissions` (FALTA)
 - ❌ CRUD de afiliados (FALTA)
 - ❌ Geração de links únicos (FALTA)
@@ -181,6 +193,7 @@ E-commerce moderno para venda de produtos digitais (PDFs) com foco em acessibili
 - ❌ Rotina de pagamento (FALTA)
 
 ### 🔴 **12. MIGRAÇÃO WOOCOMMERCE** (NÃO INICIADO - 0%)
+
 - ❌ Scripts de export (WooCommerce → JSON/CSV) (FALTA)
 - ❌ Scripts de import (JSON/CSV → PostgreSQL) (FALTA)
 - ❌ Validação de senhas phpass (FALTA)
@@ -190,6 +203,7 @@ E-commerce moderno para venda de produtos digitais (PDFs) com foco em acessibili
 - ❌ Relatório de pendências (FALTA)
 
 ### 🔴 **13. SEO E REDIRECIONAMENTOS** (NÃO INICIADO - 0%)
+
 - ❌ Middleware 301 via `url_map` (FALTA)
 - ❌ next-sitemap (FALTA)
 - ❌ robots.txt (FALTA)
@@ -198,12 +212,14 @@ E-commerce moderno para venda de produtos digitais (PDFs) com foco em acessibili
 - ❌ Schema.org (JSON-LD) (FALTA)
 
 ### 🔴 **14. PROTEÇÃO DE PDFs** (NÃO INICIADO - 0%)
+
 - ❌ Watermark dinâmica (e-mail + data) (FALTA)
 - ❌ Limite de downloads por cliente (FALTA)
 - ❌ Logs detalhados em `downloads` (FALTA)
 - ❌ Fingerprint invisível (metadata) (FALTA)
 
 ### � **15. i18n (Interface)** (PARCIAL - 50%)
+
 - ✅ react-i18next configurado
 - ✅ Middleware de detecção de idioma
 - ✅ Arquivos de tradução PT/EN/ES criados
@@ -214,18 +230,21 @@ E-commerce moderno para venda de produtos digitais (PDFs) com foco em acessibili
 - ❌ Conversor de moeda (BRL/USD/EUR) (FALTA)
 
 ### 🔴 **16. PWA** (NÃO INICIADO - 0%)
+
 - ❌ Manifest (FALTA)
 - ❌ Service Worker (FALTA)
 - ❌ Add to Home (iOS/Android) (FALTA)
 - ❌ Push Notifications (FALTA)
 
 ### 🔴 **17. TESTES E QUALIDADE** (NÃO INICIADO - 0%)
+
 - ❌ Jest (unit tests) (FALTA)
 - ❌ Cypress (e2e tests) (FALTA)
 - ❌ Testes de integração (FALTA)
 - ❌ Coverage reports (FALTA)
 
 ### 🔴 **18. DEPLOY E INFRA** (NÃO INICIADO - 0%)
+
 - ❌ Vercel/Netlify configurado (FALTA)
 - ❌ CI/CD (GitHub Actions) (FALTA)
 - ❌ Staging (`beta.`) (FALTA)
@@ -492,6 +511,7 @@ E-commerce moderno para venda de produtos digitais (PDFs) com foco em acessibili
 ## 🚀 Quick Start
 
 ### 1. Instalação
+
 ```bash
 git clone <repository-url>
 cd a-rafa-criou
@@ -499,12 +519,14 @@ npm install
 ```
 
 ### 2. Configuração do Ambiente
+
 ```bash
 cp .env.example .env.local
 # Configure as variáveis necessárias no .env.local
 ```
 
 ### 3. Banco de Dados
+
 ```bash
 # Configure seu PostgreSQL e atualize DATABASE_URL no .env.local
 npm run db:generate      # Gerar migrations
@@ -513,9 +535,11 @@ npm run db:studio        # (Opcional) Drizzle Studio
 ```
 
 ### 4. Desenvolvimento
+
 ```bash
 npm run dev              # Servidor de desenvolvimento
 ```
+
 Acesse [http://localhost:3000](http://localhost:3000)
 
 ---
@@ -586,14 +610,17 @@ src/
 ## 🔐 Segurança
 
 ### Variáveis Sensíveis
+
 Todas as variáveis sensíveis estão em `.env.example`. **Nunca commite `.env.local`**.
 
 ### Rate Limiting (Planejado)
+
 - Login: 5 tentativas/minuto
 - Downloads: Configurável por usuário
 - APIs: 60 requests/minuto
 
 ### Proteção de PDFs (Planejado)
+
 - URLs assinadas (TTL 15 min)
 - Watermark dinâmica
 - Limite de re-downloads
@@ -604,11 +631,13 @@ Todas as variáveis sensíveis estão em `.env.example`. **Nunca commite `.env.l
 ## 🌍 Localização (Planejado)
 
 ### Moedas
+
 - BRL (Real) - Padrão
 - USD (Dólar)
 - EUR (Euro)
 
 ### Idiomas (Interface)
+
 - PT (Português) - Padrão
 - EN (Inglês)
 - ES (Espanhol)
