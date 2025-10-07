@@ -2,8 +2,12 @@ import { NextRequest } from 'next/server';
 import Stripe from 'stripe';
 import { stripe } from '@/lib/stripe';
 import { db } from '@/lib/db';
-import { orders, orderItems } from '@/lib/db/schema';
+import { orders, orderItems, products, productVariations, files } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+import { resend, FROM_EMAIL } from '@/lib/email';
+import { PurchaseConfirmationEmail } from '@/emails/purchase-confirmation';
+import { render } from '@react-email/render';
+import { getR2SignedUrl } from '@/lib/r2-utils';
 
 export async function POST(req: NextRequest) {
   const body = await req.text();
@@ -42,13 +46,15 @@ export async function POST(req: NextRequest) {
       // Parsear metadata
       const items = JSON.parse(paymentIntent.metadata.items || '[]');
       const userId = paymentIntent.metadata.userId || null;
+      const customerEmail = paymentIntent.receipt_email || paymentIntent.metadata.email || '';
+      const customerName = paymentIntent.metadata.userName || 'Cliente';
 
       // Criar pedido
       const [order] = await db
         .insert(orders)
         .values({
           userId,
-          email: paymentIntent.receipt_email || '',
+          email: customerEmail,
           status: 'completed',
           subtotal: (paymentIntent.amount / 100).toString(),
           total: (paymentIntent.amount / 100).toString(),
@@ -60,21 +66,104 @@ export async function POST(req: NextRequest) {
         })
         .returning();
 
-      // Criar itens do pedido
+      // Criar itens do pedido com busca de produtos e variações
+      const orderItemsData = [];
       for (const item of items) {
-        const itemPrice = 0; // TODO: Buscar preço real do produto
-        await db.insert(orderItems).values({
+        // Buscar dados do produto e variação
+        const [productData] = await db
+          .select({
+            productId: products.id,
+            productName: products.name,
+            variationId: productVariations.id,
+            variationName: productVariations.name,
+            price: productVariations.price,
+          })
+          .from(products)
+          .leftJoin(productVariations, eq(productVariations.productId, products.id))
+          .where(eq(products.id, item.productId))
+          .limit(1);
+
+        if (!productData || !productData.price) continue;
+
+        const itemPrice = parseFloat(productData.price);
+        const itemTotal = itemPrice * item.quantity;
+
+        const [createdItem] = await db.insert(orderItems).values({
           orderId: order.id,
           productId: item.productId,
           variationId: item.variationId || null,
-          name: 'Produto', // TODO: Buscar nome real
+          name: productData.productName || 'Produto',
           quantity: item.quantity,
-          price: itemPrice.toString(),
-          total: (itemPrice * item.quantity).toString(),
+          price: productData.price,
+          total: itemTotal.toString(),
+        }).returning();
+
+        orderItemsData.push({
+          id: createdItem.id,
+          productName: productData.productName || 'Produto',
+          variationName: productData.variationName || '',
+          price: itemPrice,
+          quantity: item.quantity,
+          variationId: item.variationId,
         });
       }
 
       console.log('✅ Order created:', order.id);
+
+      // 🚀 ENVIAR E-MAIL DE CONFIRMAÇÃO
+      if (customerEmail) {
+        try {
+          // Gerar URLs assinadas para cada produto
+          const productsWithDownloadUrls = await Promise.all(
+            orderItemsData.map(async (item) => {
+              // Buscar arquivo da variação
+              const [fileData] = await db
+                .select({
+                  filePath: files.path,
+                })
+                .from(files)
+                .where(eq(files.variationId, item.variationId))
+                .limit(1);
+
+              let downloadUrl = '';
+              if (fileData?.filePath) {
+                // Gerar URL assinada com 15 minutos de validade
+                downloadUrl = await getR2SignedUrl(fileData.filePath, 15 * 60);
+              }
+
+              return {
+                name: item.productName,
+                variationName: item.variationName || undefined,
+                price: item.price,
+                downloadUrl,
+              };
+            })
+          );
+
+          // Renderizar e enviar e-mail
+          const emailHtml = await render(
+            PurchaseConfirmationEmail({
+              customerName,
+              orderId: order.id,
+              orderDate: new Date().toLocaleDateString('pt-BR'),
+              products: productsWithDownloadUrls,
+              totalAmount: parseFloat(order.total),
+            })
+          );
+
+          await resend.emails.send({
+            from: FROM_EMAIL,
+            to: customerEmail,
+            subject: `✅ Pedido Confirmado #${order.id.slice(0, 8)} - A Rafa Criou`,
+            html: emailHtml,
+          });
+
+          console.log('📧 E-mail enviado para:', customerEmail);
+        } catch (emailError) {
+          // Não bloquear o webhook se o e-mail falhar
+          console.error('⚠️ Erro ao enviar e-mail (pedido criado com sucesso):', emailError);
+        }
+      }
 
       // TODO: Enviar e-mail de confirmação (próxima etapa - SPRINT 1.2)
     } catch (error) {
