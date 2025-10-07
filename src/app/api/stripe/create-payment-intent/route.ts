@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { stripe } from '@/lib/stripe';
 import { db } from '@/lib/db';
-import { products } from '@/lib/db/schema';
+import { products, productVariations } from '@/lib/db/schema';
 import { inArray } from 'drizzle-orm';
 
 const createPaymentIntentSchema = z.object({
@@ -30,18 +30,65 @@ export async function POST(req: NextRequest) {
       return Response.json({ error: 'Um ou mais produtos não encontrados' }, { status: 400 });
     }
 
-    // 2. Calcular total REAL (preços do banco)
+    // 2. Buscar variações (se houver)
+    const variationIds = items
+      .map(item => item.variationId)
+      .filter((id): id is string => id !== undefined);
+
+    const dbVariations = variationIds.length > 0
+      ? await db.select().from(productVariations).where(inArray(productVariations.id, variationIds))
+      : [];
+
+    // 3. Calcular total REAL (preços do banco)
     let total = 0;
+    const calculationDetails: Array<{ name: string; price: number; quantity: number }> = [];
+
     for (const item of items) {
-      const product = dbProducts.find(p => p.id === item.productId);
-      if (!product) {
-        return Response.json(
-          { error: `Produto ${item.productId} não encontrado` },
-          { status: 400 }
-        );
+      let itemPrice = 0;
+      let itemName = '';
+
+      if (item.variationId) {
+        // Se tem variação, usar preço da variação
+        const variation = dbVariations.find(v => v.id === item.variationId);
+        if (!variation) {
+          return Response.json(
+            { error: `Variação ${item.variationId} não encontrada` },
+            { status: 400 }
+          );
+        }
+        itemPrice = Number(variation.price);
+        
+        const product = dbProducts.find(p => p.id === item.productId);
+        itemName = `${product?.name || 'Produto'} - ${variation.name}`;
+      } else {
+        // Se não tem variação, usar preço do produto
+        const product = dbProducts.find(p => p.id === item.productId);
+        if (!product) {
+          return Response.json(
+            { error: `Produto ${item.productId} não encontrado` },
+            { status: 400 }
+          );
+        }
+        itemPrice = Number(product.price);
+        itemName = product.name;
       }
-      total += Number(product.price) * item.quantity;
+
+      const itemTotal = itemPrice * item.quantity;
+      total += itemTotal;
+
+      calculationDetails.push({
+        name: itemName,
+        price: itemPrice,
+        quantity: item.quantity,
+      });
     }
+
+    // Log para debug (ajuda a identificar problemas)
+    console.log('💰 Cálculo de preços:', {
+      items: calculationDetails,
+      total: total.toFixed(2),
+      totalCentavos: Math.round(total * 100),
+    });
 
     if (total <= 0) {
       return Response.json({ error: 'Total inválido' }, { status: 400 });
