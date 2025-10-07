@@ -1,40 +1,168 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { CheckCircle, Download, Mail, FileText, Star, ArrowRight } from 'lucide-react'
+import { CheckCircle, Download, Mail, FileText, Star, ArrowRight, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 
+interface OrderItem {
+    id: string
+    name: string
+    price: string
+    quantity: number
+    total: string
+    variationName?: string | null
+    productSlug?: string | null
+}
+
+interface OrderData {
+    order: {
+        id: string
+        email: string
+        status: string
+        paymentStatus: string | null
+        subtotal: string
+        discountAmount: string | null
+        total: string
+        currency: string
+        paymentProvider: string | null
+        paidAt: Date | null
+        createdAt: Date
+    }
+    items: OrderItem[]
+}
+
 export default function ObrigadoPage() {
-    const [orderData] = useState({
-        orderId: '#ORD-2024-001',
-        customerName: 'Cliente',
-        customerEmail: 'cliente@exemplo.com',
-        items: [
-            {
-                id: '1',
-                name: 'E-book: JavaScript Moderno',
-                variationName: 'PDF + Códigos de Exemplo',
-                downloadUrl: '#',
-                price: 39.90
-            }
-        ],
-        total: 39.90,
-        paymentMethod: 'PIX',
-        createdAt: new Date().toLocaleDateString('pt-BR')
-    })
+    const searchParams = useSearchParams()
+    const paymentIntent = searchParams.get('payment_intent')
+    
+    const [orderData, setOrderData] = useState<OrderData | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
+    const [retryCount, setRetryCount] = useState(0)
 
     useEffect(() => {
-        // Scroll to top when page loads (apenas no cliente)
+        // Scroll to top when page loads
         if (typeof window !== 'undefined') {
             window.scrollTo(0, 0)
         }
-    }, [])
 
-    const formatPrice = (price: number) => {
-        return `R$ ${price.toFixed(2).replace('.', ',')}`
+        // Buscar dados do pedido com retry automático
+        const fetchOrder = async (attempt = 1, maxRetries = 5) => {
+            if (!paymentIntent) {
+                setError('ID do pagamento não encontrado')
+                setIsLoading(false)
+                return
+            }
+
+            try {
+                console.log(`🔍 Tentativa ${attempt}/${maxRetries} - Buscando pedido...`);
+                setRetryCount(attempt);
+                
+                const response = await fetch(`/api/orders/by-payment-intent?payment_intent=${paymentIntent}`)
+                
+                if (response.ok) {
+                    const data = await response.json()
+                    setOrderData(data)
+                    setIsLoading(false)
+                    console.log('✅ Pedido encontrado!', data);
+                    return // Sucesso!
+                }
+                
+                // Se não encontrou e ainda tem tentativas
+                if (attempt < maxRetries) {
+                    console.log(`⏳ Pedido não encontrado, aguardando webhook... (tentativa ${attempt}/${maxRetries})`);
+                    // Aguardar 2 segundos e tentar novamente
+                    setTimeout(() => {
+                        fetchOrder(attempt + 1, maxRetries)
+                    }, 2000)
+                    return
+                }
+                
+                // Esgotou todas tentativas
+                throw new Error('Pedido ainda está sendo processado')
+                
+            } catch (err) {
+                console.error('Erro ao buscar pedido:', err)
+                
+                if (attempt < maxRetries) {
+                    // Ainda tem tentativas, aguardar e tentar novamente
+                    setTimeout(() => {
+                        fetchOrder(attempt + 1, maxRetries)
+                    }, 2000)
+                } else {
+                    // Esgotou tentativas, mostrar erro
+                    setError(
+                        'Seu pedido está sendo processado. ' +
+                        'Por favor, recarregue esta página em alguns segundos ou ' +
+                        'verifique seu email para confirmação.'
+                    )
+                    setIsLoading(false)
+                }
+            }
+        }
+
+        fetchOrder()
+    }, [paymentIntent])
+
+    const formatPrice = (price: string | number) => {
+        const numPrice = typeof price === 'string' ? parseFloat(price) : price
+        return `R$ ${numPrice.toFixed(2).replace('.', ',')}`
+    }
+
+    const formatDate = (date: Date | string) => {
+        return new Date(date).toLocaleDateString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        })
+    }
+
+    // Estados de loading e erro
+    if (isLoading) {
+        return (
+            <div className="container mx-auto px-4 py-8">
+                <div className="max-w-2xl mx-auto text-center">
+                    <Loader2 className="w-12 h-12 text-[#FED466] mx-auto mb-4 animate-spin" />
+                    <h2 className="text-xl font-semibold mb-2">
+                        {retryCount > 1 ? 'Aguardando confirmação do pagamento...' : 'Carregando dados do pedido...'}
+                    </h2>
+                    {retryCount > 1 && (
+                        <p className="text-gray-600 text-sm">
+                            Tentativa {retryCount}/5 - O webhook pode levar alguns segundos para processar.
+                        </p>
+                    )}
+                </div>
+            </div>
+        )
+    }
+
+    if (error || !orderData) {
+        return (
+            <div className="container mx-auto px-4 py-8">
+                <div className="max-w-2xl mx-auto text-center">
+                    <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <FileText className="w-8 h-8" />
+                    </div>
+                    <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                        Pedido não encontrado
+                    </h1>
+                    <p className="text-gray-600 mb-6">
+                        {error || 'Não foi possível carregar os dados do seu pedido.'}
+                    </p>
+                    <Link href="/produtos">
+                        <Button>
+                            Voltar para Produtos
+                        </Button>
+                    </Link>
+                </div>
+            </div>
+        )
     }
 
     return (
@@ -57,26 +185,34 @@ export default function ObrigadoPage() {
                         <CardTitle className="flex items-center gap-2">
                             <FileText className="w-5 h-5" />
                             Detalhes do Pedido
-                            <Badge variant="outline">{orderData.orderId}</Badge>
+                            <Badge variant="outline">#{orderData.order.id.slice(0, 8).toUpperCase()}</Badge>
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-4 text-sm">
                             <div>
                                 <span className="text-gray-600">Data:</span>
-                                <div className="font-medium">{orderData.createdAt}</div>
+                                <div className="font-medium">
+                                    {formatDate(orderData.order.createdAt)}
+                                </div>
                             </div>
                             <div>
                                 <span className="text-gray-600">Pagamento:</span>
-                                <div className="font-medium">{orderData.paymentMethod}</div>
+                                <div className="font-medium">
+                                    {orderData.order.paymentProvider === 'stripe' ? 'Cartão de Crédito' : orderData.order.paymentProvider?.toUpperCase()}
+                                </div>
                             </div>
                             <div>
                                 <span className="text-gray-600">Total:</span>
-                                <div className="font-semibold text-primary">{formatPrice(orderData.total)}</div>
+                                <div className="font-semibold text-[#FD9555]">
+                                    {formatPrice(orderData.order.total)}
+                                </div>
                             </div>
                             <div>
                                 <span className="text-gray-600">Status:</span>
-                                <Badge className="bg-green-100 text-green-800">Aprovado</Badge>
+                                <Badge className="bg-green-100 text-green-800">
+                                    {orderData.order.status === 'completed' ? 'Aprovado' : orderData.order.status}
+                                </Badge>
                             </div>
                         </div>
                     </CardContent>
@@ -87,7 +223,7 @@ export default function ObrigadoPage() {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Download className="w-5 h-5" />
-                            Seus Downloads
+                            Seus Produtos ({orderData.items.length})
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
@@ -98,12 +234,14 @@ export default function ObrigadoPage() {
                             >
                                 <div className="flex-1">
                                     <h3 className="font-medium text-gray-900">{item.name}</h3>
-                                    <p className="text-sm text-gray-600">{item.variationName}</p>
+                                    {item.variationName && (
+                                        <p className="text-sm text-gray-600">{item.variationName}</p>
+                                    )}
                                     <p className="text-xs text-gray-500 mt-1">
-                                        Preço: {formatPrice(item.price)}
+                                        {item.quantity}x {formatPrice(item.price)} = {formatPrice(item.total)}
                                     </p>
                                 </div>
-                                <Button className="bg-primary hover:bg-secondary text-black">
+                                <Button className="bg-[#FED466] hover:bg-[#FED466]/90 text-black">
                                     <Download className="w-4 h-4 mr-2" />
                                     Download
                                 </Button>
@@ -118,7 +256,7 @@ export default function ObrigadoPage() {
                                         Links enviados por e-mail
                                     </p>
                                     <p className="text-blue-700">
-                                        Também enviamos os links de download para {orderData.customerEmail}.
+                                        Enviamos os links de download para <strong>{orderData.order.email}</strong>.
                                         Verifique sua caixa de entrada e spam.
                                     </p>
                                 </div>
