@@ -164,6 +164,7 @@ export const orders = pgTable('orders', {
   paymentProvider: varchar('payment_provider', { length: 50 }), // stripe, paypal, pix
   paymentId: varchar('payment_id', { length: 255 }), // ID do pagamento no provider
   paymentStatus: varchar('payment_status', { length: 50 }),
+  stripePaymentIntentId: varchar('stripe_payment_intent_id', { length: 255 }).unique(), // Para idempotência
   paidAt: timestamp('paid_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
