@@ -8,9 +8,9 @@ import { getR2SignedUrl } from '@/lib/r2-utils';
 
 /**
  * POST /api/download/generate-link
- * 
+ *
  * Gera URL assinada temporária (15min TTL) para download de PDF
- * 
+ *
  * Segurança:
  * - Verifica autenticação do usuário
  * - Valida propriedade do pedido
@@ -23,10 +23,7 @@ export async function POST(req: NextRequest) {
     // 1. Verificar autenticação
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Não autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Não autenticado' }, { status: 401 });
     }
 
     // 2. Validar dados da requisição
@@ -34,10 +31,7 @@ export async function POST(req: NextRequest) {
     const { orderItemId } = body;
 
     if (!orderItemId) {
-      return NextResponse.json(
-        { error: 'orderItemId é obrigatório' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'orderItemId é obrigatório' }, { status: 400 });
     }
 
     // 3. Buscar item do pedido com verificação de propriedade
@@ -67,10 +61,7 @@ export async function POST(req: NextRequest) {
 
     // 4. Validações
     if (!orderItem) {
-      return NextResponse.json(
-        { error: 'Item não encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Item não encontrado' }, { status: 404 });
     }
 
     // Verificar propriedade
@@ -83,10 +74,7 @@ export async function POST(req: NextRequest) {
 
     // Verificar status do pedido
     if (orderItem.orderStatus !== 'completed') {
-      return NextResponse.json(
-        { error: 'Este pedido ainda não foi confirmado' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Este pedido ainda não foi confirmado' }, { status: 400 });
     }
 
     // Verificar limite de downloads (5x)
@@ -106,10 +94,7 @@ export async function POST(req: NextRequest) {
 
     // Verificar se o arquivo existe
     if (!orderItem.filePath) {
-      return NextResponse.json(
-        { error: 'Arquivo não disponível para este item' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Arquivo não disponível para este item' }, { status: 404 });
     }
 
     // 5. Gerar URL assinada (15 minutos de validade)
@@ -152,9 +137,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error('❌ Erro ao gerar link de download:', error);
-    return NextResponse.json(
-      { error: 'Erro ao gerar link de download' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Erro ao gerar link de download' }, { status: 500 });
   }
 }

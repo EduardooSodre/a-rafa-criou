@@ -88,15 +88,18 @@ export async function POST(req: NextRequest) {
         const itemPrice = parseFloat(productData.price);
         const itemTotal = itemPrice * item.quantity;
 
-        const [createdItem] = await db.insert(orderItems).values({
-          orderId: order.id,
-          productId: item.productId,
-          variationId: item.variationId || null,
-          name: productData.productName || 'Produto',
-          quantity: item.quantity,
-          price: productData.price,
-          total: itemTotal.toString(),
-        }).returning();
+        const [createdItem] = await db
+          .insert(orderItems)
+          .values({
+            orderId: order.id,
+            productId: item.productId,
+            variationId: item.variationId || null,
+            name: productData.productName || 'Produto',
+            quantity: item.quantity,
+            price: productData.price,
+            total: itemTotal.toString(),
+          })
+          .returning();
 
         orderItemsData.push({
           id: createdItem.id,
@@ -115,7 +118,7 @@ export async function POST(req: NextRequest) {
         try {
           // Gerar URLs assinadas para cada produto
           const productsWithDownloadUrls = await Promise.all(
-            orderItemsData.map(async (item) => {
+            orderItemsData.map(async item => {
               // Buscar arquivo da variação
               const [fileData] = await db
                 .select({

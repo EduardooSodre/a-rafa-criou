@@ -3,12 +3,14 @@
 ## ✅ O QUE FOI IMPLEMENTADO
 
 ### 1. Sistema de Pagamento Stripe ✅
+
 - Payment Intent criando pedidos no banco
 - Webhook processando pagamentos
 - Idempotência (evita duplicação)
 - Página de obrigado com retry logic
 
 ### 2. Envio Automático de E-mail 📧 NOVO!
+
 - Template profissional React Email
 - Cores da marca (#FED466, #FD9555)
 - Links de download automáticos
@@ -16,6 +18,7 @@
 - Tratamento de erros
 
 ### 3. Download Seguro de PDFs 🔐 NOVO!
+
 - URLs assinadas do Cloudflare R2
 - Validade de 15 minutos
 - Verificação de propriedade
@@ -70,6 +73,7 @@ stripe listen --forward-to localhost:3000/api/stripe/webhook
 ### Verificar Logs
 
 **Terminal Next.js deve mostrar:**
+
 ```
 Webhook recebido: payment_intent.succeeded
 ✅ Order created: 123e4567-e89b...
@@ -77,6 +81,7 @@ Webhook recebido: payment_intent.succeeded
 ```
 
 **Terminal Stripe CLI deve mostrar:**
+
 ```
 --> payment_intent.succeeded [evt_xxx]
 <-- [200] POST http://localhost:3000/api/stripe/webhook
@@ -97,7 +102,7 @@ Você receberá um e-mail com:
 ✅ Total pago  
 ✅ Avisos importantes (validade, limites)  
 ✅ Botão "Ver Meus Pedidos"  
-✅ Footer com contato  
+✅ Footer com contato
 
 ---
 
@@ -151,6 +156,7 @@ docs/
 ### 1. Página de Histórico de Pedidos `/conta/pedidos`
 
 **Funcionalidades:**
+
 - Listar todos os pedidos do usuário
 - Status de cada pedido
 - Total pago
@@ -159,6 +165,7 @@ docs/
 ### 2. Página de Detalhes do Pedido `/conta/pedidos/[id]`
 
 **Funcionalidades:**
+
 - Informações completas do pedido
 - Lista de produtos comprados
 - **Botão de re-download para cada PDF**
@@ -168,6 +175,7 @@ docs/
 ### 3. Adicionar Campo `downloadCount` ao Schema
 
 **Migração necessária:**
+
 ```sql
 ALTER TABLE order_items ADD COLUMN download_count INTEGER DEFAULT 0;
 ```
@@ -187,24 +195,24 @@ ALTER TABLE order_items ADD COLUMN download_count INTEGER DEFAULT 0;
 
 ## 📊 Status Geral do Projeto
 
-| Feature | Status | Progresso |
-|---------|--------|-----------|
-| Autenticação (Auth.js) | ✅ Completo | 100% |
-| Banco de Dados (Drizzle + Postgres) | ✅ Completo | 100% |
-| Listagem de Produtos | ✅ Completo | 100% |
-| Carrinho de Compras | ✅ Completo | 100% |
-| **Checkout Stripe** | ✅ Completo | 100% |
-| **Webhook + Pedidos** | ✅ Completo | 100% |
-| **E-mail Confirmação** | ✅ Completo | 100% |
-| **Download Seguro R2** | ✅ Completo | 100% |
-| Histórico de Pedidos | 🔜 Próximo | 0% |
-| Re-download de PDFs | 🔜 Próximo | 0% |
-| Limite de Downloads | 🔜 Próximo | 0% |
-| PayPal Integration | 📋 Planejado | 0% |
-| PIX Integration | 📋 Planejado | 0% |
-| Cupons de Desconto | 📋 Planejado | 0% |
-| Sistema de Afiliados | 📋 Planejado | 0% |
-| Admin CMS | 📋 Planejado | 0% |
+| Feature                             | Status       | Progresso |
+| ----------------------------------- | ------------ | --------- |
+| Autenticação (Auth.js)              | ✅ Completo  | 100%      |
+| Banco de Dados (Drizzle + Postgres) | ✅ Completo  | 100%      |
+| Listagem de Produtos                | ✅ Completo  | 100%      |
+| Carrinho de Compras                 | ✅ Completo  | 100%      |
+| **Checkout Stripe**                 | ✅ Completo  | 100%      |
+| **Webhook + Pedidos**               | ✅ Completo  | 100%      |
+| **E-mail Confirmação**              | ✅ Completo  | 100%      |
+| **Download Seguro R2**              | ✅ Completo  | 100%      |
+| Histórico de Pedidos                | 🔜 Próximo   | 0%        |
+| Re-download de PDFs                 | 🔜 Próximo   | 0%        |
+| Limite de Downloads                 | 🔜 Próximo   | 0%        |
+| PayPal Integration                  | 📋 Planejado | 0%        |
+| PIX Integration                     | 📋 Planejado | 0%        |
+| Cupons de Desconto                  | 📋 Planejado | 0%        |
+| Sistema de Afiliados                | 📋 Planejado | 0%        |
+| Admin CMS                           | 📋 Planejado | 0%        |
 
 ---
 

@@ -42,6 +42,7 @@
 6. Aguarde verificação (~10 minutos)
 
 **Registros DNS necessários:**
+
 ```
 Tipo: MX
 Nome: @
@@ -60,6 +61,7 @@ Valor: [fornecido pelo Resend]
 #### Opção B: Usar Domínio de Teste (Para desenvolvimento)
 
 O Resend fornece automaticamente um domínio de teste:
+
 - **De:** `onboarding@resend.dev`
 - **Limitação:** Só envia para e-mails cadastrados no Resend
 - **Vantagem:** Configuração instantânea
@@ -85,6 +87,7 @@ RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 **⚠️ Importante:**
+
 - Nunca commite esta chave no Git
 - Adicione ao `.env.local` (já está no `.gitignore`)
 
@@ -102,11 +105,13 @@ npm run dev
 ### Teste Completo (Payment Intent → Webhook → E-mail)
 
 1. **Webhook Stripe rodando:**
+
    ```bash
    stripe listen --forward-to localhost:3000/api/stripe/webhook
    ```
 
 2. **Next.js rodando:**
+
    ```bash
    npm run dev
    ```
@@ -121,12 +126,14 @@ npm run dev
 4. **Verificar logs:**
 
    **Terminal Stripe CLI:**
+
    ```
    --> payment_intent.succeeded [evt_xxx]
    <-- [200] POST http://localhost:3000/api/stripe/webhook
    ```
 
    **Terminal Next.js:**
+
    ```
    ✅ Order created: 123e4567-e89b...
    📧 E-mail enviado para: seu@email.com
@@ -151,7 +158,7 @@ O template criado inclui:
 ✅ Total pago  
 ✅ Avisos importantes (validade 15min, limite 5x)  
 ✅ Botão "Ver Meus Pedidos"  
-✅ Footer com contato  
+✅ Footer com contato
 
 **Exemplo visual:**
 
@@ -198,7 +205,7 @@ O template criado inclui:
 ✅ **TTL curto:** 15 minutos de validade  
 ✅ **Privacidade:** Arquivos nunca ficam públicos  
 ✅ **Únicas:** Cada link é gerado individualmente  
-✅ **Expiração:** Após 15min, precisa solicitar novo link  
+✅ **Expiração:** Após 15min, precisa solicitar novo link
 
 ### Verificações na API `/api/download/generate-link`
 
@@ -206,7 +213,7 @@ O template criado inclui:
 ✅ **Propriedade:** Verifica se o pedido é do usuário  
 ✅ **Status:** Só permite download de pedidos confirmados  
 ✅ **Limite:** Preparado para limitar a 5 downloads (TODO: adicionar campo ao schema)  
-✅ **Logs:** Registra cada download gerado  
+✅ **Logs:** Registra cada download gerado
 
 ---
 
