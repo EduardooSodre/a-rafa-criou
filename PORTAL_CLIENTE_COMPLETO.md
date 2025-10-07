@@ -9,14 +9,16 @@
 ## 📋 O QUE FOI CRIADO
 
 ### 1. Lista de Pedidos (`/conta/pedidos`)
+
 ✅ Mostra todos os pedidos do usuário  
 ✅ Ordenação por data (mais recentes primeiro)  
 ✅ Badge de status (Concluído, Pendente, etc)  
 ✅ Resumo: produtos, total, data  
 ✅ Proteção por autenticação  
-✅ Loading e error states  
+✅ Loading e error states
 
 ### 2. Detalhes do Pedido (`/conta/pedidos/[id]`)
+
 ✅ Informações completas do pedido  
 ✅ Lista de produtos comprados  
 ✅ **Botão de download para cada produto**  
@@ -24,24 +26,27 @@
 ✅ Feedback visual (loading, sucesso, erro)  
 ✅ Contador de downloads restantes  
 ✅ Avisos sobre validade (15min)  
-✅ Verificação de propriedade  
+✅ Verificação de propriedade
 
 ### 3. APIs REST Criadas
+
 ✅ `GET /api/orders/my-orders` - Lista pedidos do usuário  
 ✅ `GET /api/orders/[id]` - Detalhes completos  
-✅ `POST /api/download/generate-link` - Gera URL assinada  
+✅ `POST /api/download/generate-link` - Gera URL assinada
 
 ---
 
 ## 🎨 Interface
 
 **Design System:**
+
 - Cores da marca: #FED466 (amarelo), #FD9555 (laranja)
 - Componentes Shadcn UI (Card, Badge, Button, Alert)
 - Ícones Lucide React
 - Responsivo e moderno
 
 **Estados Visuais:**
+
 - Loading: Skeleton components
 - Sucesso: Alert verde + contador
 - Erro: Alert vermelho + retry
@@ -88,7 +93,7 @@ Você verá sua lista de compras!
 ✅ URLs assinadas (15min de validade)  
 ✅ Limite de 5 downloads por produto (preparado)  
 ✅ Logs de auditoria  
-✅ Arquivos nunca ficam públicos no R2  
+✅ Arquivos nunca ficam públicos no R2
 
 ---
 
@@ -135,37 +140,37 @@ docs/
 
 ## ✨ Recursos Implementados
 
-| Feature | Status |
-|---------|--------|
-| Stripe Payment | ✅ 100% |
-| Webhook + Pedidos | ✅ 100% |
-| E-mail Confirmação | ✅ 100% |
-| Lista de Pedidos | ✅ 100% |
-| Detalhes do Pedido | ✅ 100% |
-| Download Seguro R2 | ✅ 100% |
-| URLs Assinadas | ✅ 100% |
+| Feature                 | Status  |
+| ----------------------- | ------- |
+| Stripe Payment          | ✅ 100% |
+| Webhook + Pedidos       | ✅ 100% |
+| E-mail Confirmação      | ✅ 100% |
+| Lista de Pedidos        | ✅ 100% |
+| Detalhes do Pedido      | ✅ 100% |
+| Download Seguro R2      | ✅ 100% |
+| URLs Assinadas          | ✅ 100% |
 | Verificação Propriedade | ✅ 100% |
-| Feedback Visual | ✅ 100% |
-| Proteção Autenticação | ✅ 100% |
+| Feedback Visual         | ✅ 100% |
+| Proteção Autenticação   | ✅ 100% |
 
 ---
 
 ## 📊 Status Geral do Projeto
 
-| Módulo | Progresso |
-|--------|-----------|
-| Autenticação | ✅ 100% |
-| Banco de Dados | ✅ 100% |
-| Produtos + Carrinho | ✅ 100% |
-| **Checkout Stripe** | ✅ 100% |
-| **Webhook + Pedidos** | ✅ 100% |
-| **E-mail Resend** | ✅ 100% |
-| **Download R2** | ✅ 100% |
-| **Portal Cliente** | ✅ 100% |
-| PayPal | 📋 Próximo |
-| PIX | 📋 Próximo |
-| Cupons | 📋 Próximo |
-| Afiliados | 📋 Próximo |
+| Módulo                | Progresso  |
+| --------------------- | ---------- |
+| Autenticação          | ✅ 100%    |
+| Banco de Dados        | ✅ 100%    |
+| Produtos + Carrinho   | ✅ 100%    |
+| **Checkout Stripe**   | ✅ 100%    |
+| **Webhook + Pedidos** | ✅ 100%    |
+| **E-mail Resend**     | ✅ 100%    |
+| **Download R2**       | ✅ 100%    |
+| **Portal Cliente**    | ✅ 100%    |
+| PayPal                | 📋 Próximo |
+| PIX                   | 📋 Próximo |
+| Cupons                | 📋 Próximo |
+| Afiliados             | 📋 Próximo |
 
 ---
 

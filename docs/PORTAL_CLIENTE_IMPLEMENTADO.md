@@ -5,6 +5,7 @@
 ### 1. Página de Histórico de Pedidos `/conta/pedidos`
 
 **Funcionalidades:**
+
 - ✅ Lista todos os pedidos do usuário autenticado
 - ✅ Ordenação por data (mais recentes primeiro)
 - ✅ Badge de status (Concluído, Pendente, Cancelado)
@@ -17,6 +18,7 @@
 ### 2. Página de Detalhes do Pedido `/conta/pedidos/[id]`
 
 **Funcionalidades:**
+
 - ✅ Informações completas do pedido
 - ✅ Status do pedido e pagamento
 - ✅ Lista de produtos comprados
@@ -31,12 +33,14 @@
 ### 3. APIs Criadas
 
 **`GET /api/orders/my-orders`**
+
 - Retorna todos os pedidos do usuário
 - Inclui itens de cada pedido
 - Ordenado por data decrescente
 - Requer autenticação
 
 **`GET /api/orders/[id]`**
+
 - Retorna detalhes completos de um pedido
 - Verifica propriedade do pedido
 - Inclui todos os itens
@@ -47,11 +51,13 @@
 ## 🎨 Design e UX
 
 ### Cores da Marca
+
 - **Amarelo primário:** `#FED466` (botões principais)
 - **Laranja secundário:** `#FD9555` (preços, botões de ação)
 - **Background:** `#F4F4F4`
 
 ### Componentes Utilizados
+
 - `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent` (Shadcn UI)
 - `Badge` (status visual)
 - `Button` (ações principais)
@@ -62,16 +68,19 @@
 ### Estados Visuais
 
 **Loading:**
+
 - Skeleton components durante carregamento
 - Spinner no botão de download
 - Feedback visual claro
 
 **Sucesso:**
+
 - Alert verde com mensagem de sucesso
 - Contador de downloads restantes
 - Link abre em nova aba automaticamente
 
 **Erro:**
+
 - Alert vermelho com mensagem de erro
 - Botão de retry
 - Mensagens claras e acionáveis
@@ -81,21 +90,24 @@
 ## 🔐 Segurança Implementada
 
 ### Autenticação
+
 ✅ Todas as páginas protegidas por `useSession`  
 ✅ Redirecionamento automático para login  
-✅ CallbackUrl preserva destino original  
+✅ CallbackUrl preserva destino original
 
 ### Autorização
+
 ✅ API verifica `session.user.id`  
 ✅ Queries filtradas por `userId`  
-✅ Erro 403 se tentar acessar pedido de outro usuário  
+✅ Erro 403 se tentar acessar pedido de outro usuário
 
 ### Downloads
+
 ✅ URLs assinadas com TTL de 15 minutos  
 ✅ Verificação de propriedade do pedido  
 ✅ Verificação de status (só pedidos concluídos)  
 ✅ Logs de auditoria  
-✅ Preparado para limite de 5 downloads  
+✅ Preparado para limite de 5 downloads
 
 ---
 
@@ -138,6 +150,7 @@ http://localhost:3000/conta/pedidos
 ```
 
 Você deve ver:
+
 - Lista com seu pedido recém-criado
 - Badge "Concluído" (se webhook processou)
 - Total pago
@@ -148,6 +161,7 @@ Você deve ver:
 Clique em "Ver Detalhes e Downloads"
 
 Você deve ver:
+
 - Informações completas do pedido
 - E-mail, forma de pagamento, status
 - Lista de produtos comprados
@@ -225,18 +239,21 @@ docs/
 ## 🐛 Tratamento de Erros
 
 ### Pedido Não Encontrado (404)
+
 ```tsx
-Alert: "Pedido não encontrado"
-Botão: "Voltar para Pedidos"
+Alert: 'Pedido não encontrado';
+Botão: 'Voltar para Pedidos';
 ```
 
 ### Sem Permissão (403)
+
 ```tsx
-Alert: "Você não tem permissão para acessar este pedido"
-Botão: "Voltar para Pedidos"
+Alert: 'Você não tem permissão para acessar este pedido';
+Botão: 'Voltar para Pedidos';
 ```
 
 ### Erro de Download
+
 ```tsx
 Alert Vermelho: "Erro ao gerar link de download"
 // Ou mensagens específicas:
@@ -246,6 +263,7 @@ Alert Vermelho: "Erro ao gerar link de download"
 ```
 
 ### Não Autenticado
+
 ```tsx
 Redirecionamento automático para:
 /auth/login?callbackUrl=/conta/pedidos
@@ -303,11 +321,12 @@ Redirecionamento automático para:
 ### 1. Adicionar Campo `downloadCount` ao Schema
 
 ```sql
-ALTER TABLE order_items 
+ALTER TABLE order_items
 ADD COLUMN download_count INTEGER DEFAULT 0;
 ```
 
 Atualizar API de download para:
+
 - Incrementar contador
 - Bloquear após 5 downloads
 - Exibir contador exato na UI
