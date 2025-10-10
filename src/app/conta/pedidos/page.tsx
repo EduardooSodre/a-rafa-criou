@@ -34,6 +34,7 @@ export default function PedidosPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [activeTab, setActiveTab] = useState('todos');
+    const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -49,16 +50,22 @@ export default function PedidosPage() {
     const fetchOrders = async () => {
         try {
             setLoading(true);
-            const response = await fetch('/api/orders/my-orders');
+            setError('');
+            const response = await fetch('/api/orders/my-orders', {
+                cache: 'no-store' // Força buscar dados atualizados
+            });
 
             if (!response.ok) {
                 throw new Error('Erro ao carregar pedidos');
             }
 
             const data = await response.json();
+            console.log('📦 Pedidos recebidos:', data.orders?.length || 0);
+            console.log('📋 Status dos pedidos:', data.orders?.map((o: Order) => `${o.id.slice(0, 8)} - ${o.status}`));
             setOrders(data.orders || []);
+            setLastUpdate(new Date());
         } catch (err) {
-            console.error('Erro ao buscar pedidos:', err);
+            console.error('❌ Erro ao buscar pedidos:', err);
             setError('Não foi possível carregar seus pedidos. Tente novamente.');
         } finally {
             setLoading(false);
@@ -187,11 +194,27 @@ export default function PedidosPage() {
 
     return (
         <div className="container mx-auto px-4 py-8 max-w-4xl">
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold mb-2">Meus Pedidos</h1>
-                <p className="text-gray-600">
-                    Gerencie seus pedidos e faça download dos seus produtos
-                </p>
+            <div className="mb-8 flex justify-between items-start">
+                <div>
+                    <h1 className="text-3xl font-bold mb-2">Meus Pedidos</h1>
+                    <p className="text-gray-600">
+                        Gerencie seus pedidos e faça download dos seus produtos
+                    </p>
+                    {lastUpdate && (
+                        <p className="text-xs text-gray-400 mt-1">
+                            Última atualização: {lastUpdate.toLocaleTimeString('pt-BR')}
+                        </p>
+                    )}
+                </div>
+                <Button 
+                    onClick={fetchOrders} 
+                    variant="outline" 
+                    disabled={loading}
+                    className="flex items-center gap-2"
+                >
+                    <Package className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                    {loading ? 'Atualizando...' : 'Atualizar'}
+                </Button>
             </div>
 
             {orders.length === 0 ? (
@@ -381,14 +404,35 @@ function OrderCard({
                         </div>
                     )}
 
-                    <Link href={`/conta/pedidos/${order.id}`}>
-                        <Button
-                            className="w-full bg-[#FD9555] hover:bg-[#FD9555]/90 text-white"
-                            disabled={order.status === 'cancelled'}
-                        >
-                            {order.status === 'completed' ? 'Ver Detalhes e Downloads' : 'Ver Detalhes'}
-                        </Button>
-                    </Link>
+                    {/* Botões de ação baseados no status */}
+                    {order.status === 'pending' ? (
+                        <div className="flex gap-2">
+                            <Link href={`/checkout/pix?orderId=${order.id}`} className="flex-1">
+                                <Button
+                                    className="w-full bg-[#FED466] hover:bg-[#FED466]/90 text-gray-800 font-semibold"
+                                >
+                                    💳 Pagar Agora
+                                </Button>
+                            </Link>
+                            <Link href={`/conta/pedidos/${order.id}`} className="flex-1">
+                                <Button
+                                    variant="outline"
+                                    className="w-full"
+                                >
+                                    Ver Detalhes
+                                </Button>
+                            </Link>
+                        </div>
+                    ) : (
+                        <Link href={`/conta/pedidos/${order.id}`}>
+                            <Button
+                                className="w-full bg-[#FD9555] hover:bg-[#FD9555]/90 text-white"
+                                disabled={order.status === 'cancelled'}
+                            >
+                                {order.status === 'completed' ? 'Ver Detalhes e Downloads' : 'Ver Detalhes'}
+                            </Button>
+                        </Link>
+                    )}
                 </div>
             </CardContent>
         </Card>

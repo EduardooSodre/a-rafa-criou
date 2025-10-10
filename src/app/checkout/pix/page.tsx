@@ -7,7 +7,7 @@
  * NOTA: PIX só funciona em produção com conta Stripe brasileira ativada
  */
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,28 +28,67 @@ export default function CheckoutPixPage() {
     const [paid, setPaid] = useState(false);
     const [error, setError] = useState<string>('');
     const [hasCreatedPayment, setHasCreatedPayment] = useState(false);
+    const [isCreatingPayment, setIsCreatingPayment] = useState(false); // 🔒 Flag para evitar chamadas simultâneas
     const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
+    
+    // 🔒 PROTEÇÃO EXTRA: useRef para garantir apenas 1 execução
+    const hasInitialized = useRef(false);
 
     // Dados do cliente
     const email = searchParams.get('email') || '';
     const name = searchParams.get('name') || '';
+    const orderId = searchParams.get('orderId') || ''; // 🔒 ID do pedido pendente (opcional)
 
-    // Criar Payment Intent PIX
+    // Criar Payment Intent PIX OU retomar pagamento pendente
     const createPixPayment = useCallback(async () => {
-        if (hasCreatedPayment) {
+        // 🔒 PROTEÇÃO: Evitar múltiplas chamadas simultâneas
+        if (hasCreatedPayment || isCreatingPayment) {
+            console.log('⚠️ Criação já em andamento, ignorando...');
             return;
         }
 
         try {
             setLoading(true);
             setHasCreatedPayment(true);
+            setIsCreatingPayment(true); // 🔒 Marcar como em criação
 
+            // 🔒 Se orderId existir, retomar pagamento pendente
+            if (orderId) {
+                console.log(`🔄 Retomando pagamento do pedido: ${orderId}`);
+                console.log(`📧 Email/Name não obrigatórios no resume (vêm do pedido)`);
+                
+                const response = await fetch(`/api/stripe/resume-payment?orderId=${orderId}`);
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('❌ Erro ao retomar pagamento:', errorData);
+                    throw new Error(errorData.error || 'Erro ao retomar pagamento');
+                }
+
+                const data: PixData = await response.json();
+                console.log('✅ Payment Intent retomado com sucesso:', {
+                    paymentIntentId: data.paymentIntentId,
+                    amount: data.amount,
+                });
+                
+                setPixData(data);
+                setLoading(false);
+                setIsCreatingPayment(false);
+                startPolling(data.paymentIntentId);
+                return; // ⚠️ IMPORTANTE: Retornar aqui para não criar novo pedido
+            }
+
+            // ✅ Caso contrário, criar novo pagamento do carrinho
             const cartItems = JSON.parse(localStorage.getItem('cart') || '[]');
 
             if (cartItems.length === 0) {
+                console.log('⚠️ Carrinho vazio, redirecionando...');
                 router.push('/carrinho');
                 return;
             }
+
+            console.log(`🆕 Criando novo pedido PIX com ${cartItems.length} itens`);
+            console.log(`📧 Email: ${email}, Name: ${name}`);
 
             const response = await fetch('/api/stripe/create-pix', {
                 method: 'POST',
@@ -62,32 +101,48 @@ export default function CheckoutPixPage() {
             });
 
             if (!response.ok) {
-                throw new Error('Erro ao criar pagamento PIX');
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Erro ao criar pagamento PIX');
             }
 
             const data: PixData = await response.json();
             setPixData(data);
 
             setLoading(false);
+            setIsCreatingPayment(false);
 
             // Iniciar polling de status
             startPolling(data.paymentIntentId);
 
-        } catch {
-            setError('Erro ao gerar QR Code PIX. Tente novamente.');
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Erro ao gerar QR Code PIX. Tente novamente.';
+            setError(errorMessage);
             setLoading(false);
+            setIsCreatingPayment(false);
             setHasCreatedPayment(false); // Permitir tentar novamente em caso de erro
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [email, name, router, hasCreatedPayment]);
+    }, [email, name, router, hasCreatedPayment, isCreatingPayment, orderId]);
 
     useEffect(() => {
-        if (!email || !name) {
+        // 🔒 PROTEÇÃO: Evitar execução dupla (principalmente em desenvolvimento)
+        if (hasInitialized.current) {
+            console.log('⚠️ useEffect já foi executado, ignorando...');
+            return;
+        }
+
+        // ✅ Se orderId existe (retomando pagamento), não precisa de email/name
+        // ✅ Se orderId NÃO existe (novo pagamento), precisa de email/name
+        if (!orderId && (!email || !name)) {
+            console.log('⚠️ Novo pagamento sem email/name, redirecionando para carrinho...');
             router.push('/carrinho');
             return;
         }
 
-        if (!hasCreatedPayment) {
+        // 🔒 PROTEÇÃO: Só criar pagamento se ainda não foi criado e não está criando
+        if (!hasCreatedPayment && !isCreatingPayment) {
+            hasInitialized.current = true; // ✅ Marcar como inicializado
+            console.log('🚀 Iniciando criação de pagamento PIX...');
             createPixPayment();
         }
 
@@ -97,7 +152,8 @@ export default function CheckoutPixPage() {
                 clearInterval(pollingInterval);
             }
         };
-    }, [email, name, router, createPixPayment, hasCreatedPayment, pollingInterval]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [email, name, orderId]); // ✅ Adicionado orderId nas dependências
 
     // Iniciar polling
     const startPolling = (paymentIntentId: string) => {

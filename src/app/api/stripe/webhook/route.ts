@@ -31,17 +31,6 @@ export async function POST(req: NextRequest) {
     const paymentIntent = event.data.object as Stripe.PaymentIntent;
 
     try {
-      // IDEMPOTÊNCIA: Verificar se pedido já existe
-      const existingOrder = await db
-        .select()
-        .from(orders)
-        .where(eq(orders.stripePaymentIntentId, paymentIntent.id))
-        .limit(1);
-
-      if (existingOrder.length > 0) {
-        return Response.json({ received: true });
-      }
-
       // Parsear metadata
       const items = JSON.parse(paymentIntent.metadata.items || '[]');
       const userId = paymentIntent.metadata.userId || null;
@@ -53,67 +42,141 @@ export async function POST(req: NextRequest) {
       const customerName =
         paymentIntent.metadata.customer_name || paymentIntent.metadata.userName || 'Cliente';
 
-      // Criar pedido
-      const [order] = await db
-        .insert(orders)
-        .values({
-          userId,
-          email: customerEmail,
-          status: 'completed',
-          subtotal: (paymentIntent.amount / 100).toString(),
-          total: (paymentIntent.amount / 100).toString(),
-          currency: paymentIntent.currency.toUpperCase(), // BRL, USD, etc
-          paymentProvider: 'stripe',
-          paymentId: paymentIntent.id,
-          stripePaymentIntentId: paymentIntent.id,
-          paymentStatus: 'paid',
-          paidAt: new Date(),
-        })
-        .returning();
+      // 🔍 Buscar pedido pendente existente (criado no create-pix)
+      const existingOrders = await db
+        .select()
+        .from(orders)
+        .where(eq(orders.stripePaymentIntentId, paymentIntent.id))
+        .limit(1);
 
-      // Criar itens do pedido com busca de produtos e variações
-      const orderItemsData = [];
-      for (const item of items) {
-        // Buscar dados do produto e variação
-        const [productData] = await db
-          .select({
-            productId: products.id,
-            productName: products.name,
-            variationId: productVariations.id,
-            variationName: productVariations.name,
-            price: productVariations.price,
+      let order;
+      const orderItemsData: Array<{
+        id: string;
+        productName: string;
+        variationName: string;
+        price: number;
+        quantity: number;
+        variationId: string | null;
+      }> = [];
+
+      if (existingOrders.length > 0) {
+        // ✅ ATUALIZAR pedido existente para "completed"
+        const existingOrder = existingOrders[0];
+        console.log(`📦 Atualizando pedido existente: ${existingOrder.id}`);
+        
+        // 🔒 VALIDAÇÃO DE SEGURANÇA: Verificar integridade dos valores
+        const orderTotal = parseFloat(existingOrder.total);
+        const paidAmount = paymentIntent.amount / 100;
+        
+        // Permitir diferença de até 0.01 (arredondamento)
+        if (Math.abs(orderTotal - paidAmount) > 0.01) {
+          console.error(`⚠️ ALERTA DE SEGURANÇA: Valores não conferem!`);
+          console.error(`Pedido: R$ ${orderTotal} | Pago: R$ ${paidAmount}`);
+          
+          // Não atualizar pedido se valores não conferem
+          return Response.json({ 
+            error: 'Valores não conferem',
+            received: false 
+          }, { status: 400 });
+        }
+        
+        const updatedOrders = await db
+          .update(orders)
+          .set({
+            status: 'completed', // ⚠️ pending → completed
+            paymentStatus: 'paid',
+            paidAt: new Date(),
           })
-          .from(products)
-          .leftJoin(productVariations, eq(productVariations.productId, products.id))
-          .where(eq(products.id, item.productId))
-          .limit(1);
+          .where(eq(orders.id, existingOrder.id))
+          .returning();
 
-        if (!productData || !productData.price) continue;
+        order = updatedOrders[0];
+        console.log(`✅ Pedido atualizado: ${order.id} (pending → completed)`);
 
-        const itemPrice = parseFloat(productData.price);
-        const itemTotal = itemPrice * item.quantity;
+        // Buscar itens do pedido já criados
+        const existingItems = await db
+          .select()
+          .from(orderItems)
+          .where(eq(orderItems.orderId, order.id));
 
-        const [createdItem] = await db
-          .insert(orderItems)
-          .values({
-            orderId: order.id,
-            productId: item.productId,
-            variationId: item.variationId || null,
-            name: productData.productName || 'Produto',
+        // Converter para formato esperado pelo email
+        for (const item of existingItems) {
+          orderItemsData.push({
+            id: item.id,
+            productName: item.name,
+            variationName: '', // Já está no name
+            price: parseFloat(item.price),
             quantity: item.quantity,
-            price: productData.price,
-            total: itemTotal.toString(),
+            variationId: item.variationId,
+          });
+        }
+      } else {
+        // ⚠️ CRIAR pedido (fallback se não foi criado no create-pix)
+        console.log('⚠️ Pedido não encontrado, criando novo...');
+        
+        const newOrders = await db
+          .insert(orders)
+          .values({
+            userId,
+            email: customerEmail,
+            status: 'completed',
+            subtotal: (paymentIntent.amount / 100).toString(),
+            total: (paymentIntent.amount / 100).toString(),
+            currency: paymentIntent.currency.toUpperCase(),
+            paymentProvider: 'stripe',
+            paymentId: paymentIntent.id,
+            stripePaymentIntentId: paymentIntent.id,
+            paymentStatus: 'paid',
+            paidAt: new Date(),
           })
           .returning();
 
-        orderItemsData.push({
-          id: createdItem.id,
-          productName: productData.productName || 'Produto',
-          variationName: productData.variationName || '',
-          price: itemPrice,
-          quantity: item.quantity,
-          variationId: item.variationId,
-        });
+        order = newOrders[0];
+
+        // Criar itens do pedido apenas se for um novo pedido
+        for (const item of items) {
+          const [productData] = await db
+            .select({
+              productId: products.id,
+              productName: products.name,
+              variationId: productVariations.id,
+              variationName: productVariations.name,
+              price: productVariations.price,
+            })
+            .from(products)
+            .leftJoin(productVariations, eq(productVariations.productId, products.id))
+            .where(eq(products.id, item.productId))
+            .limit(1);
+
+          if (!productData || !productData.price) continue;
+
+          const itemPrice = parseFloat(productData.price);
+          const itemTotal = itemPrice * item.quantity;
+
+          const createdItems = await db
+            .insert(orderItems)
+            .values({
+              orderId: order.id,
+              productId: item.productId,
+              variationId: item.variationId || null,
+              name: productData.productName || 'Produto',
+              quantity: item.quantity,
+              price: productData.price,
+              total: itemTotal.toString(),
+            })
+            .returning();
+
+          const createdItem = createdItems[0];
+
+          orderItemsData.push({
+            id: createdItem.id,
+            productName: productData.productName || 'Produto',
+            variationName: productData.variationName || '',
+            price: itemPrice,
+            quantity: item.quantity,
+            variationId: item.variationId,
+          });
+        }
       }
 
       // 🚀 ENVIAR E-MAIL DE CONFIRMAÇÃO
@@ -122,19 +185,22 @@ export async function POST(req: NextRequest) {
           // Gerar URLs assinadas para cada produto
           const productsWithDownloadUrls = await Promise.all(
             orderItemsData.map(async item => {
-              // Buscar arquivo da variação
-              const [fileData] = await db
-                .select({
-                  filePath: files.path,
-                })
-                .from(files)
-                .where(eq(files.variationId, item.variationId))
-                .limit(1);
-
+              // Buscar arquivo da variação (apenas se variationId não for null)
               let downloadUrl = '';
-              if (fileData?.filePath) {
-                // Gerar URL assinada com 15 minutos de validade
-                downloadUrl = await getR2SignedUrl(fileData.filePath, 15 * 60);
+              
+              if (item.variationId) {
+                const fileRecords = await db
+                  .select({
+                    filePath: files.path,
+                  })
+                  .from(files)
+                  .where(eq(files.variationId, item.variationId))
+                  .limit(1);
+
+                if (fileRecords.length > 0 && fileRecords[0]?.filePath) {
+                  // Gerar URL assinada com 15 minutos de validade
+                  downloadUrl = await getR2SignedUrl(fileRecords[0].filePath, 15 * 60);
+                }
               }
 
               return {
@@ -163,13 +229,15 @@ export async function POST(req: NextRequest) {
             subject: `✅ Pedido Confirmado #${order.id.slice(0, 8)} - A Rafa Criou`,
             html: emailHtml,
           });
-        } catch {
+
+          console.log(`📧 Email de confirmação enviado para: ${customerEmail}`);
+        } catch (emailError) {
+          console.error('⚠️ Erro ao enviar email de confirmação:', emailError);
           // Não bloquear o webhook se o e-mail falhar
         }
       }
-
-      // TODO: Enviar e-mail de confirmação (próxima etapa - SPRINT 1.2)
-    } catch {
+    } catch (error) {
+      console.error('❌ Erro ao processar webhook:', error);
       return Response.json({ error: 'Internal error' }, { status: 500 });
     }
   }
