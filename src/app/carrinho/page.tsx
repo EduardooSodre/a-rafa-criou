@@ -8,16 +8,29 @@ import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { ShoppingCart, Plus, Minus, Trash2, ShoppingBag, Edit } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import { ShoppingCart, Plus, Minus, Trash2, ShoppingBag, Edit, QrCode } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { EditCartItemSheet } from '@/components/sections/EditCartItemSheet'
 import { useTranslation } from 'react-i18next'
 
 export default function CarrinhoPage() {
     const { t, i18n } = useTranslation('common')
+    const router = useRouter()
     const { items, totalItems, totalPrice, updateQuantity, removeItem, clearCart } = useCart()
     const [editingItem, setEditingItem] = useState<string | null>(null)
+    const [pixDialogOpen, setPixDialogOpen] = useState(false)
+    const [pixName, setPixName] = useState('')
+    const [pixEmail, setPixEmail] = useState('')
     const [productData, setProductData] = useState<Map<string, {
         id: string
         name: string
@@ -86,6 +99,17 @@ export default function CarrinhoPage() {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         }).format(price)
+    }
+
+    // Handler para PIX
+    const handlePixCheckout = () => {
+        if (!pixName || !pixEmail) {
+            alert('Preencha seu nome e e-mail')
+            return
+        }
+
+        // Redirecionar para checkout PIX
+        router.push(`/checkout/pix?email=${encodeURIComponent(pixEmail)}&name=${encodeURIComponent(pixName)}`)
     }
 
     const handleEditItem = (itemId: string) => {
@@ -320,6 +344,54 @@ export default function CarrinhoPage() {
                                             {t('cart.checkout')}
                                         </Link>
                                     </Button>
+
+                                    {/* Botão PIX */}
+                                    <Dialog open={pixDialogOpen} onOpenChange={setPixDialogOpen}>
+                                        <DialogTrigger asChild>
+                                            <Button
+                                                className="w-full h-12 bg-green-600 hover:bg-green-700 text-white font-semibold transition-all duration-200"
+                                                size="lg"
+                                            >
+                                                <QrCode className="w-5 h-5 mr-2" />
+                                                Pagar com PIX
+                                            </Button>
+                                        </DialogTrigger>
+                                        <DialogContent>
+                                            <DialogHeader>
+                                                <DialogTitle>Pagar com PIX</DialogTitle>
+                                                <DialogDescription>
+                                                    Preencha seus dados para gerar o QR Code PIX
+                                                </DialogDescription>
+                                            </DialogHeader>
+                                            <div className="space-y-4 pt-4">
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="pix-name">Nome completo</Label>
+                                                    <Input
+                                                        id="pix-name"
+                                                        placeholder="Seu nome"
+                                                        value={pixName}
+                                                        onChange={(e) => setPixName(e.target.value)}
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="pix-email">E-mail</Label>
+                                                    <Input
+                                                        id="pix-email"
+                                                        type="email"
+                                                        placeholder="seu@email.com"
+                                                        value={pixEmail}
+                                                        onChange={(e) => setPixEmail(e.target.value)}
+                                                    />
+                                                </div>
+                                                <Button
+                                                    onClick={handlePixCheckout}
+                                                    className="w-full bg-green-600 hover:bg-green-700"
+                                                >
+                                                    Gerar QR Code PIX
+                                                </Button>
+                                            </div>
+                                        </DialogContent>
+                                    </Dialog>
 
                                     <div className="text-xs text-gray-600 text-center space-y-1 pt-2">
                                         <p className="flex items-center justify-center gap-1">

@@ -8,8 +8,6 @@ export async function GET(req: NextRequest) {
     const searchParams = req.nextUrl.searchParams;
     const paymentIntentId = searchParams.get('payment_intent');
 
-    console.log('🔍 Buscando pedido com payment_intent:', paymentIntentId);
-
     if (!paymentIntentId) {
       return NextResponse.json({ error: 'Payment Intent ID não fornecido' }, { status: 400 });
     }
@@ -21,11 +19,6 @@ export async function GET(req: NextRequest) {
       .where(eq(orders.stripePaymentIntentId, paymentIntentId))
       .limit(1);
 
-    console.log(
-      '📦 Resultado da busca:',
-      orderResult.length > 0 ? 'Pedido encontrado!' : 'Pedido NÃO encontrado'
-    );
-
     if (orderResult.length === 0) {
       // Buscar todos pedidos para debug
       const allOrders = await db
@@ -36,8 +29,6 @@ export async function GET(req: NextRequest) {
         })
         .from(orders)
         .limit(5);
-
-      console.log('🔍 Últimos pedidos no banco:', allOrders);
 
       return NextResponse.json(
         { error: 'Pedido não encontrado', debug: { paymentIntentId, allOrders } },

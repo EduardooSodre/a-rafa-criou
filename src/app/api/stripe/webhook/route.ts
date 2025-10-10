@@ -39,15 +39,14 @@ export async function POST(req: NextRequest) {
         .limit(1);
 
       if (existingOrder.length > 0) {
-        console.log('⚠️ Order already exists, skipping:', paymentIntent.id);
         return Response.json({ received: true });
       }
 
       // Parsear metadata
       const items = JSON.parse(paymentIntent.metadata.items || '[]');
       const userId = paymentIntent.metadata.userId || null;
-      const customerEmail = paymentIntent.receipt_email || paymentIntent.metadata.email || '';
-      const customerName = paymentIntent.metadata.userName || 'Cliente';
+      const customerEmail = paymentIntent.receipt_email || paymentIntent.metadata.customer_email || paymentIntent.metadata.email || '';
+      const customerName = paymentIntent.metadata.customer_name || paymentIntent.metadata.userName || 'Cliente';
 
       // Criar pedido
       const [order] = await db
@@ -58,6 +57,7 @@ export async function POST(req: NextRequest) {
           status: 'completed',
           subtotal: (paymentIntent.amount / 100).toString(),
           total: (paymentIntent.amount / 100).toString(),
+          currency: paymentIntent.currency.toUpperCase(), // BRL, USD, etc
           paymentProvider: 'stripe',
           paymentId: paymentIntent.id,
           stripePaymentIntentId: paymentIntent.id,
@@ -111,8 +111,6 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      console.log('✅ Order created:', order.id);
-
       // 🚀 ENVIAR E-MAIL DE CONFIRMAÇÃO
       if (customerEmail) {
         try {
@@ -161,16 +159,13 @@ export async function POST(req: NextRequest) {
             html: emailHtml,
           });
 
-          console.log('📧 E-mail enviado para:', customerEmail);
-        } catch (emailError) {
+        } catch {
           // Não bloquear o webhook se o e-mail falhar
-          console.error('⚠️ Erro ao enviar e-mail (pedido criado com sucesso):', emailError);
         }
       }
 
       // TODO: Enviar e-mail de confirmação (próxima etapa - SPRINT 1.2)
-    } catch (error) {
-      console.error('❌ Error processing webhook:', error);
+    } catch {
       return Response.json({ error: 'Internal error' }, { status: 500 });
     }
   }

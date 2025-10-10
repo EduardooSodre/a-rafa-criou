@@ -59,7 +59,6 @@ export default function ObrigadoPage() {
             }
 
             try {
-                console.log(`🔍 Tentativa ${attempt}/${maxRetries} - Buscando pedido...`);
                 setRetryCount(attempt);
 
                 const response = await fetch(`/api/orders/by-payment-intent?payment_intent=${paymentIntent}`)
@@ -68,13 +67,11 @@ export default function ObrigadoPage() {
                     const data = await response.json()
                     setOrderData(data)
                     setIsLoading(false)
-                    console.log('✅ Pedido encontrado!', data);
                     return // Sucesso!
                 }
 
                 // Se não encontrou e ainda tem tentativas
                 if (attempt < maxRetries) {
-                    console.log(`⏳ Pedido não encontrado, aguardando webhook... (tentativa ${attempt}/${maxRetries})`);
                     // Aguardar 2 segundos e tentar novamente
                     setTimeout(() => {
                         fetchOrder(attempt + 1, maxRetries)

@@ -83,13 +83,6 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Log para debug (ajuda a identificar problemas)
-    console.log('💰 Cálculo de preços:', {
-      items: calculationDetails,
-      total: total.toFixed(2),
-      totalCentavos: Math.round(total * 100),
-    });
-
     if (total <= 0) {
       return Response.json({ error: 'Total inválido' }, { status: 400 });
     }
