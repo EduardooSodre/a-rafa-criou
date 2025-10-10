@@ -8,6 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CheckCircle, Clock, XCircle, Package } from 'lucide-react';
 
 interface OrderItem {
     id: string;
@@ -31,6 +33,7 @@ export default function PedidosPage() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [activeTab, setActiveTab] = useState('todos');
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -63,20 +66,67 @@ export default function PedidosPage() {
     };
 
     const getStatusBadge = (status: string) => {
-        const statusMap: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-            completed: { label: 'Concluído', variant: 'default' },
-            pending: { label: 'Pendente', variant: 'secondary' },
-            cancelled: { label: 'Cancelado', variant: 'destructive' },
-            processing: { label: 'Processando', variant: 'outline' },
+        const statusMap: Record<string, { 
+            label: string; 
+            variant: 'default' | 'secondary' | 'destructive' | 'outline';
+            icon: React.ReactNode;
+            bgColor: string;
+        }> = {
+            completed: { 
+                label: 'Concluído', 
+                variant: 'default',
+                icon: <CheckCircle className="w-4 h-4 mr-1" />,
+                bgColor: 'bg-green-50 border-green-200 text-green-800'
+            },
+            pending: { 
+                label: 'Pendente', 
+                variant: 'secondary',
+                icon: <Clock className="w-4 h-4 mr-1" />,
+                bgColor: 'bg-yellow-50 border-yellow-200 text-yellow-800'
+            },
+            cancelled: { 
+                label: 'Cancelado', 
+                variant: 'destructive',
+                icon: <XCircle className="w-4 h-4 mr-1" />,
+                bgColor: 'bg-red-50 border-red-200 text-red-800'
+            },
+            processing: { 
+                label: 'Processando', 
+                variant: 'outline',
+                icon: <Package className="w-4 h-4 mr-1" />,
+                bgColor: 'bg-blue-50 border-blue-200 text-blue-800'
+            },
+            refunded: { 
+                label: 'Reembolsado', 
+                variant: 'outline',
+                icon: <XCircle className="w-4 h-4 mr-1" />,
+                bgColor: 'bg-gray-50 border-gray-200 text-gray-800'
+            },
         };
 
-        const statusInfo = statusMap[status] || { label: status, variant: 'outline' };
+        const statusInfo = statusMap[status] || { 
+            label: status, 
+            variant: 'outline' as const,
+            icon: <Package className="w-4 h-4 mr-1" />,
+            bgColor: 'bg-gray-50 border-gray-200 text-gray-800'
+        };
 
         return (
-            <Badge variant={statusInfo.variant}>
+            <div className={`flex items-center gap-1 px-3 py-1 rounded-full border ${statusInfo.bgColor} font-semibold text-sm`}>
+                {statusInfo.icon}
                 {statusInfo.label}
-            </Badge>
+            </div>
         );
+    };
+
+    const filterOrders = (filterStatus: string) => {
+        if (filterStatus === 'todos') return orders;
+        return orders.filter(order => order.status === filterStatus);
+    };
+
+    const getOrderCount = (filterStatus: string) => {
+        if (filterStatus === 'todos') return orders.length;
+        return orders.filter(order => order.status === filterStatus).length;
     };
 
     const formatDate = (dateString: string) => {
@@ -161,64 +211,186 @@ export default function PedidosPage() {
                     </CardContent>
                 </Card>
             ) : (
-                <div className="space-y-4">
-                    {orders.map((order) => (
-                        <Card key={order.id} className="hover:shadow-lg transition-shadow">
-                            <CardHeader>
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <CardTitle className="text-lg">
-                                            Pedido #{order.id.slice(0, 13)}...
-                                        </CardTitle>
-                                        <CardDescription>
-                                            {formatDate(order.createdAt)}
-                                        </CardDescription>
-                                    </div>
-                                    {getStatusBadge(order.status)}
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="text-gray-600">
-                                            {order.itemCount} {order.itemCount === 1 ? 'item' : 'itens'}
-                                        </span>
-                                        <span className="text-lg font-bold text-[#FD9555]">
-                                            {formatPrice(order.total)}
-                                        </span>
-                                    </div>
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                    <TabsList className="grid w-full grid-cols-5 mb-6">
+                        <TabsTrigger value="todos" className="flex items-center gap-2">
+                            <Package className="w-4 h-4" />
+                            Todos
+                            <Badge variant="secondary" className="ml-1">{getOrderCount('todos')}</Badge>
+                        </TabsTrigger>
+                        <TabsTrigger value="completed" className="flex items-center gap-2">
+                            <CheckCircle className="w-4 h-4" />
+                            Concluídos
+                            <Badge variant="secondary" className="ml-1">{getOrderCount('completed')}</Badge>
+                        </TabsTrigger>
+                        <TabsTrigger value="pending" className="flex items-center gap-2">
+                            <Clock className="w-4 h-4" />
+                            Pendentes
+                            <Badge variant="secondary" className="ml-1">{getOrderCount('pending')}</Badge>
+                        </TabsTrigger>
+                        <TabsTrigger value="processing" className="flex items-center gap-2">
+                            <Package className="w-4 h-4" />
+                            Processando
+                            <Badge variant="secondary" className="ml-1">{getOrderCount('processing')}</Badge>
+                        </TabsTrigger>
+                        <TabsTrigger value="cancelled" className="flex items-center gap-2">
+                            <XCircle className="w-4 h-4" />
+                            Cancelados
+                            <Badge variant="secondary" className="ml-1">{getOrderCount('cancelled')}</Badge>
+                        </TabsTrigger>
+                    </TabsList>
 
-                                    {order.items.length > 0 && (
-                                        <div className="border-t pt-4">
-                                            <p className="text-sm font-semibold mb-2">Produtos:</p>
-                                            <ul className="space-y-1">
-                                                {order.items.slice(0, 3).map((item) => (
-                                                    <li key={item.id} className="text-sm text-gray-600">
-                                                        • {item.name} {item.quantity > 1 && `(${item.quantity}x)`}
-                                                    </li>
-                                                ))}
-                                                {order.items.length > 3 && (
-                                                    <li className="text-sm text-gray-500 italic">
-                                                        + {order.items.length - 3} {order.items.length - 3 === 1 ? 'outro item' : 'outros itens'}
-                                                    </li>
-                                                )}
-                                            </ul>
-                                        </div>
-                                    )}
+                    <TabsContent value="todos" className="space-y-4">
+                        {filterOrders('todos').map((order) => (
+                            <OrderCard key={order.id} order={order} getStatusBadge={getStatusBadge} formatDate={formatDate} formatPrice={formatPrice} />
+                        ))}
+                    </TabsContent>
 
-                                    <Link href={`/conta/pedidos/${order.id}`}>
-                                        <Button
-                                            className="w-full bg-[#FD9555] hover:bg-[#FD9555]/90 text-white"
-                                        >
-                                            Ver Detalhes e Downloads
-                                        </Button>
-                                    </Link>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
+                    <TabsContent value="completed" className="space-y-4">
+                        {filterOrders('completed').length > 0 ? (
+                            filterOrders('completed').map((order) => (
+                                <OrderCard key={order.id} order={order} getStatusBadge={getStatusBadge} formatDate={formatDate} formatPrice={formatPrice} />
+                            ))
+                        ) : (
+                            <Card>
+                                <CardContent className="py-8 text-center text-gray-500">
+                                    Nenhum pedido concluído encontrado
+                                </CardContent>
+                            </Card>
+                        )}
+                    </TabsContent>
+
+                    <TabsContent value="pending" className="space-y-4">
+                        {filterOrders('pending').length > 0 ? (
+                            filterOrders('pending').map((order) => (
+                                <OrderCard key={order.id} order={order} getStatusBadge={getStatusBadge} formatDate={formatDate} formatPrice={formatPrice} />
+                            ))
+                        ) : (
+                            <Card>
+                                <CardContent className="py-8 text-center text-gray-500">
+                                    Nenhum pedido pendente encontrado
+                                </CardContent>
+                            </Card>
+                        )}
+                    </TabsContent>
+
+                    <TabsContent value="processing" className="space-y-4">
+                        {filterOrders('processing').length > 0 ? (
+                            filterOrders('processing').map((order) => (
+                                <OrderCard key={order.id} order={order} getStatusBadge={getStatusBadge} formatDate={formatDate} formatPrice={formatPrice} />
+                            ))
+                        ) : (
+                            <Card>
+                                <CardContent className="py-8 text-center text-gray-500">
+                                    Nenhum pedido em processamento encontrado
+                                </CardContent>
+                            </Card>
+                        )}
+                    </TabsContent>
+
+                    <TabsContent value="cancelled" className="space-y-4">
+                        {filterOrders('cancelled').length > 0 ? (
+                            filterOrders('cancelled').map((order) => (
+                                <OrderCard key={order.id} order={order} getStatusBadge={getStatusBadge} formatDate={formatDate} formatPrice={formatPrice} />
+                            ))
+                        ) : (
+                            <Card>
+                                <CardContent className="py-8 text-center text-gray-500">
+                                    Nenhum pedido cancelado encontrado
+                                </CardContent>
+                            </Card>
+                        )}
+                    </TabsContent>
+                </Tabs>
             )}
         </div>
+    );
+}
+
+// Componente para renderizar cada card de pedido
+function OrderCard({ 
+    order, 
+    getStatusBadge, 
+    formatDate, 
+    formatPrice 
+}: { 
+    order: Order; 
+    getStatusBadge: (status: string) => React.ReactNode; 
+    formatDate: (date: string) => string;
+    formatPrice: (price: number) => string;
+}) {
+    return (
+        <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader>
+                <div className="flex justify-between items-start">
+                    <div>
+                        <CardTitle className="text-lg">
+                            Pedido #{order.id.slice(0, 13)}...
+                        </CardTitle>
+                        <CardDescription>
+                            {formatDate(order.createdAt)}
+                        </CardDescription>
+                    </div>
+                    {getStatusBadge(order.status)}
+                </div>
+            </CardHeader>
+            <CardContent>
+                <div className="space-y-4">
+                    <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-600">
+                            {order.itemCount} {order.itemCount === 1 ? 'item' : 'itens'}
+                        </span>
+                        <span className="text-lg font-bold text-[#FD9555]">
+                            {formatPrice(order.total)}
+                        </span>
+                    </div>
+
+                    {order.items.length > 0 && (
+                        <div className="border-t pt-4">
+                            <p className="text-sm font-semibold mb-2">Produtos:</p>
+                            <ul className="space-y-1">
+                                {order.items.slice(0, 3).map((item) => (
+                                    <li key={item.id} className="text-sm text-gray-600">
+                                        • {item.name} {item.quantity > 1 && `(${item.quantity}x)`}
+                                    </li>
+                                ))}
+                                {order.items.length > 3 && (
+                                    <li className="text-sm text-gray-500 italic">
+                                        + {order.items.length - 3} {order.items.length - 3 === 1 ? 'outro item' : 'outros itens'}
+                                    </li>
+                                )}
+                            </ul>
+                        </div>
+                    )}
+
+                    {/* Mensagem especial para pedidos pendentes */}
+                    {order.status === 'pending' && (
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                            <p className="text-sm text-yellow-800">
+                                ⏳ <strong>Aguardando pagamento.</strong> Este pedido será processado assim que o pagamento for confirmado.
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Mensagem para pedidos cancelados */}
+                    {order.status === 'cancelled' && (
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                            <p className="text-sm text-red-800">
+                                ❌ Este pedido foi cancelado e não poderá ser processado.
+                            </p>
+                        </div>
+                    )}
+
+                    <Link href={`/conta/pedidos/${order.id}`}>
+                        <Button
+                            className="w-full bg-[#FD9555] hover:bg-[#FD9555]/90 text-white"
+                            disabled={order.status === 'cancelled'}
+                        >
+                            {order.status === 'completed' ? 'Ver Detalhes e Downloads' : 'Ver Detalhes'}
+                        </Button>
+                    </Link>
+                </div>
+            </CardContent>
+        </Card>
     );
 }

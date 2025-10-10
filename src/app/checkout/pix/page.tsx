@@ -134,6 +134,29 @@ export default function CheckoutPixPage() {
         }, 5 * 60 * 1000);
     };
 
+    // Simular pagamento PIX (apenas desenvolvimento)
+    const simulatePayment = async () => {
+        if (!pixData?.paymentIntentId) return;
+
+        try {
+            const response = await fetch('/api/stripe/simulate-pix-payment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ paymentIntentId: pixData.paymentIntentId }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert('✅ Pagamento simulado! Aguarde o webhook processar...');
+            } else {
+                alert(`❌ Erro: ${data.error || 'Erro desconhecido'}`);
+            }
+        } catch {
+            alert('❌ Erro ao simular pagamento');
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen p-4">
@@ -229,6 +252,26 @@ export default function CheckoutPixPage() {
                             ID do Pagamento: <code className="bg-gray-200 px-2 py-1 rounded">{pixData?.paymentIntentId}</code>
                         </p>
                     </div>
+
+                    {/* Botão de Teste - APENAS DESENVOLVIMENTO */}
+                    {process.env.NODE_ENV !== 'production' && (
+                        <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4">
+                            <h3 className="font-semibold text-yellow-900 mb-2">🧪 Modo de Desenvolvimento</h3>
+                            <p className="text-sm text-yellow-800 mb-3">
+                                PIX não funciona em modo de teste. Use o botão abaixo para simular
+                                o pagamento do <strong>Payment Intent específico</strong> que você criou:
+                            </p>
+                            <Button
+                                onClick={simulatePayment}
+                                className="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-semibold"
+                            >
+                                ⚡ Simular Pagamento PIX (Teste)
+                            </Button>
+                            <p className="text-xs text-yellow-700 mt-2 text-center">
+                                Isso confirmará o Payment Intent real com os produtos e valores corretos
+                            </p>
+                        </div>
+                    )}
 
                     {/* Botão Cancelar */}
                     <Button
