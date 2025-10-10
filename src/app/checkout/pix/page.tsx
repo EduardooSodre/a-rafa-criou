@@ -30,7 +30,7 @@ export default function CheckoutPixPage() {
     const [hasCreatedPayment, setHasCreatedPayment] = useState(false);
     const [isCreatingPayment, setIsCreatingPayment] = useState(false); // 🔒 Flag para evitar chamadas simultâneas
     const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
-    
+
     // 🔒 PROTEÇÃO EXTRA: useRef para garantir apenas 1 execução
     const hasInitialized = useRef(false);
 
@@ -56,9 +56,9 @@ export default function CheckoutPixPage() {
             if (orderId) {
                 console.log(`🔄 Retomando pagamento do pedido: ${orderId}`);
                 console.log(`📧 Email/Name não obrigatórios no resume (vêm do pedido)`);
-                
+
                 const response = await fetch(`/api/stripe/resume-payment?orderId=${orderId}`);
-                
+
                 if (!response.ok) {
                     const errorData = await response.json();
                     console.error('❌ Erro ao retomar pagamento:', errorData);
@@ -70,7 +70,7 @@ export default function CheckoutPixPage() {
                     paymentIntentId: data.paymentIntentId,
                     amount: data.amount,
                 });
-                
+
                 setPixData(data);
                 setLoading(false);
                 setIsCreatingPayment(false);

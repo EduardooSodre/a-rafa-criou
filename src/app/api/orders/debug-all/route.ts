@@ -5,7 +5,7 @@ import { desc } from 'drizzle-orm';
 
 /**
  * GET /api/orders/debug-all
- * 
+ *
  * ⚠️ APENAS PARA DEBUG - Lista TODOS os pedidos no banco
  * REMOVER EM PRODUÇÃO
  */
@@ -27,7 +27,7 @@ export async function GET() {
       .limit(20);
 
     console.log(`🔍 DEBUG: Total de pedidos no banco: ${allOrders.length}`);
-    
+
     return NextResponse.json({
       total: allOrders.length,
       orders: allOrders.map(order => ({

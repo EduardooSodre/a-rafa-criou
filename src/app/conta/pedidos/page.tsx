@@ -206,9 +206,9 @@ export default function PedidosPage() {
                         </p>
                     )}
                 </div>
-                <Button 
-                    onClick={fetchOrders} 
-                    variant="outline" 
+                <Button
+                    onClick={fetchOrders}
+                    variant="outline"
                     disabled={loading}
                     className="flex items-center gap-2"
                 >

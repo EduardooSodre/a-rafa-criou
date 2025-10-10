@@ -95,17 +95,17 @@ export async function POST(request: NextRequest) {
     // 2. 🔒 VERIFICAR SE JÁ EXISTE PEDIDO PENDENTE IDÊNTICO (evitar duplicação)
     // Criar hash dos itens para comparação (email + produtos + variações + quantidades + total)
     const sortedItems = items
-      .map(i => ({ 
-        productId: String(i.productId), 
-        variationId: i.variationId ? String(i.variationId) : null, 
-        quantity: i.quantity 
+      .map(i => ({
+        productId: String(i.productId),
+        variationId: i.variationId ? String(i.variationId) : null,
+        quantity: i.quantity,
       }))
       .sort((a, b) => a.productId.localeCompare(b.productId));
 
     const itemsHash = JSON.stringify({
       email,
       items: sortedItems,
-      total: total.toFixed(2)
+      total: total.toFixed(2),
     });
 
     console.log(`🔍 Verificando duplicação - Hash novo pedido: ${itemsHash.substring(0, 100)}...`);
@@ -123,12 +123,14 @@ export async function POST(request: NextRequest) {
 
     // Verificar se algum pedido pendente é IDÊNTICO (mesmos itens + valor)
     let identicalPendingOrder = null;
-    
+
     for (const order of existingPendingOrders) {
-      console.log(`🔍 Verificando pedido ${order.id} - Status: ${order.status}, Total: ${order.total}`);
-      
+      console.log(
+        `🔍 Verificando pedido ${order.id} - Status: ${order.status}, Total: ${order.total}`
+      );
+
       if (
-        order.status === 'pending' && 
+        order.status === 'pending' &&
         order.createdAt >= thirtyMinutesAgo &&
         order.stripePaymentIntentId &&
         parseFloat(order.total).toFixed(2) === total.toFixed(2)
@@ -143,17 +145,17 @@ export async function POST(request: NextRequest) {
 
         // Criar hash dos itens do pedido existente
         const existingSortedItems = orderItemsData
-          .map(i => ({ 
-            productId: String(i.productId), 
-            variationId: i.variationId ? String(i.variationId) : null, 
-            quantity: i.quantity 
+          .map(i => ({
+            productId: String(i.productId),
+            variationId: i.variationId ? String(i.variationId) : null,
+            quantity: i.quantity,
           }))
           .sort((a, b) => a.productId.localeCompare(b.productId));
 
         const existingItemsHash = JSON.stringify({
           email: order.email,
           items: existingSortedItems,
-          total: parseFloat(order.total).toFixed(2)
+          total: parseFloat(order.total).toFixed(2),
         });
 
         console.log(`🔍 Hash pedido existente: ${existingItemsHash.substring(0, 100)}...`);
@@ -175,7 +177,7 @@ export async function POST(request: NextRequest) {
       // ♻️ REUTILIZAR Payment Intent existente (pedido IDÊNTICO)
       console.log(`♻️ Pedido pendente IDÊNTICO encontrado: ${identicalPendingOrder.id}`);
       console.log(`♻️ Reutilizando Payment Intent: ${identicalPendingOrder.stripePaymentIntentId}`);
-      
+
       paymentIntent = await stripe.paymentIntents.retrieve(
         identicalPendingOrder.stripePaymentIntentId
       );
@@ -192,13 +194,15 @@ export async function POST(request: NextRequest) {
 
     // 3. Criar Payment Intent com PIX (apenas se não houver pedido idêntico)
     console.log(`🆕 Nenhum pedido pendente idêntico encontrado, criando novo...`);
-    
+
     // NOTA: PIX só funciona em produção com conta BR ativada
     // Em teste, vamos usar 'card' mas simular como PIX
     const isProduction = process.env.NODE_ENV === 'production';
     const paymentMethodTypes = isProduction ? ['pix'] : ['card'];
 
-    console.log(`💳 Criando Payment Intent - Modo: ${isProduction ? 'PRODUÇÃO (PIX)' : 'DESENVOLVIMENTO (CARD)'}`);
+    console.log(
+      `💳 Criando Payment Intent - Modo: ${isProduction ? 'PRODUÇÃO (PIX)' : 'DESENVOLVIMENTO (CARD)'}`
+    );
 
     paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(total * 100), // Centavos
@@ -251,9 +255,7 @@ export async function POST(request: NextRequest) {
             .limit(1)
         : null;
 
-      const itemPrice = variation && variation[0]?.price
-        ? parseFloat(variation[0].price)
-        : 0;
+      const itemPrice = variation && variation[0]?.price ? parseFloat(variation[0].price) : 0;
 
       await db.insert(orderItems).values({
         orderId: pendingOrder.id,

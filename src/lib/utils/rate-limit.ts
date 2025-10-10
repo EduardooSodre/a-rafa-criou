@@ -1,6 +1,6 @@
 /**
  * Rate Limiter simples em memória
- * 
+ *
  * IMPORTANTE: Em produção, usar Redis ou outro sistema distribuído
  * Esta implementação em memória só funciona com 1 instância do servidor
  */
@@ -13,14 +13,17 @@ interface RateLimitEntry {
 const rateLimitStore = new Map<string, RateLimitEntry>();
 
 // Limpar entradas expiradas a cada 5 minutos
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, entry] of rateLimitStore.entries()) {
-    if (entry.resetAt < now) {
-      rateLimitStore.delete(key);
+setInterval(
+  () => {
+    const now = Date.now();
+    for (const [key, entry] of rateLimitStore.entries()) {
+      if (entry.resetAt < now) {
+        rateLimitStore.delete(key);
+      }
     }
-  }
-}, 5 * 60 * 1000);
+  },
+  5 * 60 * 1000
+);
 
 export interface RateLimitConfig {
   windowMs: number; // Janela de tempo em ms

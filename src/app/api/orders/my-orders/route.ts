@@ -31,17 +31,17 @@ export async function GET() {
         userId: orders.userId,
       })
       .from(orders)
-      .where(
-        or(
-          eq(orders.userId, session.user.id),
-          eq(orders.email, session.user.email)
-        )
-      )
+      .where(or(eq(orders.userId, session.user.id), eq(orders.email, session.user.email)))
       .orderBy(desc(orders.createdAt));
 
-    console.log(`📊 Buscando pedidos para userId: ${session.user.id}, email: ${session.user.email}`);
+    console.log(
+      `📊 Buscando pedidos para userId: ${session.user.id}, email: ${session.user.email}`
+    );
     console.log(`📦 Total de pedidos encontrados: ${userOrders.length}`);
-    console.log(`📋 Status:`, userOrders.map(o => `${o.id.slice(0, 8)} - ${o.status}`));
+    console.log(
+      `📋 Status:`,
+      userOrders.map(o => `${o.id.slice(0, 8)} - ${o.status}`)
+    );
 
     // 3. Para cada pedido, buscar os itens
     const ordersWithItems = await Promise.all(

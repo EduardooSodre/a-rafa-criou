@@ -63,23 +63,26 @@ export async function POST(req: NextRequest) {
         // ✅ ATUALIZAR pedido existente para "completed"
         const existingOrder = existingOrders[0];
         console.log(`📦 Atualizando pedido existente: ${existingOrder.id}`);
-        
+
         // 🔒 VALIDAÇÃO DE SEGURANÇA: Verificar integridade dos valores
         const orderTotal = parseFloat(existingOrder.total);
         const paidAmount = paymentIntent.amount / 100;
-        
+
         // Permitir diferença de até 0.01 (arredondamento)
         if (Math.abs(orderTotal - paidAmount) > 0.01) {
           console.error(`⚠️ ALERTA DE SEGURANÇA: Valores não conferem!`);
           console.error(`Pedido: R$ ${orderTotal} | Pago: R$ ${paidAmount}`);
-          
+
           // Não atualizar pedido se valores não conferem
-          return Response.json({ 
-            error: 'Valores não conferem',
-            received: false 
-          }, { status: 400 });
+          return Response.json(
+            {
+              error: 'Valores não conferem',
+              received: false,
+            },
+            { status: 400 }
+          );
         }
-        
+
         const updatedOrders = await db
           .update(orders)
           .set({
@@ -113,7 +116,7 @@ export async function POST(req: NextRequest) {
       } else {
         // ⚠️ CRIAR pedido (fallback se não foi criado no create-pix)
         console.log('⚠️ Pedido não encontrado, criando novo...');
-        
+
         const newOrders = await db
           .insert(orders)
           .values({
@@ -187,7 +190,7 @@ export async function POST(req: NextRequest) {
             orderItemsData.map(async item => {
               // Buscar arquivo da variação (apenas se variationId não for null)
               let downloadUrl = '';
-              
+
               if (item.variationId) {
                 const fileRecords = await db
                   .select({
