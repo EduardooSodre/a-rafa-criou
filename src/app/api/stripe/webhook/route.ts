@@ -45,8 +45,13 @@ export async function POST(req: NextRequest) {
       // Parsear metadata
       const items = JSON.parse(paymentIntent.metadata.items || '[]');
       const userId = paymentIntent.metadata.userId || null;
-      const customerEmail = paymentIntent.receipt_email || paymentIntent.metadata.customer_email || paymentIntent.metadata.email || '';
-      const customerName = paymentIntent.metadata.customer_name || paymentIntent.metadata.userName || 'Cliente';
+      const customerEmail =
+        paymentIntent.receipt_email ||
+        paymentIntent.metadata.customer_email ||
+        paymentIntent.metadata.email ||
+        '';
+      const customerName =
+        paymentIntent.metadata.customer_name || paymentIntent.metadata.userName || 'Cliente';
 
       // Criar pedido
       const [order] = await db
@@ -158,7 +163,6 @@ export async function POST(req: NextRequest) {
             subject: `✅ Pedido Confirmado #${order.id.slice(0, 8)} - A Rafa Criou`,
             html: emailHtml,
           });
-
         } catch {
           // Não bloquear o webhook se o e-mail falhar
         }

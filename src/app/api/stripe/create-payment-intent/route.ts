@@ -35,9 +35,13 @@ export async function POST(req: NextRequest) {
       .map(item => item.variationId)
       .filter((id): id is string => id !== undefined);
 
-    const dbVariations = variationIds.length > 0
-      ? await db.select().from(productVariations).where(inArray(productVariations.id, variationIds))
-      : [];
+    const dbVariations =
+      variationIds.length > 0
+        ? await db
+            .select()
+            .from(productVariations)
+            .where(inArray(productVariations.id, variationIds))
+        : [];
 
     // 3. Calcular total REAL (preços do banco)
     let total = 0;
@@ -57,7 +61,7 @@ export async function POST(req: NextRequest) {
           );
         }
         itemPrice = Number(variation.price);
-        
+
         const product = dbProducts.find(p => p.id === item.productId);
         itemName = `${product?.name || 'Produto'} - ${variation.name}`;
       } else {

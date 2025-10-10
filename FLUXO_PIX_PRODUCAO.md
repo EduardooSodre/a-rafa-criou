@@ -4,7 +4,7 @@
 
 ### 🔐 Segurança Implementada
 
-1. **Sem Código de Teste**: 
+1. **Sem Código de Teste**:
    - ❌ Removido botão de confirmação manual
    - ❌ Removido QR Code simulado
    - ❌ Removido rota `/api/stripe/confirm-payment`
@@ -31,11 +31,13 @@
 ## 🔄 Fluxo Completo PIX
 
 ### 1. Usuário no Carrinho
+
 ```
 Usuario → Clica "Pagar com PIX" → Dialog pede nome/email
 ```
 
 ### 2. Criação do Payment Intent
+
 ```
 Frontend → POST /api/stripe/create-pix
   - Valida carrinho localStorage
@@ -49,6 +51,7 @@ Backend:
 ```
 
 ### 3. Página de Checkout PIX
+
 ```
 /checkout/pix?email=xxx&name=xxx
 
@@ -59,6 +62,7 @@ Backend:
 ```
 
 ### 4. Webhook Stripe (Assíncrono)
+
 ```
 Stripe → POST /api/stripe/webhook
   - ✅ Verifica assinatura
@@ -69,6 +73,7 @@ Stripe → POST /api/stripe/webhook
 ```
 
 ### 5. Polling Detecta Sucesso
+
 ```
 Frontend polling → GET /api/stripe/payment-status
   - status: "succeeded"
@@ -77,6 +82,7 @@ Frontend polling → GET /api/stripe/payment-status
 ```
 
 ### 6. Página de Obrigado
+
 ```
 /obrigado?payment_intent=xxx
 
@@ -90,16 +96,16 @@ Frontend polling → GET /api/stripe/payment-status
 
 ## 📊 Comparação: Cartão vs PIX
 
-| Aspecto | Cartão | PIX | Status |
-|---------|--------|-----|--------|
-| Payment Intent | ✅ Cria | ✅ Cria | ✅ Igual |
-| Webhook | ✅ payment_intent.succeeded | ✅ payment_intent.succeeded | ✅ Igual |
+| Aspecto          | Cartão                          | PIX                             | Status   |
+| ---------------- | ------------------------------- | ------------------------------- | -------- |
+| Payment Intent   | ✅ Cria                         | ✅ Cria                         | ✅ Igual |
+| Webhook          | ✅ payment_intent.succeeded     | ✅ payment_intent.succeeded     | ✅ Igual |
 | Redirecionamento | ✅ /obrigado?payment_intent=xxx | ✅ /obrigado?payment_intent=xxx | ✅ Igual |
-| Busca Pedido | ✅ by-payment-intent | ✅ by-payment-intent | ✅ Igual |
-| Criação Pedido | ✅ Server-side | ✅ Server-side | ✅ Igual |
-| Validação | ✅ Zod + DB | ✅ Zod + DB | ✅ Igual |
-| E-mail | ✅ Resend | ✅ Resend | ✅ Igual |
-| Downloads | ✅ R2 URLs | ✅ R2 URLs | ✅ Igual |
+| Busca Pedido     | ✅ by-payment-intent            | ✅ by-payment-intent            | ✅ Igual |
+| Criação Pedido   | ✅ Server-side                  | ✅ Server-side                  | ✅ Igual |
+| Validação        | ✅ Zod + DB                     | ✅ Zod + DB                     | ✅ Igual |
+| E-mail           | ✅ Resend                       | ✅ Resend                       | ✅ Igual |
+| Downloads        | ✅ R2 URLs                      | ✅ R2 URLs                      | ✅ Igual |
 
 **Conclusão**: Fluxos 100% idênticos, garantindo segurança e consistência.
 
@@ -108,11 +114,13 @@ Frontend polling → GET /api/stripe/payment-status
 ## 🚀 Produção: Como Funciona PIX Real
 
 ### Requisitos Stripe
+
 1. Conta Stripe brasileira
 2. PIX ativado no dashboard
 3. payment_method_types: ['pix'] em produção
 
 ### Fluxo em Produção
+
 ```
 1. Cliente clica "Pagar com PIX"
 2. Stripe gera QR Code PIX real
@@ -125,6 +133,7 @@ Frontend polling → GET /api/stripe/payment-status
 ```
 
 ### QR Code PIX
+
 - **Em Produção**: Stripe gera QR Code válido no Payment Intent
 - **Entrega**: Enviado por e-mail ao cliente
 - **Exibição**: Página mostra instruções para aguardar e-mail
@@ -134,17 +143,21 @@ Frontend polling → GET /api/stripe/payment-status
 ## ⚠️ Limitações Conhecidas
 
 ### Modo de Teste
+
 - ❌ PIX não disponível em test mode
 - ✅ Usa `payment_method_types: ['card']` para simular
 - ✅ Metadata marca como PIX: `payment_type: 'pix'`
 
 ### Solução
+
 Em teste, simular pagamento:
+
 ```bash
 stripe trigger payment_intent.succeeded
 ```
 
 Ou realizar pagamento real com cartão de teste:
+
 - Número: 4242 4242 4242 4242
 - CVC: Qualquer 3 dígitos
 - Data: Qualquer data futura
@@ -188,6 +201,7 @@ src/app/api/orders/
 ## 🧪 Como Testar
 
 ### 1. Teste Local (Cartão Simulando PIX)
+
 ```bash
 # Terminal 1: Next.js
 npm run dev
@@ -197,6 +211,7 @@ stripe listen --forward-to localhost:3000/api/stripe/webhook
 ```
 
 ### 2. Fluxo de Teste
+
 1. Adicionar produto ao carrinho
 2. Clicar "Pagar com PIX"
 3. Preencher nome e e-mail
@@ -205,6 +220,7 @@ stripe listen --forward-to localhost:3000/api/stripe/webhook
 6. Verificar redirecionamento automático
 
 ### 3. Produção
+
 1. Configurar Stripe com conta BR + PIX
 2. Atualizar env: `STRIPE_SECRET_KEY=sk_live_...`
 3. Cliente pagará PIX real
@@ -215,6 +231,7 @@ stripe listen --forward-to localhost:3000/api/stripe/webhook
 ## 📧 E-mail de Confirmação
 
 Enviado automaticamente após webhook:
+
 - ✅ Confirmação de pedido
 - ✅ Detalhes dos produtos
 - ✅ Links de download (15 min de validade)
@@ -228,12 +245,14 @@ Enviado automaticamente após webhook:
 **Fluxo PIX**: 100% funcional, seguro e idêntico ao cartão
 
 **Removido**:
+
 - ❌ Código de teste
 - ❌ QR Code mockado
 - ❌ Botão de confirmação manual
 - ❌ Logs de debug
 
 **Mantido**:
+
 - ✅ Segurança completa
 - ✅ Validação server-side
 - ✅ Webhook idempotente

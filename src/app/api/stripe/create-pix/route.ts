@@ -1,14 +1,14 @@
 /**
  * API: Criar Payment Intent PIX com Stripe
- * 
+ *
  * POST /api/stripe/create-pix
- * 
+ *
  * Body: {
  *   items: [{ productId, variationId?, quantity }],
  *   email: string,
  *   name: string
  * }
- * 
+ *
  * Retorna: QR Code PIX e instruções para pagamento
  */
 
@@ -21,11 +21,13 @@ import { eq } from 'drizzle-orm';
 
 // Schema de validação
 const createPixSchema = z.object({
-  items: z.array(z.object({
-    productId: z.string(),
-    variationId: z.string().optional(),
-    quantity: z.number().positive(),
-  })),
+  items: z.array(
+    z.object({
+      productId: z.string(),
+      variationId: z.string().optional(),
+      quantity: z.number().positive(),
+    })
+  ),
   email: z.string().email(),
   name: z.string().min(1),
 });
@@ -115,7 +117,6 @@ export async function POST(request: NextRequest) {
       paymentIntentId: paymentIntent.id,
       amount: total,
     });
-
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -126,9 +127,9 @@ export async function POST(request: NextRequest) {
 
     console.error('Erro ao criar Payment Intent PIX:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Erro ao criar pagamento PIX',
-        details: error instanceof Error ? error.message : 'Erro desconhecido'
+        details: error instanceof Error ? error.message : 'Erro desconhecido',
       },
       { status: 500 }
     );

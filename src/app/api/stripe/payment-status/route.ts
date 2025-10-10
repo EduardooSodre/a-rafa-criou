@@ -26,10 +26,7 @@ export async function GET(request: NextRequest) {
     const paymentIntentId = searchParams.get('id');
 
     if (!paymentIntentId) {
-      return NextResponse.json(
-        { error: 'Payment Intent ID não fornecido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Payment Intent ID não fornecido' }, { status: 400 });
     }
 
     // Buscar Payment Intent
@@ -47,13 +44,12 @@ export async function GET(request: NextRequest) {
       currency: paymentIntent.currency,
       metadata: paymentIntent.metadata,
     });
-
   } catch (error) {
     console.error('Erro ao verificar status:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Erro ao verificar status do pagamento',
-        details: error instanceof Error ? error.message : 'Erro desconhecido'
+        details: error instanceof Error ? error.message : 'Erro desconhecido',
       },
       { status: 500 }
     );
