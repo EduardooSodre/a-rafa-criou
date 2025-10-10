@@ -1,9 +1,9 @@
 /**
  * API APENAS PARA DESENVOLVIMENTO: Simular pagamento PIX
- * 
+ *
  * POST /api/stripe/simulate-pix-payment
  * Body: { paymentIntentId: string }
- * 
+ *
  * ⚠️ REMOVER EM PRODUÇÃO ou proteger com autenticação admin
  */
 
@@ -23,10 +23,7 @@ export async function POST(request: NextRequest) {
     const { paymentIntentId } = await request.json();
 
     if (!paymentIntentId) {
-      return NextResponse.json(
-        { error: 'paymentIntentId é obrigatório' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'paymentIntentId é obrigatório' }, { status: 400 });
     }
 
     // Buscar Payment Intent para confirmar que existe
@@ -63,7 +60,6 @@ export async function POST(request: NextRequest) {
         metadata: confirmed.metadata,
       },
     });
-
   } catch (error) {
     console.error('Erro ao simular pagamento PIX:', error);
     return NextResponse.json(

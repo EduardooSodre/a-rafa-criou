@@ -66,46 +66,46 @@ export default function PedidosPage() {
     };
 
     const getStatusBadge = (status: string) => {
-        const statusMap: Record<string, { 
-            label: string; 
+        const statusMap: Record<string, {
+            label: string;
             variant: 'default' | 'secondary' | 'destructive' | 'outline';
             icon: React.ReactNode;
             bgColor: string;
         }> = {
-            completed: { 
-                label: 'Concluído', 
+            completed: {
+                label: 'Concluído',
                 variant: 'default',
                 icon: <CheckCircle className="w-4 h-4 mr-1" />,
                 bgColor: 'bg-green-50 border-green-200 text-green-800'
             },
-            pending: { 
-                label: 'Pendente', 
+            pending: {
+                label: 'Pendente',
                 variant: 'secondary',
                 icon: <Clock className="w-4 h-4 mr-1" />,
                 bgColor: 'bg-yellow-50 border-yellow-200 text-yellow-800'
             },
-            cancelled: { 
-                label: 'Cancelado', 
+            cancelled: {
+                label: 'Cancelado',
                 variant: 'destructive',
                 icon: <XCircle className="w-4 h-4 mr-1" />,
                 bgColor: 'bg-red-50 border-red-200 text-red-800'
             },
-            processing: { 
-                label: 'Processando', 
+            processing: {
+                label: 'Processando',
                 variant: 'outline',
                 icon: <Package className="w-4 h-4 mr-1" />,
                 bgColor: 'bg-blue-50 border-blue-200 text-blue-800'
             },
-            refunded: { 
-                label: 'Reembolsado', 
+            refunded: {
+                label: 'Reembolsado',
                 variant: 'outline',
                 icon: <XCircle className="w-4 h-4 mr-1" />,
                 bgColor: 'bg-gray-50 border-gray-200 text-gray-800'
             },
         };
 
-        const statusInfo = statusMap[status] || { 
-            label: status, 
+        const statusInfo = statusMap[status] || {
+            label: status,
             variant: 'outline' as const,
             icon: <Package className="w-4 h-4 mr-1" />,
             bgColor: 'bg-gray-50 border-gray-200 text-gray-800'
@@ -308,14 +308,14 @@ export default function PedidosPage() {
 }
 
 // Componente para renderizar cada card de pedido
-function OrderCard({ 
-    order, 
-    getStatusBadge, 
-    formatDate, 
-    formatPrice 
-}: { 
-    order: Order; 
-    getStatusBadge: (status: string) => React.ReactNode; 
+function OrderCard({
+    order,
+    getStatusBadge,
+    formatDate,
+    formatPrice
+}: {
+    order: Order;
+    getStatusBadge: (status: string) => React.ReactNode;
     formatDate: (date: string) => string;
     formatPrice: (price: number) => string;
 }) {

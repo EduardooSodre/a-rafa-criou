@@ -3,17 +3,21 @@
 ## 🎯 Problema Resolvido
 
 **Antes:**
+
 ```bash
 stripe trigger payment_intent.succeeded
 ```
+
 ❌ Sempre criava pedido com **$20.00 USD**
 ❌ Produtos genéricos
 ❌ Não usava seu carrinho real
 
 **Agora:**
+
 ```
 Botão: ⚡ Simular Pagamento PIX (Teste)
 ```
+
 ✅ Usa o **Payment Intent que você acabou de criar**
 ✅ Produtos reais do carrinho
 ✅ Valor calculado corretamente
@@ -24,6 +28,7 @@ Botão: ⚡ Simular Pagamento PIX (Teste)
 ## 🚀 Como Usar
 
 ### 1. Adicione Produtos ao Carrinho
+
 ```
 Produto: Planilha de Orçamento - R$ 15,00
 Produto: Guia de Finanças - R$ 25,00
@@ -32,6 +37,7 @@ Total: R$ 40,00
 ```
 
 ### 2. Clique em "Pagar com PIX"
+
 - Digite seu nome
 - Digite seu e-mail
 - Clique em "Continuar"
@@ -61,6 +67,7 @@ Você verá:
 ### 4. Clique no Botão Amarelo
 
 O que acontece:
+
 1. ✅ Confirma o Payment Intent real (pi_xxxxxxxxxxxxx)
 2. ✅ Webhook recebe evento com seus dados
 3. ✅ Pedido criado com R$ 40,00
@@ -97,6 +104,7 @@ Com `stripe listen` rodando, você verá:
 ## 🎓 Diferença Técnica
 
 ### stripe trigger (Genérico)
+
 ```typescript
 // Cria um novo Payment Intent de teste:
 {
@@ -109,6 +117,7 @@ Com `stripe listen` rodando, você verá:
 ```
 
 ### Simulação Real (Seu PI)
+
 ```typescript
 // Usa o Payment Intent que você criou:
 {
@@ -130,6 +139,7 @@ Com `stripe listen` rodando, você verá:
 ## 🔒 Segurança
 
 ### Em Desenvolvimento
+
 ```typescript
 // Rota funciona normalmente
 POST /api/stripe/simulate-pix-payment
@@ -137,6 +147,7 @@ POST /api/stripe/simulate-pix-payment
 ```
 
 ### Em Produção
+
 ```typescript
 // Rota bloqueada automaticamente
 POST /api/stripe/simulate-pix-payment
@@ -172,11 +183,13 @@ Execute este teste completo:
 Agora você testa PIX com **dados reais do carrinho**, não valores genéricos!
 
 **Arquivos Criados:**
+
 - ✅ `/api/stripe/simulate-pix-payment` - Endpoint de simulação
 - ✅ `TESTE_PIX_DESENVOLVIMENTO.md` - Guia completo
 - ✅ Botão amarelo no checkout PIX (apenas dev)
 
 **Fluxo:**
+
 ```
 Carrinho → PIX → Botão Teste → Webhook → Pedido Real ✅
 ```

@@ -5,17 +5,20 @@
 O comando `stripe trigger payment_intent.succeeded` **NÃO usa seus Payment Intents reais**!
 
 ### O que acontece:
+
 ```bash
 stripe trigger payment_intent.succeeded
 ```
 
 ❌ Cria um **Payment Intent genérico de teste**:
+
 - Valor fixo: **$20.00 USD**
 - Sem produtos reais
 - Sem metadata do seu carrinho
 - Sem cliente real
 
 ### Por que isso acontece?
+
 O Stripe CLI gera eventos de amostra para testar webhooks, não eventos dos seus Payment Intents específicos.
 
 ---
@@ -27,12 +30,13 @@ O Stripe CLI gera eventos de amostra para testar webhooks, não eventos dos seus
 Quando você clicar em "Pagar com PIX" e chegar na página de checkout:
 
 1. **Em Desenvolvimento**, você verá uma caixa amarela:
+
    ```
    🧪 Modo de Desenvolvimento
-   
+
    PIX não funciona em modo de teste. Use o botão abaixo para
    simular o pagamento do Payment Intent específico que você criou:
-   
+
    [⚡ Simular Pagamento PIX (Teste)]
    ```
 
@@ -69,10 +73,10 @@ curl -X POST http://localhost:3000/api/stripe/simulate-pix-payment \
 
 ## 🔍 Comparação
 
-| Método | Payment Intent | Produtos | Valor | Metadata |
-|--------|---------------|----------|-------|----------|
-| `stripe trigger` | ❌ Genérico | ❌ Nenhum | ❌ $20 fixo | ❌ Vazio |
-| Botão Simulação | ✅ Seu PI real | ✅ Do carrinho | ✅ Calculado | ✅ Email/Nome |
+| Método           | Payment Intent | Produtos       | Valor        | Metadata      |
+| ---------------- | -------------- | -------------- | ------------ | ------------- |
+| `stripe trigger` | ❌ Genérico    | ❌ Nenhum      | ❌ $20 fixo  | ❌ Vazio      |
+| Botão Simulação  | ✅ Seu PI real | ✅ Do carrinho | ✅ Calculado | ✅ Email/Nome |
 
 ---
 
@@ -81,6 +85,7 @@ curl -X POST http://localhost:3000/api/stripe/simulate-pix-payment \
 ### Passo a Passo:
 
 1. **Adicione produtos ao carrinho**
+
    ```
    - Produto A (R$ 15,00) x2
    - Produto B (R$ 20,00) x1
@@ -96,6 +101,7 @@ curl -X POST http://localhost:3000/api/stripe/simulate-pix-payment \
    - Payment Intent ID: `pi_xxxxxxxxxxxxx`
 
 4. **Clique no botão amarelo de teste**
+
    ```
    ⚡ Simular Pagamento PIX (Teste)
    ```
@@ -119,10 +125,7 @@ curl -X POST http://localhost:3000/api/stripe/simulate-pix-payment \
 ```typescript
 // Em produção, retorna 403 Forbidden
 if (process.env.NODE_ENV === 'production') {
-  return NextResponse.json(
-    { error: 'Esta rota não está disponível em produção' },
-    { status: 403 }
-  );
+  return NextResponse.json({ error: 'Esta rota não está disponível em produção' }, { status: 403 });
 }
 ```
 
@@ -141,6 +144,7 @@ stripe listen --forward-to localhost:3000/api/stripe/webhook
 ```
 
 **O que você verá:**
+
 ```
 > Ready! Your webhook signing secret is whsec_xxxxxxxxxxxxx
 
@@ -158,7 +162,9 @@ stripe listen --forward-to localhost:3000/api/stripe/webhook
 ## 📊 Verificando os Dados Corretos
 
 ### No Webhook (Terminal Stripe CLI):
+
 Você verá os logs com os dados reais:
+
 ```
 💰 Payment Intent: pi_xxxxxxxxxxxxx
 💵 Valor: R$ 50.00
@@ -169,6 +175,7 @@ Você verá os logs com os dados reais:
 ```
 
 ### No Banco de Dados:
+
 ```sql
 SELECT * FROM orders WHERE stripe_payment_intent_id = 'pi_xxxxxxxxxxxxx';
 
@@ -179,7 +186,9 @@ SELECT * FROM orders WHERE stripe_payment_intent_id = 'pi_xxxxxxxxxxxxx';
 ```
 
 ### No E-mail:
+
 O cliente recebe e-mail com:
+
 - Valor correto: R$ 50,00
 - Produtos corretos
 - Links de download válidos
@@ -215,10 +224,10 @@ Se quiser testar novamente:
 
 ## 🎓 Resumo
 
-| ❌ Não Use | ✅ Use |
-|-----------|-------|
+| ❌ Não Use                                | ✅ Use                        |
+| ----------------------------------------- | ----------------------------- |
 | `stripe trigger payment_intent.succeeded` | Botão "Simular Pagamento PIX" |
-| Valores genéricos ($20) | Valores reais do carrinho |
-| Payment Intents aleatórios | Seu Payment Intent específico |
+| Valores genéricos ($20)                   | Valores reais do carrinho     |
+| Payment Intents aleatórios                | Seu Payment Intent específico |
 
 **Resultado**: Teste com dados reais, igual a produção! 🎉
