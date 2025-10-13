@@ -19,6 +19,8 @@ import { db } from '@/lib/db';
 import { products, productVariations, orders, orderItems } from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { Resend } from 'resend';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/config';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM_EMAIL = process.env.FROM_EMAIL || 'onboarding@resend.dev';
@@ -40,6 +42,12 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { items, email, name } = createPixSchema.parse(body);
+
+    // 🔒 Verificar se há usuário logado
+    const session = await getServerSession(authOptions);
+    const userId = session?.user?.id || null;
+
+    console.log(`👤 Usuário logado: ${userId ? userId : 'Não (checkout como convidado)'}`);
 
     // 1. Validar produtos e calcular total
     let total = 0;
@@ -224,7 +232,7 @@ export async function POST(request: NextRequest) {
     const [pendingOrder] = await db
       .insert(orders)
       .values({
-        userId: null, // Será preenchido se o usuário estiver logado
+        userId: userId, // ✅ Associar ao usuário logado (se houver)
         email: email,
         status: 'pending', // ⚠️ PENDENTE até webhook confirmar
         subtotal: total.toString(),

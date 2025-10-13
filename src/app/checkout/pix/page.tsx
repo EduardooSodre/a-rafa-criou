@@ -213,6 +213,44 @@ export default function CheckoutPixPage() {
         }
     };
 
+    // 🚫 Cancelar pedido e voltar ao carrinho
+    const handleCancelOrder = async () => {
+        // Se não houver orderId, apenas voltar ao carrinho
+        if (!orderId) {
+            router.push('/carrinho');
+            return;
+        }
+
+        try {
+            console.log(`🚫 Cancelando pedido: ${orderId}`);
+            
+            const response = await fetch('/api/orders/cancel', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderId }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                console.log('✅ Pedido cancelado com sucesso');
+                // Parar polling se estiver ativo
+                if (pollingInterval) {
+                    clearInterval(pollingInterval);
+                    setPollingInterval(null);
+                }
+                // Voltar ao carrinho
+                router.push('/carrinho');
+            } else {
+                console.error('❌ Erro ao cancelar pedido:', data.error);
+                alert(`Erro ao cancelar pedido: ${data.error}`);
+            }
+        } catch (error) {
+            console.error('❌ Erro ao cancelar pedido:', error);
+            alert('Erro ao cancelar pedido. Tente novamente.');
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen p-4">
@@ -331,7 +369,7 @@ export default function CheckoutPixPage() {
 
                     {/* Botão Cancelar */}
                     <Button
-                        onClick={() => router.push('/carrinho')}
+                        onClick={handleCancelOrder}
                         variant="outline"
                         className="w-full"
                     >

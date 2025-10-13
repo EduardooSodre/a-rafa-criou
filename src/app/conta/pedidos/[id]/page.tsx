@@ -31,6 +31,7 @@ interface OrderDetails {
     paymentStatus: string;
     createdAt: string;
     paidAt: string | null;
+    updatedAt: string | null; // ✅ Data de atualização
     items: OrderItem[];
 }
 
@@ -282,6 +283,61 @@ export default function PedidoDetalhesPage() {
                     Realizado em {formatDate(order.createdAt)}
                 </p>
             </div>
+
+            {/* ⚠️ Alerta de Cancelamento */}
+            {order.status === 'cancelled' && (
+                <Alert variant="destructive" className="mb-6">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                        <strong>Pedido Cancelado</strong>
+                        <p className="mt-2">
+                            Este pedido foi cancelado {order.updatedAt ? `em ${formatDate(order.updatedAt)}` : ''}.
+                        </p>
+                        <p className="mt-2 text-sm">
+                            <strong>Possíveis motivos:</strong>
+                        </p>
+                        <ul className="list-disc list-inside text-sm mt-1 space-y-1">
+                            <li>Você cancelou o pedido antes de efetuar o pagamento</li>
+                            <li>O pagamento não foi confirmado dentro do prazo</li>
+                            <li>Houve um problema com o método de pagamento</li>
+                        </ul>
+                        <p className="mt-3 text-sm">
+                            Se você deseja adquirir estes produtos novamente, adicione-os ao carrinho e realize um novo pedido.
+                        </p>
+                    </AlertDescription>
+                </Alert>
+            )}
+
+            {/* ✅ Alerta de Sucesso (Pedido Completo) */}
+            {order.status === 'completed' && (
+                <Alert className="mb-6 border-green-200 bg-green-50">
+                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                    <AlertDescription className="text-green-800">
+                        <strong>Pedido Concluído com Sucesso!</strong>
+                        <p className="mt-1">
+                            Seu pedido foi pago e você já pode fazer o download dos produtos abaixo.
+                        </p>
+                    </AlertDescription>
+                </Alert>
+            )}
+
+            {/* ⏳ Alerta de Pendência */}
+            {order.status === 'pending' && (
+                <Alert className="mb-6 border-yellow-200 bg-yellow-50">
+                    <Clock className="h-4 w-4 text-yellow-600" />
+                    <AlertDescription className="text-yellow-800">
+                        <strong>Aguardando Pagamento</strong>
+                        <p className="mt-1">
+                            Seu pedido foi criado, mas ainda está aguardando a confirmação do pagamento.
+                        </p>
+                        {order.paymentProvider === 'stripe' && (
+                            <p className="mt-2 text-sm">
+                                Se você já realizou o pagamento via PIX, aguarde alguns instantes para a confirmação automática.
+                            </p>
+                        )}
+                    </AlertDescription>
+                </Alert>
+            )}
 
             {/* Informações do Pedido */}
             <Card className="mb-6">
