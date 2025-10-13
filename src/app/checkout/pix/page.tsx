@@ -223,7 +223,7 @@ export default function CheckoutPixPage() {
 
         try {
             console.log(`🚫 Cancelando pedido: ${orderId}`);
-            
+
             const response = await fetch('/api/orders/cancel', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

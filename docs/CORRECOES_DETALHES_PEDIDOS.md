@@ -5,6 +5,7 @@
 ### **Problema 1: "Você não tem permissão para acessar este pedido"**
 
 #### 🐛 **Causa Raiz:**
+
 Os pedidos criados via PIX estavam sendo salvos com `userId: null`, mas a API de detalhes (`/api/orders/[id]`) exigia que o `userId` do pedido fosse igual ao `userId` da sessão.
 
 #### ✅ **Solução Implementada:**
@@ -24,6 +25,7 @@ Os pedidos criados via PIX estavam sendo salvos com `userId: null`, mas a API de
 ### **Problema 2: Detalhes de pedido cancelado não explicavam o motivo**
 
 #### 🐛 **Causa Raiz:**
+
 Não havia informação visual sobre por que um pedido foi cancelado nem quando isso aconteceu.
 
 #### ✅ **Solução Implementada:**
@@ -44,6 +46,7 @@ Não havia informação visual sobre por que um pedido foi cancelado nem quando 
 ### 1. `src/app/api/stripe/create-pix/route.ts`
 
 **Mudanças:**
+
 ```typescript
 // ✅ ANTES
 import { Resend } from 'resend';
@@ -81,6 +84,7 @@ export async function POST(request: NextRequest) {
 ```
 
 **Impacto:**
+
 - ✅ Novos pedidos PIX terão `userId` associado se usuário estiver logado
 - ✅ Checkouts como convidado continuam funcionando (`userId: null`)
 
@@ -89,6 +93,7 @@ export async function POST(request: NextRequest) {
 ### 2. `src/app/api/orders/[id]/route.ts`
 
 **Mudanças:**
+
 ```typescript
 // ✅ ANTES
 // 3. Verificar propriedade
@@ -102,8 +107,8 @@ if (order.userId !== session.user.id) {
 // ✅ DEPOIS
 // 3. Verificar propriedade
 // ✅ Aceitar se userId do pedido corresponde OU se email corresponde (para pedidos antigos sem userId)
-const isOwner = 
-  order.userId === session.user.id || 
+const isOwner =
+  order.userId === session.user.id ||
   (order.email === session.user.email && !order.userId);
 
 if (!isOwner) {
@@ -131,6 +136,7 @@ return NextResponse.json({
 ```
 
 **Impacto:**
+
 - ✅ Pedidos antigos sem `userId` agora são acessíveis via validação por email
 - ✅ Logs detalhados facilitam debug de problemas de acesso
 - ✅ Campo `updatedAt` permite saber quando pedido foi atualizado/cancelado
@@ -140,6 +146,7 @@ return NextResponse.json({
 ### 3. `src/app/conta/pedidos/[id]/page.tsx`
 
 **Mudanças:**
+
 ```typescript
 // ✅ ANTES
 interface OrderDetails {
@@ -214,6 +221,7 @@ interface OrderDetails {
 ```
 
 **Impacto:**
+
 - ✅ Usuário vê claramente por que o pedido foi cancelado
 - ✅ Data de cancelamento é exibida quando disponível
 - ✅ Orientações sobre como proceder (fazer novo pedido)
@@ -230,6 +238,7 @@ interface OrderDetails {
 3. Clique em "Ver Detalhes e Downloads" no pedido completo
 
 **✅ Resultado esperado:**
+
 - Página carrega sem erro "não tem permissão"
 - Alert verde mostra "Pedido Concluído com Sucesso!"
 - Botões de download disponíveis
@@ -242,6 +251,7 @@ interface OrderDetails {
 4. Clique em "Ver Detalhes" no pedido cancelado
 
 **✅ Resultado esperado:**
+
 - Página carrega sem erro "não tem permissão"
 - Alert vermelho mostra "Pedido Cancelado"
 - Explicação dos motivos de cancelamento
@@ -255,6 +265,7 @@ interface OrderDetails {
 3. Clique em "Ver Detalhes" no pedido pendente
 
 **✅ Resultado esperado:**
+
 - Página carrega sem erro "não tem permissão"
 - Alert amarelo mostra "Aguardando Pagamento"
 - Explicação sobre confirmação automática de PIX
@@ -268,10 +279,12 @@ Para testar pedidos antigos (criados antes da correção):
 2. Tente acessar esse pedido logado com o mesmo email
 
 **✅ Resultado esperado:**
+
 - Página carrega sem erro "não tem permissão"
 - Validação por email funciona como fallback
 
 **SQL para verificar:**
+
 ```sql
 SELECT id, email, "userId", status, total, "createdAt"
 FROM orders
@@ -285,6 +298,7 @@ LIMIT 5;
 ## 📊 Validação de Logs
 
 ### **Console do navegador (pedido cancelado):**
+
 ```
 ✅ Pedido encontrado: <orderId>
 Status: cancelled
@@ -292,12 +306,14 @@ updatedAt: 2025-10-10T12:34:56.789Z
 ```
 
 ### **Backend (acesso permitido por email):**
+
 ```
 👤 Usuário logado: abc-123-def (ou "Não (checkout como convidado)")
 ✅ Pedido acessível via email (userId do pedido é null)
 ```
 
 ### **Backend (acesso negado):**
+
 ```
 ❌ Acesso negado - userId pedido: xyz-789, userId sessão: abc-123, email pedido: user1@example.com, email sessão: user2@example.com
 ```
@@ -306,12 +322,12 @@ updatedAt: 2025-10-10T12:34:56.789Z
 
 ## 🔒 Segurança Implementada
 
-| Validação | Descrição |
-|-----------|-----------|
-| **userId match** | Pedido só pode ser acessado pelo dono (via userId) |
-| **Email fallback** | Para pedidos antigos sem userId, valida por email |
-| **Sessão obrigatória** | Endpoint retorna 401 se não houver sessão |
-| **Logs de acesso** | Todas as tentativas de acesso são logadas |
+| Validação              | Descrição                                          |
+| ---------------------- | -------------------------------------------------- |
+| **userId match**       | Pedido só pode ser acessado pelo dono (via userId) |
+| **Email fallback**     | Para pedidos antigos sem userId, valida por email  |
+| **Sessão obrigatória** | Endpoint retorna 401 se não houver sessão          |
+| **Logs de acesso**     | Todas as tentativas de acesso são logadas          |
 
 ---
 

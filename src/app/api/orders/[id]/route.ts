@@ -31,12 +31,13 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
     // 3. Verificar propriedade
     // ✅ Aceitar se userId do pedido corresponde OU se email corresponde (para pedidos antigos sem userId)
-    const isOwner = 
-      order.userId === session.user.id || 
-      (order.email === session.user.email && !order.userId);
+    const isOwner =
+      order.userId === session.user.id || (order.email === session.user.email && !order.userId);
 
     if (!isOwner) {
-      console.log(`❌ Acesso negado - userId pedido: ${order.userId}, userId sessão: ${session.user.id}, email pedido: ${order.email}, email sessão: ${session.user.email}`);
+      console.log(
+        `❌ Acesso negado - userId pedido: ${order.userId}, userId sessão: ${session.user.id}, email pedido: ${order.email}, email sessão: ${session.user.email}`
+      );
       return NextResponse.json(
         { error: 'Você não tem permissão para acessar este pedido' },
         { status: 403 }

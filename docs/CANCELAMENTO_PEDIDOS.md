@@ -15,6 +15,7 @@ Implementação completa do fluxo de cancelamento de pedidos pendentes quando o 
 **Método:** `POST`
 
 **Body:**
+
 ```json
 {
   "orderId": "uuid-do-pedido"
@@ -45,6 +46,7 @@ Implementação completa do fluxo de cancelamento de pedidos pendentes quando o 
    - Retorna sucesso
 
 **Resposta de Sucesso:**
+
 ```json
 {
   "success": true,
@@ -53,6 +55,7 @@ Implementação completa do fluxo de cancelamento de pedidos pendentes quando o 
 ```
 
 **Possíveis Erros:**
+
 - `400`: orderId não fornecido
 - `404`: Pedido não encontrado
 - `400`: Pedido já pago (completed)
@@ -69,40 +72,40 @@ Implementação completa do fluxo de cancelamento de pedidos pendentes quando o 
 
 ```typescript
 const handleCancelOrder = async () => {
-    // Se não houver orderId, apenas voltar ao carrinho
-    if (!orderId) {
-        router.push('/carrinho');
-        return;
+  // Se não houver orderId, apenas voltar ao carrinho
+  if (!orderId) {
+    router.push('/carrinho');
+    return;
+  }
+
+  try {
+    console.log(`🚫 Cancelando pedido: ${orderId}`);
+
+    const response = await fetch('/api/orders/cancel', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      console.log('✅ Pedido cancelado com sucesso');
+      // Parar polling se estiver ativo
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+        setPollingInterval(null);
+      }
+      // Voltar ao carrinho
+      router.push('/carrinho');
+    } else {
+      console.error('❌ Erro ao cancelar pedido:', data.error);
+      alert(`Erro ao cancelar pedido: ${data.error}`);
     }
-
-    try {
-        console.log(`🚫 Cancelando pedido: ${orderId}`);
-        
-        const response = await fetch('/api/orders/cancel', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ orderId }),
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            console.log('✅ Pedido cancelado com sucesso');
-            // Parar polling se estiver ativo
-            if (pollingInterval) {
-                clearInterval(pollingInterval);
-                setPollingInterval(null);
-            }
-            // Voltar ao carrinho
-            router.push('/carrinho');
-        } else {
-            console.error('❌ Erro ao cancelar pedido:', data.error);
-            alert(`Erro ao cancelar pedido: ${data.error}`);
-        }
-    } catch (error) {
-        console.error('❌ Erro ao cancelar pedido:', error);
-        alert('Erro ao cancelar pedido. Tente novamente.');
-    }
+  } catch (error) {
+    console.error('❌ Erro ao cancelar pedido:', error);
+    alert('Erro ao cancelar pedido. Tente novamente.');
+  }
 };
 ```
 
@@ -119,13 +122,10 @@ const handleCancelOrder = async () => {
    - Redireciona para o carrinho em caso de sucesso
 
 3. **Integração com o botão:**
+
 ```tsx
-<Button
-    onClick={handleCancelOrder}
-    variant="outline"
-    className="w-full"
->
-    Cancelar e voltar ao carrinho
+<Button onClick={handleCancelOrder} variant='outline' className='w-full'>
+  Cancelar e voltar ao carrinho
 </Button>
 ```
 
@@ -168,6 +168,7 @@ const handleCancelOrder = async () => {
 ```
 
 **Regras:**
+
 - `pending` → `completed`: Via webhook após pagamento confirmado
 - `pending` → `cancelled`: Via botão "Cancelar e voltar ao carrinho"
 - `completed`: **Estado final** (não pode ser cancelado)
@@ -186,6 +187,7 @@ const handleCancelOrder = async () => {
 5. ✅ Pedido **não** foi criado no banco
 
 **Logs esperados:**
+
 ```
 🚫 Cancelando pedido: (vazio)
 // Redireciona sem chamar API
@@ -204,12 +206,14 @@ const handleCancelOrder = async () => {
 9. ✅ Deve voltar ao carrinho
 
 **Logs esperados (Console):**
+
 ```
 🚫 Cancelando pedido: <orderId>
 ✅ Pedido cancelado com sucesso
 ```
 
 **Logs esperados (Backend):**
+
 ```
 🚫 Cancelando pedido: <orderId>
 ✅ Pedido encontrado: <orderId> - Status: pending
@@ -227,6 +231,7 @@ const handleCancelOrder = async () => {
 5. ✅ Alert deve exibir "Pedido já foi pago..."
 
 **Logs esperados:**
+
 ```
 🚫 Cancelando pedido: <orderId>
 ✅ Pedido encontrado: <orderId> - Status: completed
@@ -241,6 +246,7 @@ const handleCancelOrder = async () => {
 4. ✅ Status permanece `cancelled`
 
 **Logs esperados:**
+
 ```
 🚫 Cancelando pedido: <orderId>
 ✅ Pedido encontrado: <orderId> - Status: cancelled
@@ -254,15 +260,15 @@ const handleCancelOrder = async () => {
 ### **Consulta SQL para verificar pedidos cancelados:**
 
 ```sql
-SELECT 
-    id, 
-    status, 
-    total, 
+SELECT
+    id,
+    status,
+    total,
     email,
     "createdAt",
     "updatedAt",
     "stripePaymentIntentId"
-FROM orders 
+FROM orders
 WHERE status = 'cancelled'
 ORDER BY "updatedAt" DESC
 LIMIT 10;
@@ -271,11 +277,13 @@ LIMIT 10;
 ### **Verificar Payment Intent no Stripe:**
 
 Via CLI do Stripe:
+
 ```bash
 stripe payment_intents retrieve pi_xxx
 ```
 
 Status esperado:
+
 ```json
 {
   "id": "pi_xxx",
