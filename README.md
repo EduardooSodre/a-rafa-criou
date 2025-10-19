@@ -53,17 +53,19 @@ E-commerce moderno para venda de produtos digitais (PDFs) com foco em acessibili
 - ❌ **Afiliação:** `affiliates`, `affiliate_links`, `affiliate_commissions` (FALTA)
 - ❌ **Traduções:** `product_translations` (FALTA)
 
-### 🟡 **3. AUTENTICAÇÃO** (PARCIAL - 60%)
+### � **3. AUTENTICAÇÃO** (COMPLETO - 100%)
 
 - ✅ Auth.js configurado e funcional
 - ✅ Login com Credentials (email + senha)
 - ✅ Registro de usuários
 - ✅ Roles (admin, member, customer)
+- ✅ Proteção de rotas (middleware para /admin e /conta)
+- ✅ Script para criar/promover admins
+- ✅ Sessão JWT segura
 - ✅ Estrutura para reset de senha (`password_reset_tokens`)
-- ❌ Recuperação de senha funcional (FALTA)
-- ❌ Magic Link funcional (FALTA)
-- ❌ Compatibilidade phpass para migração WooCommerce (FALTA)
-- ❌ Rehash automático de senhas legadas (FALTA)
+- ❌ Recuperação de senha funcional (FALTA - não bloqueia vendas)
+- ❌ Magic Link funcional (FALTA - opcional)
+- ❌ Compatibilidade phpass para migração WooCommerce (FALTA - apenas se migrar)
 
 ### 🟢 **4. PAINEL ADMINISTRATIVO** (COMPLETO - 100%)
 
@@ -102,18 +104,22 @@ E-commerce moderno para venda de produtos digitais (PDFs) com foco em acessibili
 - ✅ Frontend integrado (ProductForm, ProductsCards, EditProductDialog)
 - ✅ Performance: Imagens carregam **instantaneamente** via CDN
 
-### 🟡 **6. CATÁLOGO E PRODUTOS** (PARCIAL - 40%)
+### � **6. CATÁLOGO E PRODUTOS** (PARCIAL - 70%)
 
 - ✅ Estrutura `/produtos` criada
 - ✅ Estrutura `/produtos/[slug]` criada
 - ✅ API de produtos **OTIMIZADA** funcionando
 - ✅ Hook `useProducts` para buscar produtos
-- ❌ UI do catálogo completa (FALTA)
-- ❌ Filtros e busca no frontend (FALTA)
-- ❌ Seletor de variações na PDP (FALTA)
-- ❌ Galeria de imagens na PDP (FALTA)
-- ❌ SEO dinâmico por produto (FALTA)
+- ✅ PDP (Product Detail Page) completa com galeria
+- ✅ Seletor de variações inteligente (filtros por atributos)
+- ✅ Preço dinâmico ao selecionar variação
+- ✅ Add to Cart e Buy Now funcionais
+- ✅ SEO básico (JSON-LD Schema.org Product)
+- ❌ UI do catálogo com filtros avançados (FALTA)
+- ❌ Ordenação e paginação no catálogo (FALTA)
 - ❌ Breadcrumbs e navegação (FALTA)
+- ❌ Produtos relacionados (FALTA)
+- ❌ Reviews/Avaliações (FALTA)
 
 ### � **7. CARRINHO E CHECKOUT - STRIPE** (COMPLETO - 100%) ✨ **NOVO**
 
@@ -143,17 +149,20 @@ E-commerce moderno para venda de produtos digitais (PDFs) com foco em acessibili
 - ❌ Validação de cupons no checkout (FALTA)
 - ❌ E-mail pós-compra (SPRINT 1.2)
 
-### 🟡 **7. CLOUDFLARE R2 (Storage)** (PARCIAL - 70%)
+### � **7. CLOUDFLARE R2 (Storage)** (COMPLETO - 100%)
 
 - ✅ Configuração R2 (variáveis `.env`)
 - ✅ Upload de PDFs (`/api/r2/upload`)
 - ✅ Delete de arquivos (`/api/r2/delete`)
-- ✅ URLs assinadas para download (`/api/r2/download`)
+- ✅ URLs assinadas para download (`/api/download/generate-link`)
 - ✅ Integração com admin de produtos
-- ❌ Entrega automática pós-pagamento (FALTA)
-- ❌ E-mail com link de download (FALTA)
-- ❌ Área do cliente com downloads (FALTA)
-- ❌ Proteção: watermark, limite de downloads, logs (FALTA)
+- ✅ Entrega automática pós-pagamento (via webhook + e-mail)
+- ✅ E-mail com link de download (Resend + React Email)
+- ✅ Área do cliente com downloads (`/conta/pedidos`)
+- ✅ Re-download funcional (gera novos links)
+- ✅ Logs de auditoria (tabela `downloads`)
+- ✅ Preparado para limite de 5 downloads (estrutura pronta)
+- ❌ Proteção avançada: watermark, limite ativo (OPCIONAL)
 
 ### 🔴 **8. SISTEMA DE CUPONS** (NÃO INICIADO - 0%)
 
