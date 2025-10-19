@@ -9,26 +9,31 @@ Sua loja está **pronta para vender**! Todos os módulos estão funcionando perf
 ## 🎯 O QUE FUNCIONA AGORA
 
 ### ✅ Cliente pode comprar com PIX
+
 - Escaneia QR Code no app do banco
 - Pagamento confirmado automaticamente
 - E-mail enviado com links de download
 
 ### ✅ Cliente pode comprar com Cartão
+
 - Preenche dados do cartão no site
 - Pagamento processado pelo Stripe
 - E-mail enviado com links de download
 
 ### ✅ Cliente recebe produtos automaticamente
+
 - E-mail imediato após pagamento
 - Links para baixar PDFs
 - Pode baixar quantas vezes quiser
 
 ### ✅ Cliente tem área pessoal
+
 - Ver histórico de compras
 - Baixar PDFs novamente
 - Cancelar pedidos pendentes
 
 ### ✅ Você tem painel admin
+
 - Adicionar/editar produtos
 - Upload de imagens e PDFs
 - Ver vendas e estatísticas
@@ -51,14 +56,14 @@ Sua loja está **pronta para vender**! Todos os módulos estão funcionando perf
 
 ## 🔍 RESUMO TÉCNICO
 
-| Módulo | Status |
-|--------|--------|
+| Módulo                    | Status  |
+| ------------------------- | ------- |
 | Pagamentos (PIX + Cartão) | ✅ 100% |
-| E-mail automático | ✅ 100% |
-| Download de PDFs | ✅ 100% |
-| Portal do cliente | ✅ 100% |
-| Admin panel | ✅ 100% |
-| Segurança | ✅ 100% |
+| E-mail automático         | ✅ 100% |
+| Download de PDFs          | ✅ 100% |
+| Portal do cliente         | ✅ 100% |
+| Admin panel               | ✅ 100% |
+| Segurança                 | ✅ 100% |
 
 ---
 
@@ -124,11 +129,13 @@ R: Sim. Antes de pagar, pode cancelar na página de checkout.
 ## 📞 PRÓXIMAS AÇÕES
 
 **Para você (cliente):**
+
 1. Testar o fluxo completo
 2. Aprovar funcionamento
 3. Fornecer credenciais de produção (Stripe, domínio)
 
 **Para mim (desenvolvedor):**
+
 1. Configurar produção
 2. Fazer deploy
 3. Testar em produção

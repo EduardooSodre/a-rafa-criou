@@ -8,7 +8,7 @@
 ✅ **Entrega Automática:** E-mails + Downloads Seguros - COMPLETO  
 ✅ **Portal do Cliente:** Histórico + Re-downloads - COMPLETO  
 ✅ **Painel Admin:** CRUD completo + Performance otimizada - COMPLETO  
-✅ **Autenticação:** Login/Registro + Roles - COMPLETO  
+✅ **Autenticação:** Login/Registro + Roles - COMPLETO
 
 ---
 
@@ -28,6 +28,7 @@
 - ✅ **Retomar pagamento:** Botão "Pagar Agora" funciona corretamente
 
 **Fluxo testado e funcional:**
+
 ```
 Carrinho → Checkout → Pagamento → Webhook → Pedido no Banco → E-mail → Download
 ```
@@ -46,6 +47,7 @@ Carrinho → Checkout → Pagamento → Webhook → Pedido no Banco → E-mail �
 - ✅ **E-mail de Confirmação:** Enviado com produtos após pagamento
 
 **Informações nos e-mails:**
+
 - Dados do pedido (ID, data, total)
 - Lista de produtos comprados
 - Botões individuais de download por produto
@@ -70,6 +72,7 @@ Carrinho → Checkout → Pagamento → Webhook → Pedido no Banco → E-mail �
 - ✅ **Status Colorido:** Verde (concluído), Amarelo (pendente), Vermelho (cancelado)
 
 **Recursos Adicionais:**
+
 - Download abre em nova aba automaticamente
 - Mensagens de sucesso/erro por 10 segundos
 - Proteção: redireciona para login se não autenticado
@@ -123,6 +126,7 @@ Carrinho → Checkout → Pagamento → Webhook → Pedido no Banco → E-mail �
 - ✅ **Verificação:** useSession em todas as páginas protegidas
 
 **Tabelas do Banco:**
+
 - `users` (id, email, password, role, name)
 - `accounts`, `sessions`, `verification_tokens`
 - `password_reset_tokens` (estrutura pronta para recuperação)
@@ -160,6 +164,7 @@ Carrinho → Checkout → Pagamento → Webhook → Pedido no Banco → E-mail �
 - ✅ **Metadata:** cloudinaryId, url, width, height, format
 
 **Performance:**
+
 - Imagens carregam instantaneamente
 - Formato otimizado por browser
 - Sem impacto no servidor
@@ -179,6 +184,7 @@ Carrinho → Checkout → Pagamento → Webhook → Pedido no Banco → E-mail �
 - ✅ **Limite:** Preparado para 5 downloads (estrutura pronta)
 
 **Segurança:**
+
 - Verificação de propriedade
 - Expiração automática
 - Logs de auditoria
@@ -383,13 +389,13 @@ Carrinho → Checkout → Pagamento → Webhook → Pedido no Banco → E-mail �
 
 ## 📊 MÉTRICAS DE PERFORMANCE
 
-| Métrica                      | Antes    | Depois   | Melhoria      |
-|------------------------------|----------|----------|---------------|
-| Admin - Lista produtos       | 2000ms   | 300ms    | **85% ↓**     |
-| Admin - Editar produto       | 1500ms   | 250ms    | **83% ↓**     |
-| Database queries (produtos)  | 40+      | 5        | **88% ↓**     |
-| Cloudinary cleanup           | Manual   | Automático| **100% confiável** |
-| Tamanho médio de imagem      | 2-5 MB   | 100-300 KB| **90% ↓**     |
+| Métrica                     | Antes  | Depois     | Melhoria           |
+| --------------------------- | ------ | ---------- | ------------------ |
+| Admin - Lista produtos      | 2000ms | 300ms      | **85% ↓**          |
+| Admin - Editar produto      | 1500ms | 250ms      | **83% ↓**          |
+| Database queries (produtos) | 40+    | 5          | **88% ↓**          |
+| Cloudinary cleanup          | Manual | Automático | **100% confiável** |
+| Tamanho médio de imagem     | 2-5 MB | 100-300 KB | **90% ↓**          |
 
 ---
 
@@ -434,6 +440,7 @@ stripe listen --forward-to localhost:3000/api/stripe/webhook
 7. Verifique e-mail recebido
 
 **Alternativa: Stripe CLI**
+
 ```bash
 # No terminal Stripe CLI
 stripe trigger payment_intent.succeeded
@@ -465,6 +472,7 @@ stripe trigger payment_intent.succeeded
 ### CRÍTICO (Fazer ANTES de lançar)
 
 1. ✅ **Configurar variáveis de produção na Vercel:**
+
    ```env
    DATABASE_URL=postgresql://...  (Neon Production)
    STRIPE_SECRET_KEY=sk_live_...  (Stripe LIVE)
@@ -738,27 +746,27 @@ NEXT_PUBLIC_APP_URL=
 
 ### Módulos Principais
 
-| Módulo                | Status | % Completo | Observações |
-|-----------------------|--------|------------|-------------|
-| 1. Fundação           | ✅ COMPLETO | 100% | Next.js 15 + TypeScript + Tailwind |
-| 2. Banco de Dados     | ✅ COMPLETO | 100% | 24 tabelas, migrations OK |
-| 3. Autenticação       | ✅ COMPLETO | 100% | Auth.js funcional |
-| 4. Painel Admin       | ✅ COMPLETO | 100% | CRUD completo + performance otimizada |
-| 5. Cloudinary         | ✅ COMPLETO | 100% | CDN global + otimização automática |
-| 6. Cloudflare R2      | ✅ COMPLETO | 100% | Storage privado + URLs assinadas |
-| 7. Stripe Checkout    | ✅ COMPLETO | 100% | Cartão + PIX funcionando |
-| 8. E-mails            | ✅ COMPLETO | 100% | Resend + templates profissionais |
-| 9. Portal Cliente     | ✅ COMPLETO | 100% | Histórico + downloads |
-| 10. Catálogo          | 🟡 PARCIAL | 70% | PDP completa, falta filtros avançados |
-| 11. i18n              | 🟡 PARCIAL | 60% | Configurado, falta seletor |
-| 12. Cupons            | ❌ FALTA | 0% | Opcional |
-| 13. Afiliados         | ❌ FALTA | 0% | Opcional |
-| 14. CMS               | ❌ FALTA | 0% | Opcional |
-| 15. Migração WC       | ❌ FALTA | 0% | Apenas se necessário |
-| 16. SEO Avançado      | ❌ FALTA | 20% | Básico funciona |
-| 17. PWA               | ❌ FALTA | 0% | Opcional |
-| 18. Testes            | ❌ FALTA | 0% | Recomendado |
-| 19. Deploy            | ❌ FALTA | 0% | CRÍTICO para produção |
+| Módulo             | Status      | % Completo | Observações                           |
+| ------------------ | ----------- | ---------- | ------------------------------------- |
+| 1. Fundação        | ✅ COMPLETO | 100%       | Next.js 15 + TypeScript + Tailwind    |
+| 2. Banco de Dados  | ✅ COMPLETO | 100%       | 24 tabelas, migrations OK             |
+| 3. Autenticação    | ✅ COMPLETO | 100%       | Auth.js funcional                     |
+| 4. Painel Admin    | ✅ COMPLETO | 100%       | CRUD completo + performance otimizada |
+| 5. Cloudinary      | ✅ COMPLETO | 100%       | CDN global + otimização automática    |
+| 6. Cloudflare R2   | ✅ COMPLETO | 100%       | Storage privado + URLs assinadas      |
+| 7. Stripe Checkout | ✅ COMPLETO | 100%       | Cartão + PIX funcionando              |
+| 8. E-mails         | ✅ COMPLETO | 100%       | Resend + templates profissionais      |
+| 9. Portal Cliente  | ✅ COMPLETO | 100%       | Histórico + downloads                 |
+| 10. Catálogo       | 🟡 PARCIAL  | 70%        | PDP completa, falta filtros avançados |
+| 11. i18n           | 🟡 PARCIAL  | 60%        | Configurado, falta seletor            |
+| 12. Cupons         | ❌ FALTA    | 0%         | Opcional                              |
+| 13. Afiliados      | ❌ FALTA    | 0%         | Opcional                              |
+| 14. CMS            | ❌ FALTA    | 0%         | Opcional                              |
+| 15. Migração WC    | ❌ FALTA    | 0%         | Apenas se necessário                  |
+| 16. SEO Avançado   | ❌ FALTA    | 20%        | Básico funciona                       |
+| 17. PWA            | ❌ FALTA    | 0%         | Opcional                              |
+| 18. Testes         | ❌ FALTA    | 0%         | Recomendado                           |
+| 19. Deploy         | ❌ FALTA    | 0%         | CRÍTICO para produção                 |
 
 ---
 
@@ -767,6 +775,7 @@ NEXT_PUBLIC_APP_URL=
 **O sistema está 100% PRONTO PARA VENDER!**
 
 Todos os módulos críticos estão funcionando:
+
 - ✅ Clientes podem comprar (cartão/PIX)
 - ✅ Recebem e-mails automaticamente
 - ✅ Podem baixar produtos
@@ -774,6 +783,7 @@ Todos os módulos críticos estão funcionando:
 - ✅ Admin consegue gerenciar tudo
 
 **Os itens faltantes são:**
+
 - Melhorias opcionais (cupons, afiliados, PWA)
 - Funcionalidades avançadas (CMS, migração)
 - Infraestrutura de produção (deploy, monitoramento)

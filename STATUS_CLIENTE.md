@@ -9,18 +9,21 @@
 ## 🎯 O QUE ESTÁ FUNCIONANDO
 
 ### ✅ **1. Sistema de Pagamentos (100%)**
+
 - **PIX via Stripe** - Cliente escaneia QR Code e paga
 - **Cartão de Crédito** - Processamento seguro via Stripe
 - **Webhook Automático** - Confirmação instantânea de pagamento
 - **Criação de Pedidos** - Pedido aparece automaticamente no sistema
 
 ### ✅ **2. Entrega Automática de PDFs (100%)**
+
 - **E-mail imediato** após pagamento confirmado
 - **Links de download** válidos por 15 minutos
 - **URLs seguras** - Arquivos nunca ficam públicos
 - **Template profissional** com logo e cores da marca
 
 ### ✅ **3. Portal do Cliente (100%)**
+
 - **Histórico de Pedidos** - `/conta/pedidos`
 - **Filtros por Status** - Completo / Pendente / Cancelado
 - **Detalhes do Pedido** - Informações completas
@@ -28,6 +31,7 @@
 - **Cancelamento** - Cliente pode cancelar pedido pendente
 
 ### ✅ **4. Admin Panel (100%)**
+
 - **CRUD Produtos** - Criar, editar, deletar
 - **Variações** - Ex: Básico R$29, Premium R$59
 - **Upload de Imagens** - Cloudinary (CDN global)
@@ -35,12 +39,14 @@
 - **Dashboard** - Estatísticas e vendas
 
 ### ✅ **5. Catálogo (100%)**
+
 - **Listagem de Produtos** - Com filtros e busca
 - **Página de Detalhes** - Galeria de imagens
 - **Carrinho de Compras** - Adicionar/remover produtos
 - **Sistema de Variações** - Cliente escolhe qual versão
 
 ### ✅ **6. Segurança (100%)**
+
 - **Autenticação** - Login seguro
 - **Proteção de PDFs** - URLs temporárias e privadas
 - **Validação de Pedidos** - Cliente só vê seus próprios pedidos
@@ -110,30 +116,34 @@
 
 ## 🔐 SEGURANÇA IMPLEMENTADA
 
-| Aspecto | Implementação | Status |
-|---------|---------------|--------|
-| **Arquivos PDF** | Cloudflare R2 (privado) | ✅ |
-| **Links de Download** | URLs assinadas (15min) | ✅ |
-| **Pedidos** | Validação de propriedade | ✅ |
-| **Pagamentos** | Stripe (PCI compliant) | ✅ |
-| **Duplicação** | Hash-based detection | ✅ |
-| **Autenticação** | Auth.js + session | ✅ |
-| **Logs** | Console logs completos | ✅ |
+| Aspecto               | Implementação            | Status |
+| --------------------- | ------------------------ | ------ |
+| **Arquivos PDF**      | Cloudflare R2 (privado)  | ✅     |
+| **Links de Download** | URLs assinadas (15min)   | ✅     |
+| **Pedidos**           | Validação de propriedade | ✅     |
+| **Pagamentos**        | Stripe (PCI compliant)   | ✅     |
+| **Duplicação**        | Hash-based detection     | ✅     |
+| **Autenticação**      | Auth.js + session        | ✅     |
+| **Logs**              | Console logs completos   | ✅     |
 
 ---
 
 ## 📧 SISTEMA DE E-MAILS
 
 ### **E-mail 1: Pedido Pendente (PIX)**
+
 **Enviado:** Imediatamente após criar pedido PIX  
 **Conteúdo:**
+
 - Instruções de pagamento
 - Valor a pagar
 - Aviso que links virão após confirmação
 
 ### **E-mail 2: Compra Confirmada**
+
 **Enviado:** Após webhook confirmar pagamento  
 **Conteúdo:**
+
 - ✅ Compra Confirmada
 - Número do pedido
 - Lista de produtos comprados
@@ -142,6 +152,7 @@
 - Botão "Ver Meus Pedidos"
 
 **Template profissional com:**
+
 - Logo da marca
 - Cores da marca (#FED466, #FD9555)
 - Layout responsivo
@@ -154,6 +165,7 @@
 ### **Página: /conta/pedidos**
 
 **Funcionalidades:**
+
 - ✅ Lista todos os pedidos do usuário
 - ✅ Ordenação por data (mais recentes primeiro)
 - ✅ Tabs de filtro:
@@ -173,6 +185,7 @@
 ### **Página: /conta/pedidos/[id]**
 
 **Funcionalidades:**
+
 - ✅ Informações completas do pedido
 - ✅ Status do pedido e pagamento
 - ✅ Data de criação e pagamento
@@ -197,31 +210,41 @@
 ## 🛠️ CORREÇÕES RECENTES (Outubro 2025)
 
 ### **Problema 1: "Você não tem permissão para acessar este pedido"**
+
 **✅ CORRIGIDO**
+
 - Pedidos PIX agora salvam `userId` quando usuário está logado
 - API aceita validação por email (para pedidos antigos)
 - Todos os pedidos agora são acessíveis
 
 ### **Problema 2: Pedidos cancelados sem explicação**
+
 **✅ CORRIGIDO**
+
 - Alert vermelho com lista de motivos possíveis
 - Data de cancelamento exibida
 - Orientações sobre como fazer novo pedido
 
 ### **Problema 3: Duplicação de pedidos ao clicar PIX**
+
 **✅ CORRIGIDO**
+
 - useRef para evitar execução dupla do useEffect
 - Apenas 1 pedido criado
 - Apenas 1 email enviado
 
 ### **Problema 4: "Pagar Agora" redirecionando para carrinho**
+
 **✅ CORRIGIDO**
+
 - Validação condicional de email/name
 - Se orderId existe, não exige email/name
 - Retoma pagamento corretamente
 
 ### **Problema 5: Cancelamento de pedidos**
+
 **✅ IMPLEMENTADO**
+
 - Botão "Cancelar e voltar ao carrinho"
 - Cancela Payment Intent no Stripe
 - Atualiza status para 'cancelled' no banco
@@ -231,12 +254,12 @@
 
 ## 📈 MÉTRICAS DE PERFORMANCE
 
-| Métrica | Antes | Depois | Melhoria |
-|---------|-------|--------|----------|
-| Admin - Lista produtos | 2000ms | 300ms | **85% ↓** |
-| Admin - Editar produto | 1500ms | 250ms | **83% ↓** |
-| Database queries | 40+ | 5 | **88% ↓** |
-| Cloudinary cleanup | Manual | Automático | **100%** |
+| Métrica                | Antes  | Depois     | Melhoria  |
+| ---------------------- | ------ | ---------- | --------- |
+| Admin - Lista produtos | 2000ms | 300ms      | **85% ↓** |
+| Admin - Editar produto | 1500ms | 250ms      | **83% ↓** |
+| Database queries       | 40+    | 5          | **88% ↓** |
+| Cloudinary cleanup     | Manual | Automático | **100%**  |
 
 **Técnica:** Eliminação de N+1 queries com `inArray()` do Drizzle
 
@@ -245,6 +268,7 @@
 ## 📱 TECNOLOGIAS UTILIZADAS
 
 ### **Frontend**
+
 - Next.js 15 (App Router)
 - TypeScript
 - Tailwind CSS
@@ -253,20 +277,24 @@
 - Zod (validação)
 
 ### **Backend**
+
 - Next.js API Routes
 - PostgreSQL (Neon)
 - Drizzle ORM
 - Auth.js (autenticação)
 
 ### **Pagamentos**
+
 - Stripe (PIX + Cartão)
 - Webhooks automáticos
 
 ### **Armazenamento**
+
 - **Cloudinary** - Imagens (CDN global)
 - **Cloudflare R2** - PDFs (privado)
 
 ### **E-mail**
+
 - Resend (100 emails/dia grátis)
 - React Email (templates)
 
@@ -326,6 +354,7 @@ http://localhost:4983
 ## 📂 ARQUIVOS PRINCIPAIS
 
 ### **APIs de Pagamento**
+
 ```
 src/app/api/stripe/
 ├── create-payment-intent/route.ts  # Cartão de crédito
@@ -337,6 +366,7 @@ src/app/api/stripe/
 ```
 
 ### **APIs de Pedidos**
+
 ```
 src/app/api/orders/
 ├── my-orders/route.ts              # Lista pedidos do usuário
@@ -345,12 +375,14 @@ src/app/api/orders/
 ```
 
 ### **APIs de Download**
+
 ```
 src/app/api/download/
 └── generate-link/route.ts          # Gera URL assinada R2
 ```
 
 ### **Páginas do Cliente**
+
 ```
 src/app/
 ├── checkout/
@@ -364,6 +396,7 @@ src/app/
 ```
 
 ### **E-mail**
+
 ```
 src/
 ├── emails/
