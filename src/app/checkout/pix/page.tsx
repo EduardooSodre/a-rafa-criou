@@ -60,12 +60,43 @@ export default function CheckoutPixPage() {
                 const response = await fetch(`/api/stripe/resume-payment?orderId=${orderId}`);
 
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    console.error('❌ Erro ao retomar pagamento:', errorData);
-                    throw new Error(errorData.error || 'Erro ao retomar pagamento');
+                    let errorData: unknown = null;
+                    try {
+                        errorData = await response.json();
+                    } catch {
+                        try {
+                            errorData = await response.text();
+                        } catch {
+                            errorData = null;
+                        }
+                    }
+                    console.error('❌ Erro ao retomar pagamento - status:', response.status, 'body:', errorData);
+                    const extractError = (obj: unknown): string | null => {
+                        if (!obj) return null;
+                        if (typeof obj === 'string') return obj;
+                        if (typeof obj === 'object') {
+                            const o = obj as Record<string, unknown>;
+                            if (typeof o.error === 'string') return o.error;
+                            if (typeof o.message === 'string') return o.message;
+                        }
+                        return null;
+                    }
+                    throw new Error(extractError(errorData) || 'Erro ao retomar pagamento');
                 }
 
-                const data: PixData = await response.json();
+                let data: PixData;
+                try {
+                    data = await response.json();
+                } catch {
+                    // Caso o backend retorne texto, tentar parse manual
+                    const text = await response.text();
+                    try {
+                        data = JSON.parse(text);
+                    } catch {
+                        console.error('❌ Resposta inesperada ao retomar pagamento:', text);
+                        throw new Error('Resposta inesperada do servidor ao retomar pagamento');
+                    }
+                }
                 console.log('✅ Payment Intent retomado com sucesso:', {
                     paymentIntentId: data.paymentIntentId,
                     amount: data.amount,
@@ -99,13 +130,43 @@ export default function CheckoutPixPage() {
                     name,
                 }),
             });
-
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Erro ao criar pagamento PIX');
+                let errorData: unknown = null;
+                try {
+                    errorData = await response.json();
+                } catch {
+                    try {
+                        errorData = await response.text();
+                    } catch {
+                        errorData = null;
+                    }
+                }
+                console.error('❌ Erro ao criar pagamento PIX - status:', response.status, 'body:', errorData);
+                const extractError = (obj: unknown): string | null => {
+                    if (!obj) return null;
+                    if (typeof obj === 'string') return obj;
+                    if (typeof obj === 'object') {
+                        const o = obj as Record<string, unknown>;
+                        if (typeof o.error === 'string') return o.error;
+                        if (typeof o.message === 'string') return o.message;
+                    }
+                    return null;
+                }
+                throw new Error(extractError(errorData) || 'Erro ao criar pagamento PIX');
             }
 
-            const data: PixData = await response.json();
+            let data: PixData;
+            try {
+                data = await response.json();
+            } catch {
+                const text = await response.text();
+                try {
+                    data = JSON.parse(text);
+                } catch {
+                    console.error('❌ Resposta inesperada ao criar pagamento PIX:', text);
+                    throw new Error('Resposta inesperada do servidor ao criar pagamento PIX');
+                }
+            }
             setPixData(data);
 
             setLoading(false);

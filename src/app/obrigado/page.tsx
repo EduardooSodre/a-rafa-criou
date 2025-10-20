@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { CheckCircle, Download, Mail, FileText, Star, ArrowRight, Loader2 } from 'lucide-react'
+import { CheckCircle, Download, Mail, FileText, Star, ArrowRight, Loader2, XCircle } from 'lucide-react'
 import Link from 'next/link'
 
 interface OrderItem {
@@ -165,16 +165,39 @@ export default function ObrigadoPage() {
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="max-w-2xl mx-auto">
-                {/* Success Message */}
-                <div className="text-center mb-8">
-                    <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                        Parabéns! Compra realizada com sucesso
-                    </h1>
-                    <p className="text-gray-600">
-                        Seu pagamento foi processado e você já pode acessar seus produtos digitais.
-                    </p>
-                </div>
+                {/* Status Message (dinâmico) */}
+                {(() => {
+                    const order = orderData.order
+                    const paymentStatus = (order.paymentStatus || '').toLowerCase()
+                    const orderStatus = (order.status || '').toLowerCase()
+
+                    const isSuccess = orderStatus === 'completed' || paymentStatus === 'succeeded' || paymentStatus === 'paid'
+                    const isPending = ['pending', 'processing', 'requires_action', 'requires_payment_method'].includes(orderStatus) || ['pending', 'processing', 'requires_action'].includes(paymentStatus)
+                    const isFailed = ['failed', 'canceled', 'cancelled', 'refunded', 'voided'].includes(orderStatus) || ['failed', 'canceled', 'refunded'].includes(paymentStatus)
+
+                    const Icon = isSuccess ? CheckCircle : isPending ? Loader2 : (isFailed ? XCircle : XCircle)
+                    const iconClass = isSuccess ? 'text-green-600' : isPending ? 'text-amber-500 animate-spin' : (isFailed ? 'text-red-600' : 'text-gray-600')
+
+                    const title = isSuccess
+                        ? 'Parabéns! Compra realizada com sucesso'
+                        : isPending
+                            ? 'Pedido recebido — aguardando confirmação'
+                            : 'Pagamento não aprovado'
+
+                    const subtitle = isSuccess
+                        ? 'Seu pagamento foi processado e você já pode acessar seus produtos digitais.'
+                        : isPending
+                            ? 'Estamos aguardando a confirmação do pagamento. Você receberá um e-mail quando estiver aprovado.'
+                            : 'O pagamento não foi aprovado. Verifique seu e-mail ou entre em contato com o suporte.'
+
+                    return (
+                        <div className="text-center mb-8">
+                            <Icon className={`w-16 h-16 mx-auto mb-4 ${iconClass}`} />
+                            <h1 className="text-3xl font-bold text-gray-900 mb-2">{title}</h1>
+                            <p className="text-gray-600">{subtitle}</p>
+                        </div>
+                    )
+                })()}
 
                 {/* Order Summary */}
                 <Card className="mb-6">
@@ -207,9 +230,27 @@ export default function ObrigadoPage() {
                             </div>
                             <div>
                                 <span className="text-gray-600">Status:</span>
-                                <Badge className="bg-green-100 text-green-800">
-                                    {orderData.order.status === 'completed' ? 'Aprovado' : orderData.order.status}
-                                </Badge>
+                                {(() => {
+                                    const s = (orderData.order.status || '').toLowerCase()
+                                    const p = (orderData.order.paymentStatus || '').toLowerCase()
+                                    const isSuccess = s === 'completed' || p === 'succeeded' || p === 'paid'
+                                    const isPending = ['pending', 'processing', 'requires_action', 'requires_payment_method'].includes(s) || ['pending', 'processing', 'requires_action'].includes(p)
+                                    const isFailed = ['failed', 'canceled', 'cancelled', 'refunded', 'voided'].includes(s) || ['failed', 'canceled', 'refunded'].includes(p)
+
+                                    if (isSuccess) {
+                                        return <Badge className="bg-green-100 text-green-800">Aprovado</Badge>
+                                    }
+
+                                    if (isPending) {
+                                        return <Badge className="bg-amber-100 text-amber-800">Aguardando</Badge>
+                                    }
+
+                                    if (isFailed) {
+                                        return <Badge className="bg-red-100 text-red-800">Pagamento não aprovado</Badge>
+                                    }
+
+                                    return <Badge className="bg-gray-100 text-gray-800">{orderData.order.status}</Badge>
+                                })()}
                             </div>
                         </div>
                     </CardContent>
@@ -314,7 +355,7 @@ export default function ObrigadoPage() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <Button asChild variant="outline" className="h-auto p-4">
+                            <Button asChild variant="default" className="h-auto p-4 bg-[#FED466] text-black hover:bg-[#FD9555] border-2 border-[#FD9555] shadow-md">
                                 <Link href="/produtos">
                                     <div className="text-left">
                                         <div className="font-medium flex items-center gap-2">
@@ -328,7 +369,7 @@ export default function ObrigadoPage() {
                                 </Link>
                             </Button>
 
-                            <Button asChild variant="outline" className="h-auto p-4">
+                            <Button asChild variant="outline" className="h-auto p-4 border-2 border-[#FED466] text-[#111827] hover:bg-[#FED466]/20 shadow-sm">
                                 <div className="text-left">
                                     <div className="font-medium flex items-center gap-2">
                                         <Star className="w-4 h-4" />
