@@ -281,7 +281,8 @@ export async function POST(request: NextRequest) {
 
     // 6. Enviar email com instruções PIX
     try {
-      const MASCOTE_URL = process.env.NEXT_PUBLIC_MASCOTE_URL ||
+      const MASCOTE_URL =
+        process.env.NEXT_PUBLIC_MASCOTE_URL ||
         (process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
           ? `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/${process.env.CLOUDINARY_FOLDER || ''}/mascote_raquel3.webp`
           : `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/mascote_raquel3.webp`);
