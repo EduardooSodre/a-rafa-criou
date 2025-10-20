@@ -43,6 +43,7 @@ export default function ObrigadoPage() {
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [retryCount, setRetryCount] = useState(0)
+    const [downloadingItem, setDownloadingItem] = useState<string | null>(null)
 
     useEffect(() => {
         // Scroll to top when page loads
@@ -280,8 +281,49 @@ export default function ObrigadoPage() {
                                     </p>
                                 </div>
                                 {(orderData.order.status === 'completed' || orderData.order.paymentStatus === 'succeeded') ? (
-                                    <Button className="bg-[#FED466] hover:bg-[#FED466]/90 text-black">
-                                        <Download className="w-4 h-4 mr-2" />
+                                    <Button
+                                        className="bg-[#FED466] hover:bg-[#FED466]/90 text-black cursor-pointer"
+                                        onClick={async () => {
+                                            try {
+                                                setDownloadingItem(item.id)
+                                                // Call the secure download endpoint which validates order status and returns proxy URL
+                                                const params = new URLSearchParams()
+                                                if (paymentIntent) params.set('payment_intent', paymentIntent)
+                                                params.set('itemId', item.id)
+
+                                                const res = await fetch(`/api/orders/download?${params.toString()}`)
+                                                if (!res.ok) {
+                                                    const body = await res.json().catch(() => ({}))
+                                                    console.error('Download error', res.status, body)
+                                                    setError('Erro ao iniciar download')
+                                                    setDownloadingItem(null)
+                                                    return
+                                                }
+
+                                                const data = await res.json()
+                                                const downloadUrl = data?.downloadUrl || data?.signedUrl
+                                                if (!downloadUrl) {
+                                                    setError('URL de download não disponível')
+                                                    setDownloadingItem(null)
+                                                    return
+                                                }
+
+                                                // Open the proxy URL to trigger download in the browser
+                                                window.open(downloadUrl, '_blank')
+                                                setDownloadingItem(null)
+                                            } catch (err) {
+                                                console.error('Erro ao iniciar download:', err)
+                                                setError('Erro ao iniciar download')
+                                                setDownloadingItem(null)
+                                            }
+                                        }}
+                                        disabled={!!downloadingItem}
+                                    >
+                                        {downloadingItem === item.id ? (
+                                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                        ) : (
+                                            <Download className="w-4 h-4 mr-2" />
+                                        )}
                                         Download
                                     </Button>
                                 ) : (
@@ -310,40 +352,33 @@ export default function ObrigadoPage() {
                     </CardContent>
                 </Card>
 
-                {/* Important Information */}
+                {/* Important Information (legal copyright notice) */}
                 <Card className="mb-6">
                     <CardHeader>
                         <CardTitle>Informações Importantes</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3 text-sm">
-                        <div className="flex gap-3">
-                            <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
-                            <div>
-                                <p className="font-medium">Downloads ilimitados por 30 dias</p>
-                                <p className="text-gray-600">
-                                    Você pode baixar seus produtos quantas vezes quiser durante 30 dias.
-                                </p>
-                            </div>
-                        </div>
+                        <div className="text-gray-800 space-y-2">
+                            <p>
+                                A Rafa Criou está garantida por Lei Federal de Direitos Autorais (Lei nº 9.610, 02/1998). O que cobre a possibilidade de publicações de marcas, artes e qualquer material criado pela loja sem a necessidade de aviso prévio. Através da mesma lei, caracteriza-se como crime a cópia, e/ou divulgação total ou parcial de materiais elaborados pela loja sem a autorização para uso comercial.
+                            </p>
 
-                        <div className="flex gap-3">
-                            <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
-                            <div>
-                                <p className="font-medium">Garantia de 30 dias</p>
-                                <p className="text-gray-600">
-                                    Não ficou satisfeito? Devolvemos 100% do seu dinheiro em até 30 dias.
-                                </p>
-                            </div>
-                        </div>
+                            <p>
+                                - Não é permitido distribuir, doar, repassar, revender, sub-licenciar ou compartilhar qualquer nossos produtos originais ou alterados em forma digital.
+                            </p>
 
-                        <div className="flex gap-3">
-                            <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
-                            <div>
-                                <p className="font-medium">Suporte técnico</p>
-                                <p className="text-gray-600">
-                                    Precisa de ajuda? Entre em contato conosco em suporte@arafacriou.com.br
-                                </p>
-                            </div>
+                            <p className="text-sm text-gray-600">
+                                - A Rafa Criou <b>NÃO UTILIZA</b> de forma alguma qualquer material da associação Watchtower (domínio <b className='text-red-600'>jw.org</b>). Nossos arquivos são principalmente imagens 100% autorais ou geradas/alteradas via IA quando aplicável.
+                            </p>
+                            <p className="text-sm text-gray-600">
+                                Temos total ciência que utilizar qualquer material da associação é errado e um crime.
+                            </p>
+                            <p className="text-sm text-red-600">
+                                Pirataria é crime e não concordamos com tais atos.
+                            </p>
+                            <p className="text-sm text-red-600">
+                                No caso de acusações envolvendo crimes contra a associação Watchtower, sua mensagem pode e será usada como prova judicial para danos morais quando aplicável (calúnia, difamação ou injúria).
+                            </p>
                         </div>
                     </CardContent>
                 </Card>
@@ -362,9 +397,7 @@ export default function ObrigadoPage() {
                                             <ArrowRight className="w-4 h-4" />
                                             Continuar Comprando
                                         </div>
-                                        <div className="text-sm text-gray-600 mt-1">
-                                            Explore mais produtos digitais
-                                        </div>
+
                                     </div>
                                 </Link>
                             </Button>
@@ -375,9 +408,7 @@ export default function ObrigadoPage() {
                                         <Star className="w-4 h-4" />
                                         Avalie sua Compra
                                     </div>
-                                    <div className="text-sm text-gray-600 mt-1">
-                                        Ajude outros clientes
-                                    </div>
+
                                 </div>
                             </Button>
                         </div>
