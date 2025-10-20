@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 import { ConditionalHeader } from "@/components/ConditionalHeader";
 import ToastProvider from "@/components/ToastProvider";
+import MobileBottomMenu from '@/components/sections/MobileBottomMenu';
 
 /**
  * Contexto do Copilot:
@@ -41,6 +42,7 @@ export default function RootLayout({
             {children}
           </main>
           <ToastProvider />
+          <MobileBottomMenu />
         </Providers>
       </body>
     </html>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Menu, Home, ShoppingCart, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -24,6 +25,12 @@ export default function MobileBottomMenu({
     const [menuOpen, setMenuOpen] = useState(false);
     const [cartOpen, setCartOpen] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
+    const pathname = usePathname();
+
+    // Don't render on admin routes
+    if (typeof pathname === 'string' && pathname.startsWith('/admin')) {
+        return null;
+    }
 
     return (
         <>
