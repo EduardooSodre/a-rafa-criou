@@ -266,6 +266,8 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                 <button
                                     key={idx}
                                     onClick={() => handleThumbnailClick(idx)}
+                                    aria-label={`Selecionar miniatura ${idx + 1}`}
+                                    aria-current={currentImageIndex === idx ? true : undefined}
                                     className={cn(
                                         "relative aspect-square rounded-lg overflow-hidden border-3 transition-all duration-200 hover:scale-105",
                                         currentImageIndex === idx
@@ -371,6 +373,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                                             <button
                                                                 key={value}
                                                                 onClick={() => handleFilterClick(attrName, value)}
+                                                                aria-label={`Selecionar ${attrName} ${value}`}
                                                                 className={cn(
                                                                     "group relative p-4 rounded-xl border-2 transition-all duration-300 text-center overflow-hidden",
                                                                     isSelected
@@ -505,15 +508,17 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                         <div className="flex flex-col gap-3">
                             <Button
                                 onClick={handleBuyNow}
-                                className="w-full min-h-[56px] md:min-h-[64px] bg-[#FED466] hover:bg-[#FD9555] text-black font-bold text-lg md:text-xl shadow-xl rounded-lg border-2 border-[#FD9555] focus:ring-4 focus:ring-[#FD9555]/50 transition-colors"
+                                variant="default"
                                 size="lg"
+                                className="w-full min-h-[56px] md:min-h-[64px] text-black font-bold text-lg md:text-xl rounded-lg border-2 border-[#FD9555] shadow-xl"
                             >
                                 {t('product.buyNow', 'COMPRAR AGORA')}
                             </Button>
                             <Button
                                 onClick={handleAddToCart}
-                                className="w-full min-h-[56px] md:min-h-[64px] bg-white hover:bg-[#FED466] text-black font-bold text-lg md:text-xl shadow-lg rounded-lg border-2 border-[#FED466] focus:ring-4 focus:ring-[#FED466]/50 transition-colors"
+                                variant="outline"
                                 size="lg"
+                                className="w-full min-h-[56px] md:min-h-[64px] text-black font-bold text-lg md:text-xl rounded-lg shadow-lg"
                             >
                                 <ShoppingCart className="w-6 h-6 mr-2" />
                                 {t('product.addToCart', 'ADICIONAR AO CARRINHO')}

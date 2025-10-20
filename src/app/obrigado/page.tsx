@@ -238,10 +238,17 @@ export default function ObrigadoPage() {
                                         {item.quantity}x {formatPrice(item.price)} = {formatPrice(item.total)}
                                     </p>
                                 </div>
-                                <Button className="bg-[#FED466] hover:bg-[#FED466]/90 text-black">
-                                    <Download className="w-4 h-4 mr-2" />
-                                    Download
-                                </Button>
+                                { (orderData.order.status === 'completed' || orderData.order.paymentStatus === 'succeeded') ? (
+                                    <Button className="bg-[#FED466] hover:bg-[#FED466]/90 text-black">
+                                        <Download className="w-4 h-4 mr-2" />
+                                        Download
+                                    </Button>
+                                ) : (
+                                    <Button disabled variant="ghost" className="opacity-60 cursor-not-allowed">
+                                        <Download className="w-4 h-4 mr-2" />
+                                        Aguardando pagamento
+                                    </Button>
+                                ) }
                             </div>
                         ))}
 
