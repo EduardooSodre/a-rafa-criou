@@ -281,6 +281,11 @@ export async function POST(request: NextRequest) {
 
     // 6. Enviar email com instruções PIX
     try {
+      const MASCOTE_URL = process.env.NEXT_PUBLIC_MASCOTE_URL ||
+        (process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+          ? `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/${process.env.CLOUDINARY_FOLDER || ''}/mascote_raquel3.webp`
+          : `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/mascote_raquel3.webp`);
+
       const emailHtml = `
         <!DOCTYPE html>
         <html>
@@ -298,8 +303,9 @@ export async function POST(request: NextRequest) {
         </head>
         <body>
           <div class="container">
-            <div class="header">
-              <h1 style="margin: 0; color: #333;">🎨 A Rafa Criou</h1>
+              <div class="header">
+              <img src="${MASCOTE_URL}" alt="A Rafa Criou" style="width:72px;height:72px;border-radius:12px;display:block;margin:0 auto 8px;border:0;outline:none;box-shadow:none;background:transparent;text-decoration:none;" />
+              <h1 style="margin: 0; color: #333;">A Rafa Criou</h1>
             </div>
             <div class="content">
               <h2>Olá ${name}! 👋</h2>
