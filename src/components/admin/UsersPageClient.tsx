@@ -8,36 +8,14 @@ import {
     UserPlus,
     Search,
     Filter,
-    MoreVertical,
-    Eye,
-    UserX,
-    Settings,
-    Calendar,
-    Mail,
-    Crown,
-    AlertTriangle
+    Calendar
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow
-} from '@/components/ui/table'
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import UsersCards from '@/components/admin/UsersCards'
 import {
     Select,
     SelectContent,
@@ -45,17 +23,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
 import {
     Tabs,
     TabsContent,
@@ -193,22 +160,7 @@ export default function UsersPageClient() {
         return matchesSearch && matchesRole
     })
 
-    const getRoleBadge = (role: string) => {
-        if (role === 'admin') {
-            return (
-                <Badge variant="destructive" className="flex items-center gap-1">
-                    <Crown className="w-3 h-3" />
-                    Admin
-                </Badge>
-            )
-        }
-        return (
-            <Badge variant="secondary" className="flex items-center gap-1">
-                <UserCheck className="w-3 h-3" />
-                Usuário
-            </Badge>
-        )
-    }
+    // Role badge rendering moved to UsersCards
 
     if (loading) {
         return (
@@ -371,159 +323,13 @@ export default function UsersPageClient() {
                                 </Select>
                             </div>
 
-                            {/* Tabela */}
-                            <div className="rounded-lg border overflow-hidden">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow className="bg-gray-50/50">
-                                            <TableHead className="font-semibold">Usuário</TableHead>
-                                            <TableHead className="font-semibold">Role</TableHead>
-                                            <TableHead className="font-semibold">Cadastrado</TableHead>
-                                            <TableHead className="font-semibold">Último Acesso</TableHead>
-                                            <TableHead className="text-right font-semibold">Ações</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {filteredUsers.map((user) => (
-                                            <TableRow key={user.id} className="hover:bg-gray-50/50 transition-colors">
-                                                <TableCell>
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-10 h-10 bg-gradient-to-br from-[#FED466] to-[#FD9555] rounded-full flex items-center justify-center shadow-sm">
-                                                            <span className="text-sm font-bold text-gray-800">
-                                                                {(user.name || user.email).charAt(0).toUpperCase()}
-                                                            </span>
-                                                        </div>
-                                                        <div>
-                                                            <p className="font-medium text-gray-900">{user.name || 'Sem nome'}</p>
-                                                            <div className="flex items-center gap-1 text-sm text-gray-600">
-                                                                <Mail className="w-3 h-3" />
-                                                                {user.email}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    {getRoleBadge(user.role)}
-                                                </TableCell>
-                                                <TableCell>
-                                                    <div className="flex items-center gap-1 text-sm text-gray-600">
-                                                        <Calendar className="w-3 h-3" />
-                                                        {new Date(user.createdAt).toLocaleDateString('pt-BR')}
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <span className="text-sm text-gray-600">
-                                                        {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString('pt-BR') : 'Nunca'}
-                                                    </span>
-                                                </TableCell>
-                                                <TableCell className="text-right">
-                                                    <DropdownMenu>
-                                                        <DropdownMenuTrigger asChild>
-                                                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                                                <MoreVertical className="w-4 h-4" />
-                                                            </Button>
-                                                        </DropdownMenuTrigger>
-                                                        <DropdownMenuContent align="end">
-                                                            <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                                                            <DropdownMenuItem>
-                                                                <Eye className="w-4 h-4 mr-2" />
-                                                                Ver Perfil
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuItem>
-                                                                <Settings className="w-4 h-4 mr-2" />
-                                                                Editar
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuSeparator />
-
-                                                            {user.role !== 'admin' && (
-                                                                <AlertDialog>
-                                                                    <AlertDialogTrigger asChild>
-                                                                        <DropdownMenuItem
-                                                                            onSelect={(e) => e.preventDefault()}
-                                                                            className="text-green-600 focus:text-green-600"
-                                                                            disabled={!adminPassword || actionLoading === user.email}
-                                                                        >
-                                                                            <UserCheck className="w-4 h-4 mr-2" />
-                                                                            Promover a Admin
-                                                                        </DropdownMenuItem>
-                                                                    </AlertDialogTrigger>
-                                                                    <AlertDialogContent>
-                                                                        <AlertDialogHeader>
-                                                                            <AlertDialogTitle className="flex items-center gap-2">
-                                                                                <Crown className="w-5 h-5 text-yellow-500" />
-                                                                                Promover a Administrador
-                                                                            </AlertDialogTitle>
-                                                                            <AlertDialogDescription>
-                                                                                Tem certeza que deseja promover <strong>{user.name || user.email}</strong> a administrador?
-                                                                                <br />
-                                                                                <span className="text-amber-600 flex items-center gap-1 mt-2">
-                                                                                    <AlertTriangle className="w-4 h-4" />
-                                                                                    Esta ação dará acesso completo à área administrativa.
-                                                                                </span>
-                                                                            </AlertDialogDescription>
-                                                                        </AlertDialogHeader>
-                                                                        <AlertDialogFooter>
-                                                                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                                                            <AlertDialogAction
-                                                                                onClick={() => handlePromoteUser(user.email, 'promote')}
-                                                                                className="bg-green-600 hover:bg-green-700"
-                                                                            >
-                                                                                <Crown className="w-4 h-4 mr-2" />
-                                                                                Promover
-                                                                            </AlertDialogAction>
-                                                                        </AlertDialogFooter>
-                                                                    </AlertDialogContent>
-                                                                </AlertDialog>
-                                                            )}
-
-                                                            {user.role === 'admin' && user.email !== 'admin@arafacriou.com.br' && (
-                                                                <AlertDialog>
-                                                                    <AlertDialogTrigger asChild>
-                                                                        <DropdownMenuItem
-                                                                            onSelect={(e) => e.preventDefault()}
-                                                                            className="text-red-600 focus:text-red-600"
-                                                                            disabled={!adminPassword || actionLoading === user.email}
-                                                                        >
-                                                                            <UserX className="w-4 h-4 mr-2" />
-                                                                            Remover Admin
-                                                                        </DropdownMenuItem>
-                                                                    </AlertDialogTrigger>
-                                                                    <AlertDialogContent>
-                                                                        <AlertDialogHeader>
-                                                                            <AlertDialogTitle className="flex items-center gap-2">
-                                                                                <UserX className="w-5 h-5 text-red-500" />
-                                                                                Remover Administrador
-                                                                            </AlertDialogTitle>
-                                                                            <AlertDialogDescription>
-                                                                                Tem certeza que deseja remover <strong>{user.name || user.email}</strong> do cargo de administrador?
-                                                                                <br />
-                                                                                <span className="text-amber-600 flex items-center gap-1 mt-2">
-                                                                                    <AlertTriangle className="w-4 h-4" />
-                                                                                    O usuário perderá acesso à área administrativa.
-                                                                                </span>
-                                                                            </AlertDialogDescription>
-                                                                        </AlertDialogHeader>
-                                                                        <AlertDialogFooter>
-                                                                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                                                            <AlertDialogAction
-                                                                                onClick={() => handlePromoteUser(user.email, 'demote')}
-                                                                                className="bg-red-600 hover:bg-red-700"
-                                                                            >
-                                                                                <UserX className="w-4 h-4 mr-2" />
-                                                                                Remover Admin
-                                                                            </AlertDialogAction>
-                                                                        </AlertDialogFooter>
-                                                                    </AlertDialogContent>
-                                                                </AlertDialog>
-                                                            )}
-                                                        </DropdownMenuContent>
-                                                    </DropdownMenu>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </div>
+                            {/* Cards view - mobile 2 per row, tablet/desktop more columns */}
+                            <UsersCards
+                                users={filteredUsers}
+                                adminPassword={adminPassword}
+                                actionLoading={actionLoading}
+                                onPromoteUser={(email, action) => handlePromoteUser(email, action)}
+                            />
 
                             {filteredUsers.length === 0 && (
                                 <div className="text-center py-12">

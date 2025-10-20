@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { products, users, orders, files } from '@/lib/db/schema';
-import { eq, gte, count, sum, and } from 'drizzle-orm';
+import { eq, gte, count, sum, and, desc } from 'drizzle-orm';
 
 export async function GET() {
   try {
@@ -38,7 +38,7 @@ export async function GET() {
         .from(orders)
         .where(and(gte(orders.createdAt, currentMonthStart), eq(orders.status, 'completed'))),
 
-      // Recent orders (last 10)
+      // Recent orders (last 10) - fetch raw status and data for admin UI
       db
         .select({
           id: orders.id,
@@ -50,7 +50,7 @@ export async function GET() {
         })
         .from(orders)
         .leftJoin(users, eq(orders.userId, users.id))
-        .orderBy(orders.createdAt)
+  .orderBy(desc(orders.createdAt))
         .limit(10),
     ]);
 
@@ -66,15 +66,11 @@ export async function GET() {
       downloadsMes: downloadsThisMonth,
       recentOrders: recentOrdersResult.map(order => ({
         id: order.id,
-        cliente: order.customerName || order.customerEmail || 'Cliente',
-        produto: 'Produto Digital', // TODO: Get actual product names from order items
-        valor: parseFloat(order.total),
-        status:
-          order.status === 'completed'
-            ? 'Concluído'
-            : order.status === 'processing'
-              ? 'Processando'
-              : 'Pendente',
+        customerName: order.customerName || order.customerEmail || 'Cliente',
+        total: parseFloat(order.total),
+        // Normalize status to canonical values expected by the admin UI
+        status: (order.status || '').toLowerCase(),
+        createdAt: order.createdAt,
       })),
     };
 
