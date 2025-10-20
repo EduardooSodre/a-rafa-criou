@@ -235,32 +235,34 @@ export default function PedidosPage() {
                 </Card>
             ) : (
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <TabsList className="grid w-full grid-cols-5 mb-6">
-                        <TabsTrigger value="todos" className="flex items-center gap-2">
+                    <TabsList className="mb-6 overflow-x-auto no-scrollbar -mx-4 px-4" style={{ WebkitOverflowScrolling: 'touch' }}>
+                        <div className="inline-flex space-x-2">
+                        <TabsTrigger value="todos" className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white shadow-sm">
                             <Package className="w-4 h-4" />
                             Todos
                             <Badge variant="secondary" className="ml-1">{getOrderCount('todos')}</Badge>
                         </TabsTrigger>
-                        <TabsTrigger value="completed" className="flex items-center gap-2">
+                        <TabsTrigger value="completed" className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white shadow-sm">
                             <CheckCircle className="w-4 h-4" />
                             Concluídos
                             <Badge variant="secondary" className="ml-1">{getOrderCount('completed')}</Badge>
                         </TabsTrigger>
-                        <TabsTrigger value="pending" className="flex items-center gap-2">
+                        <TabsTrigger value="pending" className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white shadow-sm">
                             <Clock className="w-4 h-4" />
                             Pendentes
                             <Badge variant="secondary" className="ml-1">{getOrderCount('pending')}</Badge>
                         </TabsTrigger>
-                        <TabsTrigger value="processing" className="flex items-center gap-2">
+                        <TabsTrigger value="processing" className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white shadow-sm">
                             <Package className="w-4 h-4" />
                             Processando
                             <Badge variant="secondary" className="ml-1">{getOrderCount('processing')}</Badge>
                         </TabsTrigger>
-                        <TabsTrigger value="cancelled" className="flex items-center gap-2">
+                        <TabsTrigger value="cancelled" className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white shadow-sm">
                             <XCircle className="w-4 h-4" />
                             Cancelados
                             <Badge variant="secondary" className="ml-1">{getOrderCount('cancelled')}</Badge>
                         </TabsTrigger>
+                        </div>
                     </TabsList>
 
                     <TabsContent value="todos" className="space-y-4">
@@ -345,7 +347,7 @@ function OrderCard({
     return (
         <Card className="hover:shadow-lg transition-shadow">
             <CardHeader>
-                <div className="flex justify-between items-start">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
                     <div>
                         <CardTitle className="text-lg">
                             Pedido #{order.id.slice(0, 13)}...
@@ -354,7 +356,9 @@ function OrderCard({
                             {formatDate(order.createdAt)}
                         </CardDescription>
                     </div>
-                    {getStatusBadge(order.status)}
+                    <div className="flex items-start justify-end">
+                        {getStatusBadge(order.status)}
+                    </div>
                 </div>
             </CardHeader>
             <CardContent>
@@ -406,15 +410,15 @@ function OrderCard({
 
                     {/* Botões de ação baseados no status */}
                     {order.status === 'pending' ? (
-                        <div className="flex gap-2">
-                            <Link href={`/checkout/pix?orderId=${order.id}`} className="flex-1">
+                        <div className="flex flex-col sm:flex-row gap-2">
+                            <Link href={`/checkout/pix?orderId=${order.id}`} className="w-full sm:flex-1">
                                 <Button
                                     className="w-full bg-[#FED466] hover:bg-[#FED466]/90 text-gray-800 font-semibold"
                                 >
                                     💳 Pagar Agora
                                 </Button>
                             </Link>
-                            <Link href={`/conta/pedidos/${order.id}`} className="flex-1">
+                            <Link href={`/conta/pedidos/${order.id}`} className="w-full sm:flex-1">
                                 <Button
                                     variant="outline"
                                     className="w-full"
