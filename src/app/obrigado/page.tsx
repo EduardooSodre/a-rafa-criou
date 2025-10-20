@@ -238,7 +238,7 @@ export default function ObrigadoPage() {
                                         {item.quantity}x {formatPrice(item.price)} = {formatPrice(item.total)}
                                     </p>
                                 </div>
-                                { (orderData.order.status === 'completed' || orderData.order.paymentStatus === 'succeeded') ? (
+                                {(orderData.order.status === 'completed' || orderData.order.paymentStatus === 'succeeded') ? (
                                     <Button className="bg-[#FED466] hover:bg-[#FED466]/90 text-black">
                                         <Download className="w-4 h-4 mr-2" />
                                         Download
@@ -248,7 +248,7 @@ export default function ObrigadoPage() {
                                         <Download className="w-4 h-4 mr-2" />
                                         Aguardando pagamento
                                     </Button>
-                                ) }
+                                )}
                             </div>
                         ))}
 
