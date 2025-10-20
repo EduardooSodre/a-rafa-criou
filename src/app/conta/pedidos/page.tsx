@@ -237,31 +237,31 @@ export default function PedidosPage() {
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                     <TabsList className="mb-6 overflow-x-auto no-scrollbar -mx-4 px-4" style={{ WebkitOverflowScrolling: 'touch' }}>
                         <div className="inline-flex space-x-2">
-                        <TabsTrigger value="todos" className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white shadow-sm">
-                            <Package className="w-4 h-4" />
-                            Todos
-                            <Badge variant="secondary" className="ml-1">{getOrderCount('todos')}</Badge>
-                        </TabsTrigger>
-                        <TabsTrigger value="completed" className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white shadow-sm">
-                            <CheckCircle className="w-4 h-4" />
-                            Concluídos
-                            <Badge variant="secondary" className="ml-1">{getOrderCount('completed')}</Badge>
-                        </TabsTrigger>
-                        <TabsTrigger value="pending" className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white shadow-sm">
-                            <Clock className="w-4 h-4" />
-                            Pendentes
-                            <Badge variant="secondary" className="ml-1">{getOrderCount('pending')}</Badge>
-                        </TabsTrigger>
-                        <TabsTrigger value="processing" className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white shadow-sm">
-                            <Package className="w-4 h-4" />
-                            Processando
-                            <Badge variant="secondary" className="ml-1">{getOrderCount('processing')}</Badge>
-                        </TabsTrigger>
-                        <TabsTrigger value="cancelled" className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white shadow-sm">
-                            <XCircle className="w-4 h-4" />
-                            Cancelados
-                            <Badge variant="secondary" className="ml-1">{getOrderCount('cancelled')}</Badge>
-                        </TabsTrigger>
+                            <TabsTrigger value="todos" className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white shadow-sm">
+                                <Package className="w-4 h-4" />
+                                Todos
+                                <Badge variant="secondary" className="ml-1">{getOrderCount('todos')}</Badge>
+                            </TabsTrigger>
+                            <TabsTrigger value="completed" className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white shadow-sm">
+                                <CheckCircle className="w-4 h-4" />
+                                Concluídos
+                                <Badge variant="secondary" className="ml-1">{getOrderCount('completed')}</Badge>
+                            </TabsTrigger>
+                            <TabsTrigger value="pending" className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white shadow-sm">
+                                <Clock className="w-4 h-4" />
+                                Pendentes
+                                <Badge variant="secondary" className="ml-1">{getOrderCount('pending')}</Badge>
+                            </TabsTrigger>
+                            <TabsTrigger value="processing" className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white shadow-sm">
+                                <Package className="w-4 h-4" />
+                                Processando
+                                <Badge variant="secondary" className="ml-1">{getOrderCount('processing')}</Badge>
+                            </TabsTrigger>
+                            <TabsTrigger value="cancelled" className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white shadow-sm">
+                                <XCircle className="w-4 h-4" />
+                                Cancelados
+                                <Badge variant="secondary" className="ml-1">{getOrderCount('cancelled')}</Badge>
+                            </TabsTrigger>
                         </div>
                     </TabsList>
 
