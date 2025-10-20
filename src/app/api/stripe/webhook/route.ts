@@ -139,7 +139,7 @@ export async function POST(req: NextRequest) {
         order = newOrders[0];
 
         // Criar itens do pedido apenas se for um novo pedido
-          for (const item of items) {
+        for (const item of items) {
           const [productData] = await db
             .select({
               productId: products.id,
@@ -229,7 +229,10 @@ export async function POST(req: NextRequest) {
             })
           );
 
-          console.log('📦 Produtos com URLs de download geradas para envio:', productsWithDownloadUrls.map(p => ({ name: p.name, hasUrl: !!p.downloadUrl })));
+          console.log(
+            '📦 Produtos com URLs de download geradas para envio:',
+            productsWithDownloadUrls.map(p => ({ name: p.name, hasUrl: !!p.downloadUrl }))
+          );
 
           // Renderizar e enviar e-mail
           const emailHtml = await render(
