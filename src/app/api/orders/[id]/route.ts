@@ -14,17 +14,18 @@ import { eq } from 'drizzle-orm';
 export async function GET(req: NextRequest, context: unknown) {
   try {
     // Next.js context.params may be a Promise in some runtime types; normalize safely
-    type Thenable = { then?: (...args: unknown[]) => unknown }
-    let rawParams: unknown = undefined
+    type Thenable = { then?: (...args: unknown[]) => unknown };
+    let rawParams: unknown = undefined;
     if (typeof context === 'object' && context !== null) {
-      const ctx = context as { params?: unknown }
-      rawParams = ctx.params
+      const ctx = context as { params?: unknown };
+      rawParams = ctx.params;
     }
-    const params = (rawParams && typeof (rawParams as Thenable).then === 'function')
-      ? await (rawParams as Promise<unknown>)
-      : rawParams
-  const paramsObj = params as Record<string, unknown> | undefined
-  const orderId = String(paramsObj?.id ?? '')
+    const params =
+      rawParams && typeof (rawParams as Thenable).then === 'function'
+        ? await (rawParams as Promise<unknown>)
+        : rawParams;
+    const paramsObj = params as Record<string, unknown> | undefined;
+    const orderId = String(paramsObj?.id ?? '');
 
     // 1. Verificar autenticação
     const session = await getServerSession(authOptions);

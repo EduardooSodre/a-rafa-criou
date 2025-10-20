@@ -31,8 +31,8 @@ export default function ContatoPage() {
                                 {t('contact.subtitle')}
                             </p>
                             <Button asChild variant="outline" className="w-full">
-                                <a href="mailto:suporte@arafacriou.com.br">
-                                    suporte@arafacriou.com.br
+                                <a href="mailto:arafacriou@gmail.com">
+                                    arafacriou@gmail.com
                                 </a>
                             </Button>
                         </CardContent>

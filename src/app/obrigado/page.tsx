@@ -106,6 +106,44 @@ export default function ObrigadoPage() {
         fetchOrder()
     }, [paymentIntent])
 
+    // If the order becomes approved, attempt to (re)send confirmation email via API once
+    useEffect(() => {
+        if (!orderData) return
+
+        const order = orderData.order
+        const paymentStatus = (order.paymentStatus || '').toLowerCase()
+        const orderStatus = (order.status || '').toLowerCase()
+        const isSuccess = orderStatus === 'completed' || paymentStatus === 'succeeded' || paymentStatus === 'paid'
+
+        if (!isSuccess) return
+
+        try {
+            const key = `confirmationSent:${order.id}`
+            if (typeof window !== 'undefined' && !localStorage.getItem(key)) {
+                // fire-and-forget; endpoint will return ok or error
+                ; (async () => {
+                    try {
+                        const params = new URLSearchParams()
+                        params.set('orderId', order.id)
+
+                        const res = await fetch(`/api/orders/send-confirmation?${params.toString()}`)
+                        if (!res.ok) {
+                            const body = await res.text().catch(() => '')
+                            console.error('Falha ao reenviar email de confirmação', res.status, body)
+                        } else {
+                            console.log('Email de confirmação enviado (via send-confirmation)')
+                            localStorage.setItem(key, '1')
+                        }
+                    } catch (err) {
+                        console.error('Erro ao chamar send-confirmation:', err)
+                    }
+                })()
+            }
+        } catch (e) {
+            console.error('Erro ao tentar enviar confirmação (localStorage)', e)
+        }
+    }, [orderData])
+
     const formatPrice = (price: string | number) => {
         const numPrice = typeof price === 'string' ? parseFloat(price) : price
         return `R$ ${numPrice.toFixed(2).replace('.', ',')}`
@@ -421,7 +459,7 @@ export default function ObrigadoPage() {
                         Obrigado por confiar na <strong>A Rafa Criou</strong>! 🎉
                     </p>
                     <p className="text-xs mt-2">
-                        Tem dúvidas? Entre em contato: suporte@arafacriou.com.br
+                        Tem dúvidas? Entre em contato: arafacriou@gmail.com
                     </p>
                 </div>
             </div>

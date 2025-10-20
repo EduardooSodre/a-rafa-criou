@@ -52,6 +52,7 @@ export async function POST(req: NextRequest) {
       let order;
       const orderItemsData: Array<{
         id: string;
+        productId?: string | null;
         productName: string;
         variationName: string;
         price: number;
@@ -106,6 +107,7 @@ export async function POST(req: NextRequest) {
         for (const item of existingItems) {
           orderItemsData.push({
             id: item.id,
+            productId: item.productId,
             productName: item.name,
             variationName: '', // Já está no name
             price: parseFloat(item.price),
@@ -137,7 +139,7 @@ export async function POST(req: NextRequest) {
         order = newOrders[0];
 
         // Criar itens do pedido apenas se for um novo pedido
-        for (const item of items) {
+          for (const item of items) {
           const [productData] = await db
             .select({
               productId: products.id,
@@ -173,6 +175,7 @@ export async function POST(req: NextRequest) {
 
           orderItemsData.push({
             id: createdItem.id,
+            productId: createdItem.productId,
             productName: productData.productName || 'Produto',
             variationName: productData.variationName || '',
             price: itemPrice,
@@ -188,21 +191,32 @@ export async function POST(req: NextRequest) {
           // Gerar URLs assinadas para cada produto
           const productsWithDownloadUrls = await Promise.all(
             orderItemsData.map(async item => {
-              // Buscar arquivo da variação (apenas se variationId não for null)
+              // Buscar arquivo preferindo variationId, senão productId
               let downloadUrl = '';
 
+              // try variation
               if (item.variationId) {
-                const fileRecords = await db
-                  .select({
-                    filePath: files.path,
-                  })
+                const byVar = await db
+                  .select({ filePath: files.path })
                   .from(files)
                   .where(eq(files.variationId, item.variationId))
                   .limit(1);
 
-                if (fileRecords.length > 0 && fileRecords[0]?.filePath) {
-                  // Gerar URL assinada com 15 minutos de validade
-                  downloadUrl = await getR2SignedUrl(fileRecords[0].filePath, 15 * 60);
+                if (byVar.length > 0 && byVar[0]?.filePath) {
+                  downloadUrl = await getR2SignedUrl(byVar[0].filePath, 15 * 60);
+                }
+              }
+
+              // fallback to product file
+              if (!downloadUrl && item.productId) {
+                const byProd = await db
+                  .select({ filePath: files.path })
+                  .from(files)
+                  .where(eq(files.productId, String(item.productId)))
+                  .limit(1);
+
+                if (byProd.length > 0 && byProd[0]?.filePath) {
+                  downloadUrl = await getR2SignedUrl(byProd[0].filePath, 15 * 60);
                 }
               }
 
@@ -214,6 +228,8 @@ export async function POST(req: NextRequest) {
               };
             })
           );
+
+          console.log('📦 Produtos com URLs de download geradas para envio:', productsWithDownloadUrls.map(p => ({ name: p.name, hasUrl: !!p.downloadUrl })));
 
           // Renderizar e enviar e-mail
           const emailHtml = await render(
