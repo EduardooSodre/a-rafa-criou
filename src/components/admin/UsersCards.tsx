@@ -119,7 +119,7 @@ export default function UsersCards({ users, onPromoteUser }: Props) {
                                                                 <DropdownMenuItem
                                                                     onSelect={(e) => e.preventDefault()}
                                                                     className="text-green-600"
-                                                                    // disabled handled by external caller using adminPassword/actionLoading
+                                                                // disabled handled by external caller using adminPassword/actionLoading
                                                                 >
                                                                     <UserCheck className="w-4 h-4 mr-2" />
                                                                     Promover a Admin

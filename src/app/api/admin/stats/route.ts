@@ -50,7 +50,7 @@ export async function GET() {
         })
         .from(orders)
         .leftJoin(users, eq(orders.userId, users.id))
-  .orderBy(desc(orders.createdAt))
+        .orderBy(desc(orders.createdAt))
         .limit(10),
     ]);
 
