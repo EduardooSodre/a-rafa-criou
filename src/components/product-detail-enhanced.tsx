@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ShoppingCart, Download, Star, FileText, Shield, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ShoppingCart, Star, ChevronLeft, ChevronRight, Check, X } from 'lucide-react'
 import { useCart } from '@/contexts/cart-context'
 import { useToast } from '@/components/ui/toast'
 import { useTranslation } from 'react-i18next'
@@ -332,7 +332,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                                 </svg>
                                             </div>
                                             <div>
-                                                <h3 className="font-bold text-xl text-gray-900">
+                                                <h3 className="font-bold text-lg text-gray-900">
                                                     {t('productInfo.chooseVariation')}
                                                 </h3>
                                                 <p className="text-sm text-gray-600">
@@ -375,10 +375,10 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                                                 onClick={() => handleFilterClick(attrName, value)}
                                                                 aria-label={`Selecionar ${attrName} ${value}`}
                                                                 className={cn(
-                                                                    "group relative p-4 rounded-xl border-2 transition-all duration-300 text-center overflow-hidden",
+                                                                    "group relative p-3 rounded-lg border-2 transition-all duration-200 text-center overflow-hidden text-sm",
                                                                     isSelected
-                                                                        ? "border-[#FD9555] bg-gradient-to-br from-[#FED466] via-[#FED466]/80 to-[#FD9555]/20 shadow-lg scale-105"
-                                                                        : "border-gray-300 bg-white hover:border-[#FED466] hover:shadow-md hover:scale-102"
+                                                                        ? "border-[#FD9555] bg-gradient-to-br from-[#FED466] via-[#FED466]/80 to-[#FD9555]/20 shadow-md scale-105"
+                                                                        : "border-gray-300 bg-white hover:border-[#FED466] hover:shadow-sm"
                                                                 )}
                                                             >
                                                                 {/* Efeito de brilho quando selecionado */}
@@ -388,8 +388,8 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
 
                                                                 {/* Check icon quando selecionado */}
                                                                 {isSelected && (
-                                                                    <div className="absolute -top-1 -right-1 w-6 h-6 bg-[#FD9555] rounded-full flex items-center justify-center shadow-md z-10">
-                                                                        <svg className="w-3.5 h-3.5 text-white" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-[#FD9555] rounded-full flex items-center justify-center shadow-sm z-10">
+                                                                        <svg className="w-3 h-3 text-white" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" viewBox="0 0 24 24" stroke="currentColor">
                                                                             <path d="M5 13l4 4L19 7"></path>
                                                                         </svg>
                                                                     </div>
@@ -506,42 +506,53 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                             R$ {currentPrice.toFixed(2).replace('.', ',')}
                         </div>
                         <div className="flex flex-col gap-3">
-                            <Button
-                                onClick={handleBuyNow}
-                                variant="default"
-                                size="lg"
-                                className="w-full min-h-[56px] md:min-h-[64px] text-black font-bold text-lg md:text-xl rounded-lg border-2 border-[#FD9555] shadow-xl"
-                            >
-                                {t('product.buyNow', 'COMPRAR AGORA')}
-                            </Button>
-                            <Button
-                                onClick={handleAddToCart}
-                                variant="outline"
-                                size="lg"
-                                className="w-full min-h-[56px] md:min-h-[64px] text-black font-bold text-lg md:text-xl rounded-lg shadow-lg"
-                            >
-                                <ShoppingCart className="w-6 h-6 mr-2" />
-                                {t('product.addToCart', 'ADICIONAR AO CARRINHO')}
-                            </Button>
+                                                        <Button
+                                                            onClick={handleBuyNow}
+                                                            variant="default"
+                                                            size="default"
+                                                            className="w-full min-h-[48px] md:min-h-[56px] text-black font-bold text-base md:text-lg rounded-md border-2 border-[#FD9555] shadow-lg"
+                                                        >
+                                                            {t('product.buyNow', 'COMPRAR AGORA')}
+                                                        </Button>
+                                                        <Button
+                                                            onClick={handleAddToCart}
+                                                            variant="outline"
+                                                            size="default"
+                                                            className="w-full min-h-[48px] md:min-h-[56px] text-black font-bold text-base md:text-lg rounded-md shadow-md"
+                                                        >
+                                                            <ShoppingCart className="w-5 h-5 mr-2" />
+                                                            {t('product.addToCart', 'ADICIONAR AO CARRINHO')}
+                                                        </Button>
                         </div>
                     </div>
 
                     {/* Garantias */}
-                    <Card className="border-3 border-green-200 bg-green-50">
-                        <CardContent className="p-5">
-                            <div className="grid grid-cols-1 gap-4 text-base md:text-lg">
-                                <div className="flex items-center gap-3 font-medium">
-                                    <Shield className="w-6 h-6 text-green-600 flex-shrink-0" />
-                                    <span className="text-gray-800">{t('productInfo.warranty', 'Garantia de 30 dias')}</span>
+                    <Card className="border-2 border-amber-200 bg-amber-50">
+                        <CardContent className="p-5 text-sm leading-relaxed text-gray-800">
+                            <h4 className="font-semibold mb-2 flex items-center gap-2 text-foreground">Descrição</h4>
+
+                            <div className="mb-3">
+                                <div className="flex items-start gap-2">
+                                    <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
+                                    <div>
+                                        <strong>Você pode:</strong> Imprimir em casa ou em gráficas quantas vezes quiser, entregar o arquivo montado para presentear ou para uso próprio.
+                                    </div>
                                 </div>
-                                <div className="flex items-center gap-3 font-medium">
-                                    <Download className="w-6 h-6 text-blue-600 flex-shrink-0" />
-                                    <span className="text-gray-800">{t('productInfo.immediateDownload', 'Download imediato após pagamento')}</span>
+                            </div>
+
+                            <div className="mb-3">
+                                <div className="flex items-start gap-2">
+                                    <X className="w-5 h-5 text-red-600 flex-shrink-0" />
+                                    <div>
+                                        <strong>Você NÃO pode:</strong> Fazer alterações de cor, molde, arte, frases (salvo para a opção &quot;escreva sua mensagem&quot;), trocas, empréstimos, doações, revendas ou qualquer tipo de comercialização, seja o PDF ou impresso, mesmo se tiver montado.
+                                    </div>
                                 </div>
-                                <div className="flex items-center gap-3 font-medium">
-                                    <FileText className="w-6 h-6 text-purple-600 flex-shrink-0" />
-                                    <span className="text-gray-800">{t('productInfo.supportIncluded', 'Suporte técnico incluso')}</span>
-                                </div>
+                            </div>
+
+                            <div className="text-xs text-gray-700">
+                                <p className="mb-2">Esse arquivo é protegido pela LEI Nº 9.610, DE 19 DE FEVEREIRO DE 1998. O crime de violação de direito autoral está previsto no art. 184 do Código Penal, que preceitua: “Violar direitos de autor e os que lhe são conexos: Pena – detenção, de 3 meses a 1 ano, ou multa”.</p>
+                                <p className="mb-2">Arquivo exclusivo DIGITAL para IMPRESSÃO feito somente para USO PESSOAL. Necessário fazer download e salvar no google drive. Após a confirmação de pagamento, o arquivo ficará disponível para Download no email cadastrado na hora da compra ou aqui mesmo no site: (Área do cliente &gt; Downloads)</p>
+                                <p>Esse arquivo é protegido pela LEI N° 9.610, DE 19 DE FEVEREIRO DE 1998. AUTORIZADO APENAS PARA USO PESSOAL. Enviar o arquivo para outras pessoas por email, whatsapp ou qualquer outro meio eletrônico é PROIBIDO. A cópia desse arquivo ou impressão com fins comerciais também NÃO é autorizada.</p>
                             </div>
                         </CardContent>
                     </Card>

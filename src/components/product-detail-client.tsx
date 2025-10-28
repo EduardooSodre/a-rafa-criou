@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
-import { ShoppingCart, Download, Star, FileText, Shield } from 'lucide-react'
+import { ShoppingCart, Download, Star, FileText, Check, X } from 'lucide-react'
 import { useCart } from '@/contexts/cart-context'
 import { useToast } from '@/components/ui/toast'
 import { useTranslation } from 'react-i18next'
@@ -169,8 +169,8 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                 {Array.isArray(product.variations) && product.variations.length > 1 && (
                     <Card className="border-2 border-primary/40 bg-[#FFFBEA] shadow-md">
                         <CardContent className="p-4">
-                            <h3 className="font-semibold mb-3 text-primary flex items-center gap-2 text-lg">
-                                <FileText className="w-5 h-5 text-primary" /> {t('productInfo.chooseVariation', 'Escolha uma variação:')}
+                            <h3 className="font-semibold mb-2 text-primary flex items-center gap-2 text-base">
+                                <FileText className="w-4 h-4 text-primary" /> {t('productInfo.chooseVariation', 'Escolha uma variação:')}
                             </h3>
                             {/* Attribute selectors (if any) */}
                             {availableAttributes.length > 0 && (
@@ -227,15 +227,15 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                     <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
                         <Button
                             onClick={handleBuyNow}
-                            className="flex-1 min-h-[52px] bg-primary hover:bg-secondary text-black font-semibold shadow-md rounded-lg border-2 border-primary focus:ring-2 focus:ring-primary/60 transition-all"
-                            size="lg"
+                            className="flex-1 bg-primary hover:bg-secondary text-black font-semibold shadow-sm rounded-md border-2 border-primary focus:ring-2 focus:ring-primary/60 transition-all text-sm"
+                            size="default"
                         >
                             {t('product.buyNow', 'Comprar Agora')}
                         </Button>
                         <Button
                             onClick={handleAddToCart}
-                            className="flex-1 min-h-[52px] bg-secondary hover:bg-primary text-black font-semibold shadow-md rounded-lg border-2 border-secondary focus:ring-2 focus:ring-secondary/60 transition-all"
-                            size="lg"
+                            className="flex-1 bg-secondary hover:bg-primary text-black font-semibold shadow-sm rounded-md border-2 border-secondary focus:ring-2 focus:ring-secondary/60 transition-all text-sm"
+                            size="default"
                         >
                             <ShoppingCart className="w-4 h-4 mr-2" />
                             {t('product.addToCart', 'Adicionar ao Carrinho')}
@@ -243,22 +243,33 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                     </div>
                 </div>
 
-                {/* Garantias */}
-                <Card>
-                    <CardContent className="p-4">
-                        <div className="grid grid-cols-1 gap-3 text-sm">
-                            <div className="flex items-center gap-2">
-                                <Shield className="w-4 h-4 text-green-600" />
-                                <span>{t('productInfo.warranty', 'Garantia de 30 dias')}</span>
+                {/* Legal / Copyright Alert (applies to all products) */}
+                <Card className="border-2 border-amber-200 bg-amber-50">
+                    <CardContent className="p-4 text-sm leading-relaxed text-gray-800">
+                        <h4 className="font-semibold mb-2 flex items-center gap-2 text-foreground">Descrição</h4>
+
+                        <div className="mb-3">
+                            <div className="flex items-start gap-2">
+                                <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
+                                <div>
+                                    <strong>Você pode:</strong> Imprimir em casa ou em gráficas quantas vezes quiser, entregar o arquivo montado para presentear ou para uso próprio.
+                                </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <Download className="w-4 h-4 text-blue-600" />
-                                <span>{t('productInfo.immediateDownload', 'Download imediato após pagamento')}</span>
+                        </div>
+
+                        <div className="mb-3">
+                            <div className="flex items-start gap-2">
+                                <X className="w-5 h-5 text-red-600 flex-shrink-0" />
+                                <div>
+                                    <strong>Você NÃO pode:</strong> Fazer alterações de cor, molde, arte, frases (salvo para a opção &quot;escreva sua mensagem&quot;), trocas, empréstimos, doações, revendas ou qualquer tipo de comercialização, seja o PDF ou impresso, mesmo se tiver montado.
+                                </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <FileText className="w-4 h-4 text-purple-600" />
-                                <span>{t('productInfo.supportIncluded', 'Suporte técnico incluso')}</span>
-                            </div>
+                        </div>
+
+                        <div className="text-xs text-gray-700">
+                            <p className="mb-2">Esse arquivo é protegido pela LEI Nº 9.610, DE 19 DE FEVEREIRO DE 1998. O crime de violação de direito autoral está previsto no art. 184 do Código Penal, que preceitua: “Violar direitos de autor e os que lhe são conexos: Pena – detenção, de 3 meses a 1 ano, ou multa”.</p>
+                            <p className="mb-2">Arquivo exclusivo DIGITAL para IMPRESSÃO feito somente para USO PESSOAL. Necessário fazer download e salvar no google drive. Após a confirmação de pagamento, o arquivo ficará disponível para Download no email cadastrado na hora da compra ou aqui mesmo no site: (Área do cliente &gt; Downloads)</p>
+                            <p>Esse arquivo é protegido pela LEI N° 9.610, DE 19 DE FEVEREIRO DE 1998. AUTORIZADO APENAS PARA USO PESSOAL. Enviar o arquivo para outras pessoas por email, whatsapp ou qualquer outro meio eletrônico é PROIBIDO. A cópia desse arquivo ou impressão com fins comerciais também NÃO é autorizada.</p>
                         </div>
                     </CardContent>
                 </Card>

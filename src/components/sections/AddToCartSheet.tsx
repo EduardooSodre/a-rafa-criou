@@ -201,7 +201,7 @@ export function AddToCartSheet({ open, onOpenChange, product }: AddToCartSheetPr
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent side="bottom" className="max-h-[75vh] p-0 flex flex-col">
+            <SheetContent side="bottom" className="max-h-[75vh] p-0 flex flex-col">
                 <SheetHeader className="p-4 border-b bg-[#FD9555] text-white">
                     <div className="flex items-start gap-3">
                         {product.mainImage?.data && (
