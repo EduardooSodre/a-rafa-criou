@@ -506,23 +506,23 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                             R$ {currentPrice.toFixed(2).replace('.', ',')}
                         </div>
                         <div className="flex flex-col gap-3">
-                                                        <Button
-                                                            onClick={handleBuyNow}
-                                                            variant="default"
-                                                            size="default"
-                                                            className="w-full min-h-[48px] md:min-h-[56px] text-black font-bold text-base md:text-lg rounded-md border-2 border-[#FD9555] shadow-lg"
-                                                        >
-                                                            {t('product.buyNow', 'COMPRAR AGORA')}
-                                                        </Button>
-                                                        <Button
-                                                            onClick={handleAddToCart}
-                                                            variant="outline"
-                                                            size="default"
-                                                            className="w-full min-h-[48px] md:min-h-[56px] text-black font-bold text-base md:text-lg rounded-md shadow-md"
-                                                        >
-                                                            <ShoppingCart className="w-5 h-5 mr-2" />
-                                                            {t('product.addToCart', 'ADICIONAR AO CARRINHO')}
-                                                        </Button>
+                            <Button
+                                onClick={handleBuyNow}
+                                variant="default"
+                                size="default"
+                                className="w-full min-h-[48px] md:min-h-[56px] text-black font-bold text-base md:text-lg rounded-md border-2 border-[#FD9555] shadow-lg"
+                            >
+                                {t('product.buyNow', 'COMPRAR AGORA')}
+                            </Button>
+                            <Button
+                                onClick={handleAddToCart}
+                                variant="outline"
+                                size="default"
+                                className="w-full min-h-[48px] md:min-h-[56px] text-black font-bold text-base md:text-lg rounded-md shadow-md"
+                            >
+                                <ShoppingCart className="w-5 h-5 mr-2" />
+                                {t('product.addToCart', 'ADICIONAR AO CARRINHO')}
+                            </Button>
                         </div>
                     </div>
 
