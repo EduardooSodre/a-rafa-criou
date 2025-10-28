@@ -320,14 +320,14 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
 
                     {/* Seleção de Variação - Sistema de Filtros Interativos */}
                     {validVariations.length > 1 && (
-                        <Card className="border-2 border-[#FED466] bg-gradient-to-br from-white via-[#FFFBEA]/10 to-white shadow-lg">
-                            <CardContent className="p-6">
-                                <div className="space-y-6">
+                        <Card className="border-2 border-[#FED466] bg-gradient-to-br from-white via-[#FFFBEA]/10 to-white shadow-md">
+                            <CardContent className="p-4">
+                                <div className="space-y-4">
                                     {/* Header */}
-                                    <div className="flex items-center justify-between pb-4 border-b-2 border-[#FED466]/30">
+                                    <div className="flex items-center justify-between pb-3 border-b-2 border-[#FED466]/30">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#FED466] to-[#FD9555] flex items-center justify-center shadow-md">
-                                                <svg className="w-5 h-5 text-white" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#FED466] to-[#FD9555] flex items-center justify-center shadow-sm">
+                                                <svg className="w-4 h-4 text-white" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
                                                 </svg>
                                             </div>
@@ -335,12 +335,12 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                                 <h3 className="font-bold text-lg text-gray-900">
                                                     {t('productInfo.chooseVariation')}
                                                 </h3>
-                                                <p className="text-sm text-gray-600">
+                                                <p className="text-xs text-gray-600">
                                                     {t('productInfo.selectOptions')}
                                                 </p>
                                             </div>
                                         </div>
-                                        <div className="hidden sm:flex items-center gap-2 bg-[#FED466]/20 px-4 py-2 rounded-full border border-[#FED466]/50">
+                                        <div className="hidden sm:flex items-center gap-2 bg-[#FED466]/20 px-3 py-1.5 rounded-full border border-[#FED466]/50">
                                             <div className="w-2 h-2 bg-[#FD9555] rounded-full animate-pulse"></div>
                                             <span className="text-sm font-semibold text-gray-700">
                                                 {getCompatibleVariations().length} {getCompatibleVariations().length === 1 ? t('productInfo.optionAvailable') : t('productInfo.optionsAvailable')}
@@ -349,13 +349,12 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                     </div>
 
                                     {/* Sistema de Filtros por Atributo */}
-                                    <div className="space-y-5">
-                                        {/* Filtros por Atributo */}
+                                    <div className="space-y-4">
                                         {Array.from(attributeGroups.entries()).map(([attrName, values]) => (
-                                            <div key={attrName} className="space-y-3">
+                                            <div key={attrName} className="space-y-2">
                                                 <div className="flex items-center gap-2">
                                                     <div className="w-1 h-5 bg-gradient-to-b from-[#FD9555] to-[#FED466] rounded-full"></div>
-                                                    <label className="font-bold text-base text-gray-800">
+                                                    <label className="font-semibold text-sm text-gray-800">
                                                         {attrName}
                                                     </label>
                                                     {selectedFilters.has(attrName) && (
@@ -365,7 +364,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                                     )}
                                                 </div>
 
-                                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                                                     {Array.from(values).map(value => {
                                                         const isSelected = selectedFilters.get(attrName) === value
 
@@ -375,20 +374,18 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                                                 onClick={() => handleFilterClick(attrName, value)}
                                                                 aria-label={`Selecionar ${attrName} ${value}`}
                                                                 className={cn(
-                                                                    "group relative p-3 rounded-lg border-2 transition-all duration-200 text-center overflow-hidden text-sm",
+                                                                    "group relative p-2 rounded-md border-2 transition-all duration-200 text-center overflow-hidden text-sm",
                                                                     isSelected
-                                                                        ? "border-[#FD9555] bg-gradient-to-br from-[#FED466] via-[#FED466]/80 to-[#FD9555]/20 shadow-md scale-105"
+                                                                        ? "border-[#FD9555] bg-gradient-to-br from-[#FED466] via-[#FED466]/80 to-[#FD9555]/20 shadow-sm scale-105"
                                                                         : "border-gray-300 bg-white hover:border-[#FED466] hover:shadow-sm"
                                                                 )}
                                                             >
-                                                                {/* Efeito de brilho quando selecionado */}
                                                                 {isSelected && (
                                                                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                                                                 )}
 
-                                                                {/* Check icon quando selecionado */}
                                                                 {isSelected && (
-                                                                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-[#FD9555] rounded-full flex items-center justify-center shadow-sm z-10">
+                                                                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-[#FD9555] rounded-full flex items-center justify-center shadow-sm z-10">
                                                                         <svg className="w-3 h-3 text-white" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" viewBox="0 0 24 24" stroke="currentColor">
                                                                             <path d="M5 13l4 4L19 7"></path>
                                                                         </svg>
@@ -397,7 +394,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
 
                                                                 <div className="relative">
                                                                     <div className={cn(
-                                                                        "font-bold text-base mb-1 transition-colors",
+                                                                        "font-semibold text-sm mb-1 transition-colors",
                                                                         isSelected ? "text-gray-900" : "text-gray-700 group-hover:text-gray-900"
                                                                     )}>
                                                                         {value}
@@ -416,57 +413,17 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                             </div>
                                         ))}
 
-                                        {/* Resumo da Seleção */}
-                                        {selectedFilters.size > 0 && currentVariation && (
-                                            <div className="mt-6 p-5 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200">
-                                                <div className="flex items-start gap-4">
-                                                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center flex-shrink-0 shadow-md">
-                                                        <svg className="w-6 h-6 text-white" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                                        </svg>
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <h4 className="font-bold text-lg text-gray-900 mb-2">
-                                                            {t('productInfo.productSelected')}
-                                                        </h4>
-                                                        <div className="space-y-2">
-                                                            <div className="font-semibold text-xl text-gray-900">
-                                                                {currentVariation.name}
-                                                            </div>
-                                                            <div className="flex flex-wrap gap-2">
-                                                                {Array.from(selectedFilters.entries()).map(([attr, value]) => (
-                                                                    <span
-                                                                        key={attr}
-                                                                        className="inline-flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-full border border-green-300 text-sm font-medium text-gray-700"
-                                                                    >
-                                                                        <span className="text-green-600">●</span>
-                                                                        {attr}: <strong>{value}</strong>
-                                                                    </span>
-                                                                ))}
-                                                            </div>
-                                                            <div className="flex items-center gap-3 pt-2 mt-2 border-t border-green-200">
-                                                                <span className="text-sm text-gray-600">{t('productInfo.price')}:</span>
-                                                                <span className="text-2xl font-black text-[#FD9555]">
-                                                                    R$ {currentVariation.price.toFixed(2).replace('.', ',')}
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
-
                                         {/* Alerta quando houver seleção parcial */}
                                         {selectedFilters.size > 0 && !currentVariation && (
-                                            <div className="mt-6 p-5 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300">
-                                                <div className="flex items-start gap-4">
-                                                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 shadow-md">
-                                                        <svg className="w-6 h-6 text-white" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                                            <div className="mt-4 p-4 rounded-lg bg-amber-50 border border-amber-200">
+                                                <div className="flex items-start gap-3">
+                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 shadow-sm">
+                                                        <svg className="w-5 h-5 text-white" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                                                         </svg>
                                                     </div>
                                                     <div className="flex-1">
-                                                        <h4 className="font-bold text-lg text-gray-900 mb-2">
+                                                        <h4 className="font-semibold text-base text-gray-900 mb-1">
                                                             {t('productInfo.continueSelecting')}
                                                         </h4>
                                                         <p className="text-sm text-gray-700">
@@ -481,28 +438,15 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                             </div>
                                         )}
 
-                                        {/* Mensagem quando nenhuma seleção */}
-                                        {selectedFilters.size === 0 && (
-                                            <div className="text-center py-8 px-4 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
-                                                <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gray-200 flex items-center justify-center">
-                                                    <svg className="w-8 h-8 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path>
-                                                    </svg>
-                                                </div>
-                                                <p className="text-gray-600 font-medium">
-                                                    {t('productInfo.selectAboveOptions')}
-                                                </p>
-                                            </div>
-                                        )}
                                     </div>
                                 </div>
                             </CardContent>
                         </Card>
                     )}
 
-                    {/* Preço e Botões - GRANDES para idosos */}
+                    {/* Preço e Botões - compactos */}
                     <div className="space-y-5">
-                        <div className="text-5xl md:text-6xl font-extrabold text-[#FD9555] drop-shadow-lg">
+                        <div className="text-4xl md:text-5xl font-extrabold text-[#FD9555]">
                             R$ {currentPrice.toFixed(2).replace('.', ',')}
                         </div>
                         <div className="flex flex-col gap-3">
@@ -510,7 +454,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                 onClick={handleBuyNow}
                                 variant="default"
                                 size="default"
-                                className="w-full min-h-[48px] md:min-h-[56px] text-black font-bold text-base md:text-lg rounded-md border-2 border-[#FD9555] shadow-lg"
+                                className="w-full min-h-[44px] md:min-h-[48px] text-black font-bold text-sm md:text-base rounded-md border-2 border-[#FD9555] shadow-md"
                             >
                                 {t('product.buyNow', 'COMPRAR AGORA')}
                             </Button>
@@ -518,7 +462,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                 onClick={handleAddToCart}
                                 variant="outline"
                                 size="default"
-                                className="w-full min-h-[48px] md:min-h-[56px] text-black font-bold text-base md:text-lg rounded-md shadow-md"
+                                className="w-full min-h-[44px] md:min-h-[48px] text-black font-bold text-sm md:text-base rounded-md shadow-sm"
                             >
                                 <ShoppingCart className="w-5 h-5 mr-2" />
                                 {t('product.addToCart', 'ADICIONAR AO CARRINHO')}
@@ -526,23 +470,23 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                         </div>
                     </div>
 
-                    {/* Garantias */}
+                    {/* Garantias / Descrição legal compacta */}
                     <Card className="border-2 border-amber-200 bg-amber-50">
-                        <CardContent className="p-5 text-sm leading-relaxed text-gray-800">
+                        <CardContent className="p-4 text-sm leading-relaxed text-gray-800">
                             <h4 className="font-semibold mb-2 flex items-center gap-2 text-foreground">Descrição</h4>
 
-                            <div className="mb-3">
+                            <div className="mb-2">
                                 <div className="flex items-start gap-2">
-                                    <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
+                                    <Check className="w-4 h-4 text-green-600 flex-shrink-0" />
                                     <div>
                                         <strong>Você pode:</strong> Imprimir em casa ou em gráficas quantas vezes quiser, entregar o arquivo montado para presentear ou para uso próprio.
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="mb-3">
+                            <div className="mb-2">
                                 <div className="flex items-start gap-2">
-                                    <X className="w-5 h-5 text-red-600 flex-shrink-0" />
+                                    <X className="w-4 h-4 text-red-600 flex-shrink-0" />
                                     <div>
                                         <strong>Você NÃO pode:</strong> Fazer alterações de cor, molde, arte, frases (salvo para a opção &quot;escreva sua mensagem&quot;), trocas, empréstimos, doações, revendas ou qualquer tipo de comercialização, seja o PDF ou impresso, mesmo se tiver montado.
                                     </div>
@@ -556,6 +500,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                             </div>
                         </CardContent>
                     </Card>
+
                 </div>
             </div>
 
