@@ -30,7 +30,7 @@ export function MobileCartSheet({ open, onOpenChange }: MobileCartSheetProps) {
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
-            <SheetContent side="right" className="w-[90vw] sm:w-[400px] p-0 flex flex-col">
+            <SheetContent side="right" className="w-[90vw] sm:w-[360px] p-0 flex flex-col">
                 <SheetTitle className="sr-only">Carrinho de Compras</SheetTitle>
 
                 {/* Header */}
@@ -138,7 +138,8 @@ export function MobileCartSheet({ open, onOpenChange }: MobileCartSheetProps) {
                             {/* Checkout Button */}
                             <Button
                                 onClick={handleCheckout}
-                                className="w-full bg-[#FD9555] hover:bg-[#E88544] text-white font-bold py-6 text-base"
+                                // Less tall CTA so sheet doesn't dominate the viewport
+                                className="w-full bg-[#FD9555] hover:bg-[#E88544] text-white font-bold py-3 text-base"
                             >
                                 Finalizar Compra
                             </Button>

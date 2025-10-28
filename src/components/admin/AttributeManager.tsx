@@ -340,7 +340,7 @@ export default function AttributeManager({ selectedAttributes, onChange }: Attri
                             return (
                                 <div
                                     key={attr.id}
-                                    className={`border rounded-lg p-4 transition-all ${isSelected
+                                    className={`border rounded-lg p-3 transition-all ${isSelected
                                         ? 'border-[#FED466] bg-[#FED466]/5'
                                         : 'border-gray-200'
                                         }`}
@@ -354,7 +354,7 @@ export default function AttributeManager({ selectedAttributes, onChange }: Attri
                                                 className="w-5 h-5"
                                             />
                                             <div>
-                                                <div className="font-semibold text-lg">{attr.name}</div>
+                                                <div className="font-semibold text-base">{attr.name}</div>
                                                 <div className="text-sm text-gray-500">
                                                     {attr.values?.length || 0} {attr.values?.length === 1 ? 'valor' : 'valores'}
                                                 </div>
@@ -392,7 +392,7 @@ export default function AttributeManager({ selectedAttributes, onChange }: Attri
                                                     return (
                                                         <div
                                                             key={value.id}
-                                                            className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border-2 transition-all ${isValueSelected
+                                                            className={`inline-flex items-center gap-2 px-2 py-1.5 rounded-md border-2 transition-all text-sm ${isValueSelected
                                                                 ? 'border-[#FD9555] bg-[#FED466]/20'
                                                                 : 'border-gray-300'
                                                                 }`}

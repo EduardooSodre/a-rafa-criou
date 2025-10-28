@@ -59,9 +59,10 @@ export async function GET(
       })),
       images: variationImages.map(img => ({
         id: img.id,
-        name: img.name,
-        data: img.data,
-        mimeType: img.mimeType,
+        cloudinaryId: img.cloudinaryId,
+        url: img.url,
+        format: img.format || null,
+        size: img.size || null,
         alt: img.alt,
         isMain: img.isMain,
         order: img.sortOrder,

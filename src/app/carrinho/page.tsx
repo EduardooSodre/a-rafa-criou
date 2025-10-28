@@ -335,15 +335,7 @@ export default function CarrinhoPage() {
                                         <span className="text-2xl font-bold text-[#FD9555]">{formatPrice(totalPrice)}</span>
                                     </div>
 
-                                    <Button
-                                        asChild
-                                        className="w-full h-14 bg-gradient-to-r from-[#FD9555] to-[#FD9555]/90 hover:from-[#FD9555]/90 hover:to-[#FD9555] text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer"
-                                        size="lg"
-                                    >
-                                        <Link href="/checkout">
-                                            {t('cart.checkout')}
-                                        </Link>
-                                    </Button>
+
 
                                     {/* Botão PIX */}
                                     <Dialog open={pixDialogOpen} onOpenChange={setPixDialogOpen}>
@@ -353,7 +345,7 @@ export default function CarrinhoPage() {
                                                 size="lg"
                                             >
                                                 <QrCode className="w-5 h-5 mr-2" />
-                                                Pagar com PIX
+                                                Pix e cartão de crédito/débito (Brasil)
                                             </Button>
                                         </DialogTrigger>
                                         <DialogContent>
@@ -392,6 +384,15 @@ export default function CarrinhoPage() {
                                             </div>
                                         </DialogContent>
                                     </Dialog>
+                                    <Button
+                                        asChild
+                                        className="w-full h-14 bg-gradient-to-r from-[#FD9555] to-[#FD9555]/90 hover:from-[#FD9555]/90 hover:to-[#FD9555] text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer"
+                                        size="lg"
+                                    >
+                                        <Link href="/checkout">
+                                            Comprar internacionalmente
+                                        </Link>
+                                    </Button>
 
                                     <div className="text-xs text-gray-600 text-center space-y-1 pt-2">
                                         <p className="flex items-center justify-center gap-1">

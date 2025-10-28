@@ -179,7 +179,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                                         <div key={attr.attributeId}>
                                             <Label className="text-sm">{attr.attributeName || attr.attributeId}</Label>
                                             <Select value={selectedAttrs[attr.attributeId] || ''} onValueChange={(val) => setSelectedAttrs(prev => ({ ...prev, [attr.attributeId]: val }))}>
-                                                <SelectTrigger className="w-full bg-white border-2 border-primary/40 focus:border-primary shadow-sm rounded-lg text-base">
+                                                <SelectTrigger className="w-full bg-white border-2 border-primary/40 focus:border-primary shadow-sm rounded-md text-sm">
                                                     <SelectValue placeholder="Selecione" />
                                                 </SelectTrigger>
                                                 <SelectContent>
@@ -193,7 +193,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                                 </div>
                             )}
                             <Select value={selectedVariation} onValueChange={setSelectedVariation}>
-                                <SelectTrigger className="w-full bg-white border-2 border-primary/40 focus:border-primary shadow-sm rounded-lg text-base">
+                                <SelectTrigger className="w-full bg-white border-2 border-primary/40 focus:border-primary shadow-sm rounded-md text-sm">
                                     <SelectValue placeholder={t('productInfo.selectVariationPlaceholder', 'Selecione uma variação')} />
                                 </SelectTrigger>
                                 <SelectContent className="bg-white rounded-lg shadow-lg border border-primary/30 max-h-60 overflow-y-auto">

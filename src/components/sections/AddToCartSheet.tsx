@@ -201,7 +201,7 @@ export function AddToCartSheet({ open, onOpenChange, product }: AddToCartSheetPr
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
-            <SheetContent side="bottom" className="h-[80vh] p-0 flex flex-col">
+        <SheetContent side="bottom" className="max-h-[75vh] p-0 flex flex-col">
                 <SheetHeader className="p-4 border-b bg-[#FD9555] text-white">
                     <div className="flex items-start gap-3">
                         {product.mainImage?.data && (
@@ -262,10 +262,11 @@ export function AddToCartSheet({ open, onOpenChange, product }: AddToCartSheetPr
                                             key={value}
                                             onClick={() => handleFilterClick(attrName, value)}
                                             className={cn(
-                                                "relative p-4 rounded-xl border-2 transition-all duration-200 text-center",
+                                                // Reduced padding and radius for a more subtle UI
+                                                "relative p-3 rounded-lg border-2 transition-all duration-200 text-center text-sm",
                                                 isSelected
-                                                    ? "border-[#FD9555] bg-[#FED466] shadow-lg scale-105"
-                                                    : "border-gray-300 bg-white hover:border-[#FED466] hover:shadow-md"
+                                                    ? "border-[#FD9555] bg-[#FED466] shadow-sm"
+                                                    : "border-gray-300 bg-white hover:border-[#FED466] hover:shadow-sm"
                                             )}
                                         >
                                             {isSelected && (
@@ -301,7 +302,8 @@ export function AddToCartSheet({ open, onOpenChange, product }: AddToCartSheetPr
                     <Button
                         onClick={handleAddToCart}
                         disabled={!allAttributesSelected}
-                        className="w-full h-14 text-lg font-bold bg-[#FD9555] hover:bg-[#FD9555]/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                        // Smaller button height/text for subtler CTA
+                        className="w-full py-3 text-base font-bold bg-[#FD9555] hover:bg-[#FD9555]/90 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <ShoppingCart className="w-5 h-5 mr-2" />
                         {allAttributesSelected ? 'Adicionar ao Carrinho' : 'Selecione todas as opções'}

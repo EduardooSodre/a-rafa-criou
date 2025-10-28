@@ -140,17 +140,19 @@ async function seedProducts() {
 
     // Adicionar imagens placeholder para os produtos
     for (const product of insertedProducts) {
+      // Build image object according to productImages schema (cloudinaryId + url required)
       const imageData = {
         productId: product.id,
-        name: 'Imagem Principal',
-        originalName: 'banner_categorias.webp',
-        mimeType: 'image/webp',
+        cloudinaryId: 'seed-placeholder',
+        url: '/banner_categorias.webp', // placeholder path
+        width: null,
+        height: null,
+        format: 'webp',
         size: 1024,
-        data: '/banner_categorias.webp', // Usando uma imagem existente como placeholder
         alt: `Imagem do ${product.name}`,
         sortOrder: 1,
         isMain: true,
-      };
+      } as const;
 
       await db.insert(productImages).values(imageData).onConflictDoNothing();
     }
