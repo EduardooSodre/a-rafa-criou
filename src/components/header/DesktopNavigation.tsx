@@ -33,69 +33,67 @@ interface ExtendedUser {
 }
 
 export function DesktopNavigation() {
-    const { data: session, status } = useSession()
-    const { t } = useTranslation('common')
-
+    const { data: session, status } = useSession();
+    const { t } = useTranslation('common');
     const handleSignOut = async () => {
-        await signOut({ callbackUrl: '/' })
-    }
-
+        await signOut({ callbackUrl: '/' });
+    };
     const navigation = [
         { name: t('nav.home', 'Início'), href: '/', icon: Home },
         { name: t('nav.favorites', 'Favoritos'), href: '/favoritos', icon: Heart },
-    ]
-
+    ];
     return (
         <div className="bg-[#8FBC8F] shadow-md hidden md:block">
             <div className="container mx-auto px-4">
-                <nav className="flex items-center justify-center py-2">
-                    <div className="flex items-center gap-8">
+                <nav className="flex flex-row items-center justify-center py-2 w-full gap-8">
+                    <div className="flex items-center gap-6">
                         {navigation.map((item) => {
-                            const Icon = item.icon
+                            const Icon = item.icon;
                             return (
                                 <Link
                                     key={item.name}
                                     href={item.href}
-                                    className="flex items-center gap-2 text-white hover:text-[#FD9555] transition-colors font-bold px-4 py-2 rounded-md hover:bg-white/10 cursor-pointer no-underline"
+                                    className="flex items-center gap-2 text-white hover:text-[#FD9555] transition-colors font-bold px-2 py-2 rounded-md hover:bg-white/10 cursor-pointer no-underline uppercase text-base tracking-wide"
                                 >
                                     <Icon className="w-4 h-4" />
-                                    {item.name}
+                                    <span className="uppercase text-base font-bold">{item.name}</span>
                                 </Link>
-                            )
+                            );
                         })}
-
-                        {/* Mega Menu */}
+                    </div>
+                    <div className="flex items-center gap-6">
                         <MegaMenu />
-
+                    </div>
+                    <div className="flex items-center gap-6">
                         {/* User menu no menu verde */}
                         {status === 'loading' ? null : session ? (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" className="flex items-center gap-2 text-white hover:text-[#FD9555] transition-colors font-bold px-4 py-2 rounded-md hover:bg-white/10 cursor-pointer">
+                                    <Button variant="ghost" className="flex items-center gap-2 text-white hover:text-[#FD9555] transition-colors font-bold px-2 py-2 rounded-md hover:bg-white/10 cursor-pointer uppercase text-base">
                                         <Avatar
                                             imageUrl={(session.user as ExtendedUser)?.image}
                                             name={session.user?.name}
                                             size="sm"
                                         />
-                                        {getDisplayName(session.user?.name)}
+                                        <span className="uppercase text-base font-bold">{getDisplayName(session.user?.name)}</span>
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="w-56">
                                     <DropdownMenuLabel>
                                         <div className="flex flex-col space-y-1">
-                                            <p className="text-sm font-medium">{getDisplayName(session.user?.name)}</p>
+                                            <p className="text-base font-bold uppercase">{getDisplayName(session.user?.name)}</p>
                                             <p className="text-xs text-muted-foreground">{session.user?.email}</p>
                                         </div>
                                     </DropdownMenuLabel>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem asChild>
-                                        <Link href="/conta" className="flex items-center gap-2 no-underline">
+                                        <Link href="/conta" className="flex items-center gap-2 no-underline uppercase text-base font-bold">
                                             <Settings className="w-4 h-4" />
                                             {t('account.title')}
                                         </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem asChild>
-                                        <Link href="/conta/pedidos" className="flex items-center gap-2 no-underline">
+                                        <Link href="/conta/pedidos" className="flex items-center gap-2 no-underline uppercase text-base font-bold">
                                             <ShoppingBag className="w-4 h-4" />
                                             {t('account.orders')}
                                         </Link>
@@ -103,7 +101,7 @@ export function DesktopNavigation() {
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem
                                         onClick={handleSignOut}
-                                        className="flex items-center gap-2 text-red-600 focus:text-red-600"
+                                        className="flex items-center gap-2 text-red-600 focus:text-red-600 uppercase text-base font-bold"
                                     >
                                         <LogOut className="w-4 h-4" />
                                         {t('auth.signOut', 'Sair')}
@@ -113,20 +111,20 @@ export function DesktopNavigation() {
                         ) : (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" className="text-md flex items-center gap-2 text-white hover:text-[#FD9555] transition-colors font-bold px-4 py-2 rounded-md hover:bg-white/10 cursor-pointer">
+                                    <Button variant="ghost" className="text-base flex items-center gap-2 text-white hover:text-[#FD9555] transition-colors font-bold px-2 py-2 rounded-md hover:bg-white/10 cursor-pointer uppercase">
                                         <CircleUserRound className="w-4 h-4" />
-                                        {t('nav.login')}
+                                        <span className="uppercase text-base font-bold">{t('nav.login')}</span>
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="w-48">
                                     <DropdownMenuItem asChild>
-                                        <Link href="/auth/login" className="flex items-center gap-2 w-full no-underline ">
+                                        <Link href="/auth/login" className="flex items-center gap-2 w-full no-underline uppercase text-base font-bold ">
                                             <LogOut className="w-4 h-4" />
                                             {t('auth.login')}
                                         </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem asChild>
-                                        <Link href="/auth/register" className="flex items-center gap-2 w-full no-underline">
+                                        <Link href="/auth/register" className="flex items-center gap-2 w-full no-underline uppercase text-base font-bold">
                                             <CircleUserRound className="w-4 h-4" />
                                             {t('nav.register')}
                                         </Link>
@@ -138,5 +136,5 @@ export function DesktopNavigation() {
                 </nav>
             </div>
         </div>
-    )
+    );
 }
