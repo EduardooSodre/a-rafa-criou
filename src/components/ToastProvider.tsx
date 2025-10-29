@@ -32,11 +32,10 @@ export default function ToastProvider() {
     }
 
     return (
-        <div className="fixed top-0 right-0 z-50 p-4 space-y-2">
-            {toasts.map((toast, index) => (
+        <div className="fixed top-0 right-0 z-50 p-4 flex flex-col gap-4">
+            {toasts.map((toast) => (
                 <div
                     key={toast.id}
-                    style={{ top: `${index * 80}px` }}
                     className="relative"
                 >
                     <Toast

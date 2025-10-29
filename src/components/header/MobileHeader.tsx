@@ -34,7 +34,7 @@ export function MobileHeader() {
     }
 
     return (
-        <div className="bg-[#FED466] py-2 sm:py-3 md:py-4">
+        <div className="bg-[#FED466]">
             <div className="container mx-auto px-2 sm:px-4">
                 <div className="flex items-center justify-between md:hidden">
                     {/* Mobile: User Avatar/Icon - primeiro */}
