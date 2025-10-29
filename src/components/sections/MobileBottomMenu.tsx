@@ -39,7 +39,7 @@ export default function MobileBottomMenu({
             <MobileSearchSheet open={searchOpen} onOpenChange={setSearchOpen} />
 
             <div className={cn(
-                "fixed bottom-0 left-0 right-0 z-50 bg-[#FD9555] md:hidden shadow-2xl border-t border-[#FD9555]/20",
+                "fixed bottom-0 left-0 right-0 z-50 bg-[#FD9555] lg:hidden shadow-2xl border-t border-[#FD9555]/20",
                 "mx-2 mb-2 rounded-2xl backdrop-blur-sm",
                 className
             )}>

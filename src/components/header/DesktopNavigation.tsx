@@ -43,7 +43,7 @@ export function DesktopNavigation() {
         { name: t('nav.favorites', 'Favoritos'), href: '/favoritos', icon: Heart },
     ];
     return (
-        <div className="bg-[#8FBC8F] shadow-md hidden md:block">
+        <div className="bg-[#8FBC8F] shadow-lg hidden lg:block">
             <div className="container mx-auto px-4">
                 <nav className="flex flex-row items-center justify-center py-2 w-full gap-8">
                     <div className="flex items-center gap-6">
