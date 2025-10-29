@@ -31,7 +31,7 @@ export default function BenefitsSection() {
                 <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6 lg:gap-8 max-w-6xl mx-auto">
                     {benefits.map((benefit) => (
                         <div key={benefit.id} className="text-center group hover:transform hover:scale-105 transition-all duration-300">
-                            <div className="w-24 h-24 sm:w-20 sm:h-20 md:w-20 md:h-20 lg:w-22 lg:h-22 xl:w-24 xl:h-24 bg-[#FD9555] rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 md:mb-4 lg:mb-6 group-hover:shadow-lg transition-shadow">
+                            <div className="w-20 h-20 md:w-22 md:h-22 lg:w-24 lg:h-24 bg-[#FD9555] rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 md:mb-4 lg:mb-6 group-hover:shadow-lg transition-shadow">
                                 <Image
                                     src={benefit.icon}
                                     alt={benefit.title}
