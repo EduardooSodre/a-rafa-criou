@@ -7,6 +7,7 @@ import {
     DrawerTitle,
 } from '@/components/ui/drawer'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import { Search, X } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -106,12 +107,16 @@ export function MobileSearchSheet({ open, onOpenChange }: MobileSearchSheetProps
                             autoFocus
                         />
                         {searchQuery && (
-                            <button
+                            <Button
+                                variant="ghost"
+                                size="icon"
                                 onClick={() => setSearchQuery('')}
                                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                aria-label="Limpar busca"
                             >
+                                <span className="sr-only">Limpar busca</span>
                                 <X className="w-5 h-5" />
-                            </button>
+                            </Button>
                         )}
                     </div>
                 </div>
