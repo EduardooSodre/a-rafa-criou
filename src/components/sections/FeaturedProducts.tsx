@@ -293,7 +293,8 @@ export default function FeaturedProducts({
                                     className="w-full bg-[#FD9555] hover:bg-[#FD9555]/90 text-white font-bold py-2 md:py-2 lg:py-3 text-xs md:text-xs lg:text-sm uppercase tracking-wide transition-all duration-200 hover:shadow-lg rounded-lg cursor-pointer"
                                     onClick={() => handleAddToCart(product)}
                                 >
-                                    {t('product.addToCart', 'ADICIONAR AO CARRINHO')}
+                                    <span className="sm:hidden">{t('nav.cart', 'CARRINHO')}</span>
+                                    <span className="hidden sm:inline">{t('product.addToCart', 'ADICIONAR AO CARRINHO')}</span>
                                 </Button>
                             </div>
                         </div>
