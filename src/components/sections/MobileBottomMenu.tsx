@@ -51,7 +51,7 @@ export default function MobileBottomMenu({
                         className={cn(
                             "flex flex-col items-center justify-center text-white py-3 px-2 h-auto gap-1",
                             "hover:bg-white/10 hover:text-white active:bg-white/20 transition-all duration-200",
-                            "focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-0",
+                            "focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-0 uppercase",
                             "rounded-xl"
                         )}
                         onClick={() => setMenuOpen(true)}
@@ -68,7 +68,7 @@ export default function MobileBottomMenu({
                         className={cn(
                             "flex flex-col items-center justify-center text-white py-3 px-2 h-auto gap-1",
                             "hover:bg-white/10 hover:text-white active:bg-white/20 transition-all duration-200",
-                            "focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-0",
+                            "focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-0 uppercase",
                             "rounded-xl"
                         )}
                         onClick={onHomeClick}
@@ -85,18 +85,18 @@ export default function MobileBottomMenu({
                         className={cn(
                             "flex flex-col items-center justify-center text-white py-3 px-2 h-auto gap-1 relative",
                             "hover:bg-white/10 hover:text-white active:bg-white/20 transition-all duration-200",
-                            "focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-0",
+                            "focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-0 uppercase",
                             "rounded-xl"
                         )}
                         onClick={() => setCartOpen(true)}
-                        aria-label={t('nav.cartAria', `Carrinho ${totalItems > 0 ? `com ${totalItems} ${totalItems === 1 ? 'item' : 'itens'}` : 'vazio'}`)}
+                        aria-label={t('nav.cartAria', `CARRINHO ${totalItems > 0 ? `com ${totalItems} ${totalItems === 1 ? 'item' : 'itens'}` : 'vazio'}`)}
                     >
                         <div className="relative">
                             <ShoppingCart className="w-7 h-7" strokeWidth={2} />
                             {totalItems > 0 && (
                                 <div className={cn(
                                     "absolute -top-1 -right-1 bg-white text-[#FD9555] text-[9px] font-black rounded-full",
-                                    "min-w-[18px] h-[18px] flex items-center justify-center border-2 border-[#FD9555]",
+                                    "min-w-[18px] h-[18px] flex items-center justify-center border-2 border-[#FD9555] uppercase",
                                     "shadow-lg animate-pulse"
                                 )}>
                                     {totalItems > 99 ? '99+' : totalItems}

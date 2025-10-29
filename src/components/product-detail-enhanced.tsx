@@ -689,7 +689,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                 onClick={handleBuyNow}
                                 variant="default"
                                 size="default"
-                                className="w-full sm:w-auto min-h-[44px] md:min-h-[48px] text-black font-bold text-sm md:text-base rounded-md border-2 border-[#FD9555] shadow-md cursor-pointer bg-[#FED466] hover:bg-[#FD9555]"
+                                className="w-full sm:w-auto min-h-[44px] md:min-h-[48px] text-black font-bold text-sm md:text-base rounded-md border-2 border-[#FD9555] shadow-md cursor-pointer bg-[#FED466] hover:bg-[#FD9555] uppercase"
                             >
                                 {t('product.buyNow', 'COMPRAR AGORA')}
                             </Button>
@@ -708,7 +708,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                     {/* Garantias / Descrição legal compacta */}
                     <Card className="border-2 border-amber-200 bg-amber-50">
                         <CardContent className="p-4 text-sm leading-relaxed text-gray-800">
-                            <h4 className="font-semibold mb-2 flex items-center gap-2 text-foreground">Descrição</h4>
+                            <h4 className="font-bold mb-4 flex justify-center items-center gap-2 text-xl">Descrição</h4>
 
                             <div className="mb-2">
                                 <div className="flex items-start gap-2">
@@ -738,10 +738,6 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
 
                 </div>
             </div>
-
-            {/* Descrição detalhada está sendo exibida abaixo da imagem na coluna da galeria.
-                O bloco duplicado foi removido para evitar repetição e melhorar a ordem no mobile.
-            */}
         </section>
     )
 }

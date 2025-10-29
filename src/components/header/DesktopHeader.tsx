@@ -22,7 +22,9 @@ export function DesktopHeader({ totalItems }: DesktopHeaderProps) {
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault()
         if (searchQuery.trim()) {
-            router.push(`/produtos?search=${encodeURIComponent(searchQuery)}`)
+            // Redireciona para página de produtos, passando o termo de busca
+            // O backend/endpoint deve tratar o filtro por nome, slug, categoria, descrição, etc.
+            router.push(`/produtos?query=${encodeURIComponent(searchQuery)}`)
         }
     }
 
@@ -56,6 +58,7 @@ export function DesktopHeader({ totalItems }: DesktopHeaderProps) {
                                 type="submit"
                                 size="sm"
                                 className="absolute right-1 top-1 h-8 w-8 md:h-10 md:w-10 bg-[#FD9555] hover:bg-[#FD9555]/90 text-white rounded-lg"
+                                aria-label={t('search.ariaLabel', 'Buscar produtos')}
                             >
                                 <Search className="w-3 h-3 md:w-4 md:h-4" />
                             </Button>
