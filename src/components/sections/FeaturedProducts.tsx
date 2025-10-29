@@ -170,12 +170,7 @@ export default function FeaturedProducts({
             <section className="py-8 bg-gray-50">
                 <div className="bg-[#8FBC8F] mb-12 flex items-center justify-center m-0 p-2">
                     <h1
-                        className="font-scripter text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-[4rem] 2xl:text-[5rem] font-bold m-3 sm:m-4 md:m-5 lg:m-5 xl:m-6 uppercase text-center leading-none"
-                        style={{
-                            color: '#FFFFFF',
-                            fontFamily: 'Scripter, sans-serif',
-                            fontSize: 'clamp(2rem, 6vw, 4rem)',
-                        }}
+                        className="font-scripter text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-[4rem] 2xl:text-[5rem] font-bold m-3 sm:m-4 md:m-5 lg:m-5 xl:m-6 uppercase text-center leading-none text-white font-scripter text-[clamp(2rem,6vw,4rem)]"
                     >
                         {t('featured.allFiles', 'TODOS OS ARQUIVOS')}
                     </h1>
@@ -202,15 +197,10 @@ export default function FeaturedProducts({
     }
 
     return (
-        <section className=" bg-gray-50">
+        <section className="bg-gray-50">
             <div className="bg-[#8FBC8F] mb-12 flex items-center justify-center m-0 p-2">
                 <h1
-                    className="font-scripter text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-[4rem] 2xl:text-[5rem] font-bold m-3 sm:m-4 md:m-5 lg:m-5 xl:m-6 uppercase text-center leading-none"
-                    style={{
-                        color: '#FFFFFF',
-                        fontFamily: 'Scripter, sans-serif',
-                        fontSize: 'clamp(2rem, 6vw, 4rem)',
-                    }}
+                    className="font-scripter text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-[4rem] 2xl:text-[5rem] font-bold m-3 sm:m-4 md:m-5 lg:m-5 xl:m-6 uppercase text-center leading-none text-white font-scripter text-[clamp(2rem,6vw,4rem)]"
                 >
                     {t('featured.allFiles', 'TODOS OS ARQUIVOS')}
                 </h1>
@@ -250,12 +240,7 @@ export default function FeaturedProducts({
                                     {/* Nome do produto - título principal */}
                                     <div className="px-3 md:px-4 lg:px-4 flex flex-col">
                                         <div className="flex-grow-0 mb-2 md:mb-3">
-                                            <h3 className="font-bold text-gray-900 uppercase text-sm md:text-base lg:text-lg leading-tight text-center min-h-[2rem] md:min-h-[2.2rem] lg:min-h-[2.5rem] flex items-center justify-center" style={{
-                                                display: '-webkit-box',
-                                                WebkitLineClamp: 2,
-                                                WebkitBoxOrient: 'vertical',
-                                                overflow: 'hidden'
-                                            }}>
+                                            <h3 className="font-bold text-gray-900 uppercase text-sm md:text-base lg:text-lg leading-tight text-center min-h-[2rem] md:min-h-[2.2rem] lg:min-h-[2.5rem] flex items-center justify-center line-clamp-2">
                                                 {t(`productNames.${product.slug}`, { defaultValue: product.name })}
                                             </h3>
                                         </div>
@@ -302,34 +287,30 @@ export default function FeaturedProducts({
                 </div>
 
                 {showViewAll && hasMore && (
-                    <div
-                        onClick={handleLoadMore}
-                        className="bg-[#8FBC8F] mt-12 flex items-center justify-center p-3 sm:p-4 w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl mx-auto rounded-full gap-2 sm:gap-4 hover:bg-[#7DAB7D] transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer shadow-lg hover:shadow-xl"
-                    >
-                        <Image
-                            src="/arrow.png"
-                            alt="Seta esquerda"
-                            width={32}
-                            height={32}
-                            className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 transition-transform duration-300 group-hover:animate-pulse"
-                        />
                         <div
-                            className="font-scripter uppercase text-center leading-none text-xl lg:text-2xl xl:text-3xl font-bold transition-all duration-300 hover:text-yellow-100 px-2 sm:px-4"
-                            style={{
-                                color: '#FFFFFF',
-                                fontFamily: 'Scripter, sans-serif',
-                            }}
+                            onClick={handleLoadMore}
+                            className="bg-[#8FBC8F] mt-12 flex items-center justify-center p-3 sm:p-4 w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl mx-auto rounded-full gap-2 sm:gap-4 hover:bg-[#7DAB7D] transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer shadow-lg hover:shadow-xl"
                         >
-                            {loading ? t('featured.loading', 'CARREGANDO...') : t('featured.viewMore', 'CLIQUE PARA VER MAIS ARQUIVOS')}
+                            <Image
+                                src="/arrow.png"
+                                alt="Seta esquerda"
+                                width={32}
+                                height={32}
+                                className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 transition-transform duration-300 group-hover:animate-pulse"
+                            />
+                            <div
+                                className="font-scripter uppercase text-center leading-none text-xl lg:text-2xl xl:text-3xl font-bold transition-all duration-300 hover:text-yellow-100 px-2 sm:px-4 text-white font-scripter"
+                            >
+                                {loading ? t('featured.loading', 'CARREGANDO...') : t('featured.viewMore', 'CLIQUE PARA VER MAIS ARQUIVOS')}
+                            </div>
+                            <Image
+                                src="/arrow.png"
+                                alt="Seta direita"
+                                width={32}
+                                height={32}
+                                className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 transition-transform duration-300 group-hover:animate-pulse"
+                            />
                         </div>
-                        <Image
-                            src="/arrow.png"
-                            alt="Seta direita"
-                            width={32}
-                            height={32}
-                            className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 transition-transform duration-300 group-hover:animate-pulse"
-                        />
-                    </div>
                 )}
 
                 {showViewAll && !hasMore && !loading && products.length > 0 && (
