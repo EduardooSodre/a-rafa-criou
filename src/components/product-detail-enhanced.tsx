@@ -88,7 +88,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
     const maxPrice = prices.length > 0 ? Math.max(...prices) : product.basePrice
     const formatPrice = (n: number) => `R$ ${n.toFixed(2).replace('.', ',')}`
 
-    
+
 
     // Filtrar variações compatíveis baseado nos filtros selecionados
     const getCompatibleVariations = () => {
@@ -409,123 +409,123 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                             </div>
                         </div>
 
-                            {/* Mobile: main image & tabs (rendered here between tags/rating and name) */}
-                            <div className="block lg:hidden mt-3 mb-4">
-                                <div className="relative aspect-square bg-gray-100 rounded-xl overflow-hidden shadow-md border border-gray-200">
-                                        <Image
-                                            src={displayedImages[currentImageIndex] || '/file.svg'}
-                                            alt={`${product.name} - imagem ${currentImageIndex + 1}`}
-                                            fill
-                                            className="object-contain p-4"
-                                            sizes="100vw"
-                                        />
+                        {/* Mobile: main image & tabs (rendered here between tags/rating and name) */}
+                        <div className="block lg:hidden mt-3 mb-4">
+                            <div className="relative aspect-square bg-gray-100 rounded-xl overflow-hidden shadow-md border border-gray-200">
+                                <Image
+                                    src={displayedImages[currentImageIndex] || '/file.svg'}
+                                    alt={`${product.name} - imagem ${currentImageIndex + 1}`}
+                                    fill
+                                    className="object-contain p-4"
+                                    sizes="100vw"
+                                />
 
-                                        {/* Mobile prev/next controls */}
-                                        {displayedImages.length > 1 && (
-                                            <>
-                                                <button
-                                                    onClick={handlePrevImage}
-                                                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-[#FED466] text-gray-800 rounded-full p-2 shadow-md transition-all duration-150 z-10"
-                                                    aria-label="Imagem anterior"
-                                                >
-                                                    <ChevronLeft className="w-5 h-5" strokeWidth={3} />
-                                                </button>
-                                                <button
-                                                    onClick={handleNextImage}
-                                                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-[#FED466] text-gray-800 rounded-full p-2 shadow-md transition-all duration-150 z-10"
-                                                    aria-label="Próxima imagem"
-                                                >
-                                                    <ChevronRight className="w-5 h-5" strokeWidth={3} />
-                                                </button>
-                                            </>
-                                        )}
-                                    </div>
+                                {/* Mobile prev/next controls */}
+                                {displayedImages.length > 1 && (
+                                    <>
+                                        <button
+                                            onClick={handlePrevImage}
+                                            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-[#FED466] text-gray-800 rounded-full p-2 shadow-md transition-all duration-150 z-10"
+                                            aria-label="Imagem anterior"
+                                        >
+                                            <ChevronLeft className="w-5 h-5" strokeWidth={3} />
+                                        </button>
+                                        <button
+                                            onClick={handleNextImage}
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-[#FED466] text-gray-800 rounded-full p-2 shadow-md transition-all duration-150 z-10"
+                                            aria-label="Próxima imagem"
+                                        >
+                                            <ChevronRight className="w-5 h-5" strokeWidth={3} />
+                                        </button>
+                                    </>
+                                )}
+                            </div>
 
-                                    {/* Mobile thumbnails */}
-                                    {displayedImages.length > 1 && (
-                                        <div className="mt-3 flex gap-2 overflow-x-auto">
-                                            {displayedImages.map((img, idx) => (
-                                                <button
-                                                    key={idx}
-                                                    onClick={() => handleThumbnailClick(idx)}
-                                                    aria-label={`Selecionar imagem ${idx + 1}`}
-                                                    className={cn(
-                                                        "relative w-20 h-20 flex-shrink-0 rounded-md overflow-hidden border transition-all duration-150",
-                                                        currentImageIndex === idx ? 'ring-2 ring-[#FED466] border-transparent' : 'border-gray-200'
-                                                    )}
-                                                >
-                                                    <Image src={img} alt={`Thumb ${idx + 1}`} fill className="object-cover" sizes="80px" />
-                                                </button>
-                                            ))}
-                                        </div>
-                                    )}
+                            {/* Mobile thumbnails */}
+                            {displayedImages.length > 1 && (
+                                <div className="mt-3 flex gap-2 overflow-x-auto">
+                                    {displayedImages.map((img, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => handleThumbnailClick(idx)}
+                                            aria-label={`Selecionar imagem ${idx + 1}`}
+                                            className={cn(
+                                                "relative w-20 h-20 flex-shrink-0 rounded-md overflow-hidden border transition-all duration-150",
+                                                currentImageIndex === idx ? 'ring-2 ring-[#FED466] border-transparent' : 'border-gray-200'
+                                            )}
+                                        >
+                                            <Image src={img} alt={`Thumb ${idx + 1}`} fill className="object-cover" sizes="80px" />
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
 
-                                    {/* Mobile Tabs: descrição / specs */}
-                                <div className="mt-4">
-                                    <Tabs defaultValue="description" className="w-full">
-                                        <TabsList className="grid w-full grid-cols-2 h-10 text-sm">
-                                            <TabsTrigger value="description" className="text-sm font-semibold">
-                                                {t('product.tabs.description', 'Descrição')}
-                                            </TabsTrigger>
-                                            <TabsTrigger value="specifications" className="text-sm font-semibold">
-                                                {t('product.tabs.specifications', 'Especificações')}
-                                            </TabsTrigger>
-                                        </TabsList>
+                            {/* Mobile Tabs: descrição / specs */}
+                            <div className="mt-4">
+                                <Tabs defaultValue="description" className="w-full">
+                                    <TabsList className="grid w-full grid-cols-2 h-10 text-sm">
+                                        <TabsTrigger value="description" className="text-sm font-semibold">
+                                            {t('product.tabs.description', 'Descrição')}
+                                        </TabsTrigger>
+                                        <TabsTrigger value="specifications" className="text-sm font-semibold">
+                                            {t('product.tabs.specifications', 'Especificações')}
+                                        </TabsTrigger>
+                                    </TabsList>
 
-                                        <TabsContent value="description" className="mt-3">
-                                            <Card>
-                                                <CardContent className="p-3">
-                                                    <div
-                                                        className="prose prose-sm max-w-none text-gray-800"
-                                                        dangerouslySetInnerHTML={{
-                                                            __html: t(`productDescriptions.${product.slug}`, {
-                                                                defaultValue: product.longDescription
-                                                            })
-                                                        }}
-                                                    />
-                                                </CardContent>
-                                            </Card>
-                                        </TabsContent>
+                                    <TabsContent value="description" className="mt-3">
+                                        <Card>
+                                            <CardContent className="p-3">
+                                                <div
+                                                    className="prose prose-sm max-w-none text-gray-800"
+                                                    dangerouslySetInnerHTML={{
+                                                        __html: t(`productDescriptions.${product.slug}`, {
+                                                            defaultValue: product.longDescription
+                                                        })
+                                                    }}
+                                                />
+                                            </CardContent>
+                                        </Card>
+                                    </TabsContent>
 
-                                        <TabsContent value="specifications" className="mt-3">
-                                            <Card>
-                                                <CardContent className="p-3">
-                                                    <div className="grid grid-cols-1 gap-3 text-sm">
+                                    <TabsContent value="specifications" className="mt-3">
+                                        <Card>
+                                            <CardContent className="p-3">
+                                                <div className="grid grid-cols-1 gap-3 text-sm">
+                                                    <div>
+                                                        <h4 className="font-bold mb-2 text-base text-gray-900">{t('productInfo.generalInformation', 'Informações Gerais')}</h4>
+                                                        <div className="space-y-2">
+                                                            <div className="flex justify-between py-2 border-b border-gray-200">
+                                                                <span className="font-medium text-gray-600">{t('productInfo.categoryLabel', 'Categoria:')}</span>
+                                                                <span className="font-semibold text-gray-900">{t(`productCategories.${categoryKey}`, { defaultValue: product.category })}</span>
+                                                            </div>
+                                                            <div className="flex justify-between py-2 border-b border-gray-200">
+                                                                <span className="font-medium text-gray-600">{t('productInfo.variationsLabel', 'Variações:')}</span>
+                                                                <span className="font-semibold text-gray-900">{validVariations.length}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    {currentVariation && (
                                                         <div>
-                                                            <h4 className="font-bold mb-2 text-base text-gray-900">{t('productInfo.generalInformation', 'Informações Gerais')}</h4>
+                                                            <h4 className="font-bold mb-2 text-base text-gray-900">{t('productInfo.selectedVariation', 'Variação Selecionada')}</h4>
                                                             <div className="space-y-2">
                                                                 <div className="flex justify-between py-2 border-b border-gray-200">
-                                                                    <span className="font-medium text-gray-600">{t('productInfo.categoryLabel', 'Categoria:')}</span>
-                                                                    <span className="font-semibold text-gray-900">{t(`productCategories.${categoryKey}`, { defaultValue: product.category })}</span>
+                                                                    <span className="font-medium text-gray-600">{t('productInfo.fieldName', 'Nome:')}</span>
+                                                                    <span className="font-semibold text-gray-900">{t(`variationNames.${currentVariation.name}`, { defaultValue: currentVariation.name })}</span>
                                                                 </div>
                                                                 <div className="flex justify-between py-2 border-b border-gray-200">
-                                                                    <span className="font-medium text-gray-600">{t('productInfo.variationsLabel', 'Variações:')}</span>
-                                                                    <span className="font-semibold text-gray-900">{validVariations.length}</span>
+                                                                    <span className="font-medium text-gray-600">{t('productInfo.fieldSize', 'Tamanho:')}</span>
+                                                                    <span className="font-semibold text-gray-900">{currentVariation.fileSize}</span>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        {currentVariation && (
-                                                            <div>
-                                                                <h4 className="font-bold mb-2 text-base text-gray-900">{t('productInfo.selectedVariation', 'Variação Selecionada')}</h4>
-                                                                <div className="space-y-2">
-                                                                    <div className="flex justify-between py-2 border-b border-gray-200">
-                                                                        <span className="font-medium text-gray-600">{t('productInfo.fieldName', 'Nome:')}</span>
-                                                                        <span className="font-semibold text-gray-900">{t(`variationNames.${currentVariation.name}`, { defaultValue: currentVariation.name })}</span>
-                                                                    </div>
-                                                                    <div className="flex justify-between py-2 border-b border-gray-200">
-                                                                        <span className="font-medium text-gray-600">{t('productInfo.fieldSize', 'Tamanho:')}</span>
-                                                                        <span className="font-semibold text-gray-900">{currentVariation.fileSize}</span>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </CardContent>
-                                            </Card>
-                                        </TabsContent>
-                                    </Tabs>
-                                </div>
+                                                    )}
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    </TabsContent>
+                                </Tabs>
                             </div>
+                        </div>
 
                         <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                             {t(`productNames.${product.slug}`, { defaultValue: product.name })}
@@ -553,9 +553,9 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                 ) : (
                                     currentVariation ? formatPrice(currentVariation.price) : formatPrice(product.basePrice)
                                 )}
-                                </div>
                             </div>
                         </div>
+                    </div>
 
                     {/* Seleção de Variação - Sistema de Filtros Interativos */}
                     {validVariations.length > 1 && (
@@ -588,7 +588,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                     </div>
 
                                     {/* Sistema de Filtros por Atributo */}
-                                    <div className={cn("space-y-4", compactMode && "max-h-[240px] overflow-auto pr-2") }>
+                                    <div className={cn("space-y-4", compactMode && "max-h-[240px] overflow-auto pr-2")}>
                                         {Array.from(attributeGroups.entries()).map(([attrName, values]) => (
                                             <div key={attrName} className={cn("space-y-2", compactMode && "py-1")}>
                                                 <div className="flex items-center gap-2">
