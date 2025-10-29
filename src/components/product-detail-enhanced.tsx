@@ -54,7 +54,6 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
 
     // Estado para controle de imagens
     const [currentImageIndex, setCurrentImageIndex] = useState(0)
-    const [displayedImages, setDisplayedImages] = useState<string[]>(product.images)
 
     // Filtrar apenas variações que têm relação (com attributeValues válidos ou arquivos)
     const validVariations = product.variations.filter(v => {
@@ -63,15 +62,33 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
         return hasValidAttrs || (v.images && v.images.length > 0)
     })
 
+    // Ordenar variações por preço (menor -> maior) para exibição e seleção padrão
+    const variationsByPrice = [...validVariations].sort((a, b) => a.price - b.price)
+    const cheapestVariationId = variationsByPrice.length > 0 ? variationsByPrice[0].id : ''
+
     const [selectedVariation, setSelectedVariation] = useState(
-        validVariations.length > 0 ? validVariations[0].id : ''
+        cheapestVariationId || ''
     )
+
+    // Imagens iniciais: se o produto não tem imagens, use imagens das variações como fallback
+    const initialImages = (product.images && product.images.length > 0)
+        ? product.images
+        : variationsByPrice.flatMap(v => v.images || [])
+    const [displayedImages, setDisplayedImages] = useState<string[]>(initialImages)
 
     // Estado para filtros de atributos (novo sistema de seleção)
     const [selectedFilters, setSelectedFilters] = useState<Map<string, string>>(new Map())
 
     const currentVariation = validVariations.find(v => v.id === selectedVariation)
     const currentPrice = currentVariation?.price || product.basePrice
+
+    // Precalcular min/max de preços para exibir faixa quando nada estiver selecionado
+    const prices = validVariations.map(v => v.price)
+    const minPrice = prices.length > 0 ? Math.min(...prices) : product.basePrice
+    const maxPrice = prices.length > 0 ? Math.max(...prices) : product.basePrice
+    const formatPrice = (n: number) => `R$ ${n.toFixed(2).replace('.', ',')}`
+
+    
 
     // Filtrar variações compatíveis baseado nos filtros selecionados
     const getCompatibleVariations = () => {
@@ -129,6 +146,10 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
 
     const attributeGroups = getAvailableAttributeGroups()
 
+    // Calcular número total de opções para ativar modo compacto quando necessário
+    const totalValuesCount = Array.from(attributeGroups.values()).reduce((acc, s) => acc + s.size, 0)
+    const compactMode = totalValuesCount > 12 || validVariations.length > 10
+
     // Handler para clique em filtro
     const handleFilterClick = (attributeName: string, value: string) => {
         setSelectedFilters(prev => {
@@ -144,7 +165,11 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
 
     // Atualizar variação selecionada quando filtros mudarem
     useEffect(() => {
-        if (selectedFilters.size === 0) return
+        // Se não houver filtros, retornar à menor variação (menor preço)
+        if (selectedFilters.size === 0) {
+            setSelectedVariation(cheapestVariationId)
+            return
+        }
 
         const matchingVariation = validVariations.find(variation => {
             return Array.from(selectedFilters.entries()).every(([attrName, value]) => {
@@ -157,17 +182,25 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
         if (matchingVariation) {
             setSelectedVariation(matchingVariation.id)
         }
-    }, [selectedFilters, validVariations])
+    }, [selectedFilters, validVariations, cheapestVariationId])
 
-    // Atualizar imagens quando a variação mudar
+    // Atualizar imagens: por padrão mostramos as imagens do produto (não sobrescrever com a
+    // variação automaticamente). Só trocamos para as imagens da variação quando houver filtros
+    // aplicados (usuário interagiu) e a variação correspondente possuir imagens.
     useEffect(() => {
+        if (selectedFilters.size === 0) {
+            setDisplayedImages(initialImages)
+            setCurrentImageIndex(0)
+            return
+        }
+
         if (currentVariation?.images && currentVariation.images.length > 0) {
             setDisplayedImages(currentVariation.images)
         } else {
             setDisplayedImages(product.images)
         }
         setCurrentImageIndex(0) // Resetar para primeira imagem
-    }, [selectedVariation, currentVariation, product.images])
+    }, [selectedVariation, currentVariation, product.images, selectedFilters, initialImages])
 
     const handlePrevImage = () => {
         setCurrentImageIndex((prev) =>
@@ -218,8 +251,8 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
     return (
         <section className="w-full max-w-7xl mx-auto px-3 sm:px-6 md:px-8 py-6 md:py-10">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-                {/* Galeria de Imagens Melhorada */}
-                <div className="w-full">
+                {/* Galeria de Imagens Melhorada (desktop only) */}
+                <div className="w-full order-1 lg:order-1 hidden lg:block">
                     {/* Imagem Principal */}
                     <div className="relative aspect-square bg-gray-100 rounded-xl overflow-hidden mb-4 shadow-lg border-2 border-gray-200">
                         <Image
@@ -286,22 +319,213 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                             ))}
                         </div>
                     )}
+
+                    {/* Descrição e Especificações (desktop-only Tabs kept in gallery) */}
+                    {/* For mobile we render a compact image + tabs below tags/rating inside the info column. */}
+
+                    <div className="mt-8 w-full">
+                        <Tabs defaultValue="description" className="w-full">
+                            <TabsList className="grid w-full grid-cols-2 h-12 text-base md:text-lg">
+                                <TabsTrigger value="description" className="text-base md:text-lg font-semibold">
+                                    {t('product.tabs.description', 'Descrição')}
+                                </TabsTrigger>
+                                <TabsTrigger value="specifications" className="text-base md:text-lg font-semibold">
+                                    {t('product.tabs.specifications', 'Especificações')}
+                                </TabsTrigger>
+                            </TabsList>
+
+                            <TabsContent value="description" className="mt-4">
+                                <Card>
+                                    <CardContent className="p-4 md:p-6">
+                                        <div
+                                            className="prose prose-base max-w-none text-gray-800"
+                                            dangerouslySetInnerHTML={{
+                                                __html: t(`productDescriptions.${product.slug}`, {
+                                                    defaultValue: product.longDescription
+                                                })
+                                            }}
+                                        />
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+
+                            <TabsContent value="specifications" className="mt-4">
+                                <Card>
+                                    <CardContent className="p-4 md:p-6">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm md:text-base">
+                                            <div>
+                                                <h4 className="font-bold mb-2 text-lg text-gray-900">{t('productInfo.generalInformation', 'Informações Gerais')}</h4>
+                                                <div className="space-y-2">
+                                                    <div className="flex justify-between py-2 border-b border-gray-200">
+                                                        <span className="font-medium text-gray-600">{t('productInfo.categoryLabel', 'Categoria:')}</span>
+                                                        <span className="font-semibold text-gray-900">{t(`productCategories.${categoryKey}`, { defaultValue: product.category })}</span>
+                                                    </div>
+                                                    <div className="flex justify-between py-2 border-b border-gray-200">
+                                                        <span className="font-medium text-gray-600">{t('productInfo.variationsLabel', 'Variações:')}</span>
+                                                        <span className="font-semibold text-gray-900">{validVariations.length}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {currentVariation && (
+                                                <div>
+                                                    <h4 className="font-bold mb-2 text-lg text-gray-900">{t('productInfo.selectedVariation', 'Variação Selecionada')}</h4>
+                                                    <div className="space-y-2">
+                                                        <div className="flex justify-between py-2 border-b border-gray-200">
+                                                            <span className="font-medium text-gray-600">{t('productInfo.fieldName', 'Nome:')}</span>
+                                                            <span className="font-semibold text-gray-900">{t(`variationNames.${currentVariation.name}`, { defaultValue: currentVariation.name })}</span>
+                                                        </div>
+                                                        <div className="flex justify-between py-2 border-b border-gray-200">
+                                                            <span className="font-medium text-gray-600">{t('productInfo.fieldSize', 'Tamanho:')}</span>
+                                                            <span className="font-semibold text-gray-900">{currentVariation.fileSize}</span>
+                                                        </div>
+                                                        <div className="flex justify-between py-2 border-b border-gray-200">
+                                                            <span className="font-medium text-gray-600">{t('productInfo.fieldDownloads', 'Downloads:')}</span>
+                                                            <span className="font-semibold text-gray-900">{currentVariation.downloadLimit}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+                        </Tabs>
+                    </div>
+
                 </div>
 
                 {/* Informações do Produto */}
-                <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-6 order-2 lg:order-2">
                     <div>
                         <div className="flex items-center gap-3 mb-3">
-                            <Badge variant="secondary" className="text-base px-4 py-1.5">
+                            <Badge variant="secondary" className="text-sm md:text-base px-2 md:px-4 py-0.5 md:py-1.5">
                                 {t(`productCategories.${categoryKey}`, { defaultValue: product.category })}
                             </Badge>
                             <div className="flex items-center gap-1">
                                 {[...Array(5)].map((_, i) => (
-                                    <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                                    <Star key={i} className="w-4 h-4 md:w-5 md:h-5 fill-yellow-400 text-yellow-400" />
                                 ))}
-                                <span className="text-base text-gray-600 ml-2 font-medium">(4.8)</span>
+                                <span className="text-sm md:text-base text-gray-600 ml-2 font-medium">(4.8)</span>
                             </div>
                         </div>
+
+                            {/* Mobile: main image & tabs (rendered here between tags/rating and name) */}
+                            <div className="block lg:hidden mt-3 mb-4">
+                                <div className="relative aspect-square bg-gray-100 rounded-xl overflow-hidden shadow-md border border-gray-200">
+                                        <Image
+                                            src={displayedImages[currentImageIndex] || '/file.svg'}
+                                            alt={`${product.name} - imagem ${currentImageIndex + 1}`}
+                                            fill
+                                            className="object-contain p-4"
+                                            sizes="100vw"
+                                        />
+
+                                        {/* Mobile prev/next controls */}
+                                        {displayedImages.length > 1 && (
+                                            <>
+                                                <button
+                                                    onClick={handlePrevImage}
+                                                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-[#FED466] text-gray-800 rounded-full p-2 shadow-md transition-all duration-150 z-10"
+                                                    aria-label="Imagem anterior"
+                                                >
+                                                    <ChevronLeft className="w-5 h-5" strokeWidth={3} />
+                                                </button>
+                                                <button
+                                                    onClick={handleNextImage}
+                                                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-[#FED466] text-gray-800 rounded-full p-2 shadow-md transition-all duration-150 z-10"
+                                                    aria-label="Próxima imagem"
+                                                >
+                                                    <ChevronRight className="w-5 h-5" strokeWidth={3} />
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
+
+                                    {/* Mobile thumbnails */}
+                                    {displayedImages.length > 1 && (
+                                        <div className="mt-3 flex gap-2 overflow-x-auto">
+                                            {displayedImages.map((img, idx) => (
+                                                <button
+                                                    key={idx}
+                                                    onClick={() => handleThumbnailClick(idx)}
+                                                    aria-label={`Selecionar imagem ${idx + 1}`}
+                                                    className={cn(
+                                                        "relative w-20 h-20 flex-shrink-0 rounded-md overflow-hidden border transition-all duration-150",
+                                                        currentImageIndex === idx ? 'ring-2 ring-[#FED466] border-transparent' : 'border-gray-200'
+                                                    )}
+                                                >
+                                                    <Image src={img} alt={`Thumb ${idx + 1}`} fill className="object-cover" sizes="80px" />
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {/* Mobile Tabs: descrição / specs */}
+                                <div className="mt-4">
+                                    <Tabs defaultValue="description" className="w-full">
+                                        <TabsList className="grid w-full grid-cols-2 h-10 text-sm">
+                                            <TabsTrigger value="description" className="text-sm font-semibold">
+                                                {t('product.tabs.description', 'Descrição')}
+                                            </TabsTrigger>
+                                            <TabsTrigger value="specifications" className="text-sm font-semibold">
+                                                {t('product.tabs.specifications', 'Especificações')}
+                                            </TabsTrigger>
+                                        </TabsList>
+
+                                        <TabsContent value="description" className="mt-3">
+                                            <Card>
+                                                <CardContent className="p-3">
+                                                    <div
+                                                        className="prose prose-sm max-w-none text-gray-800"
+                                                        dangerouslySetInnerHTML={{
+                                                            __html: t(`productDescriptions.${product.slug}`, {
+                                                                defaultValue: product.longDescription
+                                                            })
+                                                        }}
+                                                    />
+                                                </CardContent>
+                                            </Card>
+                                        </TabsContent>
+
+                                        <TabsContent value="specifications" className="mt-3">
+                                            <Card>
+                                                <CardContent className="p-3">
+                                                    <div className="grid grid-cols-1 gap-3 text-sm">
+                                                        <div>
+                                                            <h4 className="font-bold mb-2 text-base text-gray-900">{t('productInfo.generalInformation', 'Informações Gerais')}</h4>
+                                                            <div className="space-y-2">
+                                                                <div className="flex justify-between py-2 border-b border-gray-200">
+                                                                    <span className="font-medium text-gray-600">{t('productInfo.categoryLabel', 'Categoria:')}</span>
+                                                                    <span className="font-semibold text-gray-900">{t(`productCategories.${categoryKey}`, { defaultValue: product.category })}</span>
+                                                                </div>
+                                                                <div className="flex justify-between py-2 border-b border-gray-200">
+                                                                    <span className="font-medium text-gray-600">{t('productInfo.variationsLabel', 'Variações:')}</span>
+                                                                    <span className="font-semibold text-gray-900">{validVariations.length}</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        {currentVariation && (
+                                                            <div>
+                                                                <h4 className="font-bold mb-2 text-base text-gray-900">{t('productInfo.selectedVariation', 'Variação Selecionada')}</h4>
+                                                                <div className="space-y-2">
+                                                                    <div className="flex justify-between py-2 border-b border-gray-200">
+                                                                        <span className="font-medium text-gray-600">{t('productInfo.fieldName', 'Nome:')}</span>
+                                                                        <span className="font-semibold text-gray-900">{t(`variationNames.${currentVariation.name}`, { defaultValue: currentVariation.name })}</span>
+                                                                    </div>
+                                                                    <div className="flex justify-between py-2 border-b border-gray-200">
+                                                                        <span className="font-medium text-gray-600">{t('productInfo.fieldSize', 'Tamanho:')}</span>
+                                                                        <span className="font-semibold text-gray-900">{currentVariation.fileSize}</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        </TabsContent>
+                                    </Tabs>
+                                </div>
+                            </div>
 
                         <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                             {t(`productNames.${product.slug}`, { defaultValue: product.name })}
@@ -316,7 +540,22 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                 ))}
                             </div>
                         )}
-                    </div>
+
+                        {/* Preço - exibido acima da seleção */}
+                        <div className="mt-4 mb-4">
+                            <div className="text-4xl md:text-5xl font-extrabold text-[#FD9555]">
+                                {selectedFilters.size === 0 ? (
+                                    minPrice === maxPrice ? (
+                                        formatPrice(minPrice)
+                                    ) : (
+                                        `${formatPrice(minPrice)} — ${formatPrice(maxPrice)}`
+                                    )
+                                ) : (
+                                    currentVariation ? formatPrice(currentVariation.price) : formatPrice(product.basePrice)
+                                )}
+                                </div>
+                            </div>
+                        </div>
 
                     {/* Seleção de Variação - Sistema de Filtros Interativos */}
                     {validVariations.length > 1 && (
@@ -349,9 +588,9 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                     </div>
 
                                     {/* Sistema de Filtros por Atributo */}
-                                    <div className="space-y-4">
+                                    <div className={cn("space-y-4", compactMode && "max-h-[240px] overflow-auto pr-2") }>
                                         {Array.from(attributeGroups.entries()).map(([attrName, values]) => (
-                                            <div key={attrName} className="space-y-2">
+                                            <div key={attrName} className={cn("space-y-2", compactMode && "py-1")}>
                                                 <div className="flex items-center gap-2">
                                                     <div className="w-1 h-5 bg-gradient-to-b from-[#FD9555] to-[#FED466] rounded-full"></div>
                                                     <label className="font-semibold text-sm text-gray-800">
@@ -364,17 +603,16 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                                     )}
                                                 </div>
 
-                                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                                                <div className={cn("grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4", compactMode ? "gap-1 md:grid-cols-3" : "gap-2")}>
                                                     {Array.from(values).map(value => {
                                                         const isSelected = selectedFilters.get(attrName) === value
-
                                                         return (
                                                             <button
                                                                 key={value}
                                                                 onClick={() => handleFilterClick(attrName, value)}
                                                                 aria-label={`Selecionar ${attrName} ${value}`}
                                                                 className={cn(
-                                                                    "group relative p-2 rounded-md border-2 transition-all duration-200 text-center overflow-hidden text-sm",
+                                                                    compactMode ? "group relative p-1.5 rounded-md border-2 transition-all duration-200 text-center overflow-hidden text-xs cursor-pointer" : "group relative p-2 rounded-md border-2 transition-all duration-200 text-center overflow-hidden text-sm cursor-pointer",
                                                                     isSelected
                                                                         ? "border-[#FD9555] bg-gradient-to-br from-[#FED466] via-[#FED466]/80 to-[#FD9555]/20 shadow-sm scale-105"
                                                                         : "border-gray-300 bg-white hover:border-[#FED466] hover:shadow-sm"
@@ -444,27 +682,24 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                         </Card>
                     )}
 
-                    {/* Preço e Botões - compactos */}
-                    <div className="space-y-5">
-                        <div className="text-4xl md:text-5xl font-extrabold text-[#FD9555]">
-                            R$ {currentPrice.toFixed(2).replace('.', ',')}
-                        </div>
-                        <div className="flex flex-col gap-3">
+                    {/* CTAs - abaixo da seleção (Comprar / Adicionar ao carrinho) */}
+                    <div className="mt-4 mb-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3 gap-2">
                             <Button
                                 onClick={handleBuyNow}
                                 variant="default"
                                 size="default"
-                                className="w-full min-h-[44px] md:min-h-[48px] text-black font-bold text-sm md:text-base rounded-md border-2 border-[#FD9555] shadow-md"
+                                className="w-full sm:w-auto min-h-[44px] md:min-h-[48px] text-black font-bold text-sm md:text-base rounded-md border-2 border-[#FD9555] shadow-md cursor-pointer bg-[#FED466] hover:bg-[#FD9555]"
                             >
                                 {t('product.buyNow', 'COMPRAR AGORA')}
                             </Button>
                             <Button
                                 onClick={handleAddToCart}
-                                variant="outline"
+                                variant="default"
                                 size="default"
-                                className="w-full min-h-[44px] md:min-h-[48px] text-black font-bold text-sm md:text-base rounded-md shadow-sm"
+                                className="w-full sm:w-auto min-h-[44px] md:min-h-[48px] text-white font-bold text-sm md:text-base rounded-md shadow-sm cursor-pointer bg-[#FD9555] hover:bg-[#E64D2B] border-2 border-[#FD9555]"
                             >
-                                <ShoppingCart className="w-5 h-5 mr-2" />
+                                <ShoppingCart className="w-5 h-5 mr-2 text-white" />
                                 {t('product.addToCart', 'ADICIONAR AO CARRINHO')}
                             </Button>
                         </div>
@@ -504,89 +739,9 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                 </div>
             </div>
 
-            {/* Descrição Detalhada */}
-            <div className="mt-12">
-                <Tabs defaultValue="description" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 h-14 text-lg">
-                        <TabsTrigger value="description" className="text-lg font-semibold">
-                            {t('product.tabs.description', 'Descrição')}
-                        </TabsTrigger>
-                        <TabsTrigger value="specifications" className="text-lg font-semibold">
-                            {t('product.tabs.specifications', 'Especificações')}
-                        </TabsTrigger>
-                    </TabsList>
-
-                    <TabsContent value="description" className="mt-6">
-                        <Card>
-                            <CardContent className="p-6 md:p-8">
-                                <div
-                                    className="prose prose-lg max-w-none text-gray-800"
-                                    dangerouslySetInnerHTML={{
-                                        __html: t(`productDescriptions.${product.slug}`, {
-                                            defaultValue: product.longDescription
-                                        })
-                                    }}
-                                />
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-
-                    <TabsContent value="specifications" className="mt-6">
-                        <Card>
-                            <CardContent className="p-6 md:p-8">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-base md:text-lg">
-                                    <div>
-                                        <h4 className="font-bold mb-4 text-xl text-gray-900">
-                                            {t('productInfo.generalInformation', 'Informações Gerais')}
-                                        </h4>
-                                        <div className="space-y-3">
-                                            <div className="flex justify-between py-2 border-b border-gray-200">
-                                                <span className="font-medium text-gray-600">{t('productInfo.categoryLabel', 'Categoria:')}</span>
-                                                <span className="font-semibold text-gray-900">
-                                                    {t(`productCategories.${categoryKey}`, { defaultValue: product.category })}
-                                                </span>
-                                            </div>
-                                            <div className="flex justify-between py-2 border-b border-gray-200">
-                                                <span className="font-medium text-gray-600">{t('productInfo.variationsLabel', 'Variações:')}</span>
-                                                <span className="font-semibold text-gray-900">{validVariations.length}</span>
-                                            </div>
-                                            {product.tags.length > 0 && (
-                                                <div className="flex justify-between py-2 border-b border-gray-200">
-                                                    <span className="font-medium text-gray-600">{t('productInfo.tagsLabel', 'Tags:')}</span>
-                                                    <span className="font-semibold text-gray-900">{product.tags.join(', ')}</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                    {currentVariation && (
-                                        <div>
-                                            <h4 className="font-bold mb-4 text-xl text-gray-900">
-                                                {t('productInfo.selectedVariation', 'Variação Selecionada')}
-                                            </h4>
-                                            <div className="space-y-3">
-                                                <div className="flex justify-between py-2 border-b border-gray-200">
-                                                    <span className="font-medium text-gray-600">{t('productInfo.fieldName', 'Nome:')}</span>
-                                                    <span className="font-semibold text-gray-900">
-                                                        {t(`variationNames.${currentVariation.name}`, { defaultValue: currentVariation.name })}
-                                                    </span>
-                                                </div>
-                                                <div className="flex justify-between py-2 border-b border-gray-200">
-                                                    <span className="font-medium text-gray-600">{t('productInfo.fieldSize', 'Tamanho:')}</span>
-                                                    <span className="font-semibold text-gray-900">{currentVariation.fileSize}</span>
-                                                </div>
-                                                <div className="flex justify-between py-2 border-b border-gray-200">
-                                                    <span className="font-medium text-gray-600">{t('productInfo.fieldDownloads', 'Downloads:')}</span>
-                                                    <span className="font-semibold text-gray-900">{currentVariation.downloadLimit}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-                </Tabs>
-            </div>
+            {/* Descrição detalhada está sendo exibida abaixo da imagem na coluna da galeria.
+                O bloco duplicado foi removido para evitar repetição e melhorar a ordem no mobile.
+            */}
         </section>
     )
 }
