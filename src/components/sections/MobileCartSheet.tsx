@@ -18,7 +18,7 @@ export function MobileCartSheet({ open, onOpenChange }: MobileCartSheetProps) {
 
     const handleCheckout = () => {
         onOpenChange(false)
-        router.push('/checkout')
+        router.push('/carrinho')
     }
 
     const formatPrice = (price: number) => {
@@ -121,7 +121,7 @@ export function MobileCartSheet({ open, onOpenChange }: MobileCartSheetProps) {
                             <Button
                                 onClick={handleCheckout}
                                 // Less tall CTA so sheet doesn't dominate the viewport
-                                className="w-full bg-[#FD9555] hover:bg-[#E88544] text-white font-bold py-3 text-base"
+                                className="w-full bg-[#FD9555] hover:bg-[#E88544] text-white font-bold py-3 text-base uppercase"
                             >
                                 Finalizar Compra
                             </Button>

@@ -7,10 +7,12 @@ import {
     useElements,
 } from '@stripe/react-stripe-js';
 import { Button } from '@/components/ui/button';
+import { useCart } from '@/contexts/cart-context';
 
 export function StripeCheckoutForm() {
     const stripe = useStripe();
     const elements = useElements();
+    const { clearCart } = useCart();
     const [isProcessing, setIsProcessing] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -24,15 +26,19 @@ export function StripeCheckoutForm() {
         setIsProcessing(true);
         setErrorMessage(null);
 
-        const { error } = await stripe.confirmPayment({
+        const { error, paymentIntent } = await stripe.confirmPayment({
             elements,
             confirmParams: {
                 return_url: `${window.location.origin}/obrigado`,
             },
+            redirect: 'if_required',
         });
 
         if (error) {
             setErrorMessage(error.message || 'Erro ao processar pagamento');
+            setIsProcessing(false);
+        } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+            clearCart();
             setIsProcessing(false);
         }
     };
