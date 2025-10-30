@@ -27,46 +27,7 @@ export default function CheckoutPage() {
         }
     }, [items, router]);
 
-    // Criar Payment Intent quando a página carrega
-    useEffect(() => {
-        if (items.length === 0) return;
-
-        const createPaymentIntent = async () => {
-            setIsLoading(true);
-            setError(null);
-
-            try {
-                const response = await fetch('/api/stripe/create-payment-intent', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        items: items.map((item) => ({
-                            productId: item.productId,
-                            variationId: item.variationId,
-                            quantity: item.quantity,
-                        })),
-                        userId: session?.user?.id,
-                        email: session?.user?.email,
-                    }),
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.error || 'Erro ao criar pagamento');
-                }
-
-                setClientSecret(data.clientSecret);
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'Erro ao processar pagamento');
-                console.error('Erro ao criar Payment Intent:', err);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        createPaymentIntent();
-    }, [items, session?.user?.id, session?.user?.email]);
+    // Removido: Payment Intent não é mais criado automaticamente
 
     if (items.length === 0) {
         return null; // Redirecionando...
@@ -135,10 +96,42 @@ export default function CheckoutPage() {
                             </div>
                         )}
 
-                        {!isLoading && !error && !clientSecret && (
-                            <div className="text-center py-12 text-gray-500">
-                                Preparando pagamento...
-                            </div>
+
+                        {!clientSecret && !isLoading && !error && (
+                            <Button
+                                onClick={async () => {
+                                    setIsLoading(true);
+                                    setError(null);
+                                    try {
+                                        const response = await fetch('/api/stripe/create-payment-intent', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({
+                                                items: items.map((item) => ({
+                                                    productId: item.productId,
+                                                    variationId: item.variationId,
+                                                    quantity: item.quantity,
+                                                })),
+                                                userId: session?.user?.id,
+                                                email: session?.user?.email,
+                                            }),
+                                        });
+                                        const data = await response.json();
+                                        if (!response.ok) {
+                                            throw new Error(data.error || 'Erro ao criar pagamento');
+                                        }
+                                        setClientSecret(data.clientSecret);
+                                    } catch (err) {
+                                        setError(err instanceof Error ? err.message : 'Erro ao processar pagamento');
+                                    } finally {
+                                        setIsLoading(false);
+                                    }
+                                }}
+                                className="w-full bg-[#FED466] hover:bg-[#FED466]/90 text-black font-semibold"
+                                disabled={isLoading}
+                            >
+                                {isLoading ? 'Preparando pagamento...' : 'Iniciar pagamento'}
+                            </Button>
                         )}
 
                         {clientSecret && (
