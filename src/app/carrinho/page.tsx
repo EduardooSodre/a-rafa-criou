@@ -22,6 +22,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { EditCartItemSheet } from '@/components/sections/EditCartItemSheet'
 import { useTranslation } from 'react-i18next'
+import PixCheckout from '@/components/PixCheckout';
 
 export default function CarrinhoPage() {
     const { t, i18n } = useTranslation('common')
@@ -363,15 +364,23 @@ export default function CarrinhoPage() {
                                             </div>
                                         </DialogContent>
                                     </Dialog>
-                                    <Button
-                                        asChild
-                                        className="w-full h-14 bg-gradient-to-r from-[#FD9555] to-[#FD9555]/90 hover:from-[#FD9555]/90 hover:to-[#FD9555] text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer"
-                                        size="lg"
-                                    >
-                                        <Link href="/checkout">
-                                            Comprar internacionalmente
-                                        </Link>
-                                    </Button>
+
+                                    {/* Botão Pix direto no carrinho */}
+                                    <div className="flex flex-col gap-3">
+                                        <Button
+                                            asChild
+                                            className="w-full h-14 bg-gradient-to-r from-[#FD9555] to-[#FD9555]/90 hover:from-[#FD9555]/90 hover:to-[#FD9555] text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer"
+                                            size="lg"
+                                        >
+                                            <Link href="/checkout">
+                                                Comprar internacionalmente
+                                            </Link>
+                                        </Button>
+                                        {/* PixCheckout: botão Pix e QR Code */}
+                                        <div className="w-full">
+                                            <PixCheckout />
+                                        </div>
+                                    </div>
 
                                     <div className="text-xs text-gray-600 text-center space-y-1 pt-2">
                                         <p className="flex items-center justify-center gap-1">
