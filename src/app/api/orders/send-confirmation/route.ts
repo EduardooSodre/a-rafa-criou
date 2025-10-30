@@ -43,13 +43,14 @@ export async function GET(req: NextRequest) {
     };
     const order = orderRes[0] as OrderRow;
 
-    // Only send if order is completed/paid
+    // Só envia se o pedido estiver pago/completo
     const paymentStatus = (order.paymentStatus || '').toLowerCase();
     const orderStatus = (order.status || '').toLowerCase();
     const isSuccess =
-      orderStatus === 'completed' || paymentStatus === 'succeeded' || paymentStatus === 'paid';
+      orderStatus === 'completed' || paymentStatus === 'succeeded' || paymentStatus === 'paid' || paymentStatus === 'approved';
 
     if (!isSuccess) {
+      // Nunca envia e-mail de confirmação para pedidos não pagos
       return NextResponse.json({ error: 'Order payment not approved' }, { status: 403 });
     }
 

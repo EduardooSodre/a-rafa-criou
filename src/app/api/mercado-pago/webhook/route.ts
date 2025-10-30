@@ -20,6 +20,7 @@ const WebhookSchema = z.object({
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    console.log('[Webhook] Payload recebido:', JSON.stringify(body));
     const parsed = WebhookSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json({ error: 'Payload inválido.' }, { status: 400 });
@@ -35,16 +36,28 @@ export async function POST(req: NextRequest) {
     // Logging
     console.log(`[Webhook] Evento recebido: ${type}, id: ${id}`);
 
-    // Atualizar status do pedido no banco, nunca apagar/remover
-    if (type === 'payment.updated' && data.id && data.status) {
+  // Atualizar status do pedido no banco, nunca apagar/remover
+  if ((['payment.updated', 'payment.created', 'payment.finished'].includes(type)) && data.id && data.status) {
+      // Log detalhado do status recebido
+      console.log(`[Webhook] Status recebido do Mercado Pago: ${data.status}`);
       // Busca pedido pelo paymentId
       const [order] = await db.select().from(orders).where(eq(orders.paymentId, data.id)).limit(1);
       if (order) {
         let newStatus = 'pending';
-        if (data.status === 'approved' || data.status === 'paid') newStatus = 'completed';
-        else if (data.status === 'cancelled' || data.status === 'rejected') newStatus = 'cancelled';
-        else if (data.status === 'refunded') newStatus = 'refunded';
-        else newStatus = data.status;
+        // Tratar mais status que indicam pagamento aprovado
+        if ([
+          'approved', 'paid', 'authorized', 'in_process', 'in_mediation', 'partially_approved'
+        ].includes(data.status)) {
+          newStatus = 'completed';
+        } else if ([
+          'cancelled', 'rejected', 'expired', 'charged_back'
+        ].includes(data.status)) {
+          newStatus = 'cancelled';
+        } else if (data.status === 'refunded') {
+          newStatus = 'refunded';
+        } else {
+          newStatus = data.status;
+        }
         await db
           .update(orders)
           .set({

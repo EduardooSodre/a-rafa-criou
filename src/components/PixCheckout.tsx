@@ -1,8 +1,10 @@
 
 import Image from 'next/image';
 import React, { useState, useEffect } from 'react';
+import ShadcnSpinner from './ShadcnSpinner';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/cart-context';
+import { Button } from '@/components/ui/button';
 
 interface PixResponse {
     qr_code: string;
@@ -17,6 +19,12 @@ const PixCheckout: React.FC = () => {
     const [orderStatus, setOrderStatus] = useState<string | null>(null);
     const router = useRouter();
     const { items } = useCart();
+    // Resetar Pix e status ao mudar itens do carrinho
+    useEffect(() => {
+        setPix(null);
+        setOrderStatus(null);
+        setError(null);
+    }, [items]);
 
     // Envia todos os itens do carrinho
     const description = items.length === 1 ? items[0].name : 'Compra de PDF';
@@ -71,7 +79,7 @@ const PixCheckout: React.FC = () => {
                             router.push('/erro');
                         }
                     }
-                } catch {}
+                } catch { }
             }, 4000); // consulta a cada 4s
             return () => clearInterval(interval);
         }
@@ -79,29 +87,52 @@ const PixCheckout: React.FC = () => {
 
     return (
         <div className="bg-[#F4F4F4] p-6 rounded-lg shadow-md flex flex-col items-center">
-            <button
+            <Button
                 className="bg-[#FED466] text-black px-4 py-2 rounded font-bold mb-4 hover:bg-[#FD9555]"
                 onClick={handlePixPayment}
-                disabled={loading}
+                disabled={loading || [
+                    'completed', 'cancelled', 'refunded', 'rejected', 'processing'
+                ].includes(orderStatus || '')}
+                aria-disabled={(loading || [
+                    'completed', 'cancelled', 'refunded', 'rejected', 'processing'
+                ].includes(orderStatus || '')) ? 'true' : 'false'}
             >
                 {loading ? 'Gerando Pix...' : 'Pagar com Pix'}
-            </button>
+            </Button>
             {error && <div className="text-red-600 mb-2">{error}</div>}
-            {pix && (
-                <div className="flex flex-col items-center">
-                    <Image
-                        src={`data:image/png;base64,${pix.qr_code_base64}`}
-                        alt="QR Code Pix"
-                        width={192}
-                        height={192}
-                        className="w-48 h-48 mb-2 border-2 border-[#FED466]"
-                    />
-                    <div className="text-xs text-gray-700 break-all bg-white p-2 rounded">{pix.qr_code}</div>
-                    {orderStatus && (
-                        <div className="mt-2 text-sm font-semibold text-gray-700">Status: {orderStatus}</div>
-                    )}
-                </div>
+            {/* Spinner enquanto aguardando pagamento */}
+            {pix && !orderStatus && (
+                <ShadcnSpinner label="Aguardando pagamento..." />
             )}
+            {/* QR code só aparece se não estiver pago/cancelado/refundado/rejeitado */}
+            {pix && orderStatus && ![
+                'completed', 'cancelled', 'refunded', 'rejected'
+            ].includes(orderStatus) && (
+                    <div className="flex flex-col items-center">
+                        <Image
+                            src={`data:image/png;base64,${pix.qr_code_base64}`}
+                            alt="QR Code Pix"
+                            width={192}
+                            height={192}
+                            className="w-48 h-48 mb-2 border-2 border-[#FED466]"
+                        />
+                        <div className="text-xs text-gray-700 break-all bg-white p-2 rounded">{pix.qr_code}</div>
+                        {orderStatus && (
+                            <div className="mt-2 text-sm font-semibold text-gray-700">Status: {orderStatus}</div>
+                        )}
+                    </div>
+                )}
+            {/* Status final */}
+            {orderStatus && [
+                'completed', 'cancelled', 'refunded', 'rejected'
+            ].includes(orderStatus) && (
+                    <div className="mt-4 text-lg font-bold text-gray-700">
+                        {orderStatus === 'completed' && 'Pagamento aprovado!'}
+                        {orderStatus === 'cancelled' && 'Pagamento cancelado.'}
+                        {orderStatus === 'refunded' && 'Pagamento reembolsado.'}
+                        {orderStatus === 'rejected' && 'Pagamento rejeitado.'}
+                    </div>
+                )}
         </div>
     );
 };

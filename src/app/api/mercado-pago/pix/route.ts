@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { getServerSession } from 'next-auth';
 import { db } from '@/lib/db';
 import { products, productVariations } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
 
 // Rate limiting simples (pode ser aprimorado com Redis ou outro storage)
 let lastRequest = 0;
@@ -38,7 +37,7 @@ export async function POST(req: NextRequest) {
     const { items, description } = PixSchema.parse(body);
 
     // Buscar todos os produtos do carrinho
-    const productIds = items.map(item => item.productId);
+    const productIds = [...new Set(items.map(item => item.productId))];
     const variationIds = items
       .map(item => item.variationId)
       .filter((id): id is string => id !== undefined);
@@ -122,11 +121,63 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Criar ordem no banco
+    const { orders, orderItems } = await import('@/lib/db/schema');
+    const createdOrderArr = await db
+      .insert(orders)
+      .values({
+        email,
+        status: 'pending',
+        subtotal: amount.toString(),
+        discountAmount: '0',
+        total: amount.toString(),
+        currency: 'BRL',
+        paymentProvider: 'pix',
+        paymentId: payment.id,
+        paymentStatus: payment.status,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    const createdOrder = createdOrderArr[0];
+    // Criar itens do pedido
+    for (const item of items) {
+      // Buscar nome e preço correto
+      let nome = description;
+      let preco = '0';
+      if (item.variationId) {
+        const variation = dbVariations.find(v => v.id === item.variationId);
+        if (variation) {
+          nome = variation.name;
+          preco = variation.price;
+        }
+      } else {
+        const product = dbProducts.find(p => p.id === item.productId);
+        if (product) {
+          nome = product.name;
+          preco = product.price;
+        }
+      }
+      await db.insert(orderItems).values({
+        orderId: createdOrder.id,
+        productId: item.productId,
+        variationId: item.variationId,
+        name: nome,
+        price: preco.toString(),
+        quantity: item.quantity,
+        total: (Number(preco) * item.quantity).toFixed(2),
+        createdAt: new Date(),
+      });
+    }
     return NextResponse.json({
       qr_code: payment.point_of_interaction.transaction_data.qr_code,
       qr_code_base64: payment.point_of_interaction.transaction_data.qr_code_base64,
       payment_id: payment.id,
+      order_id: createdOrder.id,
     });
+
+    // Função auxiliar para pegar preço correto
+    // Função auxiliar removida (lógica incorporada acima)
   } catch (error) {
     // Logging de erro
     console.error('[Pix] Erro:', error);
