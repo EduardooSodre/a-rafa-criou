@@ -16,7 +16,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
-import { ShoppingCart, Plus, Minus, Trash2, ShoppingBag, Edit, QrCode } from 'lucide-react'
+import { ShoppingCart, Trash2, ShoppingBag, Edit, QrCode } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -26,7 +26,7 @@ import { useTranslation } from 'react-i18next'
 export default function CarrinhoPage() {
     const { t, i18n } = useTranslation('common')
     const router = useRouter()
-    const { items, totalItems, totalPrice, updateQuantity, removeItem, clearCart } = useCart()
+    const { items, totalItems, totalPrice, removeItem, clearCart } = useCart()
     const [editingItem, setEditingItem] = useState<string | null>(null)
     const [pixDialogOpen, setPixDialogOpen] = useState(false)
     const [pixName, setPixName] = useState('')
@@ -211,28 +211,7 @@ export default function CarrinhoPage() {
 
                                                     {/* Controles: Quantidade, Editar e Remover */}
                                                     <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                                                        {/* Quantidade */}
-                                                        <div className="flex items-center border-2 border-gray-300 rounded-lg overflow-hidden">
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                className="h-10 w-10 p-0 hover:bg-[#FED466]/20 rounded-none border-r border-gray-300 cursor-pointer"
-                                                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                                            >
-                                                                <Minus className="w-4 h-4 text-gray-700" />
-                                                            </Button>
-                                                            <span className="h-10 w-12 sm:w-14 flex items-center justify-center text-sm font-bold text-gray-900">
-                                                                {item.quantity}
-                                                            </span>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                className="h-10 w-10 p-0 hover:bg-[#FED466]/20 rounded-none border-l border-gray-300 cursor-pointer"
-                                                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                                            >
-                                                                <Plus className="w-4 h-4 text-gray-700" />
-                                                            </Button>
-                                                        </div>
+                                                        {/* Quantidade removida, só pode comprar 1 */}
 
                                                         {/* Botão Editar */}
                                                         {hasVariations && (

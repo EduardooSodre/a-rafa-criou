@@ -3,7 +3,7 @@
 import { useCart } from '@/contexts/cart-context'
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
-import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react'
+import { Trash2, ShoppingBag } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 
@@ -13,7 +13,7 @@ interface MobileCartSheetProps {
 }
 
 export function MobileCartSheet({ open, onOpenChange }: MobileCartSheetProps) {
-    const { items, totalItems, totalPrice, updateQuantity, removeItem } = useCart()
+    const { items, totalItems, totalPrice, removeItem } = useCart()
     const router = useRouter()
 
     const handleCheckout = () => {
@@ -93,26 +93,8 @@ export function MobileCartSheet({ open, onOpenChange }: MobileCartSheetProps) {
                                         </p>
 
                                         {/* Quantity Controls */}
-                                        <div className="flex items-center gap-2 mt-2">
-                                            <Button
-                                                variant="outline"
-                                                size="icon"
-                                                className="h-7 w-7"
-                                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                            >
-                                                <Minus className="w-3 h-3" />
-                                            </Button>
-                                            <span className="text-sm font-medium w-8 text-center">
-                                                {item.quantity}
-                                            </span>
-                                            <Button
-                                                variant="outline"
-                                                size="icon"
-                                                className="h-7 w-7"
-                                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                            >
-                                                <Plus className="w-3 h-3" />
-                                            </Button>
+                                        {/* Não exibe controles de quantidade, só pode comprar 1 */}
+                                        <div className="flex items-center mt-2">
                                             <Button
                                                 variant="ghost"
                                                 size="icon"

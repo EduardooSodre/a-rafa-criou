@@ -39,7 +39,7 @@ interface AddToCartSheetProps {
 }
 
 export function AddToCartSheet({ open, onOpenChange, product }: AddToCartSheetProps) {
-    const { addItem } = useCart()
+    const { addItem, items } = useCart()
     const { showToast } = useToast()
     const [selectedFilters, setSelectedFilters] = useState<Map<string, string>>(new Map())
     const [selectedVariation, setSelectedVariation] = useState<ProductVariation | null>(null)
@@ -172,7 +172,13 @@ export function AddToCartSheet({ open, onOpenChange, product }: AddToCartSheetPr
             showToast('Por favor, selecione todas as opções', 'error')
             return
         }
-
+        // Impede duplicidade: se já está no carrinho, não adiciona novamente
+        const alreadyInCart = items.some(item => item.productId === product.id && item.variationId === selectedVariation.id)
+        if (alreadyInCart) {
+            showToast('Produto já está no carrinho!', 'info')
+            onOpenChange(false)
+            return
+        }
         addItem({
             id: `${product.id}-${selectedVariation.id}`,
             productId: product.id,
@@ -186,7 +192,6 @@ export function AddToCartSheet({ open, onOpenChange, product }: AddToCartSheetPr
                 value: attr.value || ''
             })) || []
         })
-
         showToast('Produto adicionado ao carrinho!', 'success')
         onOpenChange(false)
     }
@@ -226,7 +231,7 @@ export function AddToCartSheet({ open, onOpenChange, product }: AddToCartSheetPr
                 </SheetHeader>
 
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                    {/* Indicador de progresso */}
+                    {/* Indicador de progresso - quantidade removida, só pode comprar 1 */}
                     <div className="bg-[#FED466]/20 p-3 rounded-lg border border-[#FED466]/50">
                         <div className="flex items-center justify-between text-sm">
                             <span className="font-semibold text-gray-700">

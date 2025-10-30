@@ -20,7 +20,7 @@ interface CartContextType {
     totalPrice: number
     addItem: (item: Omit<CartItem, 'quantity'>) => void
     removeItem: (id: string) => void
-    updateQuantity: (id: string, quantity: number) => void
+    // updateQuantity removido, quantidade sempre 1
     updateItem: (id: string, updates: Partial<Omit<CartItem, 'id' | 'productId' | 'quantity'>>) => void
     clearCart: () => void
 }
@@ -60,16 +60,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
             const existingItem = current.find(item =>
                 item.productId === newItem.productId && item.variationId === newItem.variationId
             )
-
             if (existingItem) {
-                // Se já existe, aumenta a quantidade
-                return current.map(item =>
-                    item.id === existingItem.id
-                        ? { ...item, quantity: item.quantity + 1 }
-                        : item
-                )
+                // Se já existe, não adiciona novamente
+                return current
             } else {
-                // Se não existe, adiciona novo item
+                // Se não existe, adiciona novo item com quantidade 1
                 return [...current, { ...newItem, quantity: 1 }]
             }
         })
@@ -80,16 +75,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
 
     const updateQuantity = (id: string, quantity: number) => {
-        if (quantity <= 0) {
-            removeItem(id)
-            return
-        }
-
-        setItems(current =>
-            current.map(item =>
-                item.id === id ? { ...item, quantity } : item
-            )
-        )
+        // Quantidade sempre 1, não permite alterar
+        return
     }
 
     const updateItem = (id: string, updates: Partial<Omit<CartItem, 'id' | 'productId' | 'quantity'>>) => {
@@ -111,7 +98,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
             totalPrice,
             addItem,
             removeItem,
-            updateQuantity,
             updateItem,
             clearCart,
         }}>

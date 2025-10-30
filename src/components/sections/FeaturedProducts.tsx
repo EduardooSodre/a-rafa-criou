@@ -66,8 +66,7 @@ export default function FeaturedProducts({
     showViewAll = true
 }: FeaturedProductsProps) {
     const { t } = useTranslation('common')
-    const { addItem } = useCart();
-    const { showToast } = useToast();
+    // ...
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(false);
@@ -130,35 +129,9 @@ export default function FeaturedProducts({
     };
 
     const handleAddToCart = (product: Product) => {
-        // Verificar se tem variações com atributos
-        const hasVariationsWithAttributes = product.variations && product.variations.length > 1 &&
-            product.variations.some(v => v.isActive && v.attributeValues && v.attributeValues.length > 0);
-
-        if (hasVariationsWithAttributes) {
-            // Abrir sheet de seleção
-            setSelectedProduct(product);
-            setShowAddToCart(true);
-        } else {
-            // Se não tem variações ou atributos, adiciona direto
-            const variation = product.variations.find(v => v.isActive);
-
-            addItem({
-                id: variation ? `${product.id}-${variation.id}` : product.id,
-                productId: product.id,
-                variationId: variation?.id || 'default',
-                name: t(`productNames.${product.slug}`, { defaultValue: product.name }),
-                price: variation?.price || product.price,
-                variationName: variation?.name || 'Padrão',
-                image: product.mainImage?.data || '',
-                attributes: variation?.attributeValues?.map(attr => ({
-                    name: attr.attributeName || '',
-                    value: attr.value || ''
-                })) || []
-            });
-
-            // Mostrar toast de confirmação
-            showToast(t('cart.addedToCart', { product: t(`productNames.${product.slug}`, { defaultValue: product.name }) }), 'success');
-        }
+        // Sempre abre o sheet de seleção, sem quantidade
+        setSelectedProduct(product)
+        setShowAddToCart(true)
     };
 
     // Produtos fallback simples
