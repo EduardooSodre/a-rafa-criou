@@ -1,22 +1,3 @@
-/**
- * API: Verifica    // B
-    // Buscar Payment Intent
-    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-
-    return NextResponse.json({ent Intent
-    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-
-    return NextResponse.json({
-      id: paymentIntent.id,
-      status: paymentIntent.status,
-      amount: paymentIntent.amount / 100,
-      currency: paymentIntent.currency,
-      metadata: paymentIntent.metadata,
-    });ment Intent
- * 
- * GET /api/stripe/payment-status?id=pi_xxx
- */
-
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 

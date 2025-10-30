@@ -1,16 +1,3 @@
-/**
- * API: Retomar pagamento de pedido pendente
- *
- * GET /api/stripe/resume-payment?orderId=xxx
- *
- * Segurança:
- * - Valida que pedido existe e está pendente
- * - Valida que Payment Intent ainda está válido
- * - Retorna erro se pedido já foi pago
- *
- * Retorna: clientSecret, amount, paymentIntentId
- */
-
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { db } from '@/lib/db';
