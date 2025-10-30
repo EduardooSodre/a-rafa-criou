@@ -45,8 +45,14 @@ export async function POST(req: NextRequest) {
         else if (data.status === 'cancelled' || data.status === 'rejected') newStatus = 'cancelled';
         else if (data.status === 'refunded') newStatus = 'refunded';
         else newStatus = data.status;
-        await db.update(orders)
-          .set({ status: newStatus, paymentStatus: data.status, updatedAt: new Date(), paidAt: newStatus === 'completed' ? new Date() : null })
+        await db
+          .update(orders)
+          .set({
+            status: newStatus,
+            paymentStatus: data.status,
+            updatedAt: new Date(),
+            paidAt: newStatus === 'completed' ? new Date() : null,
+          })
           .where(eq(orders.id, order.id));
         console.log(`[Webhook] Pedido ${order.id} atualizado para status: ${newStatus}`);
       } else {
