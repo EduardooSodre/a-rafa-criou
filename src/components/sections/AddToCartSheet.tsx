@@ -36,9 +36,10 @@ interface AddToCartSheetProps {
         mainImage?: { data: string; alt: string } | null
         variations?: ProductVariation[]
     }
+    onAddedToCart?: () => void
 }
 
-export function AddToCartSheet({ open, onOpenChange, product }: AddToCartSheetProps) {
+export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: AddToCartSheetProps) {
     const { addItem, items } = useCart()
     const { showToast } = useToast()
     const [selectedFilters, setSelectedFilters] = useState<Map<string, string>>(new Map())
@@ -194,6 +195,7 @@ export function AddToCartSheet({ open, onOpenChange, product }: AddToCartSheetPr
         })
         showToast('Produto adicionado ao carrinho!', 'success')
         onOpenChange(false)
+        if (onAddedToCart) onAddedToCart();
     }
 
     const currentPrice = selectedVariation?.price || product.price

@@ -21,9 +21,8 @@ export default function MobileBottomMenu({
     className
 }: MobileBottomMenuProps) {
     const { t } = useTranslation('common');
-    const { totalItems } = useCart();
+    const { totalItems, cartSheetOpen, setCartSheetOpen } = useCart();
     const [menuOpen, setMenuOpen] = useState(false);
-    const [cartOpen, setCartOpen] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
     const pathname = usePathname();
 
@@ -35,7 +34,7 @@ export default function MobileBottomMenu({
     return (
         <>
             <MobileMegaMenuSheet open={menuOpen} onOpenChange={setMenuOpen} />
-            <MobileCartSheet open={cartOpen} onOpenChange={setCartOpen} />
+            <MobileCartSheet open={cartSheetOpen} onOpenChange={setCartSheetOpen} />
             <MobileSearchSheet open={searchOpen} onOpenChange={setSearchOpen} />
 
             <div className={cn(
@@ -88,7 +87,7 @@ export default function MobileBottomMenu({
                             "focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-0 uppercase",
                             "rounded-xl"
                         )}
-                        onClick={() => setCartOpen(true)}
+                        onClick={() => setCartSheetOpen(true)}
                         aria-label={t('nav.cartAria', `CARRINHO ${totalItems > 0 ? `com ${totalItems} ${totalItems === 1 ? 'item' : 'itens'}` : 'vazio'}`)}
                     >
                         <div className="relative">

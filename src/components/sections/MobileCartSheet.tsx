@@ -129,8 +129,11 @@ export function MobileCartSheet({ open, onOpenChange }: MobileCartSheetProps) {
                             {/* Continue Shopping */}
                             <Button
                                 variant="outline"
-                                onClick={() => onOpenChange(false)}
-                                className="w-full"
+                                onClick={() => {
+                                    onOpenChange(false);
+                                    window.location.href = '/#produtos';
+                                }}
+                                className="w-full uppercase text-sm font-bold text-gray-900"
                             >
                                 Continuar Comprando
                             </Button>

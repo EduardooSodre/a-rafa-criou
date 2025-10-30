@@ -20,9 +20,11 @@ interface CartContextType {
     totalPrice: number
     addItem: (item: Omit<CartItem, 'quantity'>) => void
     removeItem: (id: string) => void
-    // updateQuantity removido, quantidade sempre 1
     updateItem: (id: string, updates: Partial<Omit<CartItem, 'id' | 'productId' | 'quantity'>>) => void
     clearCart: () => void
+    cartSheetOpen: boolean
+    setCartSheetOpen: (open: boolean) => void
+    openCartSheet: () => void
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
@@ -30,6 +32,8 @@ const CartContext = createContext<CartContextType | undefined>(undefined)
 export function CartProvider({ children }: { children: ReactNode }) {
     const [items, setItems] = useState<CartItem[]>([])
     const [isHydrated, setIsHydrated] = useState(false)
+    const [cartSheetOpen, setCartSheetOpen] = useState(false)
+    const openCartSheet = () => setCartSheetOpen(true)
 
     // Hidratar carrinho do localStorage apenas no cliente
     useEffect(() => {
@@ -74,10 +78,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
         setItems(current => current.filter(item => item.id !== id))
     }
 
-    const updateQuantity = (id: string, quantity: number) => {
-        // Quantidade sempre 1, não permite alterar
-        return
-    }
 
     const updateItem = (id: string, updates: Partial<Omit<CartItem, 'id' | 'productId' | 'quantity'>>) => {
         setItems(current =>
@@ -100,6 +100,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
             removeItem,
             updateItem,
             clearCart,
+            cartSheetOpen,
+            setCartSheetOpen,
+            openCartSheet
         }}>
             {children}
         </CartContext.Provider>

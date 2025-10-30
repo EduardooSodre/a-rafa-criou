@@ -12,6 +12,7 @@ import { useCart } from '@/contexts/cart-context'
 import { useToast } from '@/components/ui/toast'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
+import { AddToCartSheet } from '@/components/sections/AddToCartSheet'
 
 interface ProductVariation {
     id: string
@@ -49,16 +50,17 @@ interface ProductDetailEnhancedProps {
 export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
     const { t } = useTranslation('common')
     const router = useRouter()
-    const { addItem } = useCart()
+    const { addItem, openCartSheet } = useCart()
     const { showToast } = useToast()
+    const [showAddToCart, setShowAddToCart] = useState(false)
 
     // Estado para controle de imagens
     const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
     // Filtrar apenas variações que têm relação (com attributeValues válidos ou arquivos)
-    const validVariations = product.variations.filter(v => {
+    const validVariations = product.variations.filter((v: ProductVariation) => {
         const hasAttributes = v.attributeValues && v.attributeValues.length > 0
-        const hasValidAttrs = hasAttributes && v.attributeValues!.some(attr => attr.value !== null)
+        const hasValidAttrs = hasAttributes && v.attributeValues!.some((attr: { value?: string | null }) => attr.value !== null)
         return hasValidAttrs || (v.images && v.images.length > 0)
     })
 
@@ -66,24 +68,22 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
     const variationsByPrice = [...validVariations].sort((a, b) => a.price - b.price)
     const cheapestVariationId = variationsByPrice.length > 0 ? variationsByPrice[0].id : ''
 
-    const [selectedVariation, setSelectedVariation] = useState(
-        cheapestVariationId || ''
-    )
+    const [selectedVariation, setSelectedVariation] = useState<string>(cheapestVariationId || '')
 
     // Imagens iniciais: se o produto não tem imagens, use imagens das variações como fallback
     const initialImages = (product.images && product.images.length > 0)
         ? product.images
-        : variationsByPrice.flatMap(v => v.images || [])
+        : variationsByPrice.flatMap((v: ProductVariation) => v.images || [])
     const [displayedImages, setDisplayedImages] = useState<string[]>(initialImages)
 
     // Estado para filtros de atributos (novo sistema de seleção)
     const [selectedFilters, setSelectedFilters] = useState<Map<string, string>>(new Map())
 
-    const currentVariation = validVariations.find(v => v.id === selectedVariation)
+    const currentVariation = validVariations.find((v: ProductVariation) => v.id === selectedVariation)
     const currentPrice = currentVariation?.price || product.basePrice
 
     // Precalcular min/max de preços para exibir faixa quando nada estiver selecionado
-    const prices = validVariations.map(v => v.price)
+    const prices = validVariations.map((v: ProductVariation) => v.price)
     const minPrice = prices.length > 0 ? Math.min(...prices) : product.basePrice
     const maxPrice = prices.length > 0 ? Math.max(...prices) : product.basePrice
     const formatPrice = (n: number) => `R$ ${n.toFixed(2).replace('.', ',')}`
@@ -94,11 +94,9 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
     const getCompatibleVariations = () => {
         if (selectedFilters.size === 0) return validVariations
 
-        return validVariations.filter(variation => {
+        return validVariations.filter((variation: ProductVariation) => {
             return Array.from(selectedFilters.entries()).every(([attrName, value]) => {
-                return variation.attributeValues?.some(
-                    attr => attr.attributeName === attrName && attr.value === value
-                )
+                return variation.attributeValues?.some((attr: { attributeName?: string | null, value?: string | null }) => attr.attributeName === attrName && attr.value === value)
             })
         })
     }
@@ -113,8 +111,8 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
         const attributeGroups = new Map<string, Set<string>>()
 
         // Iterar por TODAS as variações válidas (não apenas compatíveis) para manter ordem consistente
-        validVariations.forEach(variation => {
-            variation.attributeValues?.forEach(attr => {
+        validVariations.forEach((variation: ProductVariation) => {
+            variation.attributeValues?.forEach((attr: { attributeName?: string | null, value?: string | null }) => {
                 if (attr.attributeName && !attributeOrder.includes(attr.attributeName)) {
                     attributeOrder.push(attr.attributeName)
                 }
@@ -122,8 +120,8 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
         })
 
         // Agora popular os valores apenas das variações compatíveis
-        compatibleVariations.forEach(variation => {
-            variation.attributeValues?.forEach(attr => {
+        compatibleVariations.forEach((variation: ProductVariation) => {
+            variation.attributeValues?.forEach((attr: { attributeName?: string | null, value?: string | null }) => {
                 if (attr.attributeName && attr.value) {
                     if (!attributeGroups.has(attr.attributeName)) {
                         attributeGroups.set(attr.attributeName, new Set())
@@ -171,11 +169,9 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
             return
         }
 
-        const matchingVariation = validVariations.find(variation => {
+        const matchingVariation = validVariations.find((variation: ProductVariation) => {
             return Array.from(selectedFilters.entries()).every(([attrName, value]) => {
-                return variation.attributeValues?.some(
-                    attr => attr.attributeName === attrName && attr.value === value
-                )
+                return variation.attributeValues?.some((attr: { attributeName?: string | null, value?: string | null }) => attr.attributeName === attrName && attr.value === value)
             })
         })
 
@@ -219,26 +215,52 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
     }
 
     const handleAddToCart = () => {
-        if (!currentVariation) return
-
+        const allAttributesSelected = attributeGroups && selectedFilters && attributeGroups.size === selectedFilters.size;
+        if (!currentVariation || !allAttributesSelected) {
+            showToast(t('productInfo.selectAllOptions', 'Selecione todas as opções antes de adicionar ao carrinho!'), 'error');
+            return;
+        }
+        // Adiciona o produto ao carrinho com as variações/atributos selecionados
         addItem({
-            id: `${product.id}-${selectedVariation}`,
+            id: `${product.id}-${currentVariation.id}`,
             productId: product.id,
-            variationId: selectedVariation,
-            name: t(`productNames.${product.slug}`, { defaultValue: product.name }),
-            price: currentPrice,
+            variationId: currentVariation.id,
+            name: product.name,
+            price: currentVariation.price,
             variationName: currentVariation.name,
-            image: displayedImages[0] || product.images[0]
-        })
-        showToast(
-            t('cart.addedToCart', { product: t(`productNames.${product.slug}`, { defaultValue: product.name }) }),
-            'success'
-        )
+            image: product.images && product.images.length > 0 ? product.images[0] : '/file.svg',
+            attributes: currentVariation.attributeValues?.map(attr => ({
+                name: attr.attributeName || '',
+                value: attr.value || ''
+            })) || []
+        });
+        showToast(t('cart.added', 'Produto adicionado ao carrinho!'), 'success');
+        openCartSheet();
     }
 
     const handleBuyNow = () => {
-        handleAddToCart()
-        router.push('/carrinho')
+        const allAttributesSelected = attributeGroups && selectedFilters && attributeGroups.size === selectedFilters.size;
+        if (!currentVariation || !allAttributesSelected) {
+            showToast(t('productInfo.selectAllOptions', 'Selecione todas as opções antes de comprar!'), 'error');
+            return;
+        }
+        // Adiciona o produto ao carrinho antes de redirecionar
+        addItem({
+            id: `${product.id}-${currentVariation.id}`,
+            productId: product.id,
+            variationId: currentVariation.id,
+            name: product.name,
+            price: currentVariation.price,
+            variationName: currentVariation.name,
+            image: product.images && product.images.length > 0 ? product.images[0] : '/file.svg',
+            attributes: currentVariation.attributeValues?.map(attr => ({
+                name: attr.attributeName || '',
+                value: attr.value || ''
+            })) || []
+        });
+        showToast(t('cart.added', 'Produto adicionado ao carrinho!'), 'success');
+        openCartSheet();
+        router.push('/carrinho');
     }
 
     const slugify = (s?: string) => {
@@ -249,7 +271,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
     const categoryKey = slugify(product.category)
 
     return (
-        <section className="w-full max-w-7xl mx-auto px-3 sm:px-6 md:px-8 py-6 md:py-10">
+    <section className="w-full max-w-7xl mx-auto px-3 sm:px-6 md:px-8 py-6 md:py-10">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
                 {/* Galeria de Imagens Melhorada (desktop only) */}
                 <div className="w-full order-1 lg:order-1 hidden lg:block">
@@ -738,6 +760,36 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
 
                 </div>
             </div>
+            {/* Sheet de adicionar ao carrinho */}
+            <AddToCartSheet
+                open={showAddToCart}
+                onOpenChange={setShowAddToCart}
+                product={{
+                    id: product.id,
+                    name: product.name,
+                    slug: product.slug,
+                    price: product.basePrice,
+                    mainImage: product.images && product.images.length > 0 ? { data: product.images[0], alt: product.name } : null,
+                    variations: product.variations.map(v => ({
+                        id: v.id,
+                        name: v.name,
+                        slug: v.name ? v.name.toLowerCase().replace(/\s+/g, '-') : '',
+                        price: v.price,
+                        isActive: true,
+                        sortOrder: 0,
+                        attributeValues: v.attributeValues?.map(attr => ({
+                            attributeId: attr.attributeId,
+                            attributeName: attr.attributeName || '',
+                            valueId: attr.valueId,
+                            value: attr.value || ''
+                        })) || []
+                    }) )
+                }}
+                onAddedToCart={() => {
+                    setShowAddToCart(false);
+                    openCartSheet();
+                }}
+            />
         </section>
     )
 }
