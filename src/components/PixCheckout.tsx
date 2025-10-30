@@ -1,6 +1,7 @@
 
 import Image from 'next/image';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/cart-context';
 
 interface PixResponse {
@@ -13,6 +14,8 @@ const PixCheckout: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [pix, setPix] = useState<PixResponse | null>(null);
+    const [orderStatus, setOrderStatus] = useState<string | null>(null);
+    const router = useRouter();
     const { items } = useCart();
 
     // Envia todos os itens do carrinho
@@ -22,6 +25,7 @@ const PixCheckout: React.FC = () => {
         setLoading(true);
         setError(null);
         setPix(null);
+        setOrderStatus(null);
         try {
             if (!items || items.length === 0) {
                 setError('Carrinho vazio ou produto não encontrado.');
@@ -50,6 +54,29 @@ const PixCheckout: React.FC = () => {
         }
     };
 
+    // Consulta periódica ao status do pedido
+    useEffect(() => {
+        if (pix?.payment_id) {
+            const interval = setInterval(async () => {
+                try {
+                    const res = await fetch(`/api/orders/status?paymentId=${pix.payment_id}`);
+                    const data = await res.json();
+                    if (data.status) {
+                        setOrderStatus(data.status);
+                        if (data.status === 'completed') {
+                            clearInterval(interval);
+                            router.push('/obrigado');
+                        } else if (['cancelled', 'refunded', 'rejected'].includes(data.status)) {
+                            clearInterval(interval);
+                            router.push('/erro');
+                        }
+                    }
+                } catch {}
+            }, 4000); // consulta a cada 4s
+            return () => clearInterval(interval);
+        }
+    }, [pix?.payment_id, router]);
+
     return (
         <div className="bg-[#F4F4F4] p-6 rounded-lg shadow-md flex flex-col items-center">
             <button
@@ -70,6 +97,9 @@ const PixCheckout: React.FC = () => {
                         className="w-48 h-48 mb-2 border-2 border-[#FED466]"
                     />
                     <div className="text-xs text-gray-700 break-all bg-white p-2 rounded">{pix.qr_code}</div>
+                    {orderStatus && (
+                        <div className="mt-2 text-sm font-semibold text-gray-700">Status: {orderStatus}</div>
+                    )}
                 </div>
             )}
         </div>
