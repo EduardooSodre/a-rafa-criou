@@ -271,7 +271,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
     const categoryKey = slugify(product.category)
 
     return (
-    <section className="w-full max-w-7xl mx-auto px-3 sm:px-6 md:px-8 py-6 md:py-10">
+        <section className="w-full max-w-7xl mx-auto px-3 sm:px-6 md:px-8 py-6 md:py-10">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
                 {/* Galeria de Imagens Melhorada (desktop only) */}
                 <div className="w-full order-1 lg:order-1 hidden lg:block">
@@ -783,7 +783,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                             valueId: attr.valueId,
                             value: attr.value || ''
                         })) || []
-                    }) )
+                    }))
                 }}
                 onAddedToCart={() => {
                     setShowAddToCart(false);
