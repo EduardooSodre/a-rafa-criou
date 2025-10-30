@@ -1,4 +1,5 @@
-﻿'use client';
+﻿
+"use client";
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
@@ -14,23 +15,27 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
 
 export default function CheckoutPage() {
     const router = useRouter();
-    const { data: session } = useSession();
+    const { data: session, status } = useSession();
     const { items, totalPrice } = useCart();
     const [clientSecret, setClientSecret] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Redirecionar se carrinho vazio
+    // Redirecionar se carrinho vazio ou usuário não logado
     useEffect(() => {
         if (items.length === 0) {
             router.push('/carrinho');
         }
-    }, [items, router]);
+        if (status === "loading") return;
+        if (!session?.user?.id) {
+            router.push('/auth/login');
+        }
+    }, [items, router, session?.user?.id, status]);
 
     // Removido: Payment Intent não é mais criado automaticamente
 
-    if (items.length === 0) {
-        return null; // Redirecionando...
+    if (items.length === 0 || status === "loading") {
+        return null; // Redirecionando ou carregando...
     }
 
     return (
@@ -102,6 +107,17 @@ export default function CheckoutPage() {
                                 onClick={async () => {
                                     setIsLoading(true);
                                     setError(null);
+                                    // Validação extra antes de enviar
+                                    if (!session?.user?.id || !session?.user?.email) {
+                                        setError('Você precisa estar logado para pagar.');
+                                        setIsLoading(false);
+                                        return;
+                                    }
+                                    if (!items.length || items.some(item => !item.productId || !item.quantity)) {
+                                        setError('Carrinho inválido.');
+                                        setIsLoading(false);
+                                        return;
+                                    }
                                     try {
                                         const response = await fetch('/api/stripe/create-payment-intent', {
                                             method: 'POST',
@@ -112,8 +128,8 @@ export default function CheckoutPage() {
                                                     variationId: item.variationId,
                                                     quantity: item.quantity,
                                                 })),
-                                                userId: session?.user?.id,
-                                                email: session?.user?.email,
+                                                userId: session.user.id,
+                                                email: session.user.email,
                                             }),
                                         });
                                         const data = await response.json();
