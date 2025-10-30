@@ -51,7 +51,10 @@ export async function POST(req: NextRequest) {
 
     const dbVariations =
       variationIds.length > 0
-        ? await db.select().from(productVariations).where(inArray(productVariations.id, variationIds))
+        ? await db
+            .select()
+            .from(productVariations)
+            .where(inArray(productVariations.id, variationIds))
         : [];
 
     // Calcular total REAL (preços do banco)
