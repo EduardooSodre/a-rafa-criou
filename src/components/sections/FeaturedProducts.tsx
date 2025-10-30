@@ -304,27 +304,27 @@ export default function FeaturedProducts({
             </div>
 
             {/* Sheet de seleção de atributos */}
-                {selectedProduct && (
-                    <AddToCartSheet
-                        open={showAddToCart}
-                        onOpenChange={setShowAddToCart}
-                        product={{
-                            id: selectedProduct.id,
-                            name: selectedProduct.name,
-                            slug: selectedProduct.slug,
-                            price: selectedProduct.price,
-                            mainImage: selectedProduct.mainImage ? {
-                                data: selectedProduct.mainImage.data,
-                                alt: selectedProduct.mainImage.alt || selectedProduct.name
-                            } : null,
-                            variations: selectedProduct.variations
-                        }}
-                        onAddedToCart={() => {
-                            setShowAddToCart(false);
-                            openCartSheet();
-                        }}
-                    />
-                )}
+            {selectedProduct && (
+                <AddToCartSheet
+                    open={showAddToCart}
+                    onOpenChange={setShowAddToCart}
+                    product={{
+                        id: selectedProduct.id,
+                        name: selectedProduct.name,
+                        slug: selectedProduct.slug,
+                        price: selectedProduct.price,
+                        mainImage: selectedProduct.mainImage ? {
+                            data: selectedProduct.mainImage.data,
+                            alt: selectedProduct.mainImage.alt || selectedProduct.name
+                        } : null,
+                        variations: selectedProduct.variations
+                    }}
+                    onAddedToCart={() => {
+                        setShowAddToCart(false);
+                        openCartSheet();
+                    }}
+                />
+            )}
         </section>
     );
 }
