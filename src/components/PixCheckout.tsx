@@ -65,6 +65,8 @@ const PixCheckout: React.FC = () => {
                     <Image
                         src={`data:image/png;base64,${pix.qr_code_base64}`}
                         alt="QR Code Pix"
+                        width={192}
+                        height={192}
                         className="w-48 h-48 mb-2 border-2 border-[#FED466]"
                     />
                     <div className="text-xs text-gray-700 break-all bg-white p-2 rounded">{pix.qr_code}</div>

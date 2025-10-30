@@ -100,12 +100,15 @@ export async function POST(req: NextRequest) {
       payer: { email },
     };
 
+    // Gerar UUID para idempotência
+    const idempotencyKey = crypto.randomUUID();
     // Chamada HTTP direta à API Mercado Pago
     const response = await fetch('https://api.mercadopago.com/v1/payments', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`,
+        'X-Idempotency-Key': idempotencyKey,
       },
       body: JSON.stringify(payment_data),
     });
