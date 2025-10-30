@@ -3,7 +3,6 @@
 import { useState, FormEvent } from "react";
 import { PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { Button } from "@/components/ui/button";
-import { useCart } from "@/contexts/cart-context";
 import { useSession } from "next-auth/react";
 
 export function StripeCheckoutForm() {
