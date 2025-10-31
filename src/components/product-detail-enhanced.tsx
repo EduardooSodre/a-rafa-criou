@@ -410,44 +410,44 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                         )}
                     </div>
 
-                    {/* Miniaturas */}
+                    {/* Miniaturas com Scroll Horizontal */}
                     {allAvailableImages.length > 1 && (
-                        <div className="grid grid-cols-4 gap-3">
-                            {allAvailableImages.map((img, idx) => {
-                                const isVariationImage = imageToVariationMap.has(img);
-                                const isSelected = currentImageIndex === idx;
+                        <div className="relative">
+                            <div className="flex gap-3 overflow-x-auto scrollbar-hide scroll-smooth pb-2">
+                                {allAvailableImages.map((img, idx) => {
+                                    const isVariationImage = imageToVariationMap.has(img);
+                                    const isSelected = currentImageIndex === idx;
 
-                                return (
-                                    <button
-                                        key={idx}
-                                        onClick={() => handleThumbnailClick(idx)}
-                                        aria-label={`Selecionar miniatura ${idx + 1}`}
-                                        aria-current={isSelected ? true : undefined}
-                                        className={cn(
-                                            "relative aspect-square rounded-lg overflow-hidden border-3 transition-all duration-200 hover:scale-105",
-                                            isSelected
-                                                ? "border-[#FED466] ring-4 ring-[#FED466]/50 shadow-lg"
-                                                : "border-gray-300 hover:border-[#FD9555] opacity-70 hover:opacity-100"
-                                        )}
-                                    >
-                                        <Image
-                                            src={img}
-                                            alt={`Miniatura ${idx + 1}`}
-                                            fill
-                                            className="object-cover"
-                                            sizes="(max-width: 768px) 25vw, 12vw"
-                                        />
-                                        {/* Indicador de variação */}
-                                        {isVariationImage && (
-                                            <div className="absolute bottom-1 right-1 w-3 h-3 bg-[#FD9555] rounded-full border-2 border-white shadow-sm"></div>
-                                        )}
-                                    </button>
-                                );
-                            })}
+                                    return (
+                                        <button
+                                            key={idx}
+                                            onClick={() => handleThumbnailClick(idx)}
+                                            aria-label={`Selecionar miniatura ${idx + 1}`}
+                                            aria-current={isSelected ? true : undefined}
+                                            className={cn(
+                                                "relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden border-3 transition-all duration-200 hover:scale-105",
+                                                isSelected
+                                                    ? "border-[#FED466] ring-4 ring-[#FED466]/50 shadow-lg"
+                                                    : "border-gray-300 hover:border-[#FD9555] opacity-70 hover:opacity-100"
+                                            )}
+                                        >
+                                            <Image
+                                                src={img}
+                                                alt={`Miniatura ${idx + 1}`}
+                                                fill
+                                                className="object-cover"
+                                                sizes="96px"
+                                            />
+                                            {/* Indicador de variação */}
+                                            {isVariationImage && (
+                                                <div className="absolute bottom-1 right-1 w-3 h-3 bg-[#FD9555] rounded-full border-2 border-white shadow-sm"></div>
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                            </div>
                         </div>
-                    )}
-
-                    {/* Descrição e Especificações (desktop-only Tabs kept in gallery) */}
+                    )}                    {/* Descrição e Especificações (desktop-only Tabs kept in gallery) */}
                     {/* For mobile we render a compact image + tabs below tags/rating inside the info column. */}
 
                     <div className="mt-8 w-full">
@@ -595,72 +595,6 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                     })}
                                 </div>
                             )}
-
-                            {/* Mobile Tabs: descrição / specs */}
-                            <div className="mt-4">
-                                <Tabs defaultValue="description" className="w-full">
-                                    <TabsList className="grid w-full grid-cols-2 h-10 text-sm">
-                                        <TabsTrigger value="description" className="text-sm font-semibold">
-                                            {t('product.tabs.description', 'Descrição')}
-                                        </TabsTrigger>
-                                        <TabsTrigger value="specifications" className="text-sm font-semibold">
-                                            {t('product.tabs.specifications', 'Especificações')}
-                                        </TabsTrigger>
-                                    </TabsList>
-
-                                    <TabsContent value="description" className="mt-3">
-                                        <Card>
-                                            <CardContent className="p-3">
-                                                <div
-                                                    className="prose prose-sm max-w-none text-gray-800"
-                                                    dangerouslySetInnerHTML={{
-                                                        __html: t(`productDescriptions.${product.slug}`, {
-                                                            defaultValue: product.longDescription
-                                                        })
-                                                    }}
-                                                />
-                                            </CardContent>
-                                        </Card>
-                                    </TabsContent>
-
-                                    <TabsContent value="specifications" className="mt-3">
-                                        <Card>
-                                            <CardContent className="p-3">
-                                                <div className="grid grid-cols-1 gap-3 text-sm">
-                                                    <div>
-                                                        <h4 className="font-bold mb-2 text-base text-gray-900">{t('productInfo.generalInformation', 'Informações Gerais')}</h4>
-                                                        <div className="space-y-2">
-                                                            <div className="flex justify-between py-2 border-b border-gray-200">
-                                                                <span className="font-medium text-gray-600">{t('productInfo.categoryLabel', 'Categoria:')}</span>
-                                                                <span className="font-semibold text-gray-900">{t(`productCategories.${categoryKey}`, { defaultValue: product.category })}</span>
-                                                            </div>
-                                                            <div className="flex justify-between py-2 border-b border-gray-200">
-                                                                <span className="font-medium text-gray-600">{t('productInfo.variationsLabel', 'Variações:')}</span>
-                                                                <span className="font-semibold text-gray-900">{validVariations.length}</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    {currentVariation && (
-                                                        <div>
-                                                            <h4 className="font-bold mb-2 text-base text-gray-900">{t('productInfo.selectedVariation', 'Variação Selecionada')}</h4>
-                                                            <div className="space-y-2">
-                                                                <div className="flex justify-between py-2 border-b border-gray-200">
-                                                                    <span className="font-medium text-gray-600">{t('productInfo.fieldName', 'Nome:')}</span>
-                                                                    <span className="font-semibold text-gray-900">{t(`variationNames.${currentVariation.name}`, { defaultValue: currentVariation.name })}</span>
-                                                                </div>
-                                                                <div className="flex justify-between py-2 border-b border-gray-200">
-                                                                    <span className="font-medium text-gray-600">{t('productInfo.fieldSize', 'Tamanho:')}</span>
-                                                                    <span className="font-semibold text-gray-900">{currentVariation.fileSize}</span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </CardContent>
-                                        </Card>
-                                    </TabsContent>
-                                </Tabs>
-                            </div>
                         </div>
 
                         <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -835,7 +769,6 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                 size="default"
                                 className="w-full sm:w-auto min-h-[44px] md:min-h-[48px] text-white font-bold text-sm md:text-base rounded-md shadow-sm cursor-pointer bg-[#FD9555] hover:bg-[#E64D2B] border-2 border-[#FD9555]"
                             >
-                                <ShoppingCart className="w-5 h-5 mr-2 text-white" />
                                 {t('product.addToCart', 'ADICIONAR AO CARRINHO')}
                             </Button>
                         </div>
@@ -871,6 +804,72 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                             </div>
                         </CardContent>
                     </Card>
+
+                    {/* Mobile Tabs: descrição / specs - apenas mobile */}
+                    <div className="mt-4 lg:hidden">
+                        <Tabs defaultValue="description" className="w-full">
+                            <TabsList className="grid w-full grid-cols-2 h-10 text-sm">
+                                <TabsTrigger value="description" className="text-sm font-semibold">
+                                    {t('product.tabs.description', 'Descrição')}
+                                </TabsTrigger>
+                                <TabsTrigger value="specifications" className="text-sm font-semibold">
+                                    {t('product.tabs.specifications', 'Especificações')}
+                                </TabsTrigger>
+                            </TabsList>
+
+                            <TabsContent value="description" className="mt-3">
+                                <Card>
+                                    <CardContent className="p-3">
+                                        <div
+                                            className="prose prose-sm max-w-none text-gray-800"
+                                            dangerouslySetInnerHTML={{
+                                                __html: t(`productDescriptions.${product.slug}`, {
+                                                    defaultValue: product.longDescription
+                                                })
+                                            }}
+                                        />
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+
+                            <TabsContent value="specifications" className="mt-3">
+                                <Card>
+                                    <CardContent className="p-3">
+                                        <div className="grid grid-cols-1 gap-3 text-sm">
+                                            <div>
+                                                <h4 className="font-bold mb-2 text-base text-gray-900">{t('productInfo.generalInformation', 'Informações Gerais')}</h4>
+                                                <div className="space-y-2">
+                                                    <div className="flex justify-between py-2 border-b border-gray-200">
+                                                        <span className="font-medium text-gray-600">{t('productInfo.categoryLabel', 'Categoria:')}</span>
+                                                        <span className="font-semibold text-gray-900">{t(`productCategories.${categoryKey}`, { defaultValue: product.category })}</span>
+                                                    </div>
+                                                    <div className="flex justify-between py-2 border-b border-gray-200">
+                                                        <span className="font-medium text-gray-600">{t('productInfo.variationsLabel', 'Variações:')}</span>
+                                                        <span className="font-semibold text-gray-900">{validVariations.length}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {currentVariation && (
+                                                <div>
+                                                    <h4 className="font-bold mb-2 text-base text-gray-900">{t('productInfo.selectedVariation', 'Variação Selecionada')}</h4>
+                                                    <div className="space-y-2">
+                                                        <div className="flex justify-between py-2 border-b border-gray-200">
+                                                            <span className="font-medium text-gray-600">{t('productInfo.fieldName', 'Nome:')}</span>
+                                                            <span className="font-semibold text-gray-900">{t(`variationNames.${currentVariation.name}`, { defaultValue: currentVariation.name })}</span>
+                                                        </div>
+                                                        <div className="flex justify-between py-2 border-b border-gray-200">
+                                                            <span className="font-medium text-gray-600">{t('productInfo.fieldSize', 'Tamanho:')}</span>
+                                                            <span className="font-semibold text-gray-900">{currentVariation.fileSize}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+                        </Tabs>
+                    </div>
 
                 </div>
             </div>

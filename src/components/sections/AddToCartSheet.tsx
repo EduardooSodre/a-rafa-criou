@@ -4,7 +4,6 @@ import { useState, useEffect, useMemo } from 'react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { ShoppingCart } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import { useCart } from '@/contexts/cart-context'
@@ -326,7 +325,6 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
                         // Smaller button height/text for subtler CTA
                         className="w-full py-3 text-base font-bold bg-[#FD9555] hover:bg-[#FD9555]/90 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <ShoppingCart className="w-5 h-5 mr-2" />
                         {allAttributesSelected ? 'Adicionar ao Carrinho' : 'Selecione todas as opções'}
                     </Button>
                 </div>
