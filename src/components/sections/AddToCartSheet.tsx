@@ -118,7 +118,7 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
         })
 
         setSelectedVariation(matchingVariation || null)
-        
+
         // Atualizar imagem para a primeira imagem da variação selecionada
         if (matchingVariation && matchingVariation.images && matchingVariation.images.length > 0) {
             const firstVariationImage = matchingVariation.images[0]
@@ -159,7 +159,7 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
         }> = []
 
         const attributeMap = new Map<string, Set<string>>()
-        
+
         // Coletar todos os atributos de TODAS as variações válidas
         validVariations.forEach(variation => {
             variation.attributeValues?.forEach(attr => {
@@ -219,7 +219,7 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
             showToast('Por favor, selecione todas as opções', 'error')
             return
         }
-        
+
         // Impede duplicidade: se já está no carrinho, não adiciona novamente
         const alreadyInCart = items.some(item => item.productId === product.id && item.variationId === selectedVariation.id)
         if (alreadyInCart) {
@@ -229,10 +229,10 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
         }
 
         // Usar a imagem atual sendo exibida ou fallback para imagem da variação/produto
-        const selectedImage = allAvailableImages[currentImageIndex] || 
-                             (selectedVariation.images && selectedVariation.images.length > 0
-                                 ? selectedVariation.images[0]
-                                 : product.mainImage?.data || product.images?.[0] || '/file.svg')
+        const selectedImage = allAvailableImages[currentImageIndex] ||
+            (selectedVariation.images && selectedVariation.images.length > 0
+                ? selectedVariation.images[0]
+                : product.mainImage?.data || product.images?.[0] || '/file.svg')
 
         addItem({
             id: `${product.id}-${selectedVariation.id}`,
