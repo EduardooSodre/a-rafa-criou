@@ -58,15 +58,15 @@ export default function AdminDashboard() {
     if (loading) {
         return (
             <div className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 lg:gap-6">
-                    {[1, 2, 3, 4, 5, 6].map(i => (
-                        <Card key={i}>
-                            <CardHeader className="pb-3">
-                                <div className="h-4 bg-gray-200 rounded animate-pulse" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="h-8 bg-gray-200 rounded animate-pulse mb-2" />
-                                <div className="h-3 bg-gray-200 rounded animate-pulse w-1/2" />
+                <div className="flex justify-between items-center">
+                    <div className="h-8 w-64 bg-gray-200 rounded animate-pulse" />
+                </div>
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {[...Array(6)].map((_, i) => (
+                        <Card key={i} className="border-l-4">
+                            <CardContent className="p-6">
+                                <div className="h-4 w-24 bg-gray-200 rounded animate-pulse mb-2" />
+                                <div className="h-8 w-16 bg-gray-200 rounded animate-pulse" />
                             </CardContent>
                         </Card>
                     ))}
@@ -78,131 +78,168 @@ export default function AdminDashboard() {
     if (!stats) {
         return <div>Erro ao carregar dados</div>
     }
+
     return (
-        <>
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="flex items-center gap-3">
+                <div className="p-3 bg-gradient-to-br from-[#FED466] to-[#FD9555] rounded-xl shadow-sm">
+                    <Package className="w-7 h-7 text-gray-800" />
+                </div>
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+                    <p className="text-gray-600 mt-1">Visão geral da sua loja</p>
+                </div>
+            </div>
+
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 lg:gap-6">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                        <CardTitle className="text-sm font-medium">Total de Produtos</CardTitle>
-                        <Package className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{stats.totalProdutos}</div>
-                        <p className="text-xs text-muted-foreground">
-                            Produtos ativos
-                        </p>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                        <CardTitle className="text-sm font-medium">Clientes Cadastrados</CardTitle>
-                        <Users className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{stats.totalClientes.toLocaleString()}</div>
-                        <p className="text-xs text-muted-foreground">
-                            Total de usuários
-                        </p>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                        <CardTitle className="text-sm font-medium">Pedidos este Mês</CardTitle>
-                        <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{stats.pedidosMes}</div>
-                        <p className="text-xs text-muted-foreground">
-                            Vendas realizadas
-                        </p>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                        <CardTitle className="text-sm font-medium">Arquivos no Sistema</CardTitle>
-                        <FileText className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{stats.arquivosUpload}</div>
-                        <p className="text-xs text-muted-foreground">
-                            PDFs disponíveis
-                        </p>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                        <CardTitle className="text-sm font-medium">Receita do Mês</CardTitle>
-                        <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">
-                            R$ {stats.receitaMes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <Card className="border-l-4 border-l-blue-500">
+                    <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-gray-600">Total de Produtos</p>
+                                <p className="text-3xl font-bold text-gray-900">{stats.totalProdutos}</p>
+                                <p className="text-xs text-gray-500 mt-1">Produtos ativos</p>
+                            </div>
+                            <div className="p-3 bg-blue-100 rounded-full">
+                                <Package className="w-6 h-6 text-blue-600" />
+                            </div>
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                            Faturamento atual
-                        </p>
                     </CardContent>
                 </Card>
 
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                        <CardTitle className="text-sm font-medium">Downloads do Mês</CardTitle>
-                        <Download className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{stats.downloadsMes}</div>
-                        <p className="text-xs text-muted-foreground">
-                            Produtos entregues
-                        </p>
+                <Card className="border-l-4 border-l-green-500">
+                    <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-gray-600">Clientes Cadastrados</p>
+                                <p className="text-3xl font-bold text-gray-900">{stats.totalClientes.toLocaleString()}</p>
+                                <p className="text-xs text-gray-500 mt-1">Total de usuários</p>
+                            </div>
+                            <div className="p-3 bg-green-100 rounded-full">
+                                <Users className="w-6 h-6 text-green-600" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="border-l-4 border-l-purple-500">
+                    <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-gray-600">Pedidos este Mês</p>
+                                <p className="text-3xl font-bold text-gray-900">{stats.pedidosMes}</p>
+                                <p className="text-xs text-gray-500 mt-1">Vendas realizadas</p>
+                            </div>
+                            <div className="p-3 bg-purple-100 rounded-full">
+                                <ShoppingCart className="w-6 h-6 text-purple-600" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="border-l-4 border-l-indigo-500">
+                    <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-gray-600">Arquivos no Sistema</p>
+                                <p className="text-3xl font-bold text-gray-900">{stats.arquivosUpload}</p>
+                                <p className="text-xs text-gray-500 mt-1">PDFs disponíveis</p>
+                            </div>
+                            <div className="p-3 bg-indigo-100 rounded-full">
+                                <FileText className="w-6 h-6 text-indigo-600" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="border-l-4 border-l-[#FD9555]">
+                    <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-gray-600">Receita do Mês</p>
+                                <p className="text-3xl font-bold text-gray-900">
+                                    R$ {stats.receitaMes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                </p>
+                                <p className="text-xs text-gray-500 mt-1">Faturamento atual</p>
+                            </div>
+                            <div className="p-3 bg-orange-100 rounded-full">
+                                <TrendingUp className="w-6 h-6 text-orange-600" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="border-l-4 border-l-teal-500">
+                    <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-gray-600">Downloads do Mês</p>
+                                <p className="text-3xl font-bold text-gray-900">{stats.downloadsMes}</p>
+                                <p className="text-xs text-gray-500 mt-1">Produtos entregues</p>
+                            </div>
+                            <div className="p-3 bg-teal-100 rounded-full">
+                                <Download className="w-6 h-6 text-teal-600" />
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
             </div>
 
-
-
             {/* Recent Orders */}
-            <Card className="mt-6">
+            <Card>
                 <CardHeader>
-                    <CardTitle>Pedidos Recentes</CardTitle>
-                    <CardDescription>
-                        Últimos pedidos realizados na plataforma
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-4">
-                        {stats.recentOrders.map((order) => (
-                            <div key={order.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg gap-3 sm:gap-0">
-                                <div className="flex-1">
-                                    <p className="font-medium">{order.customerName}</p>
-                                    <p className="text-sm text-gray-600">Pedido #{order.id}</p>
-                                </div>
-                                <div className="text-left sm:text-right">
-                                    <p className="font-medium">
-                                        R$ {new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(order.total ?? 0))}
-                                    </p>
-                                    <span className={`inline-block text-xs px-2 py-1 rounded-full mt-1 ${order.status === 'completed' ? 'bg-green-100 text-green-800' :
-                                        order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                            'bg-red-100 text-red-800'
-                                        }`}>
-                                        {order.status === 'completed' ? 'Concluído' :
-                                            order.status === 'pending' ? 'Pendente' : 'Cancelado'}
-                                    </span>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                    <div className="mt-4 text-center">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div>
+                            <CardTitle className="flex items-center gap-2">
+                                <ShoppingCart className="w-5 h-5" />
+                                Pedidos Recentes
+                            </CardTitle>
+                            <CardDescription>
+                                Últimos pedidos realizados na plataforma
+                            </CardDescription>
+                        </div>
                         <Link href="/admin/pedidos">
-                            <Button variant="outline">Ver Todos os Pedidos</Button>
+                            <Button variant="outline" size="sm">Ver Todos</Button>
                         </Link>
                     </div>
+                </CardHeader>
+                <CardContent>
+                    {stats.recentOrders.length === 0 ? (
+                        <div className="text-center py-12">
+                            <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                                <ShoppingCart className="w-8 h-8 text-gray-400" />
+                            </div>
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum pedido encontrado</h3>
+                            <p className="text-gray-600">Os pedidos mais recentes aparecerão aqui</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {stats.recentOrders.map((order) => (
+                                <div key={order.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg gap-3 sm:gap-0 hover:border-[#FED466] transition-colors">
+                                    <div className="flex-1">
+                                        <p className="font-medium text-gray-900">{order.customerName}</p>
+                                        <p className="text-sm text-gray-600">Pedido #{order.id}</p>
+                                    </div>
+                                    <div className="text-left sm:text-right">
+                                        <p className="font-medium text-gray-900">
+                                            R$ {new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(order.total ?? 0))}
+                                        </p>
+                                        <span className={`inline-block text-xs px-2 py-1 rounded-full mt-1 ${order.status === 'completed' ? 'bg-green-100 text-green-800' :
+                                            order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                                'bg-red-100 text-red-800'
+                                            }`}>
+                                            {order.status === 'completed' ? 'Concluído' :
+                                                order.status === 'pending' ? 'Pendente' : 'Cancelado'}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </CardContent>
             </Card>
-        </>
+        </div>
     )
 }

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { ArrowLeft, Loader2 } from 'lucide-react'
+import { ArrowLeft, Loader2, Package, DollarSign, BarChart3 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -23,8 +23,8 @@ interface ProductData {
     seoDescription?: string
     images?: Array<{
         id: string
-        data?: string
-        mimeType?: string
+        cloudinaryId?: string
+        url?: string
         alt?: string
     }>
     variations?: Array<{
@@ -42,8 +42,8 @@ interface ProductData {
         }>
         images?: Array<{
             id: string
-            data?: string
-            mimeType?: string
+            cloudinaryId?: string
+            url?: string
             alt?: string
         }>
         attributeValues?: Array<{
@@ -86,6 +86,14 @@ export default function ProductViewPage() {
             }
 
             const data = await response.json()
+            // Converter preços de string para number
+            data.price = parseFloat(data.price || '0')
+            if (data.variations) {
+                data.variations = data.variations.map((v: typeof data.variations[0]) => ({
+                    ...v,
+                    price: parseFloat(v.price || '0')
+                }))
+            }
             setProduct(data)
         } catch (err) {
             console.error('Erro ao carregar produto:', err)
@@ -119,7 +127,7 @@ export default function ProductViewPage() {
 
     if (loading) {
         return (
-            <div className="container mx-auto px-4 py-8">
+            <div className="space-y-6">
                 <div className="flex items-center justify-center min-h-[400px]">
                     <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
                 </div>
@@ -129,7 +137,7 @@ export default function ProductViewPage() {
 
     if (error || !product) {
         return (
-            <div className="container mx-auto px-4 py-8">
+            <div className="space-y-6">
                 <Alert variant="destructive">
                     <AlertDescription>
                         {error || 'Produto não encontrado'}
@@ -138,7 +146,6 @@ export default function ProductViewPage() {
                 <Button
                     onClick={() => router.push('/admin/produtos')}
                     variant="outline"
-                    className="mt-4"
                 >
                     <ArrowLeft className="h-4 w-4 mr-2" />
                     Voltar
@@ -148,10 +155,10 @@ export default function ProductViewPage() {
     }
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div className="flex items-center gap-3">
                     <Button
                         onClick={() => router.push('/admin/produtos')}
                         variant="outline"
@@ -160,68 +167,80 @@ export default function ProductViewPage() {
                         <ArrowLeft className="h-4 w-4 mr-2" />
                         Voltar
                     </Button>
+                    <div className="p-3 bg-gradient-to-br from-[#FED466] to-[#FD9555] rounded-xl shadow-sm">
+                        <Package className="w-7 h-7 text-gray-800" />
+                    </div>
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
-                        <p className="text-sm text-gray-500">ID: {product.id}</p>
+                        <p className="text-gray-600 mt-1">ID: {product.id.slice(0, 8)}...</p>
                     </div>
                 </div>
                 <Button
                     onClick={() => setIsEditDialogOpen(true)}
-                    className="bg-[#FED466] text-gray-900 hover:bg-[#FD9555]"
+                    className="bg-[#FED466] hover:bg-[#FD9555] text-gray-800 font-medium shadow-sm"
                 >
                     Editar Produto
                 </Button>
             </div>
 
-            {/* Grid de informações */}
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-6">
-                {/* Card de Preço */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-sm font-medium text-gray-500">Preço</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-3xl font-bold text-[#FD9555]">{formatPrice(product.price)}</p>
-                    </CardContent>
-                </Card>
-
-                {/* Card de Status */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-sm font-medium text-gray-500">Status</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex items-center gap-2">
-                            <div className={`h-3 w-3 rounded-full ${product.isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
-                            <span className="text-lg font-semibold">
-                                {product.isActive ? 'Ativo' : 'Inativo'}
-                            </span>
+            {/* Cards de Estatísticas */}
+            <div className="grid gap-4 md:grid-cols-3">
+                <Card className="border-l-4 border-l-[#FD9555]">
+                    <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-gray-600">Preço Base</p>
+                                <p className="text-3xl font-bold text-gray-900">{formatPrice(product.price)}</p>
+                            </div>
+                            <div className="p-3 bg-orange-100 rounded-full">
+                                <DollarSign className="w-6 h-6 text-orange-600" />
+                            </div>
                         </div>
-                        {product.isFeatured && (
-                            <p className="text-sm text-gray-500 mt-2">⭐ Produto em destaque</p>
-                        )}
                     </CardContent>
                 </Card>
 
-                {/* Card de Variações */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-sm font-medium text-gray-500">Variações</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-3xl font-bold text-blue-600">
-                            {product.variations?.length || 0}
-                        </p>
-                        <p className="text-sm text-gray-500 mt-1">
-                            {(product.variations?.length || 0) > 0 ? 'variações cadastradas' : 'Nenhuma variação'}
-                        </p>
+                <Card className="border-l-4 border-l-green-500">
+                    <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-gray-600">Status</p>
+                                <div className="flex items-center gap-2 mt-2">
+                                    <div className={`h-3 w-3 rounded-full ${product.isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
+                                    <span className="text-lg font-semibold">
+                                        {product.isActive ? 'Ativo' : 'Inativo'}
+                                    </span>
+                                </div>
+                                {product.isFeatured && (
+                                    <p className="text-sm text-gray-500 mt-1">⭐ Produto em destaque</p>
+                                )}
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="border-l-4 border-l-blue-500">
+                    <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-gray-600">Variações</p>
+                                <p className="text-3xl font-bold text-gray-900">
+                                    {product.variations?.length || 0}
+                                </p>
+                                <p className="text-sm text-gray-500 mt-1">
+                                    {(product.variations?.length || 0) > 0 ? 'cadastradas' : 'Sem variações'}
+                                </p>
+                            </div>
+                            <div className="p-3 bg-blue-100 rounded-full">
+                                <BarChart3 className="w-6 h-6 text-blue-600" />
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
             </div>
 
             {/* Descrições */}
             {(product.shortDescription || product.description) && (
-                <Card className="mb-6">
+                <Card>
                     <CardHeader>
                         <CardTitle>Descrições</CardTitle>
                     </CardHeader>
@@ -244,7 +263,7 @@ export default function ProductViewPage() {
 
             {/* Imagens do Produto */}
             {product.images && product.images.length > 0 && (
-                <Card className="mb-6">
+                <Card>
                     <CardHeader>
                         <CardTitle>Imagens do Produto ({product.images.length})</CardTitle>
                     </CardHeader>
@@ -252,9 +271,9 @@ export default function ProductViewPage() {
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                             {product.images.map((image, idx) => (
                                 <div key={image.id} className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden border">
-                                    {image.data ? (
+                                    {image.url ? (
                                         <Image
-                                            src={image.data}
+                                            src={image.url}
                                             alt={image.alt || `Imagem ${idx + 1}`}
                                             fill
                                             className="object-cover"
@@ -274,14 +293,14 @@ export default function ProductViewPage() {
 
             {/* Variações */}
             {product.variations && product.variations.length > 0 && (
-                <Card className="mb-6">
+                <Card>
                     <CardHeader>
                         <CardTitle>Variações ({product.variations.length})</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
                             {product.variations.map((variation) => (
-                                <div key={variation.id} className="border rounded-lg p-4">
+                                <div key={variation.id} className="border rounded-lg p-4 hover:border-[#FED466] transition-colors">
                                     <div className="flex items-start justify-between mb-3">
                                         <div>
                                             <h3 className="text-lg font-semibold text-gray-900">{variation.name}</h3>
@@ -302,9 +321,9 @@ export default function ProductViewPage() {
                                             <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
                                                 {variation.images.map((img, idx) => (
                                                     <div key={idx} className="relative aspect-square bg-gray-100 rounded overflow-hidden border">
-                                                        {img.data ? (
+                                                        {img.url ? (
                                                             <Image
-                                                                src={img.data}
+                                                                src={img.url}
                                                                 alt={img.alt || ''}
                                                                 fill
                                                                 className="object-cover"
@@ -347,7 +366,7 @@ export default function ProductViewPage() {
 
             {/* Arquivos do Produto (sem variações) */}
             {product.files && product.files.length > 0 && (
-                <Card className="mb-6">
+                <Card>
                     <CardHeader>
                         <CardTitle>Arquivos PDF ({product.files.length})</CardTitle>
                     </CardHeader>
