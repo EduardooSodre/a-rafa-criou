@@ -198,7 +198,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
         if (currentVariation.images && currentVariation.images.length > 0) {
             const firstVariationImage = currentVariation.images[0];
             const imageIndex = allAvailableImages.indexOf(firstVariationImage);
-            
+
             if (imageIndex !== -1 && imageIndex !== currentImageIndex) {
                 console.log('🔄 Variação mudou via filtros - Atualizando imagem:', {
                     variation: currentVariation.name,
