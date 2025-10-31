@@ -38,11 +38,11 @@ export default function MobileBottomMenu({
                     const windowHeight = window.innerHeight;
                     const documentHeight = document.documentElement.scrollHeight;
                     const scrollTop = window.scrollY || document.documentElement.scrollTop;
-                    
+
                     // Considera "no final" quando está a 100px ou menos do fim
                     const distanceFromBottom = documentHeight - (scrollTop + windowHeight);
                     setIsAtBottom(distanceFromBottom <= 100);
-                    
+
                     ticking.current = false;
                 });
                 ticking.current = true;
@@ -54,7 +54,7 @@ export default function MobileBottomMenu({
 
         window.addEventListener('scroll', checkIfAtBottom, { passive: true });
         window.addEventListener('resize', checkIfAtBottom, { passive: true });
-        
+
         return () => {
             window.removeEventListener('scroll', checkIfAtBottom);
             window.removeEventListener('resize', checkIfAtBottom);
