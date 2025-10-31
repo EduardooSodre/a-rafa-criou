@@ -46,16 +46,13 @@ export async function POST(req: NextRequest) {
         orderStatus: orders.status,
         // Dados do produto
         productName: products.name,
-        // Dados da variação
+        // Dados da variação (se houver)
         variationName: productVariations.name,
-        // Dados do arquivo (R2 path)
-        filePath: files.path,
       })
       .from(orderItems)
       .innerJoin(orders, eq(orderItems.orderId, orders.id))
       .innerJoin(products, eq(orderItems.productId, products.id))
       .leftJoin(productVariations, eq(orderItems.variationId, productVariations.id))
-      .leftJoin(files, eq(files.variationId, productVariations.id))
       .where(eq(orderItems.id, orderItemId))
       .limit(1);
 
@@ -77,34 +74,40 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Este pedido ainda não foi confirmado' }, { status: 400 });
     }
 
-    // Verificar limite de downloads (5x)
-    // TODO: Adicionar campo downloadCount ao schema order_items
-    const MAX_DOWNLOADS = 5;
-    // Temporariamente desabilitado até adicionar o campo ao schema
-    // if (orderItem.downloadCount >= MAX_DOWNLOADS) {
-    //   return NextResponse.json(
-    //     {
-    //       error: `Limite de ${MAX_DOWNLOADS} downloads atingido para este item`,
-    //       downloadCount: orderItem.downloadCount,
-    //       maxDownloads: MAX_DOWNLOADS,
-    //     },
-    //     { status: 429 }
-    //   );
-    // }
+    // ✅ Buscar arquivo (preferir variationId, senão productId)
+    let file = null;
+    if (orderItem.variationId) {
+      const byVariation = await db
+        .select({ path: files.path })
+        .from(files)
+        .where(eq(files.variationId, orderItem.variationId))
+        .limit(1);
+      file = byVariation[0];
+    }
+
+    if (!file && orderItem.productId) {
+      const byProduct = await db
+        .select({ path: files.path })
+        .from(files)
+        .where(eq(files.productId, orderItem.productId))
+        .limit(1);
+      file = byProduct[0];
+    }
 
     // Verificar se o arquivo existe
-    if (!orderItem.filePath) {
+    if (!file || !file.path) {
       return NextResponse.json({ error: 'Arquivo não disponível para este item' }, { status: 404 });
     }
 
     // 5. Gerar URL assinada (15 minutos de validade)
     const signedUrl = await getR2SignedUrl(
-      orderItem.filePath,
+      file.path,
       15 * 60 // 15 minutos em segundos
     );
 
     // 6. Incrementar contador de downloads
     // TODO: Adicionar lógica quando campo downloadCount estiver no schema
+    const MAX_DOWNLOADS = 5;
     const newDownloadCount = 1; // Temporário
     // await db
     //   .update(orderItems)

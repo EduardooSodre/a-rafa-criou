@@ -33,6 +33,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Usuário não autenticado.' }, { status: 401 });
     }
 
+    const email = session.user.email;
+    const userId = (session.user as { id?: string }).id || null; // ✅ Capturar userId da sessão (pode ser null para OAuth sem user no DB)
+
     const body = await req.json();
     const { items, description } = PixSchema.parse(body);
 
@@ -89,17 +92,13 @@ export async function POST(req: NextRequest) {
     }
 
     console.log(`[Pix] Total calculado: R$ ${amount.toFixed(2)}`);
-
+    
     if (amount <= 0) {
       return NextResponse.json({ error: 'Total inválido' }, { status: 400 });
     }
 
-    const email = session.user.email;
-
     // Logging básico
-    console.log(`[Pix] Criando pagamento: ${email}, valor: ${amount}`);
-
-    // Mercado Pago espera valor em reais, mas pode exigir inteiro (centavos)
+    console.log(`[Pix] Criando pagamento: ${email}, valor: ${amount}`);    // Mercado Pago espera valor em reais, mas pode exigir inteiro (centavos)
     // Stripe usa centavos, Mercado Pago geralmente usa reais, mas alguns erros podem ocorrer se não for inteiro
     const transactionAmount = Math.round(amount * 100) / 100; // Garante 2 casas decimais
     const payment_data = {
@@ -136,6 +135,7 @@ export async function POST(req: NextRequest) {
     const createdOrderArr = await db
       .insert(orders)
       .values({
+        userId, // ✅ Adicionar userId ao pedido
         email,
         status: 'pending',
         subtotal: amount.toString(),

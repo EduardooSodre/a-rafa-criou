@@ -90,6 +90,8 @@ export default function PedidoDetalhesPage() {
     }, [sessionStatus, router, orderId, fetchOrderDetails]);
 
     const handleDownload = async (orderItemId: string) => {
+        if (!order) return; // Guard clause
+        
         try {
             // Adicionar ao set de downloads em andamento
             setDownloadingItems((prev) => new Set(prev).add(orderItemId));
@@ -101,15 +103,12 @@ export default function PedidoDetalhesPage() {
                 return newMessages;
             });
 
-            // Fazer requisição para gerar link de download
-            const response = await fetch('/api/download/generate-link', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ orderItemId }),
-            });
+            // ✅ USAR MESMO ENDPOINT QUE /obrigado (sem verificação de userId)
+            const params = new URLSearchParams();
+            params.set('orderId', order.id);
+            params.set('itemId', orderItemId);
 
+            const response = await fetch(`/api/orders/download?${params.toString()}`);
             const data = await response.json();
 
             if (!response.ok) {
@@ -121,12 +120,17 @@ export default function PedidoDetalhesPage() {
                 ...prev,
                 [orderItemId]: {
                     type: 'success',
-                    message: `Link gerado! Downloads restantes: ${data.remaining}/${data.maxDownloads}`,
+                    message: 'Link gerado com sucesso! Download iniciado.',
                 },
             }));
 
-            // Abrir download em nova aba
-            window.open(data.downloadUrl, '_blank');
+            // Abrir download em nova aba usando a URL assinada
+            const downloadUrl = data.downloadUrl || data.signedUrl;
+            if (downloadUrl) {
+                window.open(downloadUrl, '_blank');
+            } else {
+                throw new Error('URL de download não disponível');
+            }
 
             // Limpar mensagem após 10 segundos
             setTimeout(() => {
@@ -463,7 +467,6 @@ export default function PedidoDetalhesPage() {
                     <AlertDescription>
                         <strong>Importante:</strong> Os links de download são válidos por 15 minutos.
                         Você pode gerar novos links clicando no botão de download novamente.
-                        Cada produto pode ser baixado até 5 vezes.
                     </AlertDescription>
                 </Alert>
             )}
