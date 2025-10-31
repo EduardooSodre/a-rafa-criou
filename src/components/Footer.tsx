@@ -92,7 +92,7 @@ export function Footer() {
                         {/* Métodos de Pagamento */}
                         <div className="mb-3 sm:mb-4 w-full">
                             <p className="text-[10px] sm:text-xs text-white/80 mb-2 text-center sm:text-left">Aceitamos:</p>
-                            <PaymentMethods 
+                            <PaymentMethods
                                 className="flex flex-wrap gap-1.5 sm:gap-2 justify-center sm:justify-start"
                                 iconSize="default"
                             />
