@@ -92,13 +92,13 @@ export async function POST(req: NextRequest) {
     }
 
     console.log(`[Pix] Total calculado: R$ ${amount.toFixed(2)}`);
-    
+
     if (amount <= 0) {
       return NextResponse.json({ error: 'Total inválido' }, { status: 400 });
     }
 
     // Logging básico
-    console.log(`[Pix] Criando pagamento: ${email}, valor: ${amount}`);    // Mercado Pago espera valor em reais, mas pode exigir inteiro (centavos)
+    console.log(`[Pix] Criando pagamento: ${email}, valor: ${amount}`); // Mercado Pago espera valor em reais, mas pode exigir inteiro (centavos)
     // Stripe usa centavos, Mercado Pago geralmente usa reais, mas alguns erros podem ocorrer se não for inteiro
     const transactionAmount = Math.round(amount * 100) / 100; // Garante 2 casas decimais
     const payment_data = {

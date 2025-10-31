@@ -91,7 +91,7 @@ export default function PedidoDetalhesPage() {
 
     const handleDownload = async (orderItemId: string) => {
         if (!order) return; // Guard clause
-        
+
         try {
             // Adicionar ao set de downloads em andamento
             setDownloadingItems((prev) => new Set(prev).add(orderItemId));
