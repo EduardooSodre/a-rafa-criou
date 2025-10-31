@@ -405,34 +405,51 @@ export default function PedidoDetalhesPage() {
 
                                 {order.status === 'completed' && (
                                     <>
-                                        <Button
-                                            onClick={() => handleDownload(item.id)}
-                                            disabled={downloadingItems.has(item.id)}
-                                            className="w-full bg-[#FED466] text-black hover:bg-[#FED466]/90"
-                                        >
-                                            {downloadingItems.has(item.id) ? (
-                                                <>
-                                                    <Clock className="w-4 h-4 mr-2 animate-spin" />
-                                                    Gerando link...
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Download className="w-4 h-4 mr-2" />
-                                                    Fazer Download
-                                                </>
-                                            )}
-                                        </Button>
+                                        {(() => {
+                                            // Calcular se o download expirou (30 dias)
+                                            const paidDate = order.paidAt ? new Date(order.paidAt) : new Date(order.createdAt);
+                                            const now = new Date();
+                                            const daysSincePurchase = Math.floor((now.getTime() - paidDate.getTime()) / (1000 * 60 * 60 * 24));
+                                            const isExpired = daysSincePurchase > 30;
 
-                                        {downloadMessages[item.id] && (
-                                            <Alert
-                                                variant={downloadMessages[item.id].type === 'error' ? 'destructive' : 'default'}
-                                                className="mt-2"
-                                            >
-                                                <AlertDescription>
-                                                    {downloadMessages[item.id].message}
-                                                </AlertDescription>
-                                            </Alert>
-                                        )}
+                                            return (
+                                                <>
+                                                    <Button
+                                                        onClick={() => handleDownload(item.id)}
+                                                        disabled={downloadingItems.has(item.id) || isExpired}
+                                                        className={`w-full ${isExpired ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#FED466] hover:bg-[#FED466]/90'} text-black`}
+                                                    >
+                                                        {isExpired ? (
+                                                            <>
+                                                                <AlertCircle className="w-4 h-4 mr-2" />
+                                                                Download Expirado (30 dias)
+                                                            </>
+                                                        ) : downloadingItems.has(item.id) ? (
+                                                            <>
+                                                                <Clock className="w-4 h-4 mr-2 animate-spin" />
+                                                                Gerando link...
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <Download className="w-4 h-4 mr-2" />
+                                                                Fazer Download
+                                                            </>
+                                                        )}
+                                                    </Button>
+
+                                                    {downloadMessages[item.id] && (
+                                                        <Alert
+                                                            variant={downloadMessages[item.id].type === 'error' ? 'destructive' : 'default'}
+                                                            className="mt-2"
+                                                        >
+                                                            <AlertDescription>
+                                                                {downloadMessages[item.id].message}
+                                                            </AlertDescription>
+                                                        </Alert>
+                                                    )}
+                                                </>
+                                            );
+                                        })()}
                                     </>
                                 )}
                             </div>
@@ -465,8 +482,46 @@ export default function PedidoDetalhesPage() {
                 <Alert className="mt-6 border-[#FED466] bg-yellow-50">
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>
-                        <strong>Importante:</strong> Os links de download são válidos por 15 minutos.
-                        Você pode gerar novos links clicando no botão de download novamente.
+                        <strong>Importante:</strong>
+                        <ul className="list-disc list-inside mt-2 space-y-1">
+                            <li>Os links de download são válidos por 15 minutos.</li>
+                            <li>Você pode gerar novos links clicando no botão de download novamente.</li>
+                            <li className="text-red-600 font-semibold">
+                                O acesso ao download expira após 30 dias da data da compra.
+                            </li>
+                        </ul>
+                        {order.paidAt && (
+                            <p className="mt-3 text-sm text-gray-700">
+                                Compra realizada em: <strong>{formatDate(order.paidAt)}</strong>
+                                <br />
+                                {(() => {
+                                    const paidDate = new Date(order.paidAt);
+                                    const expirationDate = new Date(paidDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+                                    const now = new Date();
+                                    const daysRemaining = Math.max(0, Math.ceil((expirationDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+                                    
+                                    if (daysRemaining === 0) {
+                                        return (
+                                            <span className="text-red-600 font-semibold">
+                                                ⚠️ Download expirado
+                                            </span>
+                                        );
+                                    } else if (daysRemaining <= 7) {
+                                        return (
+                                            <span className="text-orange-600 font-semibold">
+                                                ⚠️ Expira em {daysRemaining} {daysRemaining === 1 ? 'dia' : 'dias'}
+                                            </span>
+                                        );
+                                    } else {
+                                        return (
+                                            <span className="text-green-600">
+                                                ✅ Válido por mais {daysRemaining} dias
+                                            </span>
+                                        );
+                                    }
+                                })()}
+                            </p>
+                        )}
                     </AlertDescription>
                 </Alert>
             )}

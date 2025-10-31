@@ -56,6 +56,24 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Order payment not approved' }, { status: 403 });
     }
 
+    // ✅ VERIFICAR EXPIRAÇÃO DE 1 MÊS (30 dias)
+    const paidDate = order.paidAt ? new Date(order.paidAt) : new Date(order.createdAt);
+    const now = new Date();
+    const daysSincePurchase = Math.floor((now.getTime() - paidDate.getTime()) / (1000 * 60 * 60 * 24));
+    const DOWNLOAD_EXPIRATION_DAYS = 30;
+
+    if (daysSincePurchase > DOWNLOAD_EXPIRATION_DAYS) {
+      return NextResponse.json(
+        {
+          error: 'Download expirado',
+          message: `O prazo de ${DOWNLOAD_EXPIRATION_DAYS} dias para download deste produto expirou.`,
+          expiredAt: new Date(paidDate.getTime() + DOWNLOAD_EXPIRATION_DAYS * 24 * 60 * 60 * 1000).toISOString(),
+          daysSincePurchase,
+        },
+        { status: 410 } // 410 Gone
+      );
+    }
+
     // Find the order item to determine the file. We expect files to be linked by productId/variationId -> files.path
     const items = await db.select().from(orderItems).where(eq(orderItems.id, itemId)).limit(1);
     const item = items[0];
