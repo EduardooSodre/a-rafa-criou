@@ -7,11 +7,22 @@ import { resend, FROM_EMAIL } from '@/lib/email';
 import { PurchaseConfirmationEmail } from '@/emails/purchase-confirmation';
 import { render } from '@react-email/render';
 
-export async function GET(req: NextRequest) {
+// ✅ Aceitar tanto GET quanto POST (Stripe usa POST, verificação manual pode usar GET)
+async function handleConfirmation(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const orderId = searchParams.get('orderId');
-    const paymentIntent = searchParams.get('payment_intent');
+    // Extrair parâmetros de GET ou POST
+    let orderId: string | null = null;
+    let paymentIntent: string | null = null;
+
+    if (req.method === 'GET') {
+      const { searchParams } = new URL(req.url);
+      orderId = searchParams.get('orderId');
+      paymentIntent = searchParams.get('payment_intent');
+    } else if (req.method === 'POST') {
+      const body = await req.json();
+      orderId = body.orderId || null;
+      paymentIntent = body.payment_intent || null;
+    }
 
     if (!orderId && !paymentIntent) {
       return NextResponse.json({ error: 'orderId or payment_intent required' }, { status: 400 });
@@ -140,6 +151,15 @@ export async function GET(req: NextRequest) {
     console.error('Erro em send-confirmation:', err);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
+}
+
+// ✅ Exportar GET e POST usando a mesma função
+export async function GET(req: NextRequest) {
+  return handleConfirmation(req);
+}
+
+export async function POST(req: NextRequest) {
+  return handleConfirmation(req);
 }
 
 export const runtime = 'nodejs';

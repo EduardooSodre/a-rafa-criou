@@ -6,32 +6,43 @@ import { eq } from 'drizzle-orm';
 export async function GET(req: NextRequest) {
   try {
     const searchParams = req.nextUrl.searchParams;
-    const paymentIntentId = searchParams.get('payment_intent');
+    const paymentIntentId = searchParams.get('payment_intent'); // Stripe
+    const paymentId = searchParams.get('payment_id'); // Pix (Mercado Pago)
 
-    if (!paymentIntentId) {
-      return NextResponse.json({ error: 'Payment Intent ID não fornecido' }, { status: 400 });
+    if (!paymentIntentId && !paymentId) {
+      return NextResponse.json({ error: 'Payment Intent ID ou Payment ID não fornecido' }, { status: 400 });
     }
 
-    // Buscar pedido pelo Payment Intent ID
-    const orderResult = await db
-      .select()
-      .from(orders)
-      .where(eq(orders.stripePaymentIntentId, paymentIntentId))
-      .limit(1);
+    // ✅ Buscar pedido pelo Payment Intent ID (Stripe) OU Payment ID (Pix)
+    let orderResult;
+    if (paymentIntentId) {
+      orderResult = await db
+        .select()
+        .from(orders)
+        .where(eq(orders.stripePaymentIntentId, paymentIntentId))
+        .limit(1);
+    } else if (paymentId) {
+      orderResult = await db
+        .select()
+        .from(orders)
+        .where(eq(orders.paymentId, paymentId))
+        .limit(1);
+    }
 
-    if (orderResult.length === 0) {
+    if (!orderResult || orderResult.length === 0) {
       // Buscar todos pedidos para debug
       const allOrders = await db
         .select({
           id: orders.id,
           stripePaymentIntentId: orders.stripePaymentIntentId,
+          paymentId: orders.paymentId,
           createdAt: orders.createdAt,
         })
         .from(orders)
         .limit(5);
 
       return NextResponse.json(
-        { error: 'Pedido não encontrado', debug: { paymentIntentId, allOrders } },
+        { error: 'Pedido não encontrado', debug: { paymentIntentId, paymentId, allOrders } },
         { status: 404 }
       );
     }

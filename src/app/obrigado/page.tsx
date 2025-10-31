@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { CheckCircle, Download, Mail, FileText, Star, ArrowRight, Loader2, XCircle } from 'lucide-react'
 import Link from 'next/link'
+import { useCart } from '@/contexts/cart-context'
 
 interface OrderItem {
     id: string
@@ -37,13 +38,21 @@ interface OrderData {
 
 export default function ObrigadoPage() {
     const searchParams = useSearchParams()
-    const paymentIntent = searchParams.get('payment_intent')
+    const paymentIntent = searchParams.get('payment_intent') // Stripe
+    const paymentId = searchParams.get('payment_id') // Pix (Mercado Pago)
+    const { clearCart } = useCart()
 
     const [orderData, setOrderData] = useState<OrderData | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [retryCount, setRetryCount] = useState(0)
     const [downloadingItem, setDownloadingItem] = useState<string | null>(null)
+
+    // ✅ Limpar carrinho ao entrar na página de obrigado (APENAS UMA VEZ)
+    useEffect(() => {
+        clearCart();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // Array vazio = executa apenas uma vez
 
     useEffect(() => {
         // Scroll to top when page loads
@@ -53,7 +62,8 @@ export default function ObrigadoPage() {
 
         // Buscar dados do pedido com retry automático
         const fetchOrder = async (attempt = 1, maxRetries = 5) => {
-            if (!paymentIntent) {
+            // ✅ Aceitar tanto payment_intent (Stripe) quanto payment_id (Pix)
+            if (!paymentIntent && !paymentId) {
                 setError('ID do pagamento não encontrado')
                 setIsLoading(false)
                 return
@@ -62,7 +72,15 @@ export default function ObrigadoPage() {
             try {
                 setRetryCount(attempt);
 
-                const response = await fetch(`/api/orders/by-payment-intent?payment_intent=${paymentIntent}`)
+                // ✅ Construir URL baseado no tipo de pagamento
+                let url = '/api/orders/by-payment-intent?'
+                if (paymentIntent) {
+                    url += `payment_intent=${paymentIntent}`
+                } else if (paymentId) {
+                    url += `payment_id=${paymentId}`
+                }
+
+                const response = await fetch(url)
 
                 if (response.ok) {
                     const data = await response.json()
@@ -104,7 +122,7 @@ export default function ObrigadoPage() {
         }
 
         fetchOrder()
-    }, [paymentIntent])
+    }, [paymentIntent, paymentId])
 
     // If the order becomes approved, attempt to (re)send confirmation email via API once
     useEffect(() => {
@@ -327,6 +345,7 @@ export default function ObrigadoPage() {
                                                 // Call the secure download endpoint which validates order status and returns proxy URL
                                                 const params = new URLSearchParams()
                                                 if (paymentIntent) params.set('payment_intent', paymentIntent)
+                                                if (paymentId) params.set('payment_id', paymentId)
                                                 params.set('itemId', item.id)
 
                                                 const res = await fetch(`/api/orders/download?${params.toString()}`)

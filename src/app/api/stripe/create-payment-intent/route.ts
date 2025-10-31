@@ -20,10 +20,13 @@ const createPaymentIntentSchema = z.object({
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    console.log('[Stripe Payment Intent] Request recebido:', JSON.stringify(body, null, 2));
+    
     const { items, userId, email } = createPaymentIntentSchema.parse(body);
 
     // 1. Buscar produtos reais do banco (NUNCA confiar no frontend)
-    const productIds = items.map(item => item.productId);
+    // Usar Set para remover duplicatas quando há várias variações do mesmo produto
+    const productIds = [...new Set(items.map(item => item.productId))];
     const dbProducts = await db.select().from(products).where(inArray(products.id, productIds));
 
     if (dbProducts.length !== productIds.length) {
@@ -43,6 +46,10 @@ export async function POST(req: NextRequest) {
             .where(inArray(productVariations.id, variationIds))
         : [];
 
+    console.log('[Stripe Payment Intent] Produtos encontrados:', dbProducts.length);
+    console.log('[Stripe Payment Intent] Variações solicitadas:', variationIds.length);
+    console.log('[Stripe Payment Intent] Variações encontradas:', dbVariations.length);
+
     // 3. Calcular total REAL (preços do banco)
     let total = 0;
     const calculationDetails: Array<{ name: string; price: number; quantity: number }> = [];
@@ -55,6 +62,8 @@ export async function POST(req: NextRequest) {
         // Se tem variação, usar preço da variação
         const variation = dbVariations.find(v => v.id === item.variationId);
         if (!variation) {
+          console.error('[Stripe] Variação não encontrada:', item.variationId);
+          console.error('[Stripe] Variações disponíveis:', dbVariations.map(v => v.id));
           return Response.json(
             { error: `Variação ${item.variationId} não encontrada` },
             { status: 400 }
@@ -64,10 +73,13 @@ export async function POST(req: NextRequest) {
 
         const product = dbProducts.find(p => p.id === item.productId);
         itemName = `${product?.name || 'Produto'} - ${variation.name}`;
+        
+        console.log(`[Stripe] Item com variação: ${itemName} - R$ ${itemPrice} x ${item.quantity}`);
       } else {
         // Se não tem variação, usar preço do produto
         const product = dbProducts.find(p => p.id === item.productId);
         if (!product) {
+          console.error('[Stripe] Produto não encontrado:', item.productId);
           return Response.json(
             { error: `Produto ${item.productId} não encontrado` },
             { status: 400 }
@@ -75,6 +87,8 @@ export async function POST(req: NextRequest) {
         }
         itemPrice = Number(product.price);
         itemName = product.name;
+        
+        console.log(`[Stripe] Item sem variação: ${itemName} - R$ ${itemPrice} x ${item.quantity}`);
       }
 
       const itemTotal = itemPrice * item.quantity;
@@ -87,13 +101,28 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    console.log('[Stripe Payment Intent] Total calculado: R$', total.toFixed(2));
+    console.log('[Stripe Payment Intent] Detalhes:', calculationDetails);
+
     if (total <= 0) {
       return Response.json({ error: 'Total inválido' }, { status: 400 });
     }
 
-    // 3. Criar Payment Intent no Stripe
+    // Stripe requer mínimo de R$ 0.50
+    if (total < 0.5) {
+      console.error('[Stripe] Total abaixo do mínimo permitido:', total);
+      return Response.json({ 
+        error: `Total de R$ ${total.toFixed(2)} está abaixo do mínimo permitido pelo Stripe (R$ 0.50). Verifique os preços dos produtos no banco de dados.`,
+        details: calculationDetails 
+      }, { status: 400 });
+    }
+
+    // 4. Criar Payment Intent no Stripe
+    const amountInCents = Math.round(total * 100); // Converter R$ para centavos
+    console.log('[Stripe Payment Intent] Valor em centavos:', amountInCents);
+    
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(total * 100), // Converter R$ para centavos
+      amount: amountInCents,
       currency: 'brl',
       ...(email && { receipt_email: email }), // Adiciona email apenas se fornecido
       metadata: {

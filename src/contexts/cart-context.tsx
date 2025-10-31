@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react'
 
 export interface CartItem {
     id: string
@@ -59,7 +59,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
     const totalPrice = items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
 
-    const addItem = (newItem: Omit<CartItem, 'quantity'>) => {
+    const addItem = useCallback((newItem: Omit<CartItem, 'quantity'>) => {
         setItems(current => {
             const existingItem = current.find(item =>
                 item.productId === newItem.productId && item.variationId === newItem.variationId
@@ -72,24 +72,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
                 return [...current, { ...newItem, quantity: 1 }]
             }
         })
-    }
+    }, [])
 
-    const removeItem = (id: string) => {
+    const removeItem = useCallback((id: string) => {
         setItems(current => current.filter(item => item.id !== id))
-    }
+    }, [])
 
 
-    const updateItem = (id: string, updates: Partial<Omit<CartItem, 'id' | 'productId' | 'quantity'>>) => {
+    const updateItem = useCallback((id: string, updates: Partial<Omit<CartItem, 'id' | 'productId' | 'quantity'>>) => {
         setItems(current =>
             current.map(item =>
                 item.id === id ? { ...item, ...updates } : item
             )
         )
-    }
+    }, [])
 
-    const clearCart = () => {
+    const clearCart = useCallback(() => {
         setItems([])
-    }
+    }, [])
 
     return (
         <CartContext.Provider value={{

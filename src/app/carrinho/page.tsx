@@ -161,14 +161,14 @@ export default function CarrinhoPage() {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
                         {/* Lista de Produtos */}
                         <div className="lg:col-span-2 space-y-4">
-                            {items.map((item) => {
+                            {items.map((item, index) => {
                                 const hasAttributes = item.attributes && item.attributes.length > 0
                                 const hasVariations = productData.get(item.productId)?.variations?.some(v =>
                                     v.attributeValues && v.attributeValues.length > 0
                                 )
 
                                 return (
-                                    <Card key={item.id} className="bg-white hover:shadow-lg transition-all duration-200 border-gray-200">
+                                    <Card key={`${item.id}-${index}`} className="bg-white hover:shadow-lg transition-all duration-200 border-gray-200">
                                         <CardContent className="p-4 md:p-6">
                                             <div className="flex gap-4">
                                                 {/* Imagem do Produto */}

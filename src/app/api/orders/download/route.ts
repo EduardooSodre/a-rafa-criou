@@ -5,7 +5,7 @@ import { eq } from 'drizzle-orm';
 import { getR2SignedUrl } from '@/lib/r2-utils';
 
 // Secure download endpoint
-// Accepts: orderId + itemId  OR payment_intent + itemId
+// Accepts: orderId + itemId  OR payment_intent + itemId  OR payment_id + itemId
 // Validates order/payment status and ownership, finds the file.path and returns a short-lived signed URL
 export async function GET(req: NextRequest) {
   try {
@@ -13,14 +13,15 @@ export async function GET(req: NextRequest) {
     const searchParams = url.searchParams;
 
     const orderId = searchParams.get('orderId');
-    const paymentIntent = searchParams.get('payment_intent');
+    const paymentIntent = searchParams.get('payment_intent'); // Stripe
+    const paymentId = searchParams.get('payment_id'); // Pix (Mercado Pago)
     const itemId = searchParams.get('itemId');
 
     if (!itemId) {
       return NextResponse.json({ error: 'itemId is required' }, { status: 400 });
     }
 
-    // Find order either by orderId or payment_intent (stripePaymentIntentId)
+    // ✅ Find order by orderId, payment_intent (Stripe), or payment_id (Pix)
     let order;
     if (orderId) {
       const res = await db.select().from(orders).where(eq(orders.id, orderId)).limit(1);
@@ -32,8 +33,15 @@ export async function GET(req: NextRequest) {
         .where(eq(orders.stripePaymentIntentId, paymentIntent))
         .limit(1);
       order = res[0];
+    } else if (paymentId) {
+      const res = await db
+        .select()
+        .from(orders)
+        .where(eq(orders.paymentId, paymentId))
+        .limit(1);
+      order = res[0];
     } else {
-      return NextResponse.json({ error: 'orderId or payment_intent is required' }, { status: 400 });
+      return NextResponse.json({ error: 'orderId, payment_intent, or payment_id is required' }, { status: 400 });
     }
 
     if (!order) {
