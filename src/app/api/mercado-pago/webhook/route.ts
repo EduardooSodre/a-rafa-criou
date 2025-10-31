@@ -27,7 +27,7 @@ function validateWebhookSignature(
     const parts = xSignature.split(',');
     let ts = '';
     let hash = '';
-    
+
     for (const part of parts) {
       const [key, value] = part.split('=');
       if (key.trim() === 'ts') ts = value;
@@ -41,7 +41,7 @@ function validateWebhookSignature(
 
     // Criar o manifesto: id + request-id + ts
     const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`;
-    
+
     // Calcular HMAC SHA256
     const hmac = crypto.createHmac('sha256', secret);
     hmac.update(manifest);
@@ -49,7 +49,7 @@ function validateWebhookSignature(
 
     // Comparar hashes
     const isValid = calculatedHash === hash;
-    
+
     if (!isValid) {
       console.error('[Webhook] ❌ Assinatura inválida!');
       console.log('[Webhook] Hash recebido:', hash);
@@ -73,10 +73,10 @@ export async function POST(req: NextRequest) {
     console.log('[Webhook Pix] PAYLOAD COMPLETO RECEBIDO:');
     console.log(JSON.stringify(body, null, 2));
     console.log('═══════════════════════════════════════════════════════');
-    
+
     // Extrair payment ID de diferentes formatos possíveis
     let paymentId: string | null = null;
-    
+
     // Formato 1: { data: { id: "123" } }
     if (body.data?.id) {
       paymentId = body.data.id;
@@ -106,23 +106,17 @@ export async function POST(req: NextRequest) {
     if (webhookSecret) {
       const xSignature = req.headers.get('x-signature');
       const xRequestId = req.headers.get('x-request-id');
-      
-      const isValid = validateWebhookSignature(
-        xSignature,
-        xRequestId,
-        paymentId,
-        webhookSecret
-      );
+
+      const isValid = validateWebhookSignature(xSignature, xRequestId, paymentId, webhookSecret);
 
       if (!isValid) {
         console.error('[Webhook] 🚫 Assinatura inválida - webhook rejeitado!');
-        return NextResponse.json(
-          { error: 'Invalid signature' },
-          { status: 403 }
-        );
+        return NextResponse.json({ error: 'Invalid signature' }, { status: 403 });
       }
     } else {
-      console.warn('[Webhook] ⚠️ MERCADOPAGO_WEBHOOK_SECRET não configurado - validação de assinatura desabilitada');
+      console.warn(
+        '[Webhook] ⚠️ MERCADOPAGO_WEBHOOK_SECRET não configurado - validação de assinatura desabilitada'
+      );
     }
 
     // Idempotência: não processar o mesmo evento duas vezes (dentro de 1 minuto)
@@ -137,14 +131,14 @@ export async function POST(req: NextRequest) {
     // SEMPRE consultar a API do Mercado Pago para garantir status correto
     if (paymentId) {
       console.log(`[Webhook] Consultando pagamento ${paymentId} no Mercado Pago...`);
-      
+
       // Buscar status do pagamento diretamente da API do Mercado Pago
       try {
         const paymentResponse = await fetch(
           `https://api.mercadopago.com/v1/payments/${paymentId}`,
           {
             headers: {
-              'Authorization': `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`,
+              Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`,
             },
           }
         );
@@ -166,20 +160,12 @@ export async function POST(req: NextRequest) {
         if (order) {
           let newStatus = 'pending';
           let paymentStatus = 'pending';
-          
+
           // Tratar status do Mercado Pago → IGUAL À STRIPE
-          if (
-            [
-              'approved',
-              'paid',
-              'authorized',
-            ].includes(payment.status)
-          ) {
+          if (['approved', 'paid', 'authorized'].includes(payment.status)) {
             newStatus = 'completed';
             paymentStatus = 'paid'; // ✅ IGUAL À STRIPE
-          } else if (
-            ['pending', 'in_process', 'in_mediation'].includes(payment.status)
-          ) {
+          } else if (['pending', 'in_process', 'in_mediation'].includes(payment.status)) {
             newStatus = 'pending';
             paymentStatus = 'pending';
           } else if (

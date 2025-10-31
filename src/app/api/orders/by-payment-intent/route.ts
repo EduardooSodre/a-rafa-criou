@@ -10,7 +10,10 @@ export async function GET(req: NextRequest) {
     const paymentId = searchParams.get('payment_id'); // Pix (Mercado Pago)
 
     if (!paymentIntentId && !paymentId) {
-      return NextResponse.json({ error: 'Payment Intent ID ou Payment ID não fornecido' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Payment Intent ID ou Payment ID não fornecido' },
+        { status: 400 }
+      );
     }
 
     // ✅ Buscar pedido pelo Payment Intent ID (Stripe) OU Payment ID (Pix)
@@ -22,11 +25,7 @@ export async function GET(req: NextRequest) {
         .where(eq(orders.stripePaymentIntentId, paymentIntentId))
         .limit(1);
     } else if (paymentId) {
-      orderResult = await db
-        .select()
-        .from(orders)
-        .where(eq(orders.paymentId, paymentId))
-        .limit(1);
+      orderResult = await db.select().from(orders).where(eq(orders.paymentId, paymentId)).limit(1);
     }
 
     if (!orderResult || orderResult.length === 0) {

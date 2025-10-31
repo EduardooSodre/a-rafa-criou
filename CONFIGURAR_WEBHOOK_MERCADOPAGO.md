@@ -21,6 +21,7 @@ Você está recebendo o pagamento Pix no Mercado Pago, mas o banco de dados não
 ### Passo 3: Configurar a URL
 
 #### Para PRODUÇÃO:
+
 ```
 https://SEU_DOMINIO.com/api/mercado-pago/webhook
 ```
@@ -28,22 +29,26 @@ https://SEU_DOMINIO.com/api/mercado-pago/webhook
 #### Para DESENVOLVIMENTO LOCAL (usando ngrok):
 
 **No terminal 1:**
+
 ```bash
 npm run dev
 ```
 
 **No terminal 2:**
+
 ```bash
 ngrok http 3000
 ```
 
 Você verá algo assim:
+
 ```
 Session Status                online
 Forwarding                    https://abc123.ngrok.io -> http://localhost:3000
 ```
 
 **Use esta URL no Mercado Pago:**
+
 ```
 https://abc123.ngrok.io/api/mercado-pago/webhook
 ```
@@ -51,6 +56,7 @@ https://abc123.ngrok.io/api/mercado-pago/webhook
 ### Passo 4: Selecionar Eventos
 
 Marque a opção:
+
 - ✅ **Pagamentos** (ou "Payments")
 
 ### Passo 5: Copiar a Assinatura Secreta
@@ -79,6 +85,7 @@ Clique em **"Salvar"** ou **"Criar"**
 ### Teste 2: Ver os Logs
 
 Se o webhook funcionar, você verá:
+
 ```
 ═══════════════════════════════════════════════════════
 [Webhook Pix] PAYLOAD COMPLETO RECEBIDO:
@@ -107,6 +114,7 @@ Se **NÃO** aparecer nada, o webhook **NÃO** está configurado corretamente!
 ### Opção B: Usar o Endpoint Manualmente
 
 Após o pagamento, acesse:
+
 ```
 http://localhost:3000/api/mercado-pago/check-payment?paymentId=SEU_PAYMENT_ID
 ```
@@ -137,6 +145,7 @@ node scripts/check-pix-payment.js SEU_PAYMENT_ID
 ## ⚙️ Variáveis de Ambiente Necessárias
 
 No arquivo `.env`:
+
 ```env
 # Access Token (das credenciais da sua aplicação)
 MERCADOPAGO_ACCESS_TOKEN=seu_token_aqui
@@ -159,12 +168,14 @@ DATABASE_URL=sua_connection_string
 ## 🎯 Como Saber se Está Funcionando
 
 ### ✅ Funcionando:
+
 - Logs aparecem no terminal após pagamento
 - Status muda de `pending` para `completed` automaticamente
 - Frontend redireciona para `/obrigado`
 - E-mail de confirmação é enviado
 
 ### ❌ NÃO Funcionando:
+
 - Nenhum log aparece no terminal
 - Status fica `pending` para sempre
 - Precisa clicar em "Já paguei" manualmente

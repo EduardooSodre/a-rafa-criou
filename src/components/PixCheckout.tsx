@@ -52,7 +52,7 @@ const PixCheckout: React.FC = () => {
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || (data.details ? JSON.stringify(data.details) : 'Erro ao criar pagamento Pix'));
-            
+
             // Log do payment ID para facilitar debugging
             console.log('═══════════════════════════════════════════════════════');
             console.log('✅ PIX GERADO COM SUCESSO!');
@@ -60,7 +60,7 @@ const PixCheckout: React.FC = () => {
             console.log('Para verificar manualmente:');
             console.log(`node scripts/check-pix-payment.js ${data.payment_id}`);
             console.log('═══════════════════════════════════════════════════════');
-            
+
             setPix(data);
             setOrderStatus('pending'); // ✅ Definir status como pending assim que o Pix for gerado
         } catch (err: unknown) {
@@ -77,22 +77,22 @@ const PixCheckout: React.FC = () => {
     // Função para verificar manualmente o status do pagamento
     const handleCheckStatus = async () => {
         if (!pix?.payment_id) return;
-        
+
         setChecking(true);
         setError(null);
         try {
             const res = await fetch(`/api/mercado-pago/check-payment?paymentId=${pix.payment_id}`);
             const data = await res.json();
-            
+
             if (!res.ok) {
                 throw new Error(data.error || 'Erro ao verificar pagamento');
             }
 
             console.log('[PixCheckout] Verificação manual:', data);
-            
+
             if (data.database?.status) {
                 setOrderStatus(data.database.status);
-                
+
                 if (data.database.status === 'completed') {
                     // ✅ Limpar carrinho e redirecionar
                     clearCart();
@@ -157,45 +157,45 @@ const PixCheckout: React.FC = () => {
                 ) : 'Pagar com Pix'}
             </Button>
             {error && <div className="text-red-600 mb-2">{error}</div>}
-            
+
             {/* Spinner enquanto aguardando pagamento (só aparece DEPOIS de gerar o Pix) */}
             {pix && !loading && orderStatus === 'pending' && (
                 <ShadcnSpinner label="Aguardando pagamento..." />
             )}
-            
+
             {/* QR code só aparece se não estiver pago/cancelado/refundado/rejeitado */}
             {pix && !loading && orderStatus === 'pending' && (
-                    <div className="flex flex-col items-center">
-                        <Image
-                            src={`data:image/png;base64,${pix.qr_code_base64}`}
-                            alt="QR Code Pix"
-                            width={192}
-                            height={192}
-                            className="w-48 h-48 mb-2 border-2 border-[#FED466]"
-                        />
-                        <div className="text-xs text-gray-700 break-all bg-white p-2 rounded">{pix.qr_code}</div>
-                        {orderStatus && (
-                            <div className="mt-2 text-sm font-semibold text-gray-700">Status: {orderStatus}</div>
-                        )}
-                        {/* Botão para verificar manualmente */}
-                        <Button
-                            onClick={handleCheckStatus}
-                            disabled={checking}
-                            variant="outline"
-                            className="mt-4"
-                        >
-                            {checking ? 'Verificando...' : 'Já paguei, verificar agora'}
-                        </Button>
-                        {/* Mostrar Payment ID para debugging */}
-                        <div className="mt-4 p-3 bg-gray-100 rounded text-xs">
-                            <div className="font-semibold mb-1">ID do Pagamento:</div>
-                            <div className="font-mono break-all">{pix.payment_id}</div>
-                            <div className="text-gray-600 mt-2 text-[10px]">
-                                Use este ID para verificar manualmente se necessário
-                            </div>
+                <div className="flex flex-col items-center">
+                    <Image
+                        src={`data:image/png;base64,${pix.qr_code_base64}`}
+                        alt="QR Code Pix"
+                        width={192}
+                        height={192}
+                        className="w-48 h-48 mb-2 border-2 border-[#FED466]"
+                    />
+                    <div className="text-xs text-gray-700 break-all bg-white p-2 rounded">{pix.qr_code}</div>
+                    {orderStatus && (
+                        <div className="mt-2 text-sm font-semibold text-gray-700">Status: {orderStatus}</div>
+                    )}
+                    {/* Botão para verificar manualmente */}
+                    <Button
+                        onClick={handleCheckStatus}
+                        disabled={checking}
+                        variant="outline"
+                        className="mt-4"
+                    >
+                        {checking ? 'Verificando...' : 'Já paguei, verificar agora'}
+                    </Button>
+                    {/* Mostrar Payment ID para debugging */}
+                    <div className="mt-4 p-3 bg-gray-100 rounded text-xs">
+                        <div className="font-semibold mb-1">ID do Pagamento:</div>
+                        <div className="font-mono break-all">{pix.payment_id}</div>
+                        <div className="text-gray-600 mt-2 text-[10px]">
+                            Use este ID para verificar manualmente se necessário
                         </div>
                     </div>
-                )}
+                </div>
+            )}
             {/* Status final */}
             {orderStatus && [
                 'completed', 'cancelled', 'refunded', 'rejected'

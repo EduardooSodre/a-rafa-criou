@@ -3,12 +3,14 @@
 ## ✅ Correções Implementadas
 
 ### 1. Webhook Aprimorado
+
 - Aceita TODOS os formatos de payload do Mercado Pago
 - Logs detalhados para debugging
 - Extrai payment ID de 3 formatos diferentes
 - Sempre consulta a API do Mercado Pago para status real
 
 ### 2. Endpoint de Teste Criado
+
 - `/api/mercado-pago/check-payment?paymentId=XXX`
 - Verifica status no Mercado Pago e no banco
 - Atualiza o banco se necessário
@@ -17,13 +19,16 @@
 ## 🧪 Como Testar
 
 ### Passo 1: Fazer um Pagamento Pix
+
 1. Acesse o carrinho
 2. Clique em "Pagar com Pix"
 3. Anote o `payment_id` que aparece no console do navegador
 4. Faça o pagamento do Pix
 
 ### Passo 2: Verificar os Logs
+
 Abra o terminal onde o Next.js está rodando e procure por:
+
 ```
 [Webhook Pix] PAYLOAD COMPLETO RECEBIDO:
 ```
@@ -31,18 +36,23 @@ Abra o terminal onde o Next.js está rodando e procure por:
 Se NÃO aparecer nada, o webhook NÃO está sendo chamado pelo Mercado Pago.
 
 ### Passo 3: Verificar Status Manualmente
+
 Acesse no navegador:
+
 ```
 http://localhost:3000/api/mercado-pago/check-payment?paymentId=SEU_PAYMENT_ID
 ```
 
 Isso vai mostrar:
+
 - Status no Mercado Pago
 - Status no banco de dados
 - Se foi atualizado automaticamente
 
 ### Passo 4: Forçar Atualização (se necessário)
+
 Se o webhook não funcionar, você pode:
+
 1. Usar o endpoint de verificação acima (ele atualiza automaticamente)
 2. O frontend também consulta a cada 4 segundos
 
@@ -57,9 +67,11 @@ Se o webhook não funcionar, você pode:
    - Para desenvolvimento local, use ngrok ou similar
 
 2. **Usar ngrok para testes locais:**
+
    ```bash
    ngrok http 3000
    ```
+
    - Copie a URL gerada (ex: https://abc123.ngrok.io)
    - Configure no Mercado Pago: https://abc123.ngrok.io/api/mercado-pago/webhook
 
@@ -70,6 +82,7 @@ Se o webhook não funcionar, você pode:
 ### Se o pagamento está aprovado mas não atualiza:
 
 1. **Use o endpoint de verificação:**
+
    ```
    GET /api/mercado-pago/check-payment?paymentId=XXX
    ```
@@ -98,7 +111,7 @@ Se nada funcionar, execute manualmente:
 
 ```javascript
 // No console do navegador, após fazer o pagamento:
-const paymentId = "SEU_PAYMENT_ID_AQUI";
+const paymentId = 'SEU_PAYMENT_ID_AQUI';
 const response = await fetch(`/api/mercado-pago/check-payment?paymentId=${paymentId}`);
 const data = await response.json();
 console.log(data);
@@ -109,6 +122,7 @@ Isso vai forçar a verificação e atualização do status.
 ## 📝 Logs Importantes
 
 ### Webhook recebendo corretamente:
+
 ```
 ═══════════════════════════════════════════════════════
 [Webhook Pix] PAYLOAD COMPLETO RECEBIDO:
@@ -126,6 +140,7 @@ Isso vai forçar a verificação e atualização do status.
 ```
 
 ### Webhook NÃO configurado:
+
 ```
 (Nada aparece nos logs quando você faz o pagamento)
 ```

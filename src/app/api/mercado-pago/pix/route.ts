@@ -69,7 +69,9 @@ export async function POST(req: NextRequest) {
           );
         }
         itemPrice = Number(variation.price);
-        console.log(`[Pix] Item com variação: ${variation.name} - R$ ${itemPrice} x ${item.quantity}`);
+        console.log(
+          `[Pix] Item com variação: ${variation.name} - R$ ${itemPrice} x ${item.quantity}`
+        );
       } else {
         const product = dbProducts.find(p => p.id === item.productId);
         if (!product) {
@@ -79,17 +81,19 @@ export async function POST(req: NextRequest) {
           );
         }
         itemPrice = Number(product.price);
-        console.log(`[Pix] Item sem variação: ${product.name} - R$ ${itemPrice} x ${item.quantity}`);
+        console.log(
+          `[Pix] Item sem variação: ${product.name} - R$ ${itemPrice} x ${item.quantity}`
+        );
       }
       amount += itemPrice * item.quantity;
     }
-    
+
     console.log(`[Pix] Total calculado: R$ ${amount.toFixed(2)}`);
-    
+
     if (amount <= 0) {
       return NextResponse.json({ error: 'Total inválido' }, { status: 400 });
     }
-    
+
     const email = session.user.email;
 
     // Logging básico
@@ -146,7 +150,7 @@ export async function POST(req: NextRequest) {
       })
       .returning();
     const createdOrder = createdOrderArr[0];
-    
+
     console.log('═══════════════════════════════════════════════════════');
     console.log('[Pix] ✅ ORDEM CRIADA NO BANCO COM SUCESSO!');
     console.log('[Pix] Order ID:', createdOrder.id);
@@ -155,7 +159,7 @@ export async function POST(req: NextRequest) {
     console.log('[Pix] Total:', `R$ ${amount.toFixed(2)}`);
     console.log('[Pix] IMPORTANTE: Este payment_id deve aparecer no webhook!');
     console.log('═══════════════════════════════════════════════════════');
-    
+
     // Criar itens do pedido
     for (const item of items) {
       // Buscar nome e preço correto

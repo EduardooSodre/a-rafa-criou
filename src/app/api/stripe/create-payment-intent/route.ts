@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     console.log('[Stripe Payment Intent] Request recebido:', JSON.stringify(body, null, 2));
-    
+
     const { items, userId, email } = createPaymentIntentSchema.parse(body);
 
     // 1. Buscar produtos reais do banco (NUNCA confiar no frontend)
@@ -63,7 +63,10 @@ export async function POST(req: NextRequest) {
         const variation = dbVariations.find(v => v.id === item.variationId);
         if (!variation) {
           console.error('[Stripe] Variação não encontrada:', item.variationId);
-          console.error('[Stripe] Variações disponíveis:', dbVariations.map(v => v.id));
+          console.error(
+            '[Stripe] Variações disponíveis:',
+            dbVariations.map(v => v.id)
+          );
           return Response.json(
             { error: `Variação ${item.variationId} não encontrada` },
             { status: 400 }
@@ -73,7 +76,7 @@ export async function POST(req: NextRequest) {
 
         const product = dbProducts.find(p => p.id === item.productId);
         itemName = `${product?.name || 'Produto'} - ${variation.name}`;
-        
+
         console.log(`[Stripe] Item com variação: ${itemName} - R$ ${itemPrice} x ${item.quantity}`);
       } else {
         // Se não tem variação, usar preço do produto
@@ -87,7 +90,7 @@ export async function POST(req: NextRequest) {
         }
         itemPrice = Number(product.price);
         itemName = product.name;
-        
+
         console.log(`[Stripe] Item sem variação: ${itemName} - R$ ${itemPrice} x ${item.quantity}`);
       }
 
@@ -111,16 +114,19 @@ export async function POST(req: NextRequest) {
     // Stripe requer mínimo de R$ 0.50
     if (total < 0.5) {
       console.error('[Stripe] Total abaixo do mínimo permitido:', total);
-      return Response.json({ 
-        error: `Total de R$ ${total.toFixed(2)} está abaixo do mínimo permitido pelo Stripe (R$ 0.50). Verifique os preços dos produtos no banco de dados.`,
-        details: calculationDetails 
-      }, { status: 400 });
+      return Response.json(
+        {
+          error: `Total de R$ ${total.toFixed(2)} está abaixo do mínimo permitido pelo Stripe (R$ 0.50). Verifique os preços dos produtos no banco de dados.`,
+          details: calculationDetails,
+        },
+        { status: 400 }
+      );
     }
 
     // 4. Criar Payment Intent no Stripe
     const amountInCents = Math.round(total * 100); // Converter R$ para centavos
     console.log('[Stripe Payment Intent] Valor em centavos:', amountInCents);
-    
+
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amountInCents,
       currency: 'brl',

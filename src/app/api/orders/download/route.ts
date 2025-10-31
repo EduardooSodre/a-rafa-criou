@@ -34,14 +34,13 @@ export async function GET(req: NextRequest) {
         .limit(1);
       order = res[0];
     } else if (paymentId) {
-      const res = await db
-        .select()
-        .from(orders)
-        .where(eq(orders.paymentId, paymentId))
-        .limit(1);
+      const res = await db.select().from(orders).where(eq(orders.paymentId, paymentId)).limit(1);
       order = res[0];
     } else {
-      return NextResponse.json({ error: 'orderId, payment_intent, or payment_id is required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'orderId, payment_intent, or payment_id is required' },
+        { status: 400 }
+      );
     }
 
     if (!order) {

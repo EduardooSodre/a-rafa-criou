@@ -15,14 +15,11 @@ export async function GET(req: NextRequest) {
     console.log(`[Check Payment] Verificando pagamento ${paymentId}...`);
 
     // Buscar no Mercado Pago
-    const paymentResponse = await fetch(
-      `https://api.mercadopago.com/v1/payments/${paymentId}`,
-      {
-        headers: {
-          'Authorization': `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`,
-        },
-      }
-    );
+    const paymentResponse = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+      headers: {
+        Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`,
+      },
+    });
 
     if (!paymentResponse.ok) {
       throw new Error(`Erro ao buscar pagamento: ${paymentResponse.status}`);
@@ -32,25 +29,24 @@ export async function GET(req: NextRequest) {
     console.log(`[Check Payment] Status do Mercado Pago:`, payment.status);
 
     // Buscar pedido no banco
-    const [order] = await db
-      .select()
-      .from(orders)
-      .where(eq(orders.paymentId, paymentId))
-      .limit(1);
+    const [order] = await db.select().from(orders).where(eq(orders.paymentId, paymentId)).limit(1);
 
     if (!order) {
-      return NextResponse.json({
-        error: 'Pedido não encontrado no banco',
-        mercadoPagoStatus: payment.status,
-        mercadoPagoData: payment,
-      }, { status: 404 });
+      return NextResponse.json(
+        {
+          error: 'Pedido não encontrado no banco',
+          mercadoPagoStatus: payment.status,
+          mercadoPagoData: payment,
+        },
+        { status: 404 }
+      );
     }
 
     // Atualizar se necessário
     let updated = false;
     let newStatus = 'pending';
     let paymentStatus = 'pending';
-    
+
     // ✅ USAR MESMA LÓGICA DO WEBHOOK (IGUAL À STRIPE)
     if (['approved', 'paid', 'authorized'].includes(payment.status)) {
       newStatus = 'completed';
@@ -67,8 +63,10 @@ export async function GET(req: NextRequest) {
     }
 
     if (newStatus !== order.status) {
-      console.log(`[Check Payment] Atualizando pedido ${order.id}: ${order.status} -> ${newStatus}`);
-      
+      console.log(
+        `[Check Payment] Atualizando pedido ${order.id}: ${order.status} -> ${newStatus}`
+      );
+
       await db
         .update(orders)
         .set({
@@ -78,7 +76,7 @@ export async function GET(req: NextRequest) {
           paidAt: newStatus === 'completed' ? new Date() : order.paidAt,
         })
         .where(eq(orders.id, order.id));
-      
+
       updated = true;
 
       // Enviar e-mail de confirmação se completado
