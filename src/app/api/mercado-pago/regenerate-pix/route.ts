@@ -29,21 +29,35 @@ export async function POST(req: NextRequest) {
     }
 
     // Verificar se o pedido pertence ao usuário
-    if (order.userId !== session.user.id) {
+    // ✅ Aceitar se userId do pedido corresponde OU se email corresponde (para pedidos antigos sem userId)
+    const isOwner =
+      order.userId === session.user.id || (order.email === session.user.email && !order.userId);
+
+    if (!isOwner) {
+      console.log(
+        `❌ Acesso negado ao regenerar Pix - userId pedido: ${order.userId}, userId sessão: ${session.user.id}, email pedido: ${order.email}, email sessão: ${session.user.email}`
+      );
       return NextResponse.json(
         { error: 'Você não tem permissão para acessar este pedido' },
         { status: 403 }
       );
     }
 
+    console.log(
+      `✅ Acesso permitido ao regenerar Pix - userId pedido: ${order.userId}, userId sessão: ${session.user.id}, email pedido: ${order.email}, email sessão: ${session.user.email}`
+    );
+
     // Verificar se o pedido está pendente
     if (order.status !== 'pending') {
       return NextResponse.json({ error: 'Este pedido não está mais pendente' }, { status: 400 });
     }
 
-    // Verificar se é pagamento via Mercado Pago
-    if (order.paymentProvider !== 'mercado_pago') {
-      return NextResponse.json({ error: 'Este pedido não foi criado via Pix' }, { status: 400 });
+    // Verificar se é pagamento via Mercado Pago (aceita 'mercado_pago' ou 'pix')
+    if (order.paymentProvider !== 'mercado_pago' && order.paymentProvider !== 'pix') {
+      return NextResponse.json(
+        { error: `Este pedido não foi criado via Pix (provider: ${order.paymentProvider})` },
+        { status: 400 }
+      );
     }
 
     // Buscar itens do pedido
@@ -54,24 +68,40 @@ export async function POST(req: NextRequest) {
     }
 
     // Criar novo pagamento Pix no Mercado Pago
-    const pixPayload = {
+    const pixPayload: {
+      transaction_amount: number;
+      description: string;
+      payment_method_id: string;
+      payer: { email: string };
+      notification_url?: string;
+    } = {
       transaction_amount: Number(order.total),
       description: `Pedido #${order.id.slice(0, 13)}`,
       payment_method_id: 'pix',
       payer: {
         email: order.email,
       },
-      notification_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/mercado-pago/webhook`,
     };
+
+    // Adicionar notification_url apenas se for uma URL válida (não localhost)
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+    if (appUrl && !appUrl.includes('localhost') && !appUrl.includes('127.0.0.1')) {
+      pixPayload.notification_url = `${appUrl}/api/mercado-pago/webhook`;
+    }
 
     console.log('🔄 Regenerando Pix para pedido:', orderId);
     console.log('💰 Valor:', order.total);
+    console.log('🔔 Notification URL:', pixPayload.notification_url || 'Não configurada (localhost)');
+
+    // Gerar chave de idempotência única para este pedido
+    const idempotencyKey = `regenerate-pix-${orderId}-${Date.now()}`;
 
     const pixResponse = await fetch('https://api.mercadopago.com/v1/payments', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${MERCADOPAGO_ACCESS_TOKEN}`,
+        'X-Idempotency-Key': idempotencyKey,
       },
       body: JSON.stringify(pixPayload),
     });

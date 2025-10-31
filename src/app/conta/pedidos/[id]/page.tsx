@@ -87,7 +87,9 @@ export default function PedidoDetalhesPage() {
                 status: data.status,
                 paymentProvider: data.paymentProvider,
                 paymentStatus: data.paymentStatus,
-                shouldShowPix: data.status === 'pending' && data.paymentProvider === 'mercado_pago'
+                isPixProvider: data.paymentProvider === 'mercado_pago' || data.paymentProvider === 'pix',
+                shouldShowPix: data.status === 'pending' && (data.paymentProvider === 'mercado_pago' || data.paymentProvider === 'pix'),
+                fullData: JSON.stringify(data, null, 2)
             });
         } catch (err) {
             console.error('Erro ao buscar pedido:', err);
@@ -130,17 +132,28 @@ export default function PedidoDetalhesPage() {
 
         try {
             setCheckingPayment(true);
+            
+            console.log('🔄 Verificando status do pagamento...', {
+                orderId: order.id,
+                currentStatus: order.status,
+                paymentProvider: order.paymentProvider
+            });
 
             const response = await fetch(`/api/orders/status?orderId=${order.id}`);
             const data = await response.json();
+            
+            console.log('✅ Resposta do servidor:', data);
 
             if (data.status === 'completed' || data.paymentStatus === 'paid') {
+                console.log('🎉 Pagamento confirmado! Atualizando página...');
                 // Atualizar o pedido localmente
                 setOrder({ ...order, status: 'completed', paymentStatus: 'paid' });
                 clearCart();
+                // Recarregar a página para mostrar downloads
+                window.location.reload();
             }
         } catch (err) {
-            console.error('Erro ao verificar pagamento:', err);
+            console.error('❌ Erro ao verificar pagamento:', err);
         } finally {
             setCheckingPayment(false);
         }
@@ -148,15 +161,33 @@ export default function PedidoDetalhesPage() {
 
     // Polling automático para pedidos pendentes com Pix
     useEffect(() => {
-        if (!order || order.status !== 'pending' || order.paymentProvider !== 'mercado_pago') {
+        if (!order || order.status !== 'pending') {
             return;
         }
+        
+        // Verificar se é Pix (aceita 'mercado_pago' ou 'pix')
+        const isPixPayment = order.paymentProvider === 'mercado_pago' || order.paymentProvider === 'pix';
+        
+        if (!isPixPayment) {
+            console.log('⏸️ Polling desativado - não é pagamento Pix', {
+                paymentProvider: order.paymentProvider
+            });
+            return;
+        }
+
+        console.log('▶️ Iniciando polling automático a cada 4 segundos...', {
+            orderId: order.id,
+            paymentProvider: order.paymentProvider
+        });
 
         const interval = setInterval(() => {
             checkPaymentStatus();
         }, 4000); // Verifica a cada 4 segundos
 
-        return () => clearInterval(interval);
+        return () => {
+            console.log('⏹️ Parando polling automático');
+            clearInterval(interval);
+        };
     }, [order]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
@@ -205,10 +236,18 @@ export default function PedidoDetalhesPage() {
                 },
             }));
 
-            // Abrir download em nova aba usando a URL assinada
+            // Abrir download usando a URL assinada
+            // Usar createElement + click para melhor compatibilidade mobile
             const downloadUrl = data.downloadUrl || data.signedUrl;
             if (downloadUrl) {
-                window.open(downloadUrl, '_blank');
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+                link.download = ''; // Força download no mobile
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
             } else {
                 throw new Error('URL de download não disponível');
             }
@@ -417,7 +456,7 @@ export default function PedidoDetalhesPage() {
                                 <p className="mt-1 text-xs sm:text-sm">
                                     Seu pedido foi criado, mas ainda está aguardando a confirmação do pagamento.
                                 </p>
-                                {order.paymentProvider === 'mercado_pago' && (
+                                {(order.paymentProvider === 'mercado_pago' || order.paymentProvider === 'pix') && (
                                     <p className="mt-2 text-xs sm:text-sm font-semibold">
                                         {pixData ?
                                             '👇 Escaneie o QR Code abaixo para pagar' :
@@ -429,7 +468,7 @@ export default function PedidoDetalhesPage() {
                         </Alert>
 
                         {/* Card do Pix - OTIMIZADO PARA MOBILE */}
-                        {order.paymentProvider === 'mercado_pago' && (
+                        {(order.paymentProvider === 'mercado_pago' || order.paymentProvider === 'pix') && (
                             <Card className="mb-4 sm:mb-6 shadow-lg border-2 border-[#FED466]">
                                 <CardHeader className="pb-3 sm:pb-6">
                                     <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
