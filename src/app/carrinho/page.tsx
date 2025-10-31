@@ -168,62 +168,64 @@ export default function CarrinhoPage() {
                                 )
 
                                 return (
-                                    <Card key={`${item.id}-${index}`} className="bg-white hover:shadow-lg transition-all duration-200 border-gray-200">
-                                        <CardContent className="p-4 md:p-6">
-                                            <div className="flex gap-4">
-                                                {/* Imagem do Produto */}
-                                                <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-xl overflow-hidden bg-gray-50 border border-gray-200 flex-shrink-0">
+                                    <Card 
+                                        key={`${item.id}-${index}`} 
+                                        className="bg-white hover:shadow-lg transition-all duration-200 border border-gray-200 hover:border-[#FED466] overflow-hidden group"
+                                    >
+                                        <CardContent className="p-4">
+                                            <div className="flex items-start gap-4">
+                                                {/* Imagem do Produto - Modo Lista Minimalista */}
+                                                <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-gray-50 border border-gray-200 flex-shrink-0 group-hover:border-[#FED466] transition-colors">
                                                     <Image
                                                         src={item.image}
-                                                        alt={item.name}
-                                                        width={112}
-                                                        height={112}
-                                                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
+                                                        alt={`Imagem de ${item.name}`}
+                                                        fill
+                                                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                                        sizes="80px"
                                                     />
                                                 </div>
 
                                                 {/* Informações do Produto */}
-                                                <div className="flex-1 min-w-0 space-y-3">
+                                                <div className="flex-1 min-w-0 space-y-2">
                                                     <div>
-                                                        <h3 className="font-bold text-base md:text-lg text-gray-900 mb-2 line-clamp-2">
+                                                        <h3 className="font-bold text-base text-gray-900 mb-1.5 line-clamp-2 group-hover:text-[#FD9555] transition-colors">
                                                             {item.name}
                                                         </h3>
 
                                                         {/* Mostrar atributos ou nome da variação */}
                                                         {hasAttributes ? (
-                                                            <div className="flex flex-wrap gap-2">
+                                                            <div className="flex flex-wrap gap-1.5">
                                                                 {item.attributes!.map((attr, idx) => (
                                                                     <Badge
                                                                         key={idx}
                                                                         variant="outline"
-                                                                        className="bg-[#FED466]/30 text-gray-900 border-[#FED466] text-xs font-semibold px-3 py-1 rounded-md"
+                                                                        className="bg-gradient-to-r from-[#FED466]/20 to-[#FED466]/10 text-gray-700 border-[#FED466]/50 text-xs px-2 py-0.5"
                                                                     >
                                                                         <span className="opacity-70">{attr.name}:</span>
-                                                                        <span className="ml-1.5">{attr.value}</span>
+                                                                        <span className="ml-1 font-semibold">{attr.value}</span>
                                                                     </Badge>
                                                                 ))}
                                                             </div>
                                                         ) : (
-                                                            <p className="text-sm text-gray-600 font-medium">
+                                                            <p className="text-xs text-gray-600 font-medium">
                                                                 {item.variationName}
                                                             </p>
                                                         )}
                                                     </div>
 
-                                                    {/* Controles: Quantidade, Editar e Remover */}
-                                                    <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                                                        {/* Quantidade removida, só pode comprar 1 */}
-
+                                                    {/* Controles: Editar e Remover */}
+                                                    <div className="flex items-center gap-2">
                                                         {/* Botão Editar */}
                                                         {hasVariations && (
                                                             <Button
                                                                 type="button"
                                                                 size="sm"
-                                                                className="h-10 px-3 sm:px-4 !bg-white !text-[#FD9555] hover:!text-white hover:!bg-[#FD9555] border-2 !border-[#FD9555] font-medium transition-all duration-200 cursor-pointer"
+                                                                className="h-9 px-3 bg-white text-[#FD9555] hover:text-white hover:bg-[#FD9555] border border-[#FD9555] font-medium transition-all text-xs"
                                                                 onClick={() => handleEditItem(item.id)}
+                                                                aria-label={`Editar variação de ${item.name}`}
                                                             >
-                                                                <Edit className="w-4 h-4 sm:mr-2" />
-                                                                <span className="hidden sm:inline">{t('cart.edit')}</span>
+                                                                <Edit className="w-3.5 h-3.5 mr-1.5" aria-hidden="true" />
+                                                                {t('cart.edit')}
                                                             </Button>
                                                         )}
 
@@ -231,23 +233,29 @@ export default function CarrinhoPage() {
                                                         <Button
                                                             variant="ghost"
                                                             size="sm"
-                                                            className="h-10 px-3 sm:px-4  !bg-red-100 !text-red-700 hover:!text-white hover:!bg-red-600 border-2 !border-red-300 hover:!border-red-600 font-semibold transition-all duration-200 cursor-pointer   "
+                                                            className="h-9 px-3 text-red-600 hover:text-white hover:bg-red-600 border border-red-200 hover:border-red-600 font-medium transition-all text-xs"
                                                             onClick={() => removeItem(item.id)}
+                                                            aria-label={`Remover ${item.name} do carrinho`}
                                                         >
-                                                            <Trash2 className="w-4 h-4 sm:mr-2" />
-                                                            <span className="hidden sm:inline ">{t('cart.remove')}</span>
+                                                            <Trash2 className="w-3.5 h-3.5 mr-1.5" aria-hidden="true" />
+                                                            {t('cart.remove')}
                                                         </Button>
                                                     </div>
                                                 </div>
 
-                                                {/* Preço */}
-                                                <div className="ml-auto text-right space-y-1 flex-shrink-0">
-                                                    <div className="text-lg md:text-2xl font-bold text-[#FD9555]">
+                                                {/* Preço - Alinhado à direita */}
+                                                <div className="text-right space-y-1 flex-shrink-0">
+                                                    <div className="text-lg font-bold text-[#FD9555]">
                                                         {formatPrice(item.price * item.quantity)}
                                                     </div>
-                                                    <div className="text-xs md:text-sm text-gray-500 font-medium">
+                                                    <div className="text-xs text-gray-500">
                                                         {formatPrice(item.price)} {t('cart.each')}
                                                     </div>
+                                                    {item.quantity > 1 && (
+                                                        <Badge className="bg-[#FED466]/30 text-gray-900 text-xs px-2 py-0.5">
+                                                            x{item.quantity}
+                                                        </Badge>
+                                                    )}
                                                 </div>
                                             </div>
                                         </CardContent>
@@ -261,7 +269,7 @@ export default function CarrinhoPage() {
                                     <Link href="/produtos" className="flex-1">
                                         <Button
                                             type="button"
-                                            className="w-full h-12 !bg-[#FED466] hover:!bg-[#FED466]/80 !text-gray-900 font-semibold border-2 !border-[#FED466] hover:!border-[#FD9555] transition-all duration-200 cursor-pointer"
+                                            className="w-full h-12 bg-[#FED466] hover:bg-[#FED466]/80 text-gray-900 font-semibold border-2 border-[#FED466] hover:border-[#FD9555] transition-all duration-200 shadow-sm hover:shadow-md min-h-[48px]"
                                         >
                                             {t('cart.continueShopping')}
                                         </Button>
@@ -269,9 +277,9 @@ export default function CarrinhoPage() {
                                     <Button
                                         type="button"
                                         onClick={clearCart}
-                                        className="flex-1 h-12 !bg-red-100 !text-red-700 hover:!text-white hover:!bg-red-600 border-2 !border-red-300 hover:!border-red-600 font-semibold transition-all duration-200 cursor-pointer"
+                                        className="flex-1 h-12 bg-red-50 text-red-700 hover:text-white hover:bg-red-600 border-2 border-red-200 hover:border-red-600 font-semibold transition-all duration-200 shadow-sm hover:shadow-md min-h-[48px]"
                                     >
-                                        <Trash2 className="w-4 h-4 mr-2" />
+                                        <Trash2 className="w-4 h-4 mr-2" aria-hidden="true" />
                                         {t('cart.clearCart')}
                                     </Button>
                                 </div>

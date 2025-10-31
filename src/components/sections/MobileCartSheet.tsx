@@ -3,6 +3,7 @@
 import { useCart } from '@/contexts/cart-context'
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Trash2, ShoppingBag } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
@@ -30,56 +31,69 @@ export function MobileCartSheet({ open, onOpenChange }: MobileCartSheetProps) {
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
-            <SheetContent side="right" className="w-[90vw] sm:w-[360px] p-0 flex flex-col">
+            <SheetContent side="right" className="w-[90vw] sm:w-[380px] p-0 flex flex-col" aria-describedby="cart-description">
                 <SheetTitle className="sr-only">Carrinho de Compras</SheetTitle>
+                <p id="cart-description" className="sr-only">
+                    Visualize e gerencie os produtos no seu carrinho de compras
+                </p>
 
                 {/* Header */}
-                <div className="p-4 border-b bg-[#FD9555]">
-                    <div className="flex items-center gap-2">
-                        <ShoppingBag className="w-5 h-5 text-white" />
-                        <h2 className="text-lg font-bold text-white">
-                            Carrinho ({totalItems} {totalItems === 1 ? 'item' : 'itens'})
-                        </h2>
+                <header className="p-4 border-b bg-gradient-to-r from-[#FD9555] to-[#FED466]">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <ShoppingBag className="w-5 h-5 text-white" aria-hidden="true" />
+                            <h2 className="text-lg font-bold text-white">
+                                Carrinho
+                            </h2>
+                        </div>
+                        <Badge className="bg-white/20 text-white border-white/30 text-sm font-bold px-3 py-1">
+                            {totalItems} {totalItems === 1 ? 'item' : 'itens'}
+                        </Badge>
                     </div>
-                </div>
+                </header>
 
                 {/* Content */}
                 {items.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-                        <ShoppingBag className="w-16 h-16 text-gray-300 mb-4" />
-                        <p className="text-gray-500 mb-2">Seu carrinho está vazio</p>
-                        <p className="text-sm text-gray-400">Adicione produtos para continuar</p>
+                        <ShoppingBag className="w-16 h-16 text-gray-300 mb-4" aria-hidden="true" />
+                        <p className="text-gray-700 mb-2 font-semibold">Seu carrinho está vazio</p>
+                        <p className="text-sm text-gray-500">Adicione produtos para continuar</p>
                     </div>
                 ) : (
                     <>
                         {/* Items List */}
-                        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                        <div className="flex-1 overflow-y-auto p-4 space-y-3" role="list">
                             {items.map((item) => (
-                                <div key={item.id} className="relative flex gap-3 p-3 bg-gray-50 rounded-lg">
-                                    {/* Botão de Excluir - Fixo no Topo Direito */}
+                                <article 
+                                    key={item.id} 
+                                    className="relative flex gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 hover:shadow-md transition-shadow"
+                                    role="listitem"
+                                >
+                                    {/* Botão de Excluir - Acessível */}
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="absolute top-2 right-2 h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 z-10 cursor-pointer"
+                                        className="absolute top-2 right-2 h-8 w-8 text-red-600 hover:text-white hover:bg-red-600 z-10 transition-colors"
                                         onClick={() => removeItem(item.id)}
-                                        aria-label="Remover item"
+                                        aria-label={`Remover ${item.name} do carrinho`}
                                     >
                                         <Trash2 className="w-4 h-4" />
                                     </Button>
 
                                     {/* Image */}
-                                    <div className="relative w-20 h-20 flex-shrink-0 bg-white rounded-md overflow-hidden">
+                                    <div className="relative w-20 h-20 flex-shrink-0 bg-white rounded-md overflow-hidden border border-gray-200">
                                         <Image
-                                            src={item.image || '/placeholder.png'}
-                                            alt={item.name}
+                                            src={item.image || '/file.svg'}
+                                            alt={`Imagem de ${item.name}`}
                                             fill
                                             className="object-cover"
+                                            sizes="80px"
                                         />
                                     </div>
 
                                     {/* Info */}
-                                    <div className="flex-1 min-w-0">
-                                        <h3 className="font-semibold text-sm text-gray-800 mb-1 line-clamp-2 pr-2">
+                                    <div className="flex-1 min-w-0 pr-8">
+                                        <h3 className="font-bold text-sm text-gray-900 mb-1.5 line-clamp-2">
                                             {item.name}
                                         </h3>
 
@@ -87,39 +101,47 @@ export function MobileCartSheet({ open, onOpenChange }: MobileCartSheetProps) {
                                         {item.attributes && item.attributes.length > 0 ? (
                                             <div className="flex flex-wrap gap-1 mb-2">
                                                 {item.attributes.map((attr, idx) => (
-                                                    <span
+                                                    <Badge
                                                         key={idx}
-                                                        className="text-xs bg-[#FED466]/30 text-gray-700 px-2 py-0.5 rounded-full border border-[#FED466]/50"
+                                                        variant="outline"
+                                                        className="bg-[#FED466]/20 text-gray-900 border-[#FED466]/50 text-xs px-2 py-0.5"
                                                     >
-                                                        {attr.name}: <strong>{attr.value}</strong>
-                                                    </span>
+                                                        <span className="opacity-70">{attr.name}:</span>
+                                                        <span className="ml-1 font-semibold">{attr.value}</span>
+                                                    </Badge>
                                                 ))}
                                             </div>
                                         ) : (
-                                            <p className="text-xs text-gray-500 mb-2">{item.variationName}</p>
+                                            <p className="text-xs text-gray-600 mb-2 font-medium">{item.variationName}</p>
                                         )}
 
-                                        <p className="text-sm font-bold text-[#FD9555]">
-                                            {formatPrice(item.price)}
-                                        </p>
+                                        <div className="flex items-baseline gap-2">
+                                            <p className="text-base font-bold text-[#FD9555]">
+                                                {formatPrice(item.price)}
+                                            </p>
+                                            {item.quantity > 1 && (
+                                                <span className="text-xs text-gray-500">
+                                                    x{item.quantity}
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
+                                </article>
                             ))}
                         </div>
 
                         {/* Footer */}
-                        <div className="border-t p-4 space-y-3 bg-white">
+                        <footer className="border-t p-4 space-y-3 bg-white shadow-lg">
                             {/* Total */}
-                            <div className="flex items-center justify-between text-lg font-bold">
-                                <span>Total:</span>
-                                <span className="text-[#FD9555]">{formatPrice(totalPrice)}</span>
+                            <div className="flex items-center justify-between bg-[#FED466]/20 px-4 py-3 rounded-lg">
+                                <span className="font-bold text-gray-900">Total:</span>
+                                <span className="text-xl font-bold text-[#FD9555]">{formatPrice(totalPrice)}</span>
                             </div>
 
                             {/* Checkout Button */}
                             <Button
                                 onClick={handleCheckout}
-                                // Less tall CTA so sheet doesn't dominate the viewport
-                                className="w-full bg-[#FD9555] hover:bg-[#E88544] text-white font-bold py-3 text-base uppercase cursor-pointer"
+                                className="w-full bg-gradient-to-r from-[#FD9555] to-[#FD9555]/90 hover:from-[#FD9555]/90 hover:to-[#FD9555] text-white font-bold py-3 text-base shadow-md hover:shadow-lg transition-all min-h-[48px]"
                             >
                                 Finalizar Compra
                             </Button>
@@ -128,14 +150,14 @@ export function MobileCartSheet({ open, onOpenChange }: MobileCartSheetProps) {
                             <Button
                                 variant="outline"
                                 onClick={() => {
-                                    onOpenChange(false);
-                                    window.location.href = '/#produtos';
+                                    onOpenChange(false)
+                                    window.location.href = '/#produtos'
                                 }}
-                                className="w-full uppercase text-sm font-bold text-gray-900 cursor-pointer "
+                                className="w-full text-sm font-semibold text-gray-900 border-2 hover:bg-gray-50 transition-colors min-h-[44px]"
                             >
                                 Continuar Comprando
                             </Button>
-                        </div>
+                        </footer>
                     </>
                 )}
             </SheetContent>

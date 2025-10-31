@@ -51,7 +51,7 @@ interface ProductDetailEnhancedProps {
 export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
     const { t } = useTranslation('common')
     const router = useRouter()
-    const { addItem, openCartSheet } = useCart()
+    const { addItem, items, openCartSheet } = useCart()
     const { showToast } = useToast()
     const [showAddToCart, setShowAddToCart] = useState(false)
 
@@ -304,6 +304,14 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
             return;
         }
 
+        // Verifica se já está no carrinho
+        const alreadyInCart = items.some(item => item.productId === product.id && item.variationId === currentVariation.id);
+        if (alreadyInCart) {
+            showToast(t('cart.alreadyInCart', 'Este produto já está no carrinho!'), 'info');
+            openCartSheet(); // Abre o carrinho para visualizar
+            return;
+        }
+
         // Determinar a imagem: primeiro tenta variação, depois produto
         const variationImage = currentVariation.images && currentVariation.images.length > 0
             ? currentVariation.images[0]
@@ -347,6 +355,9 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
             return;
         }
 
+        // Verifica se já está no carrinho
+        const alreadyInCart = items.some(item => item.productId === product.id && item.variationId === currentVariation.id);
+        
         // Determinar a imagem: primeiro tenta variação, depois produto
         const variationImage = currentVariation.images && currentVariation.images.length > 0
             ? currentVariation.images[0]
@@ -355,22 +366,25 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
             ? product.images[0]
             : '/file.svg';
 
-        // Adiciona o produto ao carrinho antes de redirecionar
-        addItem({
-            id: `${product.id}-${currentVariation.id}`,
-            productId: product.id,
-            variationId: currentVariation.id,
-            name: product.name,
-            price: currentVariation.price,
-            variationName: currentVariation.name,
-            image: variationImage || productImage,
-            attributes: currentVariation.attributeValues?.map(attr => ({
-                name: attr.attributeName || '',
-                value: attr.value || ''
-            })) || []
-        });
-        showToast(t('cart.added', 'Produto adicionado ao carrinho!'), 'success');
-        openCartSheet();
+        // Se não está no carrinho, adiciona
+        if (!alreadyInCart) {
+            addItem({
+                id: `${product.id}-${currentVariation.id}`,
+                productId: product.id,
+                variationId: currentVariation.id,
+                name: product.name,
+                price: currentVariation.price,
+                variationName: currentVariation.name,
+                image: variationImage || productImage,
+                attributes: currentVariation.attributeValues?.map(attr => ({
+                    name: attr.attributeName || '',
+                    value: attr.value || ''
+                })) || []
+            });
+            showToast(t('cart.added', 'Produto adicionado ao carrinho!'), 'success');
+        }
+        
+        // Redireciona para o carrinho
         router.push('/carrinho');
     }
 
