@@ -8,7 +8,6 @@ import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import { useCart } from '@/contexts/cart-context'
 import { useToast } from '@/components/ui/toast'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface ProductVariation {
     id: string
@@ -44,9 +43,8 @@ interface AddToCartSheetProps {
 export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: AddToCartSheetProps) {
     const { addItem, items, openCartSheet } = useCart()
     const { showToast } = useToast()
-    const [selectedFilters, setSelectedFilters] = useState<Map<string, string>>(new Map())
-    const [selectedVariation, setSelectedVariation] = useState<ProductVariation | null>(null)
-    const [currentImageIndex, setCurrentImageIndex] = useState(0)
+    const [selection, setSelection] = useState<Record<string, string>>({})
+    const [quantity, setQuantity] = useState(1)
 
     // Filtrar apenas variações ativas com atributos
     const validVariations = useMemo(() => {
@@ -55,20 +53,14 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
         ) || []
     }, [product.variations])
 
-    // Criar array de todas as imagens disponíveis (produto + variações)
-    const allAvailableImages = useMemo(() => {
-        const productImages = product.images || (product.mainImage?.data ? [product.mainImage.data] : [])
-        const variationImages = validVariations.flatMap(v => v.images || [])
-        const allImages = [...productImages, ...variationImages]
-        return allImages.filter((img, index, self) => self.indexOf(img) === index) // Remove duplicatas
-    }, [product.images, product.mainImage, validVariations])
+    // Usar apenas imagem de capa do produto
+    const coverImage = product.mainImage?.data || product.images?.[0] || '/file.svg'
 
     // Reset ao abrir
     useEffect(() => {
         if (open) {
-            setSelectedFilters(new Map())
-            setSelectedVariation(null)
-            setCurrentImageIndex(0)
+            setSelection({})
+            setQuantity(1)
         }
     }, [open])
 
@@ -80,8 +72,7 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
             const variation = validVariations[0]
             const variationImage = variation.images && variation.images.length > 0
                 ? variation.images[0]
-                : null
-            const productImage = product.mainImage?.data || product.images?.[0] || '/file.svg'
+                : coverImage
 
             addItem({
                 id: `${product.id}-${variation.id}`,
@@ -90,7 +81,7 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
                 name: product.name,
                 price: variation.price,
                 variationName: variation.name,
-                image: variationImage || productImage,
+                image: variationImage,
                 attributes: variation.attributeValues?.map(attr => ({
                     name: attr.attributeName || '',
                     value: attr.value || ''
@@ -100,56 +91,29 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
             onOpenChange(false)
             openCartSheet()
         }
-    }, [open, validVariations, product, addItem, showToast, onOpenChange, openCartSheet])
+    }, [open, validVariations, product, addItem, showToast, onOpenChange, openCartSheet, coverImage])
 
-    // Atualizar variação selecionada quando filtros mudarem
-    useEffect(() => {
-        if (selectedFilters.size === 0) {
-            setSelectedVariation(null)
-            return
-        }
-
-        const matchingVariation = validVariations.find(variation => {
-            return Array.from(selectedFilters.entries()).every(([attrName, value]) => {
-                return variation.attributeValues?.some(
-                    attr => attr.attributeName === attrName && attr.value === value
-                )
-            })
+    // Encontrar variação selecionada
+    const selectedVariation = useMemo(() => {
+        return validVariations.find(v => {
+            return Object.entries(selection).every(([attrName, value]) =>
+                v.attributeValues?.some(attr => attr.attributeName === attrName && attr.value === value)
+            )
         })
-
-        setSelectedVariation(matchingVariation || null)
-
-        // Atualizar imagem para a primeira imagem da variação selecionada
-        if (matchingVariation && matchingVariation.images && matchingVariation.images.length > 0) {
-            const firstVariationImage = matchingVariation.images[0]
-            const imageIndex = allAvailableImages.indexOf(firstVariationImage)
-            if (imageIndex !== -1) {
-                setCurrentImageIndex(imageIndex)
-            }
-        }
-    }, [selectedFilters, validVariations, allAvailableImages])
-
-    // Navegação de imagens
-    const handlePrevImage = () => {
-        setCurrentImageIndex(prev => (prev === 0 ? allAvailableImages.length - 1 : prev - 1))
-    }
-
-    const handleNextImage = () => {
-        setCurrentImageIndex(prev => (prev === allAvailableImages.length - 1 ? 0 : prev + 1))
-    }
+    }, [validVariations, selection])
 
     // Obter variações compatíveis baseado nos filtros selecionados
     const getCompatibleVariations = useMemo(() => {
-        if (selectedFilters.size === 0) return validVariations
+        if (Object.keys(selection).length === 0) return validVariations
 
         return validVariations.filter(variation => {
-            return Array.from(selectedFilters.entries()).every(([attrName, value]) => {
+            return Object.entries(selection).every(([attrName, value]) => {
                 return variation.attributeValues?.some(
                     attr => attr.attributeName === attrName && attr.value === value
                 )
             })
         })
-    }, [selectedFilters, validVariations])
+    }, [selection, validVariations])
 
     // Agrupar atributos disponíveis - mostra TODAS as opções (como no produto/id)
     const attributeGroups = useMemo(() => {
@@ -184,7 +148,7 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
                     if (!hasThisValue) return false
 
                     // Verificar se é compatível com outros atributos já selecionados
-                    return Array.from(selectedFilters.entries()).every(([selectedAttr, selectedValue]) => {
+                    return Object.entries(selection).every(([selectedAttr, selectedValue]) => {
                         if (selectedAttr === attrName) return true // Ignora o atributo atual
                         return variation.attributeValues?.some(
                             attr => attr.attributeName === selectedAttr && attr.value === selectedValue
@@ -199,18 +163,18 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
         })
 
         return groups
-    }, [validVariations, selectedFilters])
+    }, [validVariations, selection])
 
     // Handler para clique em filtro
     const handleFilterClick = (attributeName: string, value: string) => {
-        setSelectedFilters(prev => {
-            const newFilters = new Map(prev)
-            if (newFilters.get(attributeName) === value) {
-                newFilters.delete(attributeName)
+        setSelection(prev => {
+            const newSelection = { ...prev }
+            if (newSelection[attributeName] === value) {
+                delete newSelection[attributeName]
             } else {
-                newFilters.set(attributeName, value)
+                newSelection[attributeName] = value
             }
-            return newFilters
+            return newSelection
         })
     }
 
@@ -228,11 +192,10 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
             return
         }
 
-        // Usar a imagem atual sendo exibida ou fallback para imagem da variação/produto
-        const selectedImage = allAvailableImages[currentImageIndex] ||
-            (selectedVariation.images && selectedVariation.images.length > 0
-                ? selectedVariation.images[0]
-                : product.mainImage?.data || product.images?.[0] || '/file.svg')
+        // Usar a imagem da variação se disponível, senão usa a capa
+        const selectedImage = (selectedVariation.images && selectedVariation.images.length > 0)
+            ? selectedVariation.images[0]
+            : coverImage
 
         addItem({
             id: `${product.id}-${selectedVariation.id}`,
@@ -254,7 +217,7 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
     }
 
     const currentPrice = selectedVariation?.price || product.price
-    const allAttributesSelected = selectedFilters.size === attributeGroups.length
+    const allAttributesSelected = Object.keys(selection).length === attributeGroups.length
 
     // Não renderizar se não houver variações válidas
     if (validVariations.length <= 1) {
@@ -266,44 +229,22 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
             <SheetContent side="bottom" className="max-h-[85vh] p-0 flex flex-col">
                 <SheetHeader className="p-3 border-b bg-[#FD9555] text-white">
                     <div className="flex items-start gap-2">
-                        {/* Galeria de imagens com navegação */}
-                        {allAvailableImages.length > 0 && (
-                            <div className="relative w-20 h-20 flex-shrink-0 bg-white rounded-lg overflow-hidden">
-                                <Image
-                                    src={allAvailableImages[currentImageIndex] || '/file.svg'}
-                                    alt={product.name}
-                                    fill
-                                    className="object-cover"
-                                    sizes="80px"
-                                />
-                                {allAvailableImages.length > 1 && (
-                                    <>
-                                        <button
-                                            onClick={handlePrevImage}
-                                            className="absolute left-0.5 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 rounded-full p-0.5 shadow-sm transition-all"
-                                            aria-label="Imagem anterior"
-                                        >
-                                            <ChevronLeft className="w-3 h-3" strokeWidth={3} />
-                                        </button>
-                                        <button
-                                            onClick={handleNextImage}
-                                            className="absolute right-0.5 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 rounded-full p-0.5 shadow-sm transition-all"
-                                            aria-label="Próxima imagem"
-                                        >
-                                            <ChevronRight className="w-3 h-3" strokeWidth={3} />
-                                        </button>
-                                        <div className="absolute bottom-0.5 left-1/2 -translate-x-1/2 bg-black/60 text-white px-1 py-0.5 rounded text-[9px] font-medium backdrop-blur-sm">
-                                            {currentImageIndex + 1}/{allAvailableImages.length}
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-                        )}
-                        <div className="flex-1">
-                            <SheetTitle className="text-white text-left text-base sm:text-lg">
+                        {/* Imagem de capa do produto */}
+                        <div className="relative w-20 h-20 flex-shrink-0 bg-white rounded-lg overflow-hidden shadow-md">
+                            <Image
+                                src={coverImage}
+                                alt={product.name}
+                                fill
+                                className="object-cover"
+                                sizes="80px"
+                            />
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                            <SheetTitle className="text-white text-left text-base sm:text-lg leading-tight">
                                 {product.name}
                             </SheetTitle>
-                            <p className="text-xs sm:text-sm text-white/80 mt-0.5">
+                            <p className="text-xs sm:text-sm text-white/90 mt-1">
                                 Selecione as opções desejadas
                             </p>
                         </div>
@@ -315,7 +256,7 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
                     <div className="bg-[#FED466]/20 p-2 rounded-lg border border-[#FED466]/50">
                         <div className="flex items-center justify-between text-xs sm:text-sm">
                             <span className="font-semibold text-gray-700">
-                                {selectedFilters.size} de {attributeGroups.length} selecionados
+                                {Object.keys(selection).length} de {attributeGroups.length} selecionados
                             </span>
                             <span className="text-gray-600">
                                 {getCompatibleVariations.length} {getCompatibleVariations.length === 1 ? 'opção disponível' : 'opções disponíveis'}
@@ -331,7 +272,7 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
                                 <label className="font-bold text-sm text-gray-800">
                                     {group.name}
                                 </label>
-                                {selectedFilters.has(group.name) && (
+                                {selection[group.name] && (
                                     <Badge variant="secondary" className="text-[10px] sm:text-xs bg-green-100 text-green-700">
                                         ✓ Selecionado
                                     </Badge>
@@ -340,7 +281,7 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
 
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
                                 {group.options.map((option) => {
-                                    const isSelected = selectedFilters.get(group.name) === option.value
+                                    const isSelected = selection[group.name] === option.value
                                     const isDisabled = !option.isAvailable
 
                                     return (
@@ -363,9 +304,6 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
                                                         <path d="M5 13l4 4L19 7"></path>
                                                     </svg>
                                                 </div>
-                                            )}
-                                            {isDisabled && (
-                                                <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-0.5 bg-gray-400 rotate-45" />
                                             )}
                                             <div className="font-bold text-sm text-gray-900">
                                                 {option.value}
