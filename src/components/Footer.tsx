@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { MapPin, Mail, Phone, Shield } from 'lucide-react'
+import { PaymentMethods } from '@/components/icons/PaymentIcon'
 
 export function Footer() {
     return (
@@ -91,58 +92,10 @@ export function Footer() {
                         {/* Métodos de Pagamento */}
                         <div className="mb-3 sm:mb-4 w-full">
                             <p className="text-[10px] sm:text-xs text-white/80 mb-2 text-center sm:text-left">Aceitamos:</p>
-                            <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-center sm:justify-start">
-                                {/* Stripe */}
-                                <div className="bg-white rounded px-1.5 py-1 flex items-center gap-1">
-                                    <Image
-                                        src="/payments/visa.svg"
-                                        alt="Visa"
-                                        width={28}
-                                        height={18}
-                                        className="h-4 sm:h-5 w-auto"
-                                    />
-                                </div>
-                                <div className="bg-white rounded px-1.5 py-1 flex items-center gap-1">
-                                    <Image
-                                        src="/payments/mastercard.svg"
-                                        alt="Mastercard"
-                                        width={28}
-                                        height={18}
-                                        className="h-4 sm:h-5 w-auto"
-                                    />
-                                </div>
-                                <div className="bg-white rounded px-1.5 py-1 flex items-center gap-1">
-                                    <Image
-                                        src="/payments/amex.svg"
-                                        alt="American Express"
-                                        width={28}
-                                        height={18}
-                                        className="h-4 sm:h-5 w-auto"
-                                    />
-                                </div>
-
-                                {/* PIX - Mercado Pago */}
-                                <div className="bg-white rounded px-1.5 py-1 flex items-center gap-1">
-                                    <Image
-                                        src="/payments/pix.svg"
-                                        alt="PIX"
-                                        width={28}
-                                        height={18}
-                                        className="h-4 sm:h-5 w-auto"
-                                    />
-                                </div>
-
-                                {/* PayPal */}
-                                <div className="bg-white rounded px-1.5 py-1 flex items-center gap-1">
-                                    <Image
-                                        src="/payments/paypal.svg"
-                                        alt="PayPal"
-                                        width={28}
-                                        height={18}
-                                        className="h-4 sm:h-5 w-auto"
-                                    />
-                                </div>
-                            </div>
+                            <PaymentMethods 
+                                className="flex flex-wrap gap-1.5 sm:gap-2 justify-center sm:justify-start"
+                                iconSize="default"
+                            />
                         </div>
 
                         {/* Selo de Segurança */}
