@@ -6,10 +6,10 @@ export async function GET() {
   try {
     // Buscar todos os produtos para calcular estatísticas
     const allProducts = await db.select().from(products);
-    
+
     // Buscar todas as variações para calcular preços reais
     const allVariations = await db.select().from(productVariations);
-    
+
     // Criar um mapa de variações por produto
     const variationsByProduct = new Map<string, typeof allVariations>();
     allVariations.forEach(v => {
@@ -18,7 +18,7 @@ export async function GET() {
       }
       variationsByProduct.get(v.productId)?.push(v);
     });
-    
+
     // Calcular preço real de cada produto (considerando variações)
     let totalRevenue = 0;
     allProducts.forEach(p => {
