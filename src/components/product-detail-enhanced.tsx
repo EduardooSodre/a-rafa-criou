@@ -190,6 +190,26 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
         }
     }, [selectedFilters, validVariations, cheapestVariationId])
 
+    // Atualizar a imagem quando a variação selecionada mudar (via botões de atributos)
+    useEffect(() => {
+        if (!currentVariation) return;
+
+        // Se a variação tem imagens próprias, mudar para a primeira imagem dessa variação
+        if (currentVariation.images && currentVariation.images.length > 0) {
+            const firstVariationImage = currentVariation.images[0];
+            const imageIndex = allAvailableImages.indexOf(firstVariationImage);
+            
+            if (imageIndex !== -1 && imageIndex !== currentImageIndex) {
+                console.log('🔄 Variação mudou via filtros - Atualizando imagem:', {
+                    variation: currentVariation.name,
+                    newImageIndex: imageIndex,
+                    image: firstVariationImage
+                });
+                setCurrentImageIndex(imageIndex);
+            }
+        }
+    }, [selectedVariation, currentVariation, allAvailableImages, currentImageIndex])
+
     // Atualizar imagens: por padrão mostramos as imagens do produto (não sobrescrever com a
     // variação automaticamente). Só trocamos para as imagens da variação quando houver filtros
     const handlePrevImage = () => {
