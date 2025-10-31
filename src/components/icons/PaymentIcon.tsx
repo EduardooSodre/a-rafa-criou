@@ -1,6 +1,6 @@
 import Image from 'next/image'
 
-type PaymentMethod = 'visa' | 'mastercard' | 'amex' | 'pix' | 'paypal'
+type PaymentMethod = 'visa' | 'mastercard' | 'amex' | 'pix' | 'paypal' | 'stripe'
 
 interface PaymentIconProps {
     method: PaymentMethod
@@ -14,21 +14,10 @@ const paymentLabels: Record<PaymentMethod, string> = {
     mastercard: 'Mastercard',
     amex: 'American Express',
     pix: 'PIX - Pagamento Instantâneo',
-    paypal: 'PayPal'
+    paypal: 'PayPal',
+    stripe: 'Stripe'
 }
 
-/**
- * Componente para exibir ícones de métodos de pagamento.
- * 
- * Usa SVGs oficiais otimizados baseados nas guidelines das marcas.
- * Todos os logos são marcas registradas de suas respectivas empresas.
- * 
- * @example
- * ```tsx
- * <PaymentIcon method="visa" />
- * <PaymentIcon method="pix" width={56} height={40} />
- * ```
- */
 export function PaymentIcon({
     method,
     className = 'h-5 w-auto',
@@ -47,15 +36,7 @@ export function PaymentIcon({
     )
 }
 
-/**
- * Componente que exibe todos os métodos de pagamento aceitos.
- * 
- * @example
- * ```tsx
- * <PaymentMethods />
- * <PaymentMethods className="gap-3" iconSize="large" />
- * ```
- */
+
 export function PaymentMethods({
     className = 'flex flex-wrap gap-2',
     iconSize = 'default'
@@ -63,12 +44,12 @@ export function PaymentMethods({
     className?: string
     iconSize?: 'small' | 'default' | 'large'
 }) {
-    const methods: PaymentMethod[] = ['visa', 'mastercard', 'amex', 'pix', 'paypal']
+    const methods: PaymentMethod[] = ['visa', 'mastercard', 'amex', 'stripe', 'paypal', 'pix']
 
     const sizes = {
-        small: { width: 36, height: 24, class: 'h-4 sm:h-5' },
-        default: { width: 48, height: 32, class: 'h-5 sm:h-6' },
-        large: { width: 60, height: 40, class: 'h-6 sm:h-7' }
+        small: { width: 48, height: 32, class: 'h-5 sm:h-6' },
+        default: { width: 60, height: 40, class: 'h-7 sm:h-8' },
+        large: { width: 72, height: 48, class: 'h-9 sm:h-10' }
     }
 
     const size = sizes[iconSize]
