@@ -91,7 +91,10 @@ export async function POST(req: NextRequest) {
 
     console.log('🔄 Regenerando Pix para pedido:', orderId);
     console.log('💰 Valor:', order.total);
-    console.log('🔔 Notification URL:', pixPayload.notification_url || 'Não configurada (localhost)');
+    console.log(
+      '🔔 Notification URL:',
+      pixPayload.notification_url || 'Não configurada (localhost)'
+    );
 
     // Gerar chave de idempotência única para este pedido
     const idempotencyKey = `regenerate-pix-${orderId}-${Date.now()}`;

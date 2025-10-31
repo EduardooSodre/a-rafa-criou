@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const paymentId = searchParams.get('paymentId');
   const orderId = searchParams.get('orderId');
-  
+
   if (!paymentId && !orderId) {
     return NextResponse.json({ error: 'paymentId ou orderId obrigatório' }, { status: 400 });
   }
@@ -18,7 +18,11 @@ export async function GET(req: NextRequest) {
     const [foundOrder] = await db.select().from(orders).where(eq(orders.id, orderId)).limit(1);
     order = foundOrder;
   } else if (paymentId) {
-    const [foundOrder] = await db.select().from(orders).where(eq(orders.paymentId, paymentId)).limit(1);
+    const [foundOrder] = await db
+      .select()
+      .from(orders)
+      .where(eq(orders.paymentId, paymentId))
+      .limit(1);
     order = foundOrder;
   }
 
@@ -31,40 +35,46 @@ export async function GET(req: NextRequest) {
     paymentId: order.paymentId,
     status: order.status,
     paymentProvider: order.paymentProvider,
-    paymentStatus: order.paymentStatus
+    paymentStatus: order.paymentStatus,
   });
 
   // ✅ Se ainda estiver pending, consultar Mercado Pago para ver se já foi aprovado
-  if (order.status === 'pending' && (order.paymentProvider === 'pix' || order.paymentProvider === 'mercado_pago')) {
+  if (
+    order.status === 'pending' &&
+    (order.paymentProvider === 'pix' || order.paymentProvider === 'mercado_pago')
+  ) {
     if (!order.paymentId) {
       console.log('[Status Polling] ⚠️ Pedido sem paymentId, não é possível verificar');
-      return NextResponse.json({ 
-        status: order.status, 
-        paymentStatus: order.paymentStatus 
+      return NextResponse.json({
+        status: order.status,
+        paymentStatus: order.paymentStatus,
       });
     }
 
     try {
       console.log('[Status Polling] 🔄 Consultando Mercado Pago para payment:', order.paymentId);
-      
-      const paymentResponse = await fetch(`https://api.mercadopago.com/v1/payments/${order.paymentId}`, {
-        headers: {
-          Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`,
-        },
-      });
+
+      const paymentResponse = await fetch(
+        `https://api.mercadopago.com/v1/payments/${order.paymentId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`,
+          },
+        }
+      );
 
       if (paymentResponse.ok) {
         const payment = await paymentResponse.json();
-        
+
         console.log('[Status Polling] 📊 Status no Mercado Pago:', {
           status: payment.status,
-          statusDetail: payment.status_detail
+          statusDetail: payment.status_detail,
         });
 
         // Se foi aprovado no Mercado Pago, atualizar banco
         if (['approved', 'paid', 'authorized'].includes(payment.status)) {
           console.log('[Status Polling] ✅ Pagamento aprovado! Atualizando pedido', order.id);
-          
+
           await db
             .update(orders)
             .set({
@@ -87,23 +97,26 @@ export async function GET(req: NextRequest) {
             console.error('[Status Polling] ❌ Erro ao enviar e-mail:', emailError);
           }
 
-          return NextResponse.json({ 
-            status: 'completed', 
-            paymentStatus: 'paid' 
+          return NextResponse.json({
+            status: 'completed',
+            paymentStatus: 'paid',
           });
         } else {
           console.log('[Status Polling] ⏳ Pagamento ainda pendente no Mercado Pago');
         }
       } else {
-        console.error('[Status Polling] ❌ Erro ao consultar Mercado Pago:', paymentResponse.status);
+        console.error(
+          '[Status Polling] ❌ Erro ao consultar Mercado Pago:',
+          paymentResponse.status
+        );
       }
     } catch (error) {
       console.error('[Status Polling] ❌ Erro ao consultar Mercado Pago:', error);
     }
   }
 
-  return NextResponse.json({ 
-    status: order.status, 
-    paymentStatus: order.paymentStatus 
+  return NextResponse.json({
+    status: order.status,
+    paymentStatus: order.paymentStatus,
   });
 }

@@ -132,7 +132,7 @@ export default function PedidoDetalhesPage() {
 
         try {
             setCheckingPayment(true);
-            
+
             console.log('🔄 Verificando status do pagamento...', {
                 orderId: order.id,
                 currentStatus: order.status,
@@ -141,7 +141,7 @@ export default function PedidoDetalhesPage() {
 
             const response = await fetch(`/api/orders/status?orderId=${order.id}`);
             const data = await response.json();
-            
+
             console.log('✅ Resposta do servidor:', data);
 
             if (data.status === 'completed' || data.paymentStatus === 'paid') {
@@ -164,10 +164,10 @@ export default function PedidoDetalhesPage() {
         if (!order || order.status !== 'pending') {
             return;
         }
-        
+
         // Verificar se é Pix (aceita 'mercado_pago' ou 'pix')
         const isPixPayment = order.paymentProvider === 'mercado_pago' || order.paymentProvider === 'pix';
-        
+
         if (!isPixPayment) {
             console.log('⏸️ Polling desativado - não é pagamento Pix', {
                 paymentProvider: order.paymentProvider
