@@ -18,13 +18,13 @@ export default function HomePage() {
   useEffect(() => {
     // Atualizar título
     document.title = 'A Rafa Criou - Arquivos Digitais para Festas e Organização';
-    
+
     // Meta description
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
       metaDescription.setAttribute('content', 'Descubra arquivos digitais teocráticos para organização, festas e presentes. PDFs para imprimir, personalizáveis e prontos para uso.');
     }
-    
+
     // Meta keywords
     let metaKeywords = document.querySelector('meta[name="keywords"]');
     if (!metaKeywords) {
@@ -33,7 +33,7 @@ export default function HomePage() {
       document.head.appendChild(metaKeywords);
     }
     metaKeywords.setAttribute('content', 'arquivos digitais, PDFs para imprimir, organização, festas, presentes, teocráticos, A Rafa Criou');
-    
+
     // Open Graph
     const updateMetaTag = (property: string, content: string) => {
       let meta = document.querySelector(`meta[property="${property}"]`);
@@ -44,14 +44,14 @@ export default function HomePage() {
       }
       meta.setAttribute('content', content);
     };
-    
+
     updateMetaTag('og:title', 'A Rafa Criou - Arquivos Digitais para Festas');
     updateMetaTag('og:description', 'Descubra uma coleção de arquivos digitais teocráticos para organização, festas e presentes.');
     updateMetaTag('og:type', 'website');
     updateMetaTag('og:url', typeof window !== 'undefined' ? window.location.href : 'https://arafa.com.br');
     updateMetaTag('og:image', 'https://arafa.com.br/Banner_principal.gif');
     updateMetaTag('og:locale', 'pt_BR');
-    
+
     // Twitter Card
     const updateTwitterTag = (name: string, content: string) => {
       let meta = document.querySelector(`meta[name="${name}"]`);
@@ -62,7 +62,7 @@ export default function HomePage() {
       }
       meta.setAttribute('content', content);
     };
-    
+
     updateTwitterTag('twitter:card', 'summary_large_image');
     updateTwitterTag('twitter:title', 'A Rafa Criou - Arquivos Digitais para Festas');
     updateTwitterTag('twitter:description', 'Descubra uma coleção de arquivos digitais teocráticos para organização, festas e presentes.');
