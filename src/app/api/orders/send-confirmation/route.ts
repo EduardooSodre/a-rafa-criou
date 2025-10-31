@@ -47,7 +47,10 @@ export async function GET(req: NextRequest) {
     const paymentStatus = (order.paymentStatus || '').toLowerCase();
     const orderStatus = (order.status || '').toLowerCase();
     const isSuccess =
-      orderStatus === 'completed' || paymentStatus === 'succeeded' || paymentStatus === 'paid' || paymentStatus === 'approved';
+      orderStatus === 'completed' ||
+      paymentStatus === 'succeeded' ||
+      paymentStatus === 'paid' ||
+      paymentStatus === 'approved';
 
     if (!isSuccess) {
       // Nunca envia e-mail de confirmação para pedidos não pagos

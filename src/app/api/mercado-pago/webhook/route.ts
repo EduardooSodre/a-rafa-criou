@@ -36,8 +36,12 @@ export async function POST(req: NextRequest) {
     // Logging
     console.log(`[Webhook] Evento recebido: ${type}, id: ${id}`);
 
-  // Atualizar status do pedido no banco, nunca apagar/remover
-  if ((['payment.updated', 'payment.created', 'payment.finished'].includes(type)) && data.id && data.status) {
+    // Atualizar status do pedido no banco, nunca apagar/remover
+    if (
+      ['payment.updated', 'payment.created', 'payment.finished'].includes(type) &&
+      data.id &&
+      data.status
+    ) {
       // Log detalhado do status recebido
       console.log(`[Webhook] Status recebido do Mercado Pago: ${data.status}`);
       // Busca pedido pelo paymentId
@@ -45,13 +49,18 @@ export async function POST(req: NextRequest) {
       if (order) {
         let newStatus = 'pending';
         // Tratar mais status que indicam pagamento aprovado
-        if ([
-          'approved', 'paid', 'authorized', 'in_process', 'in_mediation', 'partially_approved'
-        ].includes(data.status)) {
+        if (
+          [
+            'approved',
+            'paid',
+            'authorized',
+            'in_process',
+            'in_mediation',
+            'partially_approved',
+          ].includes(data.status)
+        ) {
           newStatus = 'completed';
-        } else if ([
-          'cancelled', 'rejected', 'expired', 'charged_back'
-        ].includes(data.status)) {
+        } else if (['cancelled', 'rejected', 'expired', 'charged_back'].includes(data.status)) {
           newStatus = 'cancelled';
         } else if (data.status === 'refunded') {
           newStatus = 'refunded';
