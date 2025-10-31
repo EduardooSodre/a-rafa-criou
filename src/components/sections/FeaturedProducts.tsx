@@ -170,7 +170,7 @@ export default function FeaturedProducts({
     }
 
     return (
-        <section className="bg-gray-50">
+        <section className="bg-gray-50 pb-8">
             <div className="bg-[#8FBC8F] mb-12 flex items-center justify-center">
                 <h1
                     className="font-scripter text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-[4rem] 2xl:text-[5rem] font-bold m-3 sm:m-4 md:m-5 lg:m-5 xl:m-6 uppercase text-center leading-none"
@@ -183,7 +183,7 @@ export default function FeaturedProducts({
                     {t('featured.allFiles', 'TODOS OS ARQUIVOS')}
                 </h1>
             </div>
-            <div className="container mx-auto px-4 mb-16">
+            <div className="container mx-auto px-4 ">
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 max-w-7xl mx-auto">
                     {displayProducts.map((product, index) => (
                         <div

@@ -6,7 +6,7 @@ import { MapPin, Mail, Phone, Shield } from 'lucide-react'
 
 export function Footer() {
     return (
-        <footer className="bg-gradient-to-br from-[#FD9555] to-[#FED466] text-white mt-auto pb-20 lg:pb-0">
+        <footer className="bg-gradient-to-br from-[#FD9555] to-[#FED466] text-white mt-auto pb-5 lg:pb-0">
             <div className="container mx-auto px-4 py-8 sm:py-10 lg:py-12">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
                     {/* Logo e Descrição */}
