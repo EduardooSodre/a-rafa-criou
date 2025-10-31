@@ -88,11 +88,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             icon: ShoppingCart
         },
         {
-            title: 'Clientes',
-            href: '/admin/clientes',
-            icon: Users
-        },
-        {
             title: 'Usuários',
             href: '/admin/usuarios',
             icon: Users

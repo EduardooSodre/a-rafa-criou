@@ -23,6 +23,15 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '100mb', // Aumenta o limite para 100MB para PDFs grandes
     },
   },
+  async redirects() {
+    return [
+      {
+        source: '/admin/clientes',
+        destination: '/admin/usuarios',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
