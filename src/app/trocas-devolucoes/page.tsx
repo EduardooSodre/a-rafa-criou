@@ -9,10 +9,10 @@ export default function TrocasDevolucoesPage() {
     return (
         <div className="container mx-auto px-4 py-12 max-w-4xl">
             <h1 className="text-4xl font-bold mb-8 text-gray-900">Trocas, Devoluções e Reembolsos</h1>
-            
+
             <div className="prose prose-lg max-w-none">
                 <p className="text-gray-700 leading-relaxed mb-6">
-                    Entendemos que a satisfação do cliente é fundamental. Por isso, oferecemos uma política clara 
+                    Entendemos que a satisfação do cliente é fundamental. Por isso, oferecemos uma política clara
                     de trocas e reembolsos para produtos digitais.
                 </p>
 
@@ -23,7 +23,7 @@ export default function TrocasDevolucoesPage() {
 
                 <h3 className="text-xl font-semibold mt-6 mb-3 text-gray-900">Direito de Arrependimento</h3>
                 <p className="text-gray-700 leading-relaxed mb-4">
-                    Você tem até <strong>7 dias</strong> após a compra para solicitar reembolso, conforme previsto 
+                    Você tem até <strong>7 dias</strong> após a compra para solicitar reembolso, conforme previsto
                     no Código de Defesa do Consumidor (Art. 49).
                 </p>
 
@@ -46,13 +46,13 @@ export default function TrocasDevolucoesPage() {
 
                 <h3 className="text-xl font-semibold mt-6 mb-3 text-gray-900">Importante</h3>
                 <p className="text-gray-700 leading-relaxed mb-6">
-                    O reembolso será feito através do mesmo método de pagamento utilizado na compra. 
+                    O reembolso será feito através do mesmo método de pagamento utilizado na compra.
                     Em caso de PIX, informe seus dados bancários para transferência.
                 </p>
 
                 <div className="bg-orange-50 border-l-4 border-[#FD9555] p-4 mt-8">
                     <p className="text-sm text-gray-700">
-                        <strong>Dúvidas?</strong> Entre em contato conosco através do WhatsApp 
+                        <strong>Dúvidas?</strong> Entre em contato conosco através do WhatsApp
                         <a href="https://wa.me/5511998274504" className="text-[#FD9555] hover:underline ml-1" target="_blank" rel="noopener noreferrer">
                             +55 (11) 99827-4504
                         </a>

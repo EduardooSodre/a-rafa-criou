@@ -9,7 +9,7 @@ export default function PrivacidadePage() {
     return (
         <div className="container mx-auto px-4 py-12 max-w-4xl">
             <h1 className="text-4xl font-bold mb-8 text-gray-900">Política de Privacidade</h1>
-            
+
             <div className="prose prose-lg max-w-none">
                 <p className="text-gray-700 leading-relaxed mb-6">
                     A <strong>A Rafa Criou</strong> respeita sua privacidade e está comprometida em proteger seus dados pessoais.
@@ -39,7 +39,7 @@ export default function PrivacidadePage() {
 
                 <h2 className="text-2xl font-semibold mt-8 mb-4 text-gray-900">Segurança</h2>
                 <p className="text-gray-700 leading-relaxed mb-6">
-                    Utilizamos criptografia SSL de 256 bits e parceiros certificados para processar pagamentos. 
+                    Utilizamos criptografia SSL de 256 bits e parceiros certificados para processar pagamentos.
                     Seus dados nunca são compartilhados com terceiros sem autorização.
                 </p>
 
@@ -56,13 +56,13 @@ export default function PrivacidadePage() {
 
                 <h2 className="text-2xl font-semibold mt-8 mb-4 text-gray-900">Cookies</h2>
                 <p className="text-gray-700 leading-relaxed mb-6">
-                    Utilizamos cookies para melhorar sua experiência de navegação. Você pode desativá-los 
+                    Utilizamos cookies para melhorar sua experiência de navegação. Você pode desativá-los
                     nas configurações do seu navegador.
                 </p>
 
                 <div className="bg-orange-50 border-l-4 border-[#FD9555] p-4 mt-8">
                     <p className="text-sm text-gray-700">
-                        <strong>Contato:</strong> Para exercer seus direitos ou tirar dúvidas sobre privacidade, 
+                        <strong>Contato:</strong> Para exercer seus direitos ou tirar dúvidas sobre privacidade,
                         entre em contato através do email: <a href="mailto:arafacriou@gmail.com" className="text-[#FD9555] hover:underline">arafacriou@gmail.com</a>
                     </p>
                 </div>

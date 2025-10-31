@@ -9,7 +9,7 @@ export default function SobrePage() {
     return (
         <div className="container mx-auto px-4 py-12 max-w-4xl">
             <h1 className="text-4xl font-bold mb-8 text-gray-900">Sobre a A Rafa Criou</h1>
-            
+
             <div className="prose prose-lg max-w-none">
                 <p className="text-gray-700 leading-relaxed mb-6">
                     Bem-vindo à <strong>A Rafa Criou</strong>, sua loja especializada em produtos digitais de alta qualidade!
@@ -17,8 +17,8 @@ export default function SobrePage() {
 
                 <h2 className="text-2xl font-semibold mt-8 mb-4 text-gray-900">Nossa História</h2>
                 <p className="text-gray-700 leading-relaxed mb-6">
-                    Nascemos da paixão por criar e compartilhar conteúdo digital que facilita o dia a dia das pessoas. 
-                    Nossos produtos são desenvolvidos com carinho e atenção aos detalhes para ajudar você a organizar, 
+                    Nascemos da paixão por criar e compartilhar conteúdo digital que facilita o dia a dia das pessoas.
+                    Nossos produtos são desenvolvidos com carinho e atenção aos detalhes para ajudar você a organizar,
                     planejar e realizar seus projetos.
                 </p>
 
@@ -32,7 +32,7 @@ export default function SobrePage() {
 
                 <h2 className="text-2xl font-semibold mt-8 mb-4 text-gray-900">Nosso Compromisso</h2>
                 <p className="text-gray-700 leading-relaxed mb-6">
-                    Trabalhamos constantemente para oferecer produtos de qualidade com o melhor atendimento ao cliente. 
+                    Trabalhamos constantemente para oferecer produtos de qualidade com o melhor atendimento ao cliente.
                     Sua satisfação é nossa prioridade!
                 </p>
             </div>
