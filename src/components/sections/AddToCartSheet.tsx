@@ -55,8 +55,8 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
 
     // Criar array de todas as imagens disponíveis (produto + TODAS as variações)
     const allAvailableImages = useMemo(() => {
-        const productImages = product.images && product.images.length > 0 
-            ? product.images 
+        const productImages = product.images && product.images.length > 0
+            ? product.images
             : (product.mainImage?.data ? [product.mainImage.data] : [])
         const variationImages = validVariations.flatMap(v => v.images || [])
         const allImages = [...productImages, ...variationImages]
@@ -299,7 +299,7 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
                                     {group.options.map((option) => {
                                         const isSelected = selection[group.name] === option.value
                                         const isDisabled = !option.isAvailable
-                                        
+
                                         return (
                                             <button
                                                 key={option.value}

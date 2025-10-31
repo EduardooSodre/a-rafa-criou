@@ -64,8 +64,8 @@ export function MobileCartSheet({ open, onOpenChange }: MobileCartSheetProps) {
                         {/* Items List */}
                         <div className="flex-1 overflow-y-auto p-4 space-y-3" role="list">
                             {items.map((item) => (
-                                <article 
-                                    key={item.id} 
+                                <article
+                                    key={item.id}
                                     className="relative flex gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 hover:shadow-md transition-shadow"
                                     role="listitem"
                                 >

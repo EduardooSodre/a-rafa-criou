@@ -357,7 +357,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
 
         // Verifica se já está no carrinho
         const alreadyInCart = items.some(item => item.productId === product.id && item.variationId === currentVariation.id);
-        
+
         // Determinar a imagem: primeiro tenta variação, depois produto
         const variationImage = currentVariation.images && currentVariation.images.length > 0
             ? currentVariation.images[0]
@@ -383,7 +383,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
             });
             showToast(t('cart.added', 'Produto adicionado ao carrinho!'), 'success');
         }
-        
+
         // Redireciona para o carrinho
         router.push('/carrinho');
     }

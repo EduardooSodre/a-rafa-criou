@@ -168,8 +168,8 @@ export default function CarrinhoPage() {
                                 )
 
                                 return (
-                                    <Card 
-                                        key={`${item.id}-${index}`} 
+                                    <Card
+                                        key={`${item.id}-${index}`}
                                         className="bg-white hover:shadow-lg transition-all duration-200 border border-gray-200 hover:border-[#FED466] overflow-hidden group"
                                     >
                                         <CardContent className="p-4">
