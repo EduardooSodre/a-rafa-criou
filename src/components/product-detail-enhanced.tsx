@@ -195,11 +195,11 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
     const handlePrevImage = () => {
         setCurrentImageIndex((prev) => {
             const newIndex = prev === 0 ? allAvailableImages.length - 1 : prev - 1;
-            
+
             // Selecionar variação automaticamente
             const newImage = allAvailableImages[newIndex];
             const matchedVariation = imageToVariationMap.get(newImage);
-            
+
             if (matchedVariation) {
                 console.log('⬅️ Seta anterior - Variação selecionada:', matchedVariation.name);
                 const newFilters = new Map<string, string>();
@@ -215,7 +215,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                 setSelectedFilters(new Map());
                 setSelectedVariation('');
             }
-            
+
             return newIndex;
         });
     }
@@ -223,11 +223,11 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
     const handleNextImage = () => {
         setCurrentImageIndex((prev) => {
             const newIndex = prev === allAvailableImages.length - 1 ? 0 : prev + 1;
-            
+
             // Selecionar variação automaticamente
             const newImage = allAvailableImages[newIndex];
             const matchedVariation = imageToVariationMap.get(newImage);
-            
+
             if (matchedVariation) {
                 console.log('➡️ Seta próxima - Variação selecionada:', matchedVariation.name);
                 const newFilters = new Map<string, string>();
@@ -243,27 +243,27 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                 setSelectedFilters(new Map());
                 setSelectedVariation('');
             }
-            
+
             return newIndex;
         });
     }
 
     const handleThumbnailClick = (index: number) => {
         setCurrentImageIndex(index)
-        
+
         // Obter a imagem clicada
         const clickedImage = allAvailableImages[index];
-        
+
         // Verificar se essa imagem pertence a uma variação específica
         const matchedVariation = imageToVariationMap.get(clickedImage);
-        
+
         if (matchedVariation) {
             console.log('🖼️ Imagem da variação clicada:', {
                 image: clickedImage,
                 variation: matchedVariation.name,
                 attributes: matchedVariation.attributeValues
             });
-            
+
             // Selecionar automaticamente os atributos dessa variação
             const newFilters = new Map<string, string>();
             matchedVariation.attributeValues?.forEach((attr) => {
@@ -271,7 +271,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                     newFilters.set(attr.attributeName, attr.value);
                 }
             });
-            
+
             setSelectedFilters(newFilters);
             setSelectedVariation(matchedVariation.id);
         } else {
@@ -288,17 +288,17 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
             showToast(t('productInfo.selectAllOptions', 'Selecione todas as opções antes de adicionar ao carrinho!'), 'error');
             return;
         }
-        
+
         // Determinar a imagem: primeiro tenta variação, depois produto
-        const variationImage = currentVariation.images && currentVariation.images.length > 0 
-            ? currentVariation.images[0] 
+        const variationImage = currentVariation.images && currentVariation.images.length > 0
+            ? currentVariation.images[0]
             : null;
-        const productImage = product.images && product.images.length > 0 
-            ? product.images[0] 
+        const productImage = product.images && product.images.length > 0
+            ? product.images[0]
             : '/file.svg';
-        
+
         const finalImage = variationImage || productImage;
-        
+
         console.log('🛒 Adicionando ao carrinho:', {
             variationId: currentVariation.id,
             variationName: currentVariation.name,
@@ -306,7 +306,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
             productImages: product.images,
             selectedImage: finalImage
         });
-        
+
         // Adiciona o produto ao carrinho com as variações/atributos selecionados
         addItem({
             id: `${product.id}-${currentVariation.id}`,
@@ -331,15 +331,15 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
             showToast(t('productInfo.selectAllOptions', 'Selecione todas as opções antes de comprar!'), 'error');
             return;
         }
-        
+
         // Determinar a imagem: primeiro tenta variação, depois produto
-        const variationImage = currentVariation.images && currentVariation.images.length > 0 
-            ? currentVariation.images[0] 
+        const variationImage = currentVariation.images && currentVariation.images.length > 0
+            ? currentVariation.images[0]
             : null;
-        const productImage = product.images && product.images.length > 0 
-            ? product.images[0] 
+        const productImage = product.images && product.images.length > 0
+            ? product.images[0]
             : '/file.svg';
-        
+
         // Adiciona o produto ao carrinho antes de redirecionar
         addItem({
             id: `${product.id}-${currentVariation.id}`,
@@ -416,7 +416,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                             {allAvailableImages.map((img, idx) => {
                                 const isVariationImage = imageToVariationMap.has(img);
                                 const isSelected = currentImageIndex === idx;
-                                
+
                                 return (
                                     <button
                                         key={idx}
@@ -574,7 +574,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                     {allAvailableImages.map((img, idx) => {
                                         const isVariationImage = imageToVariationMap.has(img);
                                         const isSelected = currentImageIndex === idx;
-                                        
+
                                         return (
                                             <button
                                                 key={idx}

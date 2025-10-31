@@ -171,7 +171,7 @@ export async function GET(request: NextRequest) {
         .map(v => {
           // Buscar attributeValues desta variação
           const varAttrs = allVariationAttributes.filter(attr => attr.variationId === v.id);
-          
+
           // Buscar imagens desta variação
           const variationImages = allImages.filter(img => img.variationId === v.id);
 

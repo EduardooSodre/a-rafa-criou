@@ -67,11 +67,11 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
 
         if (validVariations.length === 1) {
             const variation = validVariations[0]
-            const variationImage = variation.images && variation.images.length > 0 
-                ? variation.images[0] 
+            const variationImage = variation.images && variation.images.length > 0
+                ? variation.images[0]
                 : null;
             const productImage = product.mainImage?.data || '/file.svg';
-            
+
             addItem({
                 id: `${product.id}-${variation.id}`,
                 productId: product.id,
@@ -187,12 +187,12 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
             onOpenChange(false)
             return
         }
-        
-        const variationImage = selectedVariation.images && selectedVariation.images.length > 0 
-            ? selectedVariation.images[0] 
+
+        const variationImage = selectedVariation.images && selectedVariation.images.length > 0
+            ? selectedVariation.images[0]
             : null;
         const productImage = product.mainImage?.data || '/file.svg';
-        
+
         addItem({
             id: `${product.id}-${selectedVariation.id}`,
             productId: product.id,
