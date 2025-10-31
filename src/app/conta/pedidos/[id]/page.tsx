@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,8 @@ interface OrderItem {
     quantity: number;
     price: number;
     total: number;
+    imageUrl?: string;
+    variation?: Record<string, string>;
 }
 
 interface OrderDetails {
@@ -232,22 +235,31 @@ export default function PedidoDetalhesPage() {
                 ...prev,
                 [orderItemId]: {
                     type: 'success',
-                    message: 'Link gerado com sucesso! Download iniciado.',
+                    message: 'Link gerado com sucesso! Abrindo em nova aba...',
                 },
             }));
 
             // Abrir download usando a URL assinada
-            // Usar createElement + click para melhor compatibilidade mobile
             const downloadUrl = data.downloadUrl || data.signedUrl;
             if (downloadUrl) {
-                const link = document.createElement('a');
-                link.href = downloadUrl;
-                link.target = '_blank';
-                link.rel = 'noopener noreferrer';
-                link.download = ''; // Força download no mobile
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                // Detectar se é mobile (iOS ou Android)
+                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+                if (isMobile) {
+                    // Mobile: usar location.href para evitar bloqueio de popup
+                    window.location.href = downloadUrl;
+
+                    // Opcional: volta para a página após um delay
+                    setTimeout(() => {
+                        // Se ainda estiver na mesma página (PDF não carregou), volta
+                        if (window.location.href === downloadUrl) {
+                            window.history.back();
+                        }
+                    }, 1000);
+                } else {
+                    // Desktop/Tablet: abre em nova aba
+                    window.open(downloadUrl, '_blank', 'noopener,noreferrer');
+                }
             } else {
                 throw new Error('URL de download não disponível');
             }
@@ -640,16 +652,53 @@ export default function PedidoDetalhesPage() {
                                     key={item.id}
                                     className="border rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow bg-white"
                                 >
-                                    <div className="flex justify-between items-start mb-3">
-                                        <div className="flex-1 pr-2">
-                                            <h3 className="font-semibold text-sm sm:text-lg leading-tight">{item.name}</h3>
-                                            <p className="text-xs sm:text-sm text-gray-600 mt-1">
-                                                Quantidade: {item.quantity}
-                                            </p>
+                                    <div className="flex gap-3 sm:gap-4 mb-3">
+                                        {/* Imagem do Produto */}
+                                        <div className="flex-shrink-0">
+                                            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden bg-gray-100 border relative">
+                                                {item.imageUrl ? (
+                                                    <Image
+                                                        src={item.imageUrl}
+                                                        alt={item.name}
+                                                        fill
+                                                        className="object-cover"
+                                                        sizes="(max-width: 640px) 80px, 96px"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                        </svg>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
-                                        <p className="text-base sm:text-lg font-bold text-[#FD9555] whitespace-nowrap">
-                                            {formatPrice(item.total)}
-                                        </p>
+
+                                        {/* Informações do Produto */}
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <h3 className="font-semibold text-sm sm:text-lg leading-tight pr-2">{item.name}</h3>
+                                                <p className="text-base sm:text-lg font-bold text-[#FD9555] whitespace-nowrap">
+                                                    {formatPrice(item.total)}
+                                                </p>
+                                            </div>
+
+                                            {/* Variações em Badges */}
+                                            {item.variation && (
+                                                <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-2">
+                                                    {Object.entries(item.variation).map(([key, value]) => (
+                                                        <Badge 
+                                                            key={key} 
+                                                            variant="outline" 
+                                                            className="text-xs bg-gray-50 border-gray-300"
+                                                        >
+                                                            <span className="font-medium">{key}:</span>
+                                                            <span className="ml-1">{value}</span>
+                                                        </Badge>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
 
                                     {order.status === 'completed' && (
@@ -681,8 +730,8 @@ export default function PedidoDetalhesPage() {
                                                                 </>
                                                             ) : (
                                                                 <>
-                                                                    <Download className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                                                                    📥 Fazer Download
+                                                                    <Download className="w-4 h-4 sm:w-5 sm:h-5 " />
+                                                                    Fazer Download
                                                                 </>
                                                             )}
                                                         </Button>
@@ -734,7 +783,6 @@ export default function PedidoDetalhesPage() {
                         <AlertDescription className="text-xs sm:text-sm">
                             <strong>Importante:</strong>
                             <ul className="list-disc list-inside mt-2 space-y-1">
-                                <li>Os links de download são válidos por 15 minutos.</li>
                                 <li>Você pode gerar novos links clicando no botão de download novamente.</li>
                                 <li className="text-red-600 font-semibold">
                                     O acesso ao download expira após 30 dias da data da compra.

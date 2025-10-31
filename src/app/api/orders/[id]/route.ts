@@ -2,8 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/config';
 import { db } from '@/lib/db';
-import { orders, orderItems } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { 
+  orders, 
+  orderItems, 
+  products,
+  productImages, 
+  variationAttributeValues, 
+  attributeValues, 
+  attributes 
+} from '@/lib/db/schema';
+import { eq, asc } from 'drizzle-orm';
 
 /**
  * GET /api/orders/[id]
@@ -59,7 +67,83 @@ export async function GET(req: NextRequest, context: unknown) {
     // 4. Buscar itens do pedido
     const items = await db.select().from(orderItems).where(eq(orderItems.orderId, orderId));
 
-    // 5. Retornar dados completos
+    // 5. Buscar imagens e variações para cada item
+    const enrichedItems = await Promise.all(
+      items.map(async (item) => {
+        // Buscar nome do produto original (sem variação)
+        const [product] = await db
+          .select({ name: products.name })
+          .from(products)
+          .where(eq(products.id, item.productId))
+          .limit(1);
+
+        // Buscar imagem principal do produto ou da variação
+        let imageUrl = null;
+        
+        if (item.variationId) {
+          // Buscar imagem da variação primeiro
+          const [variationImage] = await db
+            .select()
+            .from(productImages)
+            .where(eq(productImages.variationId, item.variationId))
+            .orderBy(asc(productImages.sortOrder))
+            .limit(1);
+          
+          if (variationImage) {
+            imageUrl = variationImage.url;
+          }
+        }
+        
+        // Se não encontrou imagem da variação, buscar do produto
+        if (!imageUrl) {
+          const [productImage] = await db
+            .select()
+            .from(productImages)
+            .where(eq(productImages.productId, item.productId))
+            .orderBy(asc(productImages.sortOrder))
+            .limit(1);
+          
+          if (productImage) {
+            imageUrl = productImage.url;
+          }
+        }
+
+        // Buscar atributos da variação
+        let variation = null;
+        if (item.variationId) {
+          const variationAttrs = await db
+            .select({
+              attributeName: attributes.name,
+              attributeValue: attributeValues.value,
+            })
+            .from(variationAttributeValues)
+            .innerJoin(attributes, eq(variationAttributeValues.attributeId, attributes.id))
+            .innerJoin(attributeValues, eq(variationAttributeValues.valueId, attributeValues.id))
+            .where(eq(variationAttributeValues.variationId, item.variationId));
+
+          if (variationAttrs.length > 0) {
+            variation = variationAttrs.reduce((acc, attr) => {
+              acc[attr.attributeName] = attr.attributeValue;
+              return acc;
+            }, {} as Record<string, string>);
+          }
+        }
+
+        return {
+          id: item.id,
+          productId: item.productId,
+          variationId: item.variationId,
+          name: product?.name || item.name, // Usar nome do produto, fallback para snapshot
+          quantity: item.quantity,
+          price: parseFloat(item.price),
+          total: parseFloat(item.total),
+          imageUrl,
+          variation,
+        };
+      })
+    );
+
+    // 6. Retornar dados completos
     return NextResponse.json({
       id: order.id,
       email: order.email,
@@ -70,16 +154,8 @@ export async function GET(req: NextRequest, context: unknown) {
       paymentStatus: order.paymentStatus,
       createdAt: order.createdAt.toISOString(),
       paidAt: order.paidAt?.toISOString() || null,
-      updatedAt: order.updatedAt?.toISOString() || null, // ✅ Data de atualização (útil para cancelamento)
-      items: items.map(item => ({
-        id: item.id,
-        productId: item.productId,
-        variationId: item.variationId,
-        name: item.name,
-        quantity: item.quantity,
-        price: parseFloat(item.price),
-        total: parseFloat(item.total),
-      })),
+      updatedAt: order.updatedAt?.toISOString() || null,
+      items: enrichedItems,
     });
   } catch (error) {
     console.error('❌ Erro ao buscar pedido:', error);
