@@ -193,29 +193,30 @@ export default function PedidosPage() {
     }
 
     return (
-        <div className="container mx-auto px-4 py-8 max-w-4xl">
-            <div className="mb-8 flex justify-between items-start">
-                <div>
-                    <h1 className="text-3xl font-bold mb-2">Meus Pedidos</h1>
-                    <p className="text-gray-600">
-                        Gerencie seus pedidos e faça download dos seus produtos
-                    </p>
-                    {lastUpdate && (
-                        <p className="text-xs text-gray-400 mt-1">
-                            Última atualização: {lastUpdate.toLocaleTimeString('pt-BR')}
+        <div className="min-h-screen bg-gray-50">
+            <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-4xl">
+                <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+                    <div>
+                        <h1 className="text-2xl sm:text-3xl font-bold mb-2">Meus Pedidos</h1>
+                        <p className="text-sm sm:text-base text-gray-600">
+                            Gerencie seus pedidos e faça download dos seus produtos
                         </p>
-                    )}
+                        {lastUpdate && (
+                            <p className="text-xs text-gray-400 mt-1">
+                                Última atualização: {lastUpdate.toLocaleTimeString('pt-BR')}
+                            </p>
+                        )}
+                    </div>
+                    <Button
+                        onClick={fetchOrders}
+                        variant="outline"
+                        disabled={loading}
+                        className="flex items-center gap-2 w-full sm:w-auto"
+                    >
+                        <Package className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                        {loading ? 'Atualizando...' : 'Atualizar'}
+                    </Button>
                 </div>
-                <Button
-                    onClick={fetchOrders}
-                    variant="outline"
-                    disabled={loading}
-                    className="flex items-center gap-2"
-                >
-                    <Package className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                    {loading ? 'Atualizando...' : 'Atualizar'}
-                </Button>
-            </div>
 
             {orders.length === 0 ? (
                 <Card>
@@ -235,35 +236,35 @@ export default function PedidosPage() {
                 </Card>
             ) : (
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <TabsList className="mb-6 overflow-x-auto no-scrollbar -mx-4 px-4" style={{ WebkitOverflowScrolling: 'touch' }}>
-                        <div className="inline-flex space-x-2">
-                            <TabsTrigger value="todos" className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white shadow-sm">
+                    <div className="mb-6 overflow-x-auto scrollbar-hide -mx-3 sm:-mx-4 px-3 sm:px-4">
+                        <TabsList className="inline-flex min-w-full w-auto">
+                            <TabsTrigger value="todos" className="flex items-center gap-2 whitespace-nowrap">
                                 <Package className="w-4 h-4" />
                                 Todos
                                 <Badge variant="secondary" className="ml-1">{getOrderCount('todos')}</Badge>
                             </TabsTrigger>
-                            <TabsTrigger value="completed" className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white shadow-sm">
+                            <TabsTrigger value="completed" className="flex items-center gap-2 whitespace-nowrap">
                                 <CheckCircle className="w-4 h-4" />
                                 Concluídos
                                 <Badge variant="secondary" className="ml-1">{getOrderCount('completed')}</Badge>
                             </TabsTrigger>
-                            <TabsTrigger value="pending" className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white shadow-sm">
+                            <TabsTrigger value="pending" className="flex items-center gap-2 whitespace-nowrap">
                                 <Clock className="w-4 h-4" />
                                 Pendentes
                                 <Badge variant="secondary" className="ml-1">{getOrderCount('pending')}</Badge>
                             </TabsTrigger>
-                            <TabsTrigger value="processing" className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white shadow-sm">
+                            <TabsTrigger value="processing" className="flex items-center gap-2 whitespace-nowrap">
                                 <Package className="w-4 h-4" />
                                 Processando
                                 <Badge variant="secondary" className="ml-1">{getOrderCount('processing')}</Badge>
                             </TabsTrigger>
-                            <TabsTrigger value="cancelled" className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white shadow-sm">
+                            <TabsTrigger value="cancelled" className="flex items-center gap-2 whitespace-nowrap">
                                 <XCircle className="w-4 h-4" />
                                 Cancelados
                                 <Badge variant="secondary" className="ml-1">{getOrderCount('cancelled')}</Badge>
                             </TabsTrigger>
-                        </div>
-                    </TabsList>
+                        </TabsList>
+                    </div>
 
                     <TabsContent value="todos" className="space-y-4">
                         {filterOrders('todos').map((order) => (
@@ -328,6 +329,7 @@ export default function PedidosPage() {
                     </TabsContent>
                 </Tabs>
             )}
+            </div>
         </div>
     );
 }
@@ -345,44 +347,46 @@ function OrderCard({
     formatPrice: (price: number) => string;
 }) {
     return (
-        <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
-                    <div>
-                        <CardTitle className="text-lg">
-                            Pedido #{order.id.slice(0, 13)}...
-                        </CardTitle>
-                        <CardDescription>
-                            {formatDate(order.createdAt)}
-                        </CardDescription>
-                    </div>
-                    <div className="flex items-start justify-end">
-                        {getStatusBadge(order.status)}
+        <Card className="hover:shadow-lg transition-shadow bg-white">
+            <CardHeader className="pb-3 sm:pb-6">
+                <div className="flex flex-col gap-3">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                        <div className="flex-1">
+                            <CardTitle className="text-base sm:text-lg">
+                                Pedido #{order.id.slice(0, 8)}...
+                            </CardTitle>
+                            <CardDescription className="text-xs sm:text-sm mt-1">
+                                {formatDate(order.createdAt)}
+                            </CardDescription>
+                        </div>
+                        <div className="flex items-start justify-start sm:justify-end">
+                            {getStatusBadge(order.status)}
+                        </div>
                     </div>
                 </div>
             </CardHeader>
-            <CardContent>
-                <div className="space-y-4">
-                    <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-600">
+            <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
+                <div className="space-y-3 sm:space-y-4">
+                    <div className="flex justify-between items-center">
+                        <span className="text-xs sm:text-sm text-gray-600">
                             {order.itemCount} {order.itemCount === 1 ? 'item' : 'itens'}
                         </span>
-                        <span className="text-lg font-bold text-[#FD9555]">
+                        <span className="text-base sm:text-lg font-bold text-[#FD9555]">
                             {formatPrice(order.total)}
                         </span>
                     </div>
 
                     {order.items.length > 0 && (
-                        <div className="border-t pt-4">
-                            <p className="text-sm font-semibold mb-2">Produtos:</p>
+                        <div className="border-t pt-3 sm:pt-4">
+                            <p className="text-xs sm:text-sm font-semibold mb-2">Produtos:</p>
                             <ul className="space-y-1">
                                 {order.items.slice(0, 3).map((item) => (
-                                    <li key={item.id} className="text-sm text-gray-600">
+                                    <li key={item.id} className="text-xs sm:text-sm text-gray-600">
                                         • {item.name} {item.quantity > 1 && `(${item.quantity}x)`}
                                     </li>
                                 ))}
                                 {order.items.length > 3 && (
-                                    <li className="text-sm text-gray-500 italic">
+                                    <li className="text-xs sm:text-sm text-gray-500 italic">
                                         + {order.items.length - 3} {order.items.length - 3 === 1 ? 'outro item' : 'outros itens'}
                                     </li>
                                 )}
@@ -390,52 +394,44 @@ function OrderCard({
                         </div>
                     )}
 
-                    {/* Mensagem especial para pedidos pendentes */}
-                    {order.status === 'pending' && (
-                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                            <p className="text-sm text-yellow-800">
-                                ⏳ <strong>Aguardando pagamento.</strong> Este pedido será processado assim que o pagamento for confirmado.
-                            </p>
-                        </div>
-                    )}
-
-                    {/* Mensagem para pedidos cancelados */}
-                    {order.status === 'cancelled' && (
-                        <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                            <p className="text-sm text-red-800">
-                                ❌ Este pedido foi cancelado e não poderá ser processado.
-                            </p>
-                        </div>
-                    )}
-
-                    {/* Botões de ação baseados no status */}
+                    {/* Botões de ação baseados no status - PRIORIDADE NO MOBILE */}
                     {order.status === 'pending' ? (
-                        <div className="flex flex-col sm:flex-row gap-2">
-                            <Link href={`/checkout/pix?orderId=${order.id}`} className="w-full sm:flex-1">
+                        <div className="space-y-3 pt-2">
+                            <Link href={`/conta/pedidos/${order.id}`} className="block w-full">
                                 <Button
-                                    className="w-full bg-[#FED466] hover:bg-[#FED466]/90 text-gray-800 font-semibold"
+                                    size="lg"
+                                    className="w-full h-12 bg-[#FED466] hover:bg-[#FED466]/90 text-gray-900 font-bold text-base shadow-md"
                                 >
                                     💳 Pagar Agora
                                 </Button>
                             </Link>
-                            <Link href={`/conta/pedidos/${order.id}`} className="w-full sm:flex-1">
-                                <Button
-                                    variant="outline"
-                                    className="w-full"
-                                >
-                                    Ver Detalhes
-                                </Button>
-                            </Link>
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                                <p className="text-xs sm:text-sm text-yellow-800 text-center">
+                                    ⏳ <strong>Aguardando pagamento.</strong> Clique acima para pagar via Pix.
+                                </p>
+                            </div>
                         </div>
                     ) : (
-                        <Link href={`/conta/pedidos/${order.id}`}>
-                            <Button
-                                className="w-full bg-[#FD9555] hover:bg-[#FD9555]/90 text-white"
-                                disabled={order.status === 'cancelled'}
-                            >
-                                {order.status === 'completed' ? 'Ver Detalhes e Downloads' : 'Ver Detalhes'}
-                            </Button>
-                        </Link>
+                        <>
+                            {/* Mensagem para pedidos cancelados */}
+                            {order.status === 'cancelled' && (
+                                <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-3">
+                                    <p className="text-xs sm:text-sm text-red-800">
+                                        ❌ Este pedido foi cancelado e não poderá ser processado.
+                                    </p>
+                                </div>
+                            )}
+                            
+                            <Link href={`/conta/pedidos/${order.id}`} className="block w-full">
+                                <Button
+                                    size="lg"
+                                    className="w-full h-12 bg-[#FD9555] hover:bg-[#FD9555]/90 text-white font-semibold"
+                                    disabled={order.status === 'cancelled'}
+                                >
+                                    {order.status === 'completed' ? '📥 Ver Downloads' : '📋 Ver Detalhes'}
+                                </Button>
+                            </Link>
+                        </>
                     )}
                 </div>
             </CardContent>

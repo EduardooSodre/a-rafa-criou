@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Menu, Home, ShoppingCart, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -25,6 +25,7 @@ export default function MobileBottomMenu({
     const [menuOpen, setMenuOpen] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
     const pathname = usePathname();
+    const router = useRouter();
 
     // Don't render on admin routes
     if (typeof pathname === 'string' && pathname.startsWith('/admin')) {
@@ -70,7 +71,7 @@ export default function MobileBottomMenu({
                             "focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-0 uppercase",
                             "rounded-xl"
                         )}
-                        onClick={onHomeClick}
+                        onClick={() => onHomeClick ? onHomeClick() : router.push('/')}
                         aria-label={t('nav.home', 'Início')}
                     >
                         <Home className="w-7 h-7" strokeWidth={2} />

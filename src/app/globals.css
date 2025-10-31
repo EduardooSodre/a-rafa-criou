@@ -154,3 +154,13 @@ main {
   scrollbar-width: thin;
   scrollbar-color: #e5e7eb transparent;
 }
+
+/* Esconder scrollbar mas manter funcionalidade */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
