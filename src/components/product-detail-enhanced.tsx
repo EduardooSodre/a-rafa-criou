@@ -497,7 +497,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
             </Head>
 
             <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
                     {/* Galeria de Imagens - Desktop */}
                     <div className="w-full order-1 hidden lg:block">
                         {/* Imagem Principal */}
@@ -506,7 +506,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                 src={allAvailableImages[currentImageIndex] || '/file.svg'}
                                 alt={`${product.name} - ${currentVariation?.name || 'imagem principal'}`}
                                 fill
-                                className="object-contain p-6"
+                                className="object-contain p-4"
                                 priority
                                 sizes="(max-width: 1024px) 100vw, 50vw"
                             />
@@ -516,24 +516,24 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                 <>
                                     <button
                                         onClick={handlePrevImage}
-                                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-[#FED466] text-gray-800 rounded-full p-2.5 shadow-md transition-all duration-200 hover:scale-105 z-10"
+                                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-[#FED466] text-gray-800 rounded-full p-2 shadow-md transition-all duration-200 hover:scale-105 z-10"
                                         aria-label="Imagem anterior"
                                     >
-                                        <ChevronLeft className="w-5 h-5" strokeWidth={2.5} />
+                                        <ChevronLeft className="w-4 h-4" strokeWidth={2.5} />
                                     </button>
                                     <button
                                         onClick={handleNextImage}
-                                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-[#FED466] text-gray-800 rounded-full p-2.5 shadow-md transition-all duration-200 hover:scale-105 z-10"
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-[#FED466] text-gray-800 rounded-full p-2 shadow-md transition-all duration-200 hover:scale-105 z-10"
                                         aria-label="Próxima imagem"
                                     >
-                                        <ChevronRight className="w-5 h-5" strokeWidth={2.5} />
+                                        <ChevronRight className="w-4 h-4" strokeWidth={2.5} />
                                     </button>
                                 </>
                             )}
 
                             {/* Indicador de posição */}
                             {allAvailableImages.length > 1 && (
-                                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/60 text-white px-3 py-1.5 rounded-full text-xs font-medium backdrop-blur-sm">
+                                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 text-white px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-sm">
                                     {currentImageIndex + 1} / {allAvailableImages.length}
                                 </div>
                             )}
@@ -554,7 +554,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                                 aria-label={`Selecionar miniatura ${idx + 1}`}
                                                 aria-current={isSelected ? true : undefined}
                                                 className={cn(
-                                                    "relative w-20 h-20 flex-shrink-0 rounded-md overflow-hidden border-2 transition-all duration-200 hover:scale-105",
+                                                    "relative w-16 h-16 flex-shrink-0 rounded-md overflow-hidden border-2 transition-all duration-200 hover:scale-105",
                                                     isSelected
                                                         ? "border-[#FED466] ring-2 ring-[#FED466]/30 shadow-sm"
                                                         : "border-gray-200 hover:border-[#FD9555] opacity-70 hover:opacity-100"
@@ -565,11 +565,11 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                                     alt={`Miniatura ${idx + 1}`}
                                                     fill
                                                     className="object-cover"
-                                                    sizes="80px"
+                                                    sizes="64px"
                                                 />
                                                 {/* Indicador de variação */}
                                                 {isVariationImage && (
-                                                    <div className="absolute bottom-1 right-1 w-2.5 h-2.5 bg-[#FD9555] rounded-full border border-white shadow-sm"></div>
+                                                    <div className="absolute bottom-1 right-1 w-2 h-2 bg-[#FD9555] rounded-full border border-white shadow-sm"></div>
                                                 )}
                                             </button>
                                         );
@@ -579,13 +579,13 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                         )}
 
                         {/* Descrição e Especificações - Desktop */}
-                        <div className="mt-6 w-full">
+                        <div className="mt-5 w-full">
                             <Tabs defaultValue="description" className="w-full">
-                                <TabsList className="grid w-full grid-cols-2 h-11">
-                                    <TabsTrigger value="description" className="text-sm font-semibold">
+                                <TabsList className="grid w-full grid-cols-2 h-10">
+                                    <TabsTrigger value="description" className="text-sm font-medium">
                                         {t('product.tabs.description', 'Descrição')}
                                     </TabsTrigger>
-                                    <TabsTrigger value="specifications" className="text-sm font-semibold">
+                                    <TabsTrigger value="specifications" className="text-sm font-medium">
                                         {t('product.tabs.specifications', 'Especificações')}
                                     </TabsTrigger>
                                 </TabsList>
@@ -686,7 +686,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                     src={allAvailableImages[currentImageIndex] || '/file.svg'}
                                     alt={`${product.name} - ${currentVariation?.name || 'imagem principal'}`}
                                     fill
-                                    className="object-contain p-4"
+                                    className="object-contain p-3"
                                     sizes="100vw"
                                     priority
                                 />
@@ -696,17 +696,17 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                     <>
                                         <button
                                             onClick={handlePrevImage}
-                                            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-[#FED466] text-gray-800 rounded-full p-2 shadow-md transition-all duration-150 z-10"
+                                            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-[#FED466] text-gray-800 rounded-full p-1.5 shadow-md transition-all duration-150 z-10"
                                             aria-label="Imagem anterior"
                                         >
-                                            <ChevronLeft className="w-5 h-5" strokeWidth={2.5} />
+                                            <ChevronLeft className="w-4 h-4" strokeWidth={2.5} />
                                         </button>
                                         <button
                                             onClick={handleNextImage}
-                                            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-[#FED466] text-gray-800 rounded-full p-2 shadow-md transition-all duration-150 z-10"
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-[#FED466] text-gray-800 rounded-full p-1.5 shadow-md transition-all duration-150 z-10"
                                             aria-label="Próxima imagem"
                                         >
-                                            <ChevronRight className="w-5 h-5" strokeWidth={2.5} />
+                                            <ChevronRight className="w-4 h-4" strokeWidth={2.5} />
                                         </button>
 
                                         {/* Indicador mobile */}
@@ -730,14 +730,14 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                                 onClick={() => handleThumbnailClick(idx)}
                                                 aria-label={`Selecionar imagem ${idx + 1}`}
                                                 className={cn(
-                                                    "relative w-16 h-16 flex-shrink-0 rounded-md overflow-hidden border-2 transition-all duration-150",
+                                                    "relative w-14 h-14 flex-shrink-0 rounded-md overflow-hidden border-2 transition-all duration-150",
                                                     isSelected ? 'ring-2 ring-[#FED466] border-transparent' : 'border-gray-200'
                                                 )}
                                             >
-                                                <Image src={img} alt={`Thumb ${idx + 1}`} fill className="object-cover" sizes="64px" />
+                                                <Image src={img} alt={`Thumb ${idx + 1}`} fill className="object-cover" sizes="56px" />
                                                 {/* Indicador de variação */}
                                                 {isVariationImage && (
-                                                    <div className="absolute bottom-1 right-1 w-2 h-2 bg-[#FD9555] rounded-full border border-white shadow-sm"></div>
+                                                    <div className="absolute bottom-0.5 right-0.5 w-1.5 h-1.5 bg-[#FD9555] rounded-full border border-white shadow-sm"></div>
                                                 )}
                                             </button>
                                         );
@@ -747,7 +747,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                         </div>
 
                         {/* Título do Produto */}
-                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">
+                        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 leading-tight">
                             {t(`productNames.${product.slug}`, { defaultValue: product.name })}
                         </h1>
 
@@ -755,7 +755,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                         {product.tags.length > 0 && (
                             <div className="flex flex-wrap gap-1.5">
                                 {product.tags.map((tag) => (
-                                    <Badge key={tag} variant="outline" className="text-xs px-2.5 py-0.5">
+                                    <Badge key={tag} variant="outline" className="text-xs px-2 py-0.5">
                                         {tag}
                                     </Badge>
                                 ))}
@@ -764,7 +764,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
 
                         {/* Preço */}
                         <div className="py-2">
-                            <div className="text-3xl sm:text-4xl font-bold text-[#FD9555]">
+                            <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#FD9555]">
                                 {selectedFilters.size === 0 ? (
                                     minPrice === maxPrice ? (
                                         formatPrice(minPrice)
@@ -781,17 +781,17 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                         {validVariations.length > 1 && (
                             <Card className="border border-[#FED466]/60 bg-gradient-to-br from-white to-[#FFFBEA]/30">
                                 <CardContent className="p-3 sm:p-4">
-                                    <div className="space-y-3">
+                                    <div className="space-y-2.5">
                                         {/* Header */}
-                                        <div className="flex items-center justify-between pb-2.5 border-b border-[#FED466]/30">
-                                            <div className="flex items-center gap-2.5">
-                                                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#FED466] to-[#FD9555] flex items-center justify-center">
-                                                    <svg className="w-3.5 h-3.5 text-white" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                                        <div className="flex items-center justify-between pb-2 border-b border-[#FED466]/30">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-br from-[#FED466] to-[#FD9555] flex items-center justify-center">
+                                                    <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
                                                     </svg>
                                                 </div>
                                                 <div>
-                                                    <h3 className="font-bold text-sm sm:text-base text-gray-900">
+                                                    <h3 className="font-bold text-sm text-gray-900">
                                                         {t('productInfo.chooseVariation', 'Escolha sua variação')}
                                                     </h3>
                                                     <p className="text-xs text-gray-600">
@@ -799,25 +799,25 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                                     </p>
                                                 </div>
                                             </div>
-                                            <div className="hidden sm:flex items-center gap-2 bg-[#FED466]/20 px-3 py-1.5 rounded-full border border-[#FED466]/50">
-                                                <div className="w-2 h-2 bg-[#FD9555] rounded-full animate-pulse"></div>
-                                                <span className="text-sm font-semibold text-gray-700">
+                                            <div className="hidden sm:flex items-center gap-1.5 bg-[#FED466]/20 px-2.5 py-1 rounded-full border border-[#FED466]/50">
+                                                <div className="w-1.5 h-1.5 bg-[#FD9555] rounded-full animate-pulse"></div>
+                                                <span className="text-xs font-semibold text-gray-700">
                                                     {getCompatibleVariations().length} {getCompatibleVariations().length === 1 ? t('productInfo.optionAvailable') : t('productInfo.optionsAvailable')}
                                                 </span>
                                             </div>
                                         </div>
 
                                         {/* Sistema de Filtros por Atributo */}
-                                        <div className={cn("space-y-4", compactMode && "max-h-[240px] overflow-auto pr-2")}>
+                                        <div className={cn("space-y-3", compactMode && "max-h-[240px] overflow-auto pr-2")}>
                                             {Array.from(attributeGroups.entries()).map(([attrName, values]) => (
-                                                <div key={attrName} className={cn("space-y-2", compactMode && "py-1")}>
+                                                <div key={attrName} className={cn("space-y-1.5", compactMode && "py-1")}>
                                                     <div className="flex items-center gap-2">
-                                                        <div className="w-1 h-5 bg-gradient-to-b from-[#FD9555] to-[#FED466] rounded-full"></div>
+                                                        <div className="w-1 h-4 bg-gradient-to-b from-[#FD9555] to-[#FED466] rounded-full"></div>
                                                         <label className="font-semibold text-sm text-gray-800">
                                                             {attrName}
                                                         </label>
                                                         {selectedFilters.has(attrName) && (
-                                                            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold">
+                                                            <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full font-medium">
                                                                 {t('productInfo.selected')}
                                                             </span>
                                                         )}
@@ -949,13 +949,13 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                         )}
 
                         {/* CTAs - abaixo da seleção (Comprar / Adicionar ao carrinho) */}
-                        <div className="mt-4 mb-4">
+                        <div className="mt-3 mb-3">
                             <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3 gap-2">
                                 <Button
                                     onClick={handleBuyNow}
                                     variant="default"
                                     size="default"
-                                    className="w-full sm:w-auto min-h-[44px] md:min-h-[48px] text-black font-bold text-sm md:text-base rounded-md border-2 border-[#FD9555] shadow-md cursor-pointer bg-[#FED466] hover:bg-[#FD9555] uppercase"
+                                    className="w-full sm:w-auto min-h-[44px] text-black font-bold text-sm sm:text-base rounded-md border-2 border-[#FD9555] shadow-md cursor-pointer bg-[#FED466] hover:bg-[#FD9555] uppercase"
                                 >
                                     {t('product.buyNow', 'COMPRAR AGORA')}
                                 </Button>
@@ -963,9 +963,9 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                     onClick={handleAddToCart}
                                     variant="default"
                                     size="default"
-                                    className="w-full sm:w-auto min-h-[44px] md:min-h-[48px] text-white font-bold text-sm md:text-base rounded-md shadow-sm cursor-pointer bg-[#FD9555] hover:bg-[#E64D2B] border-2 border-[#FD9555]"
+                                    className="w-full sm:w-auto min-h-[44px] text-white font-bold text-sm sm:text-base rounded-md shadow-sm cursor-pointer bg-[#FD9555] hover:bg-[#E64D2B] border-2 border-[#FD9555]"
                                 >
-                                    <ShoppingCart className="w-5 h-5 mr-2 text-white" />
+                                    <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-white" />
                                     {t('product.addToCart', 'ADICIONAR AO CARRINHO')}
                                 </Button>
                             </div>
@@ -973,13 +973,13 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
 
                         {/* Garantias / Descrição legal compacta */}
                         <Card className="border-2 border-amber-200 bg-amber-50">
-                            <CardContent className="p-4 text-sm leading-relaxed text-gray-800">
-                                <h4 className="font-bold mb-4 flex justify-center items-center gap-2 text-xl">Descrição</h4>
+                            <CardContent className="p-3 sm:p-4 text-sm leading-relaxed text-gray-800">
+                                <h4 className="font-bold mb-3 flex justify-center items-center gap-2 text-base sm:text-lg">Descrição</h4>
 
                                 <div className="mb-2">
                                     <div className="flex items-start gap-2">
-                                        <Check className="w-4 h-4 text-green-600 flex-shrink-0" />
-                                        <div>
+                                        <Check className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                                        <div className="text-sm">
                                             <strong>Você pode:</strong> Imprimir em casa ou em gráficas quantas vezes quiser, entregar o arquivo montado para presentear ou para uso próprio.
                                         </div>
                                     </div>
