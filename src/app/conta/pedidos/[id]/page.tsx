@@ -499,7 +499,7 @@ export default function PedidoDetalhesPage() {
                                     const expirationDate = new Date(paidDate.getTime() + 30 * 24 * 60 * 60 * 1000);
                                     const now = new Date();
                                     const daysRemaining = Math.max(0, Math.ceil((expirationDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
-                                    
+
                                     if (daysRemaining === 0) {
                                         return (
                                             <span className="text-red-600 font-semibold">

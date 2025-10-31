@@ -59,7 +59,9 @@ export async function GET(req: NextRequest) {
     // ✅ VERIFICAR EXPIRAÇÃO DE 1 MÊS (30 dias)
     const paidDate = order.paidAt ? new Date(order.paidAt) : new Date(order.createdAt);
     const now = new Date();
-    const daysSincePurchase = Math.floor((now.getTime() - paidDate.getTime()) / (1000 * 60 * 60 * 24));
+    const daysSincePurchase = Math.floor(
+      (now.getTime() - paidDate.getTime()) / (1000 * 60 * 60 * 24)
+    );
     const DOWNLOAD_EXPIRATION_DAYS = 30;
 
     if (daysSincePurchase > DOWNLOAD_EXPIRATION_DAYS) {
@@ -67,7 +69,9 @@ export async function GET(req: NextRequest) {
         {
           error: 'Download expirado',
           message: `O prazo de ${DOWNLOAD_EXPIRATION_DAYS} dias para download deste produto expirou.`,
-          expiredAt: new Date(paidDate.getTime() + DOWNLOAD_EXPIRATION_DAYS * 24 * 60 * 60 * 1000).toISOString(),
+          expiredAt: new Date(
+            paidDate.getTime() + DOWNLOAD_EXPIRATION_DAYS * 24 * 60 * 60 * 1000
+          ).toISOString(),
           daysSincePurchase,
         },
         { status: 410 } // 410 Gone
