@@ -48,13 +48,13 @@ export default function PedidoDetalhesPage() {
     const [error, setError] = useState('');
     const [downloadingItems, setDownloadingItems] = useState<Set<string>>(new Set());
     const [downloadMessages, setDownloadMessages] = useState<Record<string, { type: 'success' | 'error'; message: string }>>({});
-    
+
     // Estados para Pix
     const [pixData, setPixData] = useState<{ qrCode: string; qrCodeBase64: string } | null>(null);
     const [generatingPix, setGeneratingPix] = useState(false);
     const [pixError, setPixError] = useState('');
     const [checkingPayment, setCheckingPayment] = useState(false);
-    
+
     const { clearCart } = useCart();
 
     const fetchOrderDetails = useCallback(async () => {
@@ -80,7 +80,7 @@ export default function PedidoDetalhesPage() {
 
             const data = await response.json();
             setOrder(data);
-            
+
             // Debug: verificar dados do pedido
             console.log('📦 Pedido carregado:', {
                 id: data.id,
@@ -96,26 +96,26 @@ export default function PedidoDetalhesPage() {
             setLoading(false);
         }
     }, [orderId]);
-    
+
     const generatePixForExistingOrder = async () => {
         if (!order) return;
-        
+
         try {
             setGeneratingPix(true);
             setPixError('');
-            
+
             const response = await fetch('/api/mercado-pago/regenerate-pix', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ orderId: order.id }),
             });
-            
+
             const data = await response.json();
-            
+
             if (!response.ok) {
                 throw new Error(data.error || 'Erro ao gerar Pix');
             }
-            
+
             setPixData(data);
         } catch (err) {
             console.error('Erro ao gerar Pix:', err);
@@ -124,16 +124,16 @@ export default function PedidoDetalhesPage() {
             setGeneratingPix(false);
         }
     };
-    
+
     const checkPaymentStatus = async () => {
         if (!order) return;
-        
+
         try {
             setCheckingPayment(true);
-            
+
             const response = await fetch(`/api/orders/status?orderId=${order.id}`);
             const data = await response.json();
-            
+
             if (data.status === 'completed' || data.paymentStatus === 'paid') {
                 // Atualizar o pedido localmente
                 setOrder({ ...order, status: 'completed', paymentStatus: 'paid' });
@@ -145,17 +145,17 @@ export default function PedidoDetalhesPage() {
             setCheckingPayment(false);
         }
     };
-    
+
     // Polling automático para pedidos pendentes com Pix
     useEffect(() => {
         if (!order || order.status !== 'pending' || order.paymentProvider !== 'mercado_pago') {
             return;
         }
-        
+
         const interval = setInterval(() => {
             checkPaymentStatus();
         }, 4000); // Verifica a cada 4 segundos
-        
+
         return () => clearInterval(interval);
     }, [order]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -370,372 +370,372 @@ export default function PedidoDetalhesPage() {
                     </p>
                 </div>
 
-            {/* ⚠️ Alerta de Cancelamento */}
-            {order.status === 'cancelled' && (
-                <Alert variant="destructive" className="mb-4 sm:mb-6">
-                    <AlertCircle className="h-4 w-4 flex-shrink-0" />
-                    <AlertDescription className="text-xs sm:text-sm">
-                        <strong>Pedido Cancelado</strong>
-                        <p className="mt-2">
-                            Este pedido foi cancelado {order.updatedAt ? `em ${formatDate(order.updatedAt)}` : ''}.
-                        </p>
-                        <p className="mt-2">
-                            <strong>Possíveis motivos:</strong>
-                        </p>
-                        <ul className="list-disc list-inside mt-1 space-y-1">
-                            <li>Você cancelou o pedido antes de efetuar o pagamento</li>
-                            <li>O pagamento não foi confirmado dentro do prazo</li>
-                            <li>Houve um problema com o método de pagamento</li>
-                        </ul>
-                        <p className="mt-3">
-                            Se você deseja adquirir estes produtos novamente, adicione-os ao carrinho e realize um novo pedido.
-                        </p>
-                    </AlertDescription>
-                </Alert>
-            )}
-
-            {/* ✅ Alerta de Sucesso (Pedido Completo) */}
-            {order.status === 'completed' && (
-                <Alert className="mb-4 sm:mb-6 border-green-200 bg-green-50">
-                    <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
-                    <AlertDescription className="text-green-800 text-xs sm:text-sm">
-                        <strong>Pedido Concluído com Sucesso!</strong>
-                        <p className="mt-1">
-                            Seu pedido foi pago e você já pode fazer o download dos produtos abaixo.
-                        </p>
-                    </AlertDescription>
-                </Alert>
-            )}
-
-            {/* ⏳ Alerta de Pendência com Pix */}
-            {order.status === 'pending' && (
-                <>
-                    <Alert className="mb-4 sm:mb-6 border-yellow-200 bg-yellow-50">
-                        <Clock className="h-4 w-4 text-yellow-600 flex-shrink-0" />
-                        <AlertDescription className="text-yellow-800">
-                            <strong className="text-sm sm:text-base">Aguardando Pagamento</strong>
-                            <p className="mt-1 text-xs sm:text-sm">
-                                Seu pedido foi criado, mas ainda está aguardando a confirmação do pagamento.
+                {/* ⚠️ Alerta de Cancelamento */}
+                {order.status === 'cancelled' && (
+                    <Alert variant="destructive" className="mb-4 sm:mb-6">
+                        <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                        <AlertDescription className="text-xs sm:text-sm">
+                            <strong>Pedido Cancelado</strong>
+                            <p className="mt-2">
+                                Este pedido foi cancelado {order.updatedAt ? `em ${formatDate(order.updatedAt)}` : ''}.
                             </p>
-                            {order.paymentProvider === 'mercado_pago' && (
-                                <p className="mt-2 text-xs sm:text-sm font-semibold">
-                                    {pixData ? 
-                                        '👇 Escaneie o QR Code abaixo para pagar' : 
-                                        '👇 Clique no botão abaixo para gerar o QR Code do Pix'
-                                    }
+                            <p className="mt-2">
+                                <strong>Possíveis motivos:</strong>
+                            </p>
+                            <ul className="list-disc list-inside mt-1 space-y-1">
+                                <li>Você cancelou o pedido antes de efetuar o pagamento</li>
+                                <li>O pagamento não foi confirmado dentro do prazo</li>
+                                <li>Houve um problema com o método de pagamento</li>
+                            </ul>
+                            <p className="mt-3">
+                                Se você deseja adquirir estes produtos novamente, adicione-os ao carrinho e realize um novo pedido.
+                            </p>
+                        </AlertDescription>
+                    </Alert>
+                )}
+
+                {/* ✅ Alerta de Sucesso (Pedido Completo) */}
+                {order.status === 'completed' && (
+                    <Alert className="mb-4 sm:mb-6 border-green-200 bg-green-50">
+                        <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
+                        <AlertDescription className="text-green-800 text-xs sm:text-sm">
+                            <strong>Pedido Concluído com Sucesso!</strong>
+                            <p className="mt-1">
+                                Seu pedido foi pago e você já pode fazer o download dos produtos abaixo.
+                            </p>
+                        </AlertDescription>
+                    </Alert>
+                )}
+
+                {/* ⏳ Alerta de Pendência com Pix */}
+                {order.status === 'pending' && (
+                    <>
+                        <Alert className="mb-4 sm:mb-6 border-yellow-200 bg-yellow-50">
+                            <Clock className="h-4 w-4 text-yellow-600 flex-shrink-0" />
+                            <AlertDescription className="text-yellow-800">
+                                <strong className="text-sm sm:text-base">Aguardando Pagamento</strong>
+                                <p className="mt-1 text-xs sm:text-sm">
+                                    Seu pedido foi criado, mas ainda está aguardando a confirmação do pagamento.
+                                </p>
+                                {order.paymentProvider === 'mercado_pago' && (
+                                    <p className="mt-2 text-xs sm:text-sm font-semibold">
+                                        {pixData ?
+                                            '👇 Escaneie o QR Code abaixo para pagar' :
+                                            '👇 Clique no botão abaixo para gerar o QR Code do Pix'
+                                        }
+                                    </p>
+                                )}
+                            </AlertDescription>
+                        </Alert>
+
+                        {/* Card do Pix - OTIMIZADO PARA MOBILE */}
+                        {order.paymentProvider === 'mercado_pago' && (
+                            <Card className="mb-4 sm:mb-6 shadow-lg border-2 border-[#FED466]">
+                                <CardHeader className="pb-3 sm:pb-6">
+                                    <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                                        🎯 Pagamento via Pix
+                                    </CardTitle>
+                                    <CardDescription className="text-xs sm:text-sm">
+                                        {pixData ?
+                                            'Escaneie o QR Code ou copie o código para pagar' :
+                                            'Gere o QR Code do Pix para completar seu pagamento'
+                                        }
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="px-3 sm:px-6 pb-4 sm:pb-6">
+                                    {pixData ? (
+                                        <div className="space-y-3 sm:space-y-4">
+                                            {/* QR Code */}
+                                            <div className="flex flex-col items-center justify-center p-4 sm:p-6 bg-white rounded-lg border-2 border-[#FED466] shadow-inner">
+                                                <div className="w-full max-w-[256px]">
+                                                    <QRCodeSVG
+                                                        value={pixData.qrCode}
+                                                        size={256}
+                                                        level="M"
+                                                        includeMargin={true}
+                                                        className="w-full h-auto"
+                                                    />
+                                                </div>
+                                                <p className="text-xs sm:text-sm text-gray-600 mt-3 sm:mt-4 text-center font-medium">
+                                                    📱 Escaneie este QR Code com o app do seu banco
+                                                </p>
+                                            </div>
+
+                                            {/* Pix Copia e Cola */}
+                                            <div>
+                                                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
+                                                    Ou copie o código Pix:
+                                                </label>
+                                                <div className="flex flex-col sm:flex-row gap-2">
+                                                    <input
+                                                        type="text"
+                                                        value={pixData.qrCode}
+                                                        readOnly
+                                                        aria-label="Código Pix copia e cola"
+                                                        className="flex-1 px-2 sm:px-3 py-2 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm font-mono bg-gray-50 overflow-x-auto"
+                                                    />
+                                                    <Button
+                                                        onClick={() => {
+                                                            navigator.clipboard.writeText(pixData.qrCode);
+                                                            alert('✅ Código Pix copiado!');
+                                                        }}
+                                                        variant="outline"
+                                                        className="w-full sm:w-auto whitespace-nowrap h-10 sm:h-auto"
+                                                    >
+                                                        📋 Copiar
+                                                    </Button>
+                                                </div>
+                                            </div>
+
+                                            {/* Botão de verificar pagamento */}
+                                            <Button
+                                                onClick={checkPaymentStatus}
+                                                disabled={checkingPayment}
+                                                size="lg"
+                                                className="w-full h-12 sm:h-auto bg-green-600 hover:bg-green-700 text-white font-bold text-base shadow-md"
+                                            >
+                                                {checkingPayment ? (
+                                                    <>
+                                                        <Clock className="w-5 h-5 mr-2 animate-spin" />
+                                                        Verificando...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <CheckCircle2 className="w-5 h-5 mr-2" />
+                                                        Já Paguei
+                                                    </>
+                                                )}
+                                            </Button>
+
+                                            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                                                <p className="text-xs sm:text-sm text-green-800 text-center">
+                                                    ✅ Verificando pagamento automaticamente a cada 4 segundos
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-3 sm:space-y-4">
+                                            {pixError && (
+                                                <Alert variant="destructive">
+                                                    <AlertCircle className="h-4 w-4" />
+                                                    <AlertDescription className="text-xs sm:text-sm">{pixError}</AlertDescription>
+                                                </Alert>
+                                            )}
+
+                                            <Button
+                                                onClick={generatePixForExistingOrder}
+                                                disabled={generatingPix}
+                                                size="lg"
+                                                className="w-full h-14 bg-[#FED466] hover:bg-[#FED466]/90 text-black font-bold text-base sm:text-lg shadow-lg"
+                                            >
+                                                {generatingPix ? (
+                                                    <>
+                                                        <Clock className="w-5 h-5 mr-2 animate-spin" />
+                                                        Gerando QR Code...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        🎯 Gerar QR Code do Pix
+                                                    </>
+                                                )}
+                                            </Button>
+
+                                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                                <p className="text-xs sm:text-sm text-blue-800 text-center">
+                                                    💡 O QR Code será gerado instantaneamente e você poderá pagar via Pix
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        )}
+                    </>
+                )}
+
+                {/* Informações do Pedido */}
+                <Card className="mb-4 sm:mb-6">
+                    <CardHeader className="pb-3 sm:pb-6">
+                        <CardTitle className="text-base sm:text-lg">Informações do Pedido</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                            <div>
+                                <p className="text-xs sm:text-sm text-gray-600 mb-1">E-mail</p>
+                                <p className="font-medium text-sm sm:text-base break-all">{order.email}</p>
+                            </div>
+                            <div>
+                                <p className="text-xs sm:text-sm text-gray-600 mb-1">Forma de Pagamento</p>
+                                <p className="font-medium text-sm sm:text-base capitalize">{order.paymentProvider === 'mercado_pago' ? 'Pix' : order.paymentProvider}</p>
+                            </div>
+                            <div>
+                                <p className="text-xs sm:text-sm text-gray-600 mb-1">Status do Pagamento</p>
+                                <Badge variant={order.paymentStatus === 'paid' ? 'default' : 'secondary'} className="text-xs sm:text-sm">
+                                    {order.paymentStatus === 'paid' ? 'Pago' : order.paymentStatus}
+                                </Badge>
+                            </div>
+                            {order.paidAt && (
+                                <div>
+                                    <p className="text-xs sm:text-sm text-gray-600 mb-1">Data do Pagamento</p>
+                                    <p className="font-medium text-sm sm:text-base">{formatDate(order.paidAt)}</p>
+                                </div>
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Produtos */}
+                <Card className="mb-4 sm:mb-6">
+                    <CardHeader className="pb-3 sm:pb-6">
+                        <CardTitle className="text-base sm:text-lg">Produtos Comprados</CardTitle>
+                        <CardDescription className="text-xs sm:text-sm">
+                            {order.status === 'completed'
+                                ? 'Clique para fazer download dos seus produtos'
+                                : 'Os downloads estarão disponíveis após a confirmação do pagamento'}
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="px-3 sm:px-6">
+                        <div className="space-y-3 sm:space-y-4">
+                            {order.items.map((item) => (
+                                <div
+                                    key={item.id}
+                                    className="border rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow bg-white"
+                                >
+                                    <div className="flex justify-between items-start mb-3">
+                                        <div className="flex-1 pr-2">
+                                            <h3 className="font-semibold text-sm sm:text-lg leading-tight">{item.name}</h3>
+                                            <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                                                Quantidade: {item.quantity}
+                                            </p>
+                                        </div>
+                                        <p className="text-base sm:text-lg font-bold text-[#FD9555] whitespace-nowrap">
+                                            {formatPrice(item.total)}
+                                        </p>
+                                    </div>
+
+                                    {order.status === 'completed' && (
+                                        <>
+                                            {(() => {
+                                                // Calcular se o download expirou (30 dias)
+                                                const paidDate = order.paidAt ? new Date(order.paidAt) : new Date(order.createdAt);
+                                                const now = new Date();
+                                                const daysSincePurchase = Math.floor((now.getTime() - paidDate.getTime()) / (1000 * 60 * 60 * 24));
+                                                const isExpired = daysSincePurchase > 30;
+
+                                                return (
+                                                    <>
+                                                        <Button
+                                                            onClick={() => handleDownload(item.id)}
+                                                            disabled={downloadingItems.has(item.id) || isExpired}
+                                                            size="lg"
+                                                            className={`w-full h-12 ${isExpired ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#FED466] hover:bg-[#FED466]/90'} text-black font-bold text-sm sm:text-base`}
+                                                        >
+                                                            {isExpired ? (
+                                                                <>
+                                                                    <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                                                                    Download Expirado (30 dias)
+                                                                </>
+                                                            ) : downloadingItems.has(item.id) ? (
+                                                                <>
+                                                                    <Clock className="w-4 h-4 sm:w-5 sm:h-5 mr-2 animate-spin" />
+                                                                    Gerando link...
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <Download className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                                                                    📥 Fazer Download
+                                                                </>
+                                                            )}
+                                                        </Button>
+
+                                                        {downloadMessages[item.id] && (
+                                                            <Alert
+                                                                variant={downloadMessages[item.id].type === 'error' ? 'destructive' : 'default'}
+                                                                className="mt-2"
+                                                            >
+                                                                <AlertDescription>
+                                                                    {downloadMessages[item.id].message}
+                                                                </AlertDescription>
+                                                            </Alert>
+                                                        )}
+                                                    </>
+                                                );
+                                            })()}
+                                        </>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Resumo do Pedido */}
+                <Card className="mb-4 sm:mb-6">
+                    <CardHeader className="pb-3 sm:pb-6">
+                        <CardTitle className="text-base sm:text-lg">Resumo do Pedido</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-2">
+                            <div className="flex justify-between text-sm sm:text-base">
+                                <span className="text-gray-600">Subtotal</span>
+                                <span className="font-medium">{formatPrice(order.subtotal)}</span>
+                            </div>
+                            <div className="flex justify-between text-base sm:text-lg font-bold border-t pt-2">
+                                <span>Total</span>
+                                <span className="text-[#FD9555]">{formatPrice(order.total)}</span>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Aviso sobre downloads */}
+                {order.status === 'completed' && (
+                    <Alert className="border-[#FED466] bg-yellow-50">
+                        <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                        <AlertDescription className="text-xs sm:text-sm">
+                            <strong>Importante:</strong>
+                            <ul className="list-disc list-inside mt-2 space-y-1">
+                                <li>Os links de download são válidos por 15 minutos.</li>
+                                <li>Você pode gerar novos links clicando no botão de download novamente.</li>
+                                <li className="text-red-600 font-semibold">
+                                    O acesso ao download expira após 30 dias da data da compra.
+                                </li>
+                            </ul>
+                            {order.paidAt && (
+                                <p className="mt-3 text-xs sm:text-sm text-gray-700">
+                                    Compra realizada em: <strong>{formatDate(order.paidAt)}</strong>
+                                    <br />
+                                    {(() => {
+                                        const paidDate = new Date(order.paidAt);
+                                        const expirationDate = new Date(paidDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+                                        const now = new Date();
+                                        const daysRemaining = Math.max(0, Math.ceil((expirationDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+
+                                        if (daysRemaining === 0) {
+                                            return (
+                                                <span className="text-red-600 font-semibold text-xs sm:text-sm">
+                                                    ⚠️ Download expirado
+                                                </span>
+                                            );
+                                        } else if (daysRemaining <= 7) {
+                                            return (
+                                                <span className="text-orange-600 font-semibold text-xs sm:text-sm">
+                                                    ⚠️ Expira em {daysRemaining} {daysRemaining === 1 ? 'dia' : 'dias'}
+                                                </span>
+                                            );
+                                        } else {
+                                            return (
+                                                <span className="text-green-600 text-xs sm:text-sm">
+                                                    ✅ Válido por mais {daysRemaining} dias
+                                                </span>
+                                            );
+                                        }
+                                    })()}
                                 </p>
                             )}
                         </AlertDescription>
                     </Alert>
-                    
-                    {/* Card do Pix - OTIMIZADO PARA MOBILE */}
-                    {order.paymentProvider === 'mercado_pago' && (
-                        <Card className="mb-4 sm:mb-6 shadow-lg border-2 border-[#FED466]">
-                            <CardHeader className="pb-3 sm:pb-6">
-                                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                                    🎯 Pagamento via Pix
-                                </CardTitle>
-                                <CardDescription className="text-xs sm:text-sm">
-                                    {pixData ? 
-                                        'Escaneie o QR Code ou copie o código para pagar' : 
-                                        'Gere o QR Code do Pix para completar seu pagamento'
-                                    }
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="px-3 sm:px-6 pb-4 sm:pb-6">
-                                {pixData ? (
-                                    <div className="space-y-3 sm:space-y-4">
-                                        {/* QR Code */}
-                                        <div className="flex flex-col items-center justify-center p-4 sm:p-6 bg-white rounded-lg border-2 border-[#FED466] shadow-inner">
-                                            <div className="w-full max-w-[256px]">
-                                                <QRCodeSVG 
-                                                    value={pixData.qrCode}
-                                                    size={256}
-                                                    level="M"
-                                                    includeMargin={true}
-                                                    className="w-full h-auto"
-                                                />
-                                            </div>
-                                            <p className="text-xs sm:text-sm text-gray-600 mt-3 sm:mt-4 text-center font-medium">
-                                                📱 Escaneie este QR Code com o app do seu banco
-                                            </p>
-                                        </div>
-                                        
-                                        {/* Pix Copia e Cola */}
-                                        <div>
-                                            <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
-                                                Ou copie o código Pix:
-                                            </label>
-                                            <div className="flex flex-col sm:flex-row gap-2">
-                                                <input
-                                                    type="text"
-                                                    value={pixData.qrCode}
-                                                    readOnly
-                                                    aria-label="Código Pix copia e cola"
-                                                    className="flex-1 px-2 sm:px-3 py-2 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm font-mono bg-gray-50 overflow-x-auto"
-                                                />
-                                                <Button
-                                                    onClick={() => {
-                                                        navigator.clipboard.writeText(pixData.qrCode);
-                                                        alert('✅ Código Pix copiado!');
-                                                    }}
-                                                    variant="outline"
-                                                    className="w-full sm:w-auto whitespace-nowrap h-10 sm:h-auto"
-                                                >
-                                                    📋 Copiar
-                                                </Button>
-                                            </div>
-                                        </div>
-                                        
-                                        {/* Botão de verificar pagamento */}
-                                        <Button
-                                            onClick={checkPaymentStatus}
-                                            disabled={checkingPayment}
-                                            size="lg"
-                                            className="w-full h-12 sm:h-auto bg-green-600 hover:bg-green-700 text-white font-bold text-base shadow-md"
-                                        >
-                                            {checkingPayment ? (
-                                                <>
-                                                    <Clock className="w-5 h-5 mr-2 animate-spin" />
-                                                    Verificando...
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <CheckCircle2 className="w-5 h-5 mr-2" />
-                                                    Já Paguei
-                                                </>
-                                            )}
-                                        </Button>
-                                        
-                                        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                                            <p className="text-xs sm:text-sm text-green-800 text-center">
-                                                ✅ Verificando pagamento automaticamente a cada 4 segundos
-                                            </p>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-3 sm:space-y-4">
-                                        {pixError && (
-                                            <Alert variant="destructive">
-                                                <AlertCircle className="h-4 w-4" />
-                                                <AlertDescription className="text-xs sm:text-sm">{pixError}</AlertDescription>
-                                            </Alert>
-                                        )}
-                                        
-                                        <Button
-                                            onClick={generatePixForExistingOrder}
-                                            disabled={generatingPix}
-                                            size="lg"
-                                            className="w-full h-14 bg-[#FED466] hover:bg-[#FED466]/90 text-black font-bold text-base sm:text-lg shadow-lg"
-                                        >
-                                            {generatingPix ? (
-                                                <>
-                                                    <Clock className="w-5 h-5 mr-2 animate-spin" />
-                                                    Gerando QR Code...
-                                                </>
-                                            ) : (
-                                                <>
-                                                    🎯 Gerar QR Code do Pix
-                                                </>
-                                            )}
-                                        </Button>
-                                        
-                                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                                            <p className="text-xs sm:text-sm text-blue-800 text-center">
-                                                💡 O QR Code será gerado instantaneamente e você poderá pagar via Pix
-                                            </p>
-                                        </div>
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
-                    )}
-                </>
-            )}
-
-            {/* Informações do Pedido */}
-            <Card className="mb-4 sm:mb-6">
-                <CardHeader className="pb-3 sm:pb-6">
-                    <CardTitle className="text-base sm:text-lg">Informações do Pedido</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                        <div>
-                            <p className="text-xs sm:text-sm text-gray-600 mb-1">E-mail</p>
-                            <p className="font-medium text-sm sm:text-base break-all">{order.email}</p>
-                        </div>
-                        <div>
-                            <p className="text-xs sm:text-sm text-gray-600 mb-1">Forma de Pagamento</p>
-                            <p className="font-medium text-sm sm:text-base capitalize">{order.paymentProvider === 'mercado_pago' ? 'Pix' : order.paymentProvider}</p>
-                        </div>
-                        <div>
-                            <p className="text-xs sm:text-sm text-gray-600 mb-1">Status do Pagamento</p>
-                            <Badge variant={order.paymentStatus === 'paid' ? 'default' : 'secondary'} className="text-xs sm:text-sm">
-                                {order.paymentStatus === 'paid' ? 'Pago' : order.paymentStatus}
-                            </Badge>
-                        </div>
-                        {order.paidAt && (
-                            <div>
-                                <p className="text-xs sm:text-sm text-gray-600 mb-1">Data do Pagamento</p>
-                                <p className="font-medium text-sm sm:text-base">{formatDate(order.paidAt)}</p>
-                            </div>
-                        )}
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* Produtos */}
-            <Card className="mb-4 sm:mb-6">
-                <CardHeader className="pb-3 sm:pb-6">
-                    <CardTitle className="text-base sm:text-lg">Produtos Comprados</CardTitle>
-                    <CardDescription className="text-xs sm:text-sm">
-                        {order.status === 'completed'
-                            ? 'Clique para fazer download dos seus produtos'
-                            : 'Os downloads estarão disponíveis após a confirmação do pagamento'}
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="px-3 sm:px-6">
-                    <div className="space-y-3 sm:space-y-4">
-                        {order.items.map((item) => (
-                            <div
-                                key={item.id}
-                                className="border rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow bg-white"
-                            >
-                                <div className="flex justify-between items-start mb-3">
-                                    <div className="flex-1 pr-2">
-                                        <h3 className="font-semibold text-sm sm:text-lg leading-tight">{item.name}</h3>
-                                        <p className="text-xs sm:text-sm text-gray-600 mt-1">
-                                            Quantidade: {item.quantity}
-                                        </p>
-                                    </div>
-                                    <p className="text-base sm:text-lg font-bold text-[#FD9555] whitespace-nowrap">
-                                        {formatPrice(item.total)}
-                                    </p>
-                                </div>
-
-                                {order.status === 'completed' && (
-                                    <>
-                                        {(() => {
-                                            // Calcular se o download expirou (30 dias)
-                                            const paidDate = order.paidAt ? new Date(order.paidAt) : new Date(order.createdAt);
-                                            const now = new Date();
-                                            const daysSincePurchase = Math.floor((now.getTime() - paidDate.getTime()) / (1000 * 60 * 60 * 24));
-                                            const isExpired = daysSincePurchase > 30;
-
-                                            return (
-                                                <>
-                                                    <Button
-                                                        onClick={() => handleDownload(item.id)}
-                                                        disabled={downloadingItems.has(item.id) || isExpired}
-                                                        size="lg"
-                                                        className={`w-full h-12 ${isExpired ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#FED466] hover:bg-[#FED466]/90'} text-black font-bold text-sm sm:text-base`}
-                                                    >
-                                                        {isExpired ? (
-                                                            <>
-                                                                <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                                                                Download Expirado (30 dias)
-                                                            </>
-                                                        ) : downloadingItems.has(item.id) ? (
-                                                            <>
-                                                                <Clock className="w-4 h-4 sm:w-5 sm:h-5 mr-2 animate-spin" />
-                                                                Gerando link...
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <Download className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                                                                📥 Fazer Download
-                                                            </>
-                                                        )}
-                                                    </Button>
-
-                                                    {downloadMessages[item.id] && (
-                                                        <Alert
-                                                            variant={downloadMessages[item.id].type === 'error' ? 'destructive' : 'default'}
-                                                            className="mt-2"
-                                                        >
-                                                            <AlertDescription>
-                                                                {downloadMessages[item.id].message}
-                                                            </AlertDescription>
-                                                        </Alert>
-                                                    )}
-                                                </>
-                                            );
-                                        })()}
-                                    </>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* Resumo do Pedido */}
-            <Card className="mb-4 sm:mb-6">
-                <CardHeader className="pb-3 sm:pb-6">
-                    <CardTitle className="text-base sm:text-lg">Resumo do Pedido</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-2">
-                        <div className="flex justify-between text-sm sm:text-base">
-                            <span className="text-gray-600">Subtotal</span>
-                            <span className="font-medium">{formatPrice(order.subtotal)}</span>
-                        </div>
-                        <div className="flex justify-between text-base sm:text-lg font-bold border-t pt-2">
-                            <span>Total</span>
-                            <span className="text-[#FD9555]">{formatPrice(order.total)}</span>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* Aviso sobre downloads */}
-            {order.status === 'completed' && (
-                <Alert className="border-[#FED466] bg-yellow-50">
-                    <AlertCircle className="h-4 w-4 flex-shrink-0" />
-                    <AlertDescription className="text-xs sm:text-sm">
-                        <strong>Importante:</strong>
-                        <ul className="list-disc list-inside mt-2 space-y-1">
-                            <li>Os links de download são válidos por 15 minutos.</li>
-                            <li>Você pode gerar novos links clicando no botão de download novamente.</li>
-                            <li className="text-red-600 font-semibold">
-                                O acesso ao download expira após 30 dias da data da compra.
-                            </li>
-                        </ul>
-                        {order.paidAt && (
-                            <p className="mt-3 text-xs sm:text-sm text-gray-700">
-                                Compra realizada em: <strong>{formatDate(order.paidAt)}</strong>
-                                <br />
-                                {(() => {
-                                    const paidDate = new Date(order.paidAt);
-                                    const expirationDate = new Date(paidDate.getTime() + 30 * 24 * 60 * 60 * 1000);
-                                    const now = new Date();
-                                    const daysRemaining = Math.max(0, Math.ceil((expirationDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
-
-                                    if (daysRemaining === 0) {
-                                        return (
-                                            <span className="text-red-600 font-semibold text-xs sm:text-sm">
-                                                ⚠️ Download expirado
-                                            </span>
-                                        );
-                                    } else if (daysRemaining <= 7) {
-                                        return (
-                                            <span className="text-orange-600 font-semibold text-xs sm:text-sm">
-                                                ⚠️ Expira em {daysRemaining} {daysRemaining === 1 ? 'dia' : 'dias'}
-                                            </span>
-                                        );
-                                    } else {
-                                        return (
-                                            <span className="text-green-600 text-xs sm:text-sm">
-                                                ✅ Válido por mais {daysRemaining} dias
-                                            </span>
-                                        );
-                                    }
-                                })()}
-                            </p>
-                        )}
-                    </AlertDescription>
-                </Alert>
-            )}
+                )}
             </div>
         </div>
     );

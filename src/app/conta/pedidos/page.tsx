@@ -218,117 +218,117 @@ export default function PedidosPage() {
                     </Button>
                 </div>
 
-            {orders.length === 0 ? (
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Nenhum pedido encontrado</CardTitle>
-                        <CardDescription>
-                            Você ainda não realizou nenhuma compra.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <Link href="/produtos">
-                            <Button className="bg-[#FED466] text-black hover:bg-[#FED466]/90">
-                                Explorar Produtos
-                            </Button>
-                        </Link>
-                    </CardContent>
-                </Card>
-            ) : (
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <div className="mb-6 overflow-x-auto scrollbar-hide -mx-3 sm:-mx-4 px-3 sm:px-4">
-                        <TabsList className="inline-flex min-w-full w-auto">
-                            <TabsTrigger value="todos" className="flex items-center gap-2 whitespace-nowrap">
-                                <Package className="w-4 h-4" />
-                                Todos
-                                <Badge variant="secondary" className="ml-1">{getOrderCount('todos')}</Badge>
-                            </TabsTrigger>
-                            <TabsTrigger value="completed" className="flex items-center gap-2 whitespace-nowrap">
-                                <CheckCircle className="w-4 h-4" />
-                                Concluídos
-                                <Badge variant="secondary" className="ml-1">{getOrderCount('completed')}</Badge>
-                            </TabsTrigger>
-                            <TabsTrigger value="pending" className="flex items-center gap-2 whitespace-nowrap">
-                                <Clock className="w-4 h-4" />
-                                Pendentes
-                                <Badge variant="secondary" className="ml-1">{getOrderCount('pending')}</Badge>
-                            </TabsTrigger>
-                            <TabsTrigger value="processing" className="flex items-center gap-2 whitespace-nowrap">
-                                <Package className="w-4 h-4" />
-                                Processando
-                                <Badge variant="secondary" className="ml-1">{getOrderCount('processing')}</Badge>
-                            </TabsTrigger>
-                            <TabsTrigger value="cancelled" className="flex items-center gap-2 whitespace-nowrap">
-                                <XCircle className="w-4 h-4" />
-                                Cancelados
-                                <Badge variant="secondary" className="ml-1">{getOrderCount('cancelled')}</Badge>
-                            </TabsTrigger>
-                        </TabsList>
-                    </div>
+                {orders.length === 0 ? (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Nenhum pedido encontrado</CardTitle>
+                            <CardDescription>
+                                Você ainda não realizou nenhuma compra.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Link href="/produtos">
+                                <Button className="bg-[#FED466] text-black hover:bg-[#FED466]/90">
+                                    Explorar Produtos
+                                </Button>
+                            </Link>
+                        </CardContent>
+                    </Card>
+                ) : (
+                    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                        <div className="mb-6 overflow-x-auto scrollbar-hide -mx-3 sm:-mx-4 px-3 sm:px-4">
+                            <TabsList className="inline-flex min-w-full w-auto">
+                                <TabsTrigger value="todos" className="flex items-center gap-2 whitespace-nowrap">
+                                    <Package className="w-4 h-4" />
+                                    Todos
+                                    <Badge variant="secondary" className="ml-1">{getOrderCount('todos')}</Badge>
+                                </TabsTrigger>
+                                <TabsTrigger value="completed" className="flex items-center gap-2 whitespace-nowrap">
+                                    <CheckCircle className="w-4 h-4" />
+                                    Concluídos
+                                    <Badge variant="secondary" className="ml-1">{getOrderCount('completed')}</Badge>
+                                </TabsTrigger>
+                                <TabsTrigger value="pending" className="flex items-center gap-2 whitespace-nowrap">
+                                    <Clock className="w-4 h-4" />
+                                    Pendentes
+                                    <Badge variant="secondary" className="ml-1">{getOrderCount('pending')}</Badge>
+                                </TabsTrigger>
+                                <TabsTrigger value="processing" className="flex items-center gap-2 whitespace-nowrap">
+                                    <Package className="w-4 h-4" />
+                                    Processando
+                                    <Badge variant="secondary" className="ml-1">{getOrderCount('processing')}</Badge>
+                                </TabsTrigger>
+                                <TabsTrigger value="cancelled" className="flex items-center gap-2 whitespace-nowrap">
+                                    <XCircle className="w-4 h-4" />
+                                    Cancelados
+                                    <Badge variant="secondary" className="ml-1">{getOrderCount('cancelled')}</Badge>
+                                </TabsTrigger>
+                            </TabsList>
+                        </div>
 
-                    <TabsContent value="todos" className="space-y-4">
-                        {filterOrders('todos').map((order) => (
-                            <OrderCard key={order.id} order={order} getStatusBadge={getStatusBadge} formatDate={formatDate} formatPrice={formatPrice} />
-                        ))}
-                    </TabsContent>
-
-                    <TabsContent value="completed" className="space-y-4">
-                        {filterOrders('completed').length > 0 ? (
-                            filterOrders('completed').map((order) => (
+                        <TabsContent value="todos" className="space-y-4">
+                            {filterOrders('todos').map((order) => (
                                 <OrderCard key={order.id} order={order} getStatusBadge={getStatusBadge} formatDate={formatDate} formatPrice={formatPrice} />
-                            ))
-                        ) : (
-                            <Card>
-                                <CardContent className="py-8 text-center text-gray-500">
-                                    Nenhum pedido concluído encontrado
-                                </CardContent>
-                            </Card>
-                        )}
-                    </TabsContent>
+                            ))}
+                        </TabsContent>
 
-                    <TabsContent value="pending" className="space-y-4">
-                        {filterOrders('pending').length > 0 ? (
-                            filterOrders('pending').map((order) => (
-                                <OrderCard key={order.id} order={order} getStatusBadge={getStatusBadge} formatDate={formatDate} formatPrice={formatPrice} />
-                            ))
-                        ) : (
-                            <Card>
-                                <CardContent className="py-8 text-center text-gray-500">
-                                    Nenhum pedido pendente encontrado
-                                </CardContent>
-                            </Card>
-                        )}
-                    </TabsContent>
+                        <TabsContent value="completed" className="space-y-4">
+                            {filterOrders('completed').length > 0 ? (
+                                filterOrders('completed').map((order) => (
+                                    <OrderCard key={order.id} order={order} getStatusBadge={getStatusBadge} formatDate={formatDate} formatPrice={formatPrice} />
+                                ))
+                            ) : (
+                                <Card>
+                                    <CardContent className="py-8 text-center text-gray-500">
+                                        Nenhum pedido concluído encontrado
+                                    </CardContent>
+                                </Card>
+                            )}
+                        </TabsContent>
 
-                    <TabsContent value="processing" className="space-y-4">
-                        {filterOrders('processing').length > 0 ? (
-                            filterOrders('processing').map((order) => (
-                                <OrderCard key={order.id} order={order} getStatusBadge={getStatusBadge} formatDate={formatDate} formatPrice={formatPrice} />
-                            ))
-                        ) : (
-                            <Card>
-                                <CardContent className="py-8 text-center text-gray-500">
-                                    Nenhum pedido em processamento encontrado
-                                </CardContent>
-                            </Card>
-                        )}
-                    </TabsContent>
+                        <TabsContent value="pending" className="space-y-4">
+                            {filterOrders('pending').length > 0 ? (
+                                filterOrders('pending').map((order) => (
+                                    <OrderCard key={order.id} order={order} getStatusBadge={getStatusBadge} formatDate={formatDate} formatPrice={formatPrice} />
+                                ))
+                            ) : (
+                                <Card>
+                                    <CardContent className="py-8 text-center text-gray-500">
+                                        Nenhum pedido pendente encontrado
+                                    </CardContent>
+                                </Card>
+                            )}
+                        </TabsContent>
 
-                    <TabsContent value="cancelled" className="space-y-4">
-                        {filterOrders('cancelled').length > 0 ? (
-                            filterOrders('cancelled').map((order) => (
-                                <OrderCard key={order.id} order={order} getStatusBadge={getStatusBadge} formatDate={formatDate} formatPrice={formatPrice} />
-                            ))
-                        ) : (
-                            <Card>
-                                <CardContent className="py-8 text-center text-gray-500">
-                                    Nenhum pedido cancelado encontrado
-                                </CardContent>
-                            </Card>
-                        )}
-                    </TabsContent>
-                </Tabs>
-            )}
+                        <TabsContent value="processing" className="space-y-4">
+                            {filterOrders('processing').length > 0 ? (
+                                filterOrders('processing').map((order) => (
+                                    <OrderCard key={order.id} order={order} getStatusBadge={getStatusBadge} formatDate={formatDate} formatPrice={formatPrice} />
+                                ))
+                            ) : (
+                                <Card>
+                                    <CardContent className="py-8 text-center text-gray-500">
+                                        Nenhum pedido em processamento encontrado
+                                    </CardContent>
+                                </Card>
+                            )}
+                        </TabsContent>
+
+                        <TabsContent value="cancelled" className="space-y-4">
+                            {filterOrders('cancelled').length > 0 ? (
+                                filterOrders('cancelled').map((order) => (
+                                    <OrderCard key={order.id} order={order} getStatusBadge={getStatusBadge} formatDate={formatDate} formatPrice={formatPrice} />
+                                ))
+                            ) : (
+                                <Card>
+                                    <CardContent className="py-8 text-center text-gray-500">
+                                        Nenhum pedido cancelado encontrado
+                                    </CardContent>
+                                </Card>
+                            )}
+                        </TabsContent>
+                    </Tabs>
+                )}
             </div>
         </div>
     );
@@ -421,7 +421,7 @@ function OrderCard({
                                     </p>
                                 </div>
                             )}
-                            
+
                             <Link href={`/conta/pedidos/${order.id}`} className="block w-full">
                                 <Button
                                     size="lg"
