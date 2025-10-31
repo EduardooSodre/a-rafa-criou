@@ -171,6 +171,9 @@ export async function GET(request: NextRequest) {
         .map(v => {
           // Buscar attributeValues desta variação
           const varAttrs = allVariationAttributes.filter(attr => attr.variationId === v.id);
+          
+          // Buscar imagens desta variação
+          const variationImages = allImages.filter(img => img.variationId === v.id);
 
           return {
             id: v.id,
@@ -179,6 +182,7 @@ export async function GET(request: NextRequest) {
             price: Number(v.price),
             isActive: v.isActive,
             sortOrder: v.sortOrder,
+            images: variationImages.map(img => img.url), // URLs das imagens da variação
             attributeValues: varAttrs.map(attr => ({
               attributeId: attr.attributeId,
               attributeName: attr.attributeName,

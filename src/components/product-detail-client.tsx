@@ -77,7 +77,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
         Array.isArray(product.variations) && product.variations.length > 0 ? product.variations[0].id : ''
     )
     const router = useRouter()
-    const { addItem } = useCart()
+    const { addItem, openCartSheet } = useCart()
     const { showToast } = useToast()
 
     const currentVariation = Array.isArray(product.variations) ? product.variations.find(v => v.id === selectedVariation) : undefined
@@ -112,6 +112,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
             image: product.images[0]
         })
         showToast(t('cart.addedToCart', { product: t(`productNames.${product.slug}`, { defaultValue: product.name }) }), 'success')
+        openCartSheet() // Abre o MobileCartSheet após adicionar
     }
 
     // Resolve variation by selected attributes (if applicable)

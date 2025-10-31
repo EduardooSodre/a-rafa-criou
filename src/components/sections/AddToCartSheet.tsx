@@ -17,6 +17,7 @@ interface ProductVariation {
     slug: string
     isActive: boolean
     sortOrder: number
+    images?: string[]
     attributeValues?: {
         attributeId: string
         attributeName: string | null
@@ -40,7 +41,7 @@ interface AddToCartSheetProps {
 }
 
 export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: AddToCartSheetProps) {
-    const { addItem, items } = useCart()
+    const { addItem, items, openCartSheet } = useCart()
     const { showToast } = useToast()
     const [selectedFilters, setSelectedFilters] = useState<Map<string, string>>(new Map())
     const [selectedVariation, setSelectedVariation] = useState<ProductVariation | null>(null)
@@ -66,6 +67,11 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
 
         if (validVariations.length === 1) {
             const variation = validVariations[0]
+            const variationImage = variation.images && variation.images.length > 0 
+                ? variation.images[0] 
+                : null;
+            const productImage = product.mainImage?.data || '/file.svg';
+            
             addItem({
                 id: `${product.id}-${variation.id}`,
                 productId: product.id,
@@ -73,7 +79,7 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
                 name: product.name,
                 price: variation.price,
                 variationName: variation.name,
-                image: product.mainImage?.data || '/file.svg',
+                image: variationImage || productImage,
                 attributes: variation.attributeValues?.map(attr => ({
                     name: attr.attributeName || '',
                     value: attr.value || ''
@@ -81,8 +87,9 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
             })
             showToast('Produto adicionado ao carrinho!', 'success')
             onOpenChange(false)
+            openCartSheet() // Abre o MobileCartSheet após adicionar
         }
-    }, [open, validVariations, product, addItem, showToast, onOpenChange])
+    }, [open, validVariations, product, addItem, showToast, onOpenChange, openCartSheet])
 
     // Atualizar variação selecionada quando filtros mudarem
     useEffect(() => {
@@ -180,6 +187,12 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
             onOpenChange(false)
             return
         }
+        
+        const variationImage = selectedVariation.images && selectedVariation.images.length > 0 
+            ? selectedVariation.images[0] 
+            : null;
+        const productImage = product.mainImage?.data || '/file.svg';
+        
         addItem({
             id: `${product.id}-${selectedVariation.id}`,
             productId: product.id,
@@ -187,7 +200,7 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
             name: product.name,
             price: selectedVariation.price,
             variationName: selectedVariation.name,
-            image: product.mainImage?.data || '/file.svg',
+            image: variationImage || productImage,
             attributes: selectedVariation.attributeValues?.map(attr => ({
                 name: attr.attributeName || '',
                 value: attr.value || ''
@@ -195,6 +208,7 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
         })
         showToast('Produto adicionado ao carrinho!', 'success')
         onOpenChange(false)
+        openCartSheet() // Abre o MobileCartSheet após adicionar
         if (onAddedToCart) onAddedToCart();
     }
 

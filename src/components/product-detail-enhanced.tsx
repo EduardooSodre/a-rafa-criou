@@ -71,16 +71,26 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
     const [selectedVariation, setSelectedVariation] = useState<string>(cheapestVariationId || '')
 
     // Imagens iniciais: se o produto não tem imagens, use imagens das variações como fallback
-    const initialImages = (product.images && product.images.length > 0)
-        ? product.images
-        : variationsByPrice.flatMap((v: ProductVariation) => v.images || [])
-    const [displayedImages, setDisplayedImages] = useState<string[]>(initialImages)
+    // Criar mapa de imagens para variações (para seleção automática ao clicar na thumbnail)
+    const imageToVariationMap = new Map<string, ProductVariation>();
+    validVariations.forEach((variation: ProductVariation) => {
+        if (variation.images && variation.images.length > 0) {
+            variation.images.forEach((img: string) => {
+                imageToVariationMap.set(img, variation);
+            });
+        }
+    });
+
+    // Criar array de todas as imagens disponíveis (produto + variações)
+    const allAvailableImages = [
+        ...product.images,
+        ...validVariations.flatMap((v: ProductVariation) => v.images || [])
+    ].filter((img, index, self) => self.indexOf(img) === index); // Remove duplicatas
 
     // Estado para filtros de atributos (novo sistema de seleção)
     const [selectedFilters, setSelectedFilters] = useState<Map<string, string>>(new Map())
 
     const currentVariation = validVariations.find((v: ProductVariation) => v.id === selectedVariation)
-    const currentPrice = currentVariation?.price || product.basePrice
 
     // Precalcular min/max de preços para exibir faixa quando nada estiver selecionado
     const prices = validVariations.map((v: ProductVariation) => v.price)
@@ -182,36 +192,94 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
 
     // Atualizar imagens: por padrão mostramos as imagens do produto (não sobrescrever com a
     // variação automaticamente). Só trocamos para as imagens da variação quando houver filtros
-    // aplicados (usuário interagiu) e a variação correspondente possuir imagens.
-    useEffect(() => {
-        if (selectedFilters.size === 0) {
-            setDisplayedImages(initialImages)
-            setCurrentImageIndex(0)
-            return
-        }
-
-        if (currentVariation?.images && currentVariation.images.length > 0) {
-            setDisplayedImages(currentVariation.images)
-        } else {
-            setDisplayedImages(product.images)
-        }
-        setCurrentImageIndex(0) // Resetar para primeira imagem
-    }, [selectedVariation, currentVariation, product.images, selectedFilters, initialImages])
-
     const handlePrevImage = () => {
-        setCurrentImageIndex((prev) =>
-            prev === 0 ? displayedImages.length - 1 : prev - 1
-        )
+        setCurrentImageIndex((prev) => {
+            const newIndex = prev === 0 ? allAvailableImages.length - 1 : prev - 1;
+            
+            // Selecionar variação automaticamente
+            const newImage = allAvailableImages[newIndex];
+            const matchedVariation = imageToVariationMap.get(newImage);
+            
+            if (matchedVariation) {
+                console.log('⬅️ Seta anterior - Variação selecionada:', matchedVariation.name);
+                const newFilters = new Map<string, string>();
+                matchedVariation.attributeValues?.forEach((attr) => {
+                    if (attr.attributeName && attr.value) {
+                        newFilters.set(attr.attributeName, attr.value);
+                    }
+                });
+                setSelectedFilters(newFilters);
+                setSelectedVariation(matchedVariation.id);
+            } else {
+                console.log('⬅️ Seta anterior - Imagem do produto, limpando seleção');
+                setSelectedFilters(new Map());
+                setSelectedVariation('');
+            }
+            
+            return newIndex;
+        });
     }
 
     const handleNextImage = () => {
-        setCurrentImageIndex((prev) =>
-            prev === displayedImages.length - 1 ? 0 : prev + 1
-        )
+        setCurrentImageIndex((prev) => {
+            const newIndex = prev === allAvailableImages.length - 1 ? 0 : prev + 1;
+            
+            // Selecionar variação automaticamente
+            const newImage = allAvailableImages[newIndex];
+            const matchedVariation = imageToVariationMap.get(newImage);
+            
+            if (matchedVariation) {
+                console.log('➡️ Seta próxima - Variação selecionada:', matchedVariation.name);
+                const newFilters = new Map<string, string>();
+                matchedVariation.attributeValues?.forEach((attr) => {
+                    if (attr.attributeName && attr.value) {
+                        newFilters.set(attr.attributeName, attr.value);
+                    }
+                });
+                setSelectedFilters(newFilters);
+                setSelectedVariation(matchedVariation.id);
+            } else {
+                console.log('➡️ Seta próxima - Imagem do produto, limpando seleção');
+                setSelectedFilters(new Map());
+                setSelectedVariation('');
+            }
+            
+            return newIndex;
+        });
     }
 
     const handleThumbnailClick = (index: number) => {
         setCurrentImageIndex(index)
+        
+        // Obter a imagem clicada
+        const clickedImage = allAvailableImages[index];
+        
+        // Verificar se essa imagem pertence a uma variação específica
+        const matchedVariation = imageToVariationMap.get(clickedImage);
+        
+        if (matchedVariation) {
+            console.log('🖼️ Imagem da variação clicada:', {
+                image: clickedImage,
+                variation: matchedVariation.name,
+                attributes: matchedVariation.attributeValues
+            });
+            
+            // Selecionar automaticamente os atributos dessa variação
+            const newFilters = new Map<string, string>();
+            matchedVariation.attributeValues?.forEach((attr) => {
+                if (attr.attributeName && attr.value) {
+                    newFilters.set(attr.attributeName, attr.value);
+                }
+            });
+            
+            setSelectedFilters(newFilters);
+            setSelectedVariation(matchedVariation.id);
+        } else {
+            // Se for imagem do produto (não de variação), limpar seleção
+            console.log('🖼️ Imagem do produto clicada, limpando seleção');
+            setSelectedFilters(new Map());
+            setSelectedVariation('');
+        }
     }
 
     const handleAddToCart = () => {
@@ -220,6 +288,25 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
             showToast(t('productInfo.selectAllOptions', 'Selecione todas as opções antes de adicionar ao carrinho!'), 'error');
             return;
         }
+        
+        // Determinar a imagem: primeiro tenta variação, depois produto
+        const variationImage = currentVariation.images && currentVariation.images.length > 0 
+            ? currentVariation.images[0] 
+            : null;
+        const productImage = product.images && product.images.length > 0 
+            ? product.images[0] 
+            : '/file.svg';
+        
+        const finalImage = variationImage || productImage;
+        
+        console.log('🛒 Adicionando ao carrinho:', {
+            variationId: currentVariation.id,
+            variationName: currentVariation.name,
+            variationImages: currentVariation.images,
+            productImages: product.images,
+            selectedImage: finalImage
+        });
+        
         // Adiciona o produto ao carrinho com as variações/atributos selecionados
         addItem({
             id: `${product.id}-${currentVariation.id}`,
@@ -228,7 +315,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
             name: product.name,
             price: currentVariation.price,
             variationName: currentVariation.name,
-            image: product.images && product.images.length > 0 ? product.images[0] : '/file.svg',
+            image: finalImage,
             attributes: currentVariation.attributeValues?.map(attr => ({
                 name: attr.attributeName || '',
                 value: attr.value || ''
@@ -244,6 +331,15 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
             showToast(t('productInfo.selectAllOptions', 'Selecione todas as opções antes de comprar!'), 'error');
             return;
         }
+        
+        // Determinar a imagem: primeiro tenta variação, depois produto
+        const variationImage = currentVariation.images && currentVariation.images.length > 0 
+            ? currentVariation.images[0] 
+            : null;
+        const productImage = product.images && product.images.length > 0 
+            ? product.images[0] 
+            : '/file.svg';
+        
         // Adiciona o produto ao carrinho antes de redirecionar
         addItem({
             id: `${product.id}-${currentVariation.id}`,
@@ -252,7 +348,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
             name: product.name,
             price: currentVariation.price,
             variationName: currentVariation.name,
-            image: product.images && product.images.length > 0 ? product.images[0] : '/file.svg',
+            image: variationImage || productImage,
             attributes: currentVariation.attributeValues?.map(attr => ({
                 name: attr.attributeName || '',
                 value: attr.value || ''
@@ -278,7 +374,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                     {/* Imagem Principal */}
                     <div className="relative aspect-square bg-gray-100 rounded-xl overflow-hidden mb-4 shadow-lg border-2 border-gray-200">
                         <Image
-                            src={displayedImages[currentImageIndex] || '/file.svg'}
+                            src={allAvailableImages[currentImageIndex] || '/file.svg'}
                             alt={`${product.name} - imagem ${currentImageIndex + 1}`}
                             fill
                             className="object-contain p-4"
@@ -287,7 +383,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                         />
 
                         {/* Botões de Navegação - GRANDES e VISÍVEIS para idosos */}
-                        {displayedImages.length > 1 && (
+                        {allAvailableImages.length > 1 && (
                             <>
                                 <button
                                     onClick={handlePrevImage}
@@ -307,38 +403,47 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                         )}
 
                         {/* Indicador de posição */}
-                        {displayedImages.length > 1 && (
-                            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-full text-base md:text-lg font-semibold">
-                                {currentImageIndex + 1} / {displayedImages.length}
+                        {allAvailableImages.length > 1 && (
+                            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/75 text-white px-4 py-2 rounded-full text-sm md:text-base font-bold shadow-2xl backdrop-blur-sm">
+                                {currentImageIndex + 1} / {allAvailableImages.length}
                             </div>
                         )}
                     </div>
 
                     {/* Miniaturas */}
-                    {displayedImages.length > 1 && (
+                    {allAvailableImages.length > 1 && (
                         <div className="grid grid-cols-4 gap-3">
-                            {displayedImages.map((img, idx) => (
-                                <button
-                                    key={idx}
-                                    onClick={() => handleThumbnailClick(idx)}
-                                    aria-label={`Selecionar miniatura ${idx + 1}`}
-                                    aria-current={currentImageIndex === idx ? true : undefined}
-                                    className={cn(
-                                        "relative aspect-square rounded-lg overflow-hidden border-3 transition-all duration-200 hover:scale-105",
-                                        currentImageIndex === idx
-                                            ? "border-[#FED466] ring-4 ring-[#FED466]/50 shadow-lg"
-                                            : "border-gray-300 hover:border-[#FD9555] opacity-70 hover:opacity-100"
-                                    )}
-                                >
-                                    <Image
-                                        src={img}
-                                        alt={`Miniatura ${idx + 1}`}
-                                        fill
-                                        className="object-cover"
-                                        sizes="(max-width: 768px) 25vw, 12vw"
-                                    />
-                                </button>
-                            ))}
+                            {allAvailableImages.map((img, idx) => {
+                                const isVariationImage = imageToVariationMap.has(img);
+                                const isSelected = currentImageIndex === idx;
+                                
+                                return (
+                                    <button
+                                        key={idx}
+                                        onClick={() => handleThumbnailClick(idx)}
+                                        aria-label={`Selecionar miniatura ${idx + 1}`}
+                                        aria-current={isSelected ? true : undefined}
+                                        className={cn(
+                                            "relative aspect-square rounded-lg overflow-hidden border-3 transition-all duration-200 hover:scale-105",
+                                            isSelected
+                                                ? "border-[#FED466] ring-4 ring-[#FED466]/50 shadow-lg"
+                                                : "border-gray-300 hover:border-[#FD9555] opacity-70 hover:opacity-100"
+                                        )}
+                                    >
+                                        <Image
+                                            src={img}
+                                            alt={`Miniatura ${idx + 1}`}
+                                            fill
+                                            className="object-cover"
+                                            sizes="(max-width: 768px) 25vw, 12vw"
+                                        />
+                                        {/* Indicador de variação */}
+                                        {isVariationImage && (
+                                            <div className="absolute bottom-1 right-1 w-3 h-3 bg-[#FD9555] rounded-full border-2 border-white shadow-sm"></div>
+                                        )}
+                                    </button>
+                                );
+                            })}
                         </div>
                     )}
 
@@ -435,7 +540,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                         <div className="block lg:hidden mt-3 mb-4">
                             <div className="relative aspect-square bg-gray-100 rounded-xl overflow-hidden shadow-md border border-gray-200">
                                 <Image
-                                    src={displayedImages[currentImageIndex] || '/file.svg'}
+                                    src={allAvailableImages[currentImageIndex] || '/file.svg'}
                                     alt={`${product.name} - imagem ${currentImageIndex + 1}`}
                                     fill
                                     className="object-contain p-4"
@@ -443,7 +548,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                 />
 
                                 {/* Mobile prev/next controls */}
-                                {displayedImages.length > 1 && (
+                                {allAvailableImages.length > 1 && (
                                     <>
                                         <button
                                             onClick={handlePrevImage}
@@ -464,21 +569,30 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                             </div>
 
                             {/* Mobile thumbnails */}
-                            {displayedImages.length > 1 && (
+                            {allAvailableImages.length > 1 && (
                                 <div className="mt-3 flex gap-2 overflow-x-auto">
-                                    {displayedImages.map((img, idx) => (
-                                        <button
-                                            key={idx}
-                                            onClick={() => handleThumbnailClick(idx)}
-                                            aria-label={`Selecionar imagem ${idx + 1}`}
-                                            className={cn(
-                                                "relative w-20 h-20 flex-shrink-0 rounded-md overflow-hidden border transition-all duration-150",
-                                                currentImageIndex === idx ? 'ring-2 ring-[#FED466] border-transparent' : 'border-gray-200'
-                                            )}
-                                        >
-                                            <Image src={img} alt={`Thumb ${idx + 1}`} fill className="object-cover" sizes="80px" />
-                                        </button>
-                                    ))}
+                                    {allAvailableImages.map((img, idx) => {
+                                        const isVariationImage = imageToVariationMap.has(img);
+                                        const isSelected = currentImageIndex === idx;
+                                        
+                                        return (
+                                            <button
+                                                key={idx}
+                                                onClick={() => handleThumbnailClick(idx)}
+                                                aria-label={`Selecionar imagem ${idx + 1}`}
+                                                className={cn(
+                                                    "relative w-20 h-20 flex-shrink-0 rounded-md overflow-hidden border transition-all duration-150",
+                                                    isSelected ? 'ring-2 ring-[#FED466] border-transparent' : 'border-gray-200'
+                                                )}
+                                            >
+                                                <Image src={img} alt={`Thumb ${idx + 1}`} fill className="object-cover" sizes="80px" />
+                                                {/* Indicador de variação */}
+                                                {isVariationImage && (
+                                                    <div className="absolute bottom-1 right-1 w-2 h-2 bg-[#FD9555] rounded-full border border-white shadow-sm"></div>
+                                                )}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             )}
 
