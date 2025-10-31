@@ -437,7 +437,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
             <Head>
                 <title>{product.name} | A Rafa Criou - Arquivos Digitais para Festas</title>
                 <meta name="description" content={product.description} />
-                
+
                 {/* Open Graph / Facebook */}
                 <meta property="og:type" content="product" />
                 <meta property="og:url" content={productUrl} />
@@ -449,21 +449,21 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                 <meta property="og:site_name" content="A Rafa Criou" />
                 <meta property="product:price:amount" content={productPrice.toString()} />
                 <meta property="product:price:currency" content="BRL" />
-                
+
                 {/* Twitter */}
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:url" content={productUrl} />
                 <meta name="twitter:title" content={product.name} />
                 <meta name="twitter:description" content={product.description} />
                 <meta name="twitter:image" content={absoluteImageUrl} />
-                
+
                 {/* WhatsApp */}
                 <meta property="og:image:type" content="image/jpeg" />
                 <meta property="og:locale" content="pt_BR" />
-                
+
                 {/* Canonical URL */}
                 <link rel="canonical" href={productUrl} />
-                
+
                 {/* Schema.org para Google */}
                 <script type="application/ld+json">
                     {JSON.stringify({
@@ -497,610 +497,610 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
             </Head>
 
             <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
-                {/* Galeria de Imagens - Desktop */}
-                <div className="w-full order-1 hidden lg:block">
-                    {/* Imagem Principal */}
-                    <div className="relative aspect-square bg-gray-50 rounded-lg overflow-hidden shadow-sm border border-gray-200">
-                        <Image
-                            src={allAvailableImages[currentImageIndex] || '/file.svg'}
-                            alt={`${product.name} - ${currentVariation?.name || 'imagem principal'}`}
-                            fill
-                            className="object-contain p-6"
-                            priority
-                            sizes="(max-width: 1024px) 100vw, 50vw"
-                        />
-
-                        {/* Botões de Navegação */}
-                        {allAvailableImages.length > 1 && (
-                            <>
-                                <button
-                                    onClick={handlePrevImage}
-                                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-[#FED466] text-gray-800 rounded-full p-2.5 shadow-md transition-all duration-200 hover:scale-105 z-10"
-                                    aria-label="Imagem anterior"
-                                >
-                                    <ChevronLeft className="w-5 h-5" strokeWidth={2.5} />
-                                </button>
-                                <button
-                                    onClick={handleNextImage}
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-[#FED466] text-gray-800 rounded-full p-2.5 shadow-md transition-all duration-200 hover:scale-105 z-10"
-                                    aria-label="Próxima imagem"
-                                >
-                                    <ChevronRight className="w-5 h-5" strokeWidth={2.5} />
-                                </button>
-                            </>
-                        )}
-
-                        {/* Indicador de posição */}
-                        {allAvailableImages.length > 1 && (
-                            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/60 text-white px-3 py-1.5 rounded-full text-xs font-medium backdrop-blur-sm">
-                                {currentImageIndex + 1} / {allAvailableImages.length}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Miniaturas */}
-                    {allAvailableImages.length > 1 && (
-                        <div className="mt-3">
-                            <div className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth pb-1">
-                                {allAvailableImages.map((img, idx) => {
-                                    const isVariationImage = imageToVariationMap.has(img);
-                                    const isSelected = currentImageIndex === idx;
-
-                                    return (
-                                        <button
-                                            key={idx}
-                                            onClick={() => handleThumbnailClick(idx)}
-                                            aria-label={`Selecionar miniatura ${idx + 1}`}
-                                            aria-current={isSelected ? true : undefined}
-                                            className={cn(
-                                                "relative w-20 h-20 flex-shrink-0 rounded-md overflow-hidden border-2 transition-all duration-200 hover:scale-105",
-                                                isSelected
-                                                    ? "border-[#FED466] ring-2 ring-[#FED466]/30 shadow-sm"
-                                                    : "border-gray-200 hover:border-[#FD9555] opacity-70 hover:opacity-100"
-                                            )}
-                                        >
-                                            <Image
-                                                src={img}
-                                                alt={`Miniatura ${idx + 1}`}
-                                                fill
-                                                className="object-cover"
-                                                sizes="80px"
-                                            />
-                                            {/* Indicador de variação */}
-                                            {isVariationImage && (
-                                                <div className="absolute bottom-1 right-1 w-2.5 h-2.5 bg-[#FD9555] rounded-full border border-white shadow-sm"></div>
-                                            )}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Descrição e Especificações - Desktop */}
-                    <div className="mt-6 w-full">
-                        <Tabs defaultValue="description" className="w-full">
-                            <TabsList className="grid w-full grid-cols-2 h-11">
-                                <TabsTrigger value="description" className="text-sm font-semibold">
-                                    {t('product.tabs.description', 'Descrição')}
-                                </TabsTrigger>
-                                <TabsTrigger value="specifications" className="text-sm font-semibold">
-                                    {t('product.tabs.specifications', 'Especificações')}
-                                </TabsTrigger>
-                            </TabsList>
-
-                            <TabsContent value="description" className="mt-3">
-                                <Card>
-                                    <CardContent className="p-4">
-                                        <div
-                                            className="prose prose-sm max-w-none text-gray-700 leading-relaxed"
-                                            dangerouslySetInnerHTML={{
-                                                __html: t(`productDescriptions.${product.slug}`, {
-                                                    defaultValue: product.longDescription
-                                                })
-                                            }}
-                                        />
-                                    </CardContent>
-                                </Card>
-                            </TabsContent>
-
-                            <TabsContent value="specifications" className="mt-3">
-                                <Card>
-                                    <CardContent className="p-4">
-                                        <div className="space-y-4 text-sm">
-                                            <div>
-                                                <h4 className="font-bold mb-3 text-base text-gray-900">{t('productInfo.generalInformation', 'Informações Gerais')}</h4>
-                                                <div className="space-y-2">
-                                                    <div className="flex justify-between py-2 border-b border-gray-200">
-                                                        <span className="font-medium text-gray-600">{t('productInfo.categoryLabel', 'Categoria:')}</span>
-                                                        <span className="font-semibold text-gray-900">{t(`productCategories.${categoryKey}`, { defaultValue: product.category })}</span>
-                                                    </div>
-                                                    <div className="flex justify-between py-2 border-b border-gray-200">
-                                                        <span className="font-medium text-gray-600">{t('productInfo.variationsLabel', 'Variações:')}</span>
-                                                        <span className="font-semibold text-gray-900">{validVariations.length}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            {currentVariation && (
-                                                <div>
-                                                    <h4 className="font-bold mb-3 text-base text-gray-900">{t('productInfo.selectedVariation', 'Variação Selecionada')}</h4>
-                                                    <div className="space-y-2">
-                                                        <div className="flex justify-between py-2 border-b border-gray-200">
-                                                            <span className="font-medium text-gray-600">{t('productInfo.fieldName', 'Nome:')}</span>
-                                                            <span className="font-semibold text-gray-900">{t(`variationNames.${currentVariation.name}`, { defaultValue: currentVariation.name })}</span>
-                                                        </div>
-                                                        <div className="flex justify-between py-2 border-b border-gray-200">
-                                                            <span className="font-medium text-gray-600">{t('productInfo.fieldSize', 'Tamanho:')}</span>
-                                                            <span className="font-semibold text-gray-900">{currentVariation.fileSize}</span>
-                                                        </div>
-                                                        <div className="flex justify-between py-2 border-b border-gray-200">
-                                                            <span className="font-medium text-gray-600">{t('productInfo.fieldDownloads', 'Downloads:')}</span>
-                                                            <span className="font-semibold text-gray-900">{currentVariation.downloadLimit}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </TabsContent>
-                        </Tabs>
-                    </div>
-
-                </div>
-
-                {/* Informações do Produto */}
-                <div className="flex flex-col gap-4 order-2">
-                    {/* Breadcrumb, Rating e Compartilhar */}
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                            <Badge variant="secondary" className="text-xs sm:text-sm px-2.5 py-1">
-                                {t(`productCategories.${categoryKey}`, { defaultValue: product.category })}
-                            </Badge>
-                            <div className="flex items-center gap-1">
-                                {[...Array(5)].map((_, i) => (
-                                    <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                ))}
-                                <span className="text-xs sm:text-sm text-gray-600 ml-1.5 font-medium">(4.8)</span>
-                            </div>
-                        </div>
-                        
-                        {/* Botão Compartilhar */}
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={handleShare}
-                            className="flex items-center gap-1.5 h-8 px-3 text-xs"
-                            aria-label="Compartilhar produto"
-                        >
-                            <Share2 className="w-3.5 h-3.5" />
-                            <span className="hidden sm:inline">Compartilhar</span>
-                        </Button>
-                    </div>
-
-                    {/* Mobile: Galeria de Imagens */}
-                    <div className="block lg:hidden">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
+                    {/* Galeria de Imagens - Desktop */}
+                    <div className="w-full order-1 hidden lg:block">
+                        {/* Imagem Principal */}
                         <div className="relative aspect-square bg-gray-50 rounded-lg overflow-hidden shadow-sm border border-gray-200">
                             <Image
                                 src={allAvailableImages[currentImageIndex] || '/file.svg'}
                                 alt={`${product.name} - ${currentVariation?.name || 'imagem principal'}`}
                                 fill
-                                className="object-contain p-4"
-                                sizes="100vw"
+                                className="object-contain p-6"
                                 priority
+                                sizes="(max-width: 1024px) 100vw, 50vw"
                             />
 
-                            {/* Mobile prev/next controls */}
+                            {/* Botões de Navegação */}
                             {allAvailableImages.length > 1 && (
                                 <>
                                     <button
                                         onClick={handlePrevImage}
-                                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-[#FED466] text-gray-800 rounded-full p-2 shadow-md transition-all duration-150 z-10"
+                                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-[#FED466] text-gray-800 rounded-full p-2.5 shadow-md transition-all duration-200 hover:scale-105 z-10"
                                         aria-label="Imagem anterior"
                                     >
                                         <ChevronLeft className="w-5 h-5" strokeWidth={2.5} />
                                     </button>
                                     <button
                                         onClick={handleNextImage}
-                                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-[#FED466] text-gray-800 rounded-full p-2 shadow-md transition-all duration-150 z-10"
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-[#FED466] text-gray-800 rounded-full p-2.5 shadow-md transition-all duration-200 hover:scale-105 z-10"
                                         aria-label="Próxima imagem"
                                     >
                                         <ChevronRight className="w-5 h-5" strokeWidth={2.5} />
                                     </button>
-                                    
-                                    {/* Indicador mobile */}
-                                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 text-white px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-sm">
-                                        {currentImageIndex + 1} / {allAvailableImages.length}
-                                    </div>
                                 </>
                             )}
-                        </div>
 
-                        {/* Mobile thumbnails */}
-                        {allAvailableImages.length > 1 && (
-                            <div className="mt-2.5 flex gap-2 overflow-x-auto scrollbar-hide">
-                                {allAvailableImages.map((img, idx) => {
-                                    const isVariationImage = imageToVariationMap.has(img);
-                                    const isSelected = currentImageIndex === idx;
-
-                                    return (
-                                        <button
-                                            key={idx}
-                                            onClick={() => handleThumbnailClick(idx)}
-                                            aria-label={`Selecionar imagem ${idx + 1}`}
-                                            className={cn(
-                                                "relative w-16 h-16 flex-shrink-0 rounded-md overflow-hidden border-2 transition-all duration-150",
-                                                isSelected ? 'ring-2 ring-[#FED466] border-transparent' : 'border-gray-200'
-                                            )}
-                                        >
-                                            <Image src={img} alt={`Thumb ${idx + 1}`} fill className="object-cover" sizes="64px" />
-                                            {/* Indicador de variação */}
-                                            {isVariationImage && (
-                                                <div className="absolute bottom-1 right-1 w-2 h-2 bg-[#FD9555] rounded-full border border-white shadow-sm"></div>
-                                            )}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Título do Produto */}
-                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">
-                        {t(`productNames.${product.slug}`, { defaultValue: product.name })}
-                    </h1>
-
-                    {/* Tags */}
-                    {product.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5">
-                            {product.tags.map((tag) => (
-                                <Badge key={tag} variant="outline" className="text-xs px-2.5 py-0.5">
-                                    {tag}
-                                </Badge>
-                            ))}
-                        </div>
-                    )}
-
-                    {/* Preço */}
-                    <div className="py-2">
-                        <div className="text-3xl sm:text-4xl font-bold text-[#FD9555]">
-                            {selectedFilters.size === 0 ? (
-                                minPrice === maxPrice ? (
-                                    formatPrice(minPrice)
-                                ) : (
-                                    `${formatPrice(minPrice)} — ${formatPrice(maxPrice)}`
-                                )
-                            ) : (
-                                currentVariation ? formatPrice(currentVariation.price) : formatPrice(product.basePrice)
+                            {/* Indicador de posição */}
+                            {allAvailableImages.length > 1 && (
+                                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/60 text-white px-3 py-1.5 rounded-full text-xs font-medium backdrop-blur-sm">
+                                    {currentImageIndex + 1} / {allAvailableImages.length}
+                                </div>
                             )}
                         </div>
+
+                        {/* Miniaturas */}
+                        {allAvailableImages.length > 1 && (
+                            <div className="mt-3">
+                                <div className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth pb-1">
+                                    {allAvailableImages.map((img, idx) => {
+                                        const isVariationImage = imageToVariationMap.has(img);
+                                        const isSelected = currentImageIndex === idx;
+
+                                        return (
+                                            <button
+                                                key={idx}
+                                                onClick={() => handleThumbnailClick(idx)}
+                                                aria-label={`Selecionar miniatura ${idx + 1}`}
+                                                aria-current={isSelected ? true : undefined}
+                                                className={cn(
+                                                    "relative w-20 h-20 flex-shrink-0 rounded-md overflow-hidden border-2 transition-all duration-200 hover:scale-105",
+                                                    isSelected
+                                                        ? "border-[#FED466] ring-2 ring-[#FED466]/30 shadow-sm"
+                                                        : "border-gray-200 hover:border-[#FD9555] opacity-70 hover:opacity-100"
+                                                )}
+                                            >
+                                                <Image
+                                                    src={img}
+                                                    alt={`Miniatura ${idx + 1}`}
+                                                    fill
+                                                    className="object-cover"
+                                                    sizes="80px"
+                                                />
+                                                {/* Indicador de variação */}
+                                                {isVariationImage && (
+                                                    <div className="absolute bottom-1 right-1 w-2.5 h-2.5 bg-[#FD9555] rounded-full border border-white shadow-sm"></div>
+                                                )}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Descrição e Especificações - Desktop */}
+                        <div className="mt-6 w-full">
+                            <Tabs defaultValue="description" className="w-full">
+                                <TabsList className="grid w-full grid-cols-2 h-11">
+                                    <TabsTrigger value="description" className="text-sm font-semibold">
+                                        {t('product.tabs.description', 'Descrição')}
+                                    </TabsTrigger>
+                                    <TabsTrigger value="specifications" className="text-sm font-semibold">
+                                        {t('product.tabs.specifications', 'Especificações')}
+                                    </TabsTrigger>
+                                </TabsList>
+
+                                <TabsContent value="description" className="mt-3">
+                                    <Card>
+                                        <CardContent className="p-4">
+                                            <div
+                                                className="prose prose-sm max-w-none text-gray-700 leading-relaxed"
+                                                dangerouslySetInnerHTML={{
+                                                    __html: t(`productDescriptions.${product.slug}`, {
+                                                        defaultValue: product.longDescription
+                                                    })
+                                                }}
+                                            />
+                                        </CardContent>
+                                    </Card>
+                                </TabsContent>
+
+                                <TabsContent value="specifications" className="mt-3">
+                                    <Card>
+                                        <CardContent className="p-4">
+                                            <div className="space-y-4 text-sm">
+                                                <div>
+                                                    <h4 className="font-bold mb-3 text-base text-gray-900">{t('productInfo.generalInformation', 'Informações Gerais')}</h4>
+                                                    <div className="space-y-2">
+                                                        <div className="flex justify-between py-2 border-b border-gray-200">
+                                                            <span className="font-medium text-gray-600">{t('productInfo.categoryLabel', 'Categoria:')}</span>
+                                                            <span className="font-semibold text-gray-900">{t(`productCategories.${categoryKey}`, { defaultValue: product.category })}</span>
+                                                        </div>
+                                                        <div className="flex justify-between py-2 border-b border-gray-200">
+                                                            <span className="font-medium text-gray-600">{t('productInfo.variationsLabel', 'Variações:')}</span>
+                                                            <span className="font-semibold text-gray-900">{validVariations.length}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {currentVariation && (
+                                                    <div>
+                                                        <h4 className="font-bold mb-3 text-base text-gray-900">{t('productInfo.selectedVariation', 'Variação Selecionada')}</h4>
+                                                        <div className="space-y-2">
+                                                            <div className="flex justify-between py-2 border-b border-gray-200">
+                                                                <span className="font-medium text-gray-600">{t('productInfo.fieldName', 'Nome:')}</span>
+                                                                <span className="font-semibold text-gray-900">{t(`variationNames.${currentVariation.name}`, { defaultValue: currentVariation.name })}</span>
+                                                            </div>
+                                                            <div className="flex justify-between py-2 border-b border-gray-200">
+                                                                <span className="font-medium text-gray-600">{t('productInfo.fieldSize', 'Tamanho:')}</span>
+                                                                <span className="font-semibold text-gray-900">{currentVariation.fileSize}</span>
+                                                            </div>
+                                                            <div className="flex justify-between py-2 border-b border-gray-200">
+                                                                <span className="font-medium text-gray-600">{t('productInfo.fieldDownloads', 'Downloads:')}</span>
+                                                                <span className="font-semibold text-gray-900">{currentVariation.downloadLimit}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                </TabsContent>
+                            </Tabs>
+                        </div>
+
                     </div>
 
-                    {/* Seleção de Variação */}
-                    {validVariations.length > 1 && (
-                        <Card className="border border-[#FED466]/60 bg-gradient-to-br from-white to-[#FFFBEA]/30">
-                            <CardContent className="p-3 sm:p-4">
-                                <div className="space-y-3">
-                                    {/* Header */}
-                                    <div className="flex items-center justify-between pb-2.5 border-b border-[#FED466]/30">
-                                        <div className="flex items-center gap-2.5">
-                                            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#FED466] to-[#FD9555] flex items-center justify-center">
-                                                <svg className="w-3.5 h-3.5 text-white" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
-                                                </svg>
-                                            </div>
-                                            <div>
-                                                <h3 className="font-bold text-sm sm:text-base text-gray-900">
-                                                    {t('productInfo.chooseVariation', 'Escolha sua variação')}
-                                                </h3>
-                                                <p className="text-xs text-gray-600">
-                                                    {t('productInfo.selectOptions')}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className="hidden sm:flex items-center gap-2 bg-[#FED466]/20 px-3 py-1.5 rounded-full border border-[#FED466]/50">
-                                            <div className="w-2 h-2 bg-[#FD9555] rounded-full animate-pulse"></div>
-                                            <span className="text-sm font-semibold text-gray-700">
-                                                {getCompatibleVariations().length} {getCompatibleVariations().length === 1 ? t('productInfo.optionAvailable') : t('productInfo.optionsAvailable')}
-                                            </span>
-                                        </div>
-                                    </div>
+                    {/* Informações do Produto */}
+                    <div className="flex flex-col gap-4 order-2">
+                        {/* Breadcrumb, Rating e Compartilhar */}
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                                <Badge variant="secondary" className="text-xs sm:text-sm px-2.5 py-1">
+                                    {t(`productCategories.${categoryKey}`, { defaultValue: product.category })}
+                                </Badge>
+                                <div className="flex items-center gap-1">
+                                    {[...Array(5)].map((_, i) => (
+                                        <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                    ))}
+                                    <span className="text-xs sm:text-sm text-gray-600 ml-1.5 font-medium">(4.8)</span>
+                                </div>
+                            </div>
 
-                                    {/* Sistema de Filtros por Atributo */}
-                                    <div className={cn("space-y-4", compactMode && "max-h-[240px] overflow-auto pr-2")}>
-                                        {Array.from(attributeGroups.entries()).map(([attrName, values]) => (
-                                            <div key={attrName} className={cn("space-y-2", compactMode && "py-1")}>
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-1 h-5 bg-gradient-to-b from-[#FD9555] to-[#FED466] rounded-full"></div>
-                                                    <label className="font-semibold text-sm text-gray-800">
-                                                        {attrName}
-                                                    </label>
-                                                    {selectedFilters.has(attrName) && (
-                                                        <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold">
-                                                            {t('productInfo.selected')}
-                                                        </span>
-                                                    )}
+                            {/* Botão Compartilhar */}
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleShare}
+                                className="flex items-center gap-1.5 h-8 px-3 text-xs"
+                                aria-label="Compartilhar produto"
+                            >
+                                <Share2 className="w-3.5 h-3.5" />
+                                <span className="hidden sm:inline">Compartilhar</span>
+                            </Button>
+                        </div>
+
+                        {/* Mobile: Galeria de Imagens */}
+                        <div className="block lg:hidden">
+                            <div className="relative aspect-square bg-gray-50 rounded-lg overflow-hidden shadow-sm border border-gray-200">
+                                <Image
+                                    src={allAvailableImages[currentImageIndex] || '/file.svg'}
+                                    alt={`${product.name} - ${currentVariation?.name || 'imagem principal'}`}
+                                    fill
+                                    className="object-contain p-4"
+                                    sizes="100vw"
+                                    priority
+                                />
+
+                                {/* Mobile prev/next controls */}
+                                {allAvailableImages.length > 1 && (
+                                    <>
+                                        <button
+                                            onClick={handlePrevImage}
+                                            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-[#FED466] text-gray-800 rounded-full p-2 shadow-md transition-all duration-150 z-10"
+                                            aria-label="Imagem anterior"
+                                        >
+                                            <ChevronLeft className="w-5 h-5" strokeWidth={2.5} />
+                                        </button>
+                                        <button
+                                            onClick={handleNextImage}
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-[#FED466] text-gray-800 rounded-full p-2 shadow-md transition-all duration-150 z-10"
+                                            aria-label="Próxima imagem"
+                                        >
+                                            <ChevronRight className="w-5 h-5" strokeWidth={2.5} />
+                                        </button>
+
+                                        {/* Indicador mobile */}
+                                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 text-white px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-sm">
+                                            {currentImageIndex + 1} / {allAvailableImages.length}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+
+                            {/* Mobile thumbnails */}
+                            {allAvailableImages.length > 1 && (
+                                <div className="mt-2.5 flex gap-2 overflow-x-auto scrollbar-hide">
+                                    {allAvailableImages.map((img, idx) => {
+                                        const isVariationImage = imageToVariationMap.has(img);
+                                        const isSelected = currentImageIndex === idx;
+
+                                        return (
+                                            <button
+                                                key={idx}
+                                                onClick={() => handleThumbnailClick(idx)}
+                                                aria-label={`Selecionar imagem ${idx + 1}`}
+                                                className={cn(
+                                                    "relative w-16 h-16 flex-shrink-0 rounded-md overflow-hidden border-2 transition-all duration-150",
+                                                    isSelected ? 'ring-2 ring-[#FED466] border-transparent' : 'border-gray-200'
+                                                )}
+                                            >
+                                                <Image src={img} alt={`Thumb ${idx + 1}`} fill className="object-cover" sizes="64px" />
+                                                {/* Indicador de variação */}
+                                                {isVariationImage && (
+                                                    <div className="absolute bottom-1 right-1 w-2 h-2 bg-[#FD9555] rounded-full border border-white shadow-sm"></div>
+                                                )}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Título do Produto */}
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">
+                            {t(`productNames.${product.slug}`, { defaultValue: product.name })}
+                        </h1>
+
+                        {/* Tags */}
+                        {product.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5">
+                                {product.tags.map((tag) => (
+                                    <Badge key={tag} variant="outline" className="text-xs px-2.5 py-0.5">
+                                        {tag}
+                                    </Badge>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Preço */}
+                        <div className="py-2">
+                            <div className="text-3xl sm:text-4xl font-bold text-[#FD9555]">
+                                {selectedFilters.size === 0 ? (
+                                    minPrice === maxPrice ? (
+                                        formatPrice(minPrice)
+                                    ) : (
+                                        `${formatPrice(minPrice)} — ${formatPrice(maxPrice)}`
+                                    )
+                                ) : (
+                                    currentVariation ? formatPrice(currentVariation.price) : formatPrice(product.basePrice)
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Seleção de Variação */}
+                        {validVariations.length > 1 && (
+                            <Card className="border border-[#FED466]/60 bg-gradient-to-br from-white to-[#FFFBEA]/30">
+                                <CardContent className="p-3 sm:p-4">
+                                    <div className="space-y-3">
+                                        {/* Header */}
+                                        <div className="flex items-center justify-between pb-2.5 border-b border-[#FED466]/30">
+                                            <div className="flex items-center gap-2.5">
+                                                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#FED466] to-[#FD9555] flex items-center justify-center">
+                                                    <svg className="w-3.5 h-3.5 text-white" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                                                    </svg>
                                                 </div>
+                                                <div>
+                                                    <h3 className="font-bold text-sm sm:text-base text-gray-900">
+                                                        {t('productInfo.chooseVariation', 'Escolha sua variação')}
+                                                    </h3>
+                                                    <p className="text-xs text-gray-600">
+                                                        {t('productInfo.selectOptions')}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="hidden sm:flex items-center gap-2 bg-[#FED466]/20 px-3 py-1.5 rounded-full border border-[#FED466]/50">
+                                                <div className="w-2 h-2 bg-[#FD9555] rounded-full animate-pulse"></div>
+                                                <span className="text-sm font-semibold text-gray-700">
+                                                    {getCompatibleVariations().length} {getCompatibleVariations().length === 1 ? t('productInfo.optionAvailable') : t('productInfo.optionsAvailable')}
+                                                </span>
+                                            </div>
+                                        </div>
 
-                                                <div className={cn("grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4", compactMode ? "gap-1 md:grid-cols-3" : "gap-2")}>
-                                                    {Array.from(values).map(value => {
-                                                        const isSelected = selectedFilters.get(attrName) === value
-                                                        
-                                                        // Verificar se essa opção está disponível baseado nas seleções dos OUTROS atributos
-                                                        // Ignorar o próprio atributo atual para não criar conflito circular
-                                                        const isAvailable = validVariations.some((variation: ProductVariation) => {
-                                                            // Esta variação tem o valor que estamos testando?
-                                                            const hasThisValue = variation.attributeValues?.some((attr: { attributeName?: string | null, value?: string | null }) => 
-                                                                attr.attributeName === attrName && attr.value === value
-                                                            )
-                                                            
-                                                            if (!hasThisValue) return false
-                                                            
-                                                            // Esta variação é compatível com os OUTROS filtros selecionados (exceto o atributo atual)?
-                                                            const otherFilters = Array.from(selectedFilters.entries()).filter(([filterAttrName]) => filterAttrName !== attrName)
-                                                            
-                                                            if (otherFilters.length === 0) return true // Se não há outros filtros, está disponível
-                                                            
-                                                            // Verificar se a variação atende aos outros filtros
-                                                            return otherFilters.every(([filterAttrName, filterValue]) => {
-                                                                return variation.attributeValues?.some((attr: { attributeName?: string | null, value?: string | null }) => 
-                                                                    attr.attributeName === filterAttrName && attr.value === filterValue
+                                        {/* Sistema de Filtros por Atributo */}
+                                        <div className={cn("space-y-4", compactMode && "max-h-[240px] overflow-auto pr-2")}>
+                                            {Array.from(attributeGroups.entries()).map(([attrName, values]) => (
+                                                <div key={attrName} className={cn("space-y-2", compactMode && "py-1")}>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-1 h-5 bg-gradient-to-b from-[#FD9555] to-[#FED466] rounded-full"></div>
+                                                        <label className="font-semibold text-sm text-gray-800">
+                                                            {attrName}
+                                                        </label>
+                                                        {selectedFilters.has(attrName) && (
+                                                            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold">
+                                                                {t('productInfo.selected')}
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    <div className={cn("grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4", compactMode ? "gap-1 md:grid-cols-3" : "gap-2")}>
+                                                        {Array.from(values).map(value => {
+                                                            const isSelected = selectedFilters.get(attrName) === value
+
+                                                            // Verificar se essa opção está disponível baseado nas seleções dos OUTROS atributos
+                                                            // Ignorar o próprio atributo atual para não criar conflito circular
+                                                            const isAvailable = validVariations.some((variation: ProductVariation) => {
+                                                                // Esta variação tem o valor que estamos testando?
+                                                                const hasThisValue = variation.attributeValues?.some((attr: { attributeName?: string | null, value?: string | null }) =>
+                                                                    attr.attributeName === attrName && attr.value === value
                                                                 )
+
+                                                                if (!hasThisValue) return false
+
+                                                                // Esta variação é compatível com os OUTROS filtros selecionados (exceto o atributo atual)?
+                                                                const otherFilters = Array.from(selectedFilters.entries()).filter(([filterAttrName]) => filterAttrName !== attrName)
+
+                                                                if (otherFilters.length === 0) return true // Se não há outros filtros, está disponível
+
+                                                                // Verificar se a variação atende aos outros filtros
+                                                                return otherFilters.every(([filterAttrName, filterValue]) => {
+                                                                    return variation.attributeValues?.some((attr: { attributeName?: string | null, value?: string | null }) =>
+                                                                        attr.attributeName === filterAttrName && attr.value === filterValue
+                                                                    )
+                                                                })
                                                             })
-                                                        })
-                                                        
-                                                        return (
-                                                            <button
-                                                                key={value}
-                                                                onClick={() => isAvailable && handleFilterClick(attrName, value)}
-                                                                aria-label={`Selecionar ${attrName} ${value}`}
-                                                                disabled={!isAvailable && !isSelected}
-                                                                className={cn(
-                                                                    compactMode ? "group relative p-1.5 rounded-md border-2 transition-all duration-200 text-center overflow-hidden text-xs" : "group relative p-2 rounded-md border-2 transition-all duration-200 text-center overflow-hidden text-sm",
-                                                                    isSelected
-                                                                        ? "border-[#FD9555] bg-gradient-to-br from-[#FED466] via-[#FED466]/80 to-[#FD9555]/20 shadow-sm scale-105 cursor-pointer"
-                                                                        : isAvailable
-                                                                        ? "border-gray-300 bg-white hover:border-[#FED466] hover:shadow-sm cursor-pointer"
-                                                                        : "border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed"
-                                                                )}
-                                                            >
-                                                                {isSelected && (
-                                                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                                                                )}
 
-                                                                {isSelected && (
-                                                                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-[#FD9555] rounded-full flex items-center justify-center shadow-sm z-10">
-                                                                        <svg className="w-3 h-3 text-white" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" viewBox="0 0 24 24" stroke="currentColor">
-                                                                            <path d="M5 13l4 4L19 7"></path>
-                                                                        </svg>
-                                                                    </div>
-                                                                )}
-
-                                                                {!isAvailable && !isSelected && (
-                                                                    <div className="absolute inset-0 flex items-center justify-center">
-                                                                        <div className="w-px h-full bg-gray-300 rotate-45 transform origin-center"></div>
-                                                                    </div>
-                                                                )}
-
-                                                                <div className="relative">
-                                                                    <div className={cn(
-                                                                        "font-semibold text-sm mb-1 transition-colors",
-                                                                        isSelected 
-                                                                            ? "text-gray-900" 
-                                                                            : isAvailable 
-                                                                            ? "text-gray-700 group-hover:text-gray-900"
-                                                                            : "text-gray-400"
-                                                                    )}>
-                                                                        {value}
-                                                                    </div>
-                                                                    <div className={cn(
-                                                                        "text-xs font-medium transition-colors",
-                                                                        isSelected 
-                                                                            ? "text-[#FD9555]" 
+                                                            return (
+                                                                <button
+                                                                    key={value}
+                                                                    onClick={() => isAvailable && handleFilterClick(attrName, value)}
+                                                                    aria-label={`Selecionar ${attrName} ${value}`}
+                                                                    disabled={!isAvailable && !isSelected}
+                                                                    className={cn(
+                                                                        compactMode ? "group relative p-1.5 rounded-md border-2 transition-all duration-200 text-center overflow-hidden text-xs" : "group relative p-2 rounded-md border-2 transition-all duration-200 text-center overflow-hidden text-sm",
+                                                                        isSelected
+                                                                            ? "border-[#FD9555] bg-gradient-to-br from-[#FED466] via-[#FED466]/80 to-[#FD9555]/20 shadow-sm scale-105 cursor-pointer"
                                                                             : isAvailable
-                                                                            ? "text-gray-500"
-                                                                            : "text-gray-400"
-                                                                    )}>
-                                                                        {isSelected 
-                                                                            ? t('productInfo.selected').replace('✓ ', '') 
-                                                                            : isAvailable
-                                                                            ? t('productInfo.select')
-                                                                            : 'Indisponível'
-                                                                        }
-                                                                    </div>
-                                                                </div>
-                                                            </button>
-                                                        )
-                                                    })}
-                                                </div>
-                                            </div>
-                                        ))}
+                                                                                ? "border-gray-300 bg-white hover:border-[#FED466] hover:shadow-sm cursor-pointer"
+                                                                                : "border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed"
+                                                                    )}
+                                                                >
+                                                                    {isSelected && (
+                                                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                                                                    )}
 
-                                        {/* Alerta quando houver seleção parcial */}
-                                        {selectedFilters.size > 0 && !currentVariation && (
-                                            <div className="mt-4 p-4 rounded-lg bg-amber-50 border border-amber-200">
-                                                <div className="flex items-start gap-3">
-                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 shadow-sm">
-                                                        <svg className="w-5 h-5 text-white" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                                                        </svg>
-                                                    </div>
-                                                    <div className="flex-1">
-                                                        <h4 className="font-semibold text-base text-gray-900 mb-1">
-                                                            {t('productInfo.continueSelecting')}
-                                                        </h4>
-                                                        <p className="text-sm text-gray-700">
-                                                            {t('productInfo.selectAllOptions')}
-                                                            <br />
-                                                            <strong className="text-amber-700">
-                                                                {attributeGroups.size - selectedFilters.size} {t('productInfo.optionsRemaining')}
-                                                            </strong>
-                                                        </p>
+                                                                    {isSelected && (
+                                                                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-[#FD9555] rounded-full flex items-center justify-center shadow-sm z-10">
+                                                                            <svg className="w-3 h-3 text-white" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                <path d="M5 13l4 4L19 7"></path>
+                                                                            </svg>
+                                                                        </div>
+                                                                    )}
+
+                                                                    {!isAvailable && !isSelected && (
+                                                                        <div className="absolute inset-0 flex items-center justify-center">
+                                                                            <div className="w-px h-full bg-gray-300 rotate-45 transform origin-center"></div>
+                                                                        </div>
+                                                                    )}
+
+                                                                    <div className="relative">
+                                                                        <div className={cn(
+                                                                            "font-semibold text-sm mb-1 transition-colors",
+                                                                            isSelected
+                                                                                ? "text-gray-900"
+                                                                                : isAvailable
+                                                                                    ? "text-gray-700 group-hover:text-gray-900"
+                                                                                    : "text-gray-400"
+                                                                        )}>
+                                                                            {value}
+                                                                        </div>
+                                                                        <div className={cn(
+                                                                            "text-xs font-medium transition-colors",
+                                                                            isSelected
+                                                                                ? "text-[#FD9555]"
+                                                                                : isAvailable
+                                                                                    ? "text-gray-500"
+                                                                                    : "text-gray-400"
+                                                                        )}>
+                                                                            {isSelected
+                                                                                ? t('productInfo.selected').replace('✓ ', '')
+                                                                                : isAvailable
+                                                                                    ? t('productInfo.select')
+                                                                                    : 'Indisponível'
+                                                                            }
+                                                                        </div>
+                                                                    </div>
+                                                                </button>
+                                                            )
+                                                        })}
                                                     </div>
                                                 </div>
-                                            </div>
-                                        )}
+                                            ))}
 
+                                            {/* Alerta quando houver seleção parcial */}
+                                            {selectedFilters.size > 0 && !currentVariation && (
+                                                <div className="mt-4 p-4 rounded-lg bg-amber-50 border border-amber-200">
+                                                    <div className="flex items-start gap-3">
+                                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 shadow-sm">
+                                                            <svg className="w-5 h-5 text-white" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                                            </svg>
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <h4 className="font-semibold text-base text-gray-900 mb-1">
+                                                                {t('productInfo.continueSelecting')}
+                                                            </h4>
+                                                            <p className="text-sm text-gray-700">
+                                                                {t('productInfo.selectAllOptions')}
+                                                                <br />
+                                                                <strong className="text-amber-700">
+                                                                    {attributeGroups.size - selectedFilters.size} {t('productInfo.optionsRemaining')}
+                                                                </strong>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                        </div>
                                     </div>
+                                </CardContent>
+                            </Card>
+                        )}
+
+                        {/* CTAs - abaixo da seleção (Comprar / Adicionar ao carrinho) */}
+                        <div className="mt-4 mb-4">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3 gap-2">
+                                <Button
+                                    onClick={handleBuyNow}
+                                    variant="default"
+                                    size="default"
+                                    className="w-full sm:w-auto min-h-[44px] md:min-h-[48px] text-black font-bold text-sm md:text-base rounded-md border-2 border-[#FD9555] shadow-md cursor-pointer bg-[#FED466] hover:bg-[#FD9555] uppercase"
+                                >
+                                    {t('product.buyNow', 'COMPRAR AGORA')}
+                                </Button>
+                                <Button
+                                    onClick={handleAddToCart}
+                                    variant="default"
+                                    size="default"
+                                    className="w-full sm:w-auto min-h-[44px] md:min-h-[48px] text-white font-bold text-sm md:text-base rounded-md shadow-sm cursor-pointer bg-[#FD9555] hover:bg-[#E64D2B] border-2 border-[#FD9555]"
+                                >
+                                    <ShoppingCart className="w-5 h-5 mr-2 text-white" />
+                                    {t('product.addToCart', 'ADICIONAR AO CARRINHO')}
+                                </Button>
+                            </div>
+                        </div>
+
+                        {/* Garantias / Descrição legal compacta */}
+                        <Card className="border-2 border-amber-200 bg-amber-50">
+                            <CardContent className="p-4 text-sm leading-relaxed text-gray-800">
+                                <h4 className="font-bold mb-4 flex justify-center items-center gap-2 text-xl">Descrição</h4>
+
+                                <div className="mb-2">
+                                    <div className="flex items-start gap-2">
+                                        <Check className="w-4 h-4 text-green-600 flex-shrink-0" />
+                                        <div>
+                                            <strong>Você pode:</strong> Imprimir em casa ou em gráficas quantas vezes quiser, entregar o arquivo montado para presentear ou para uso próprio.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="mb-2">
+                                    <div className="flex items-start gap-2">
+                                        <X className="w-4 h-4 text-red-600 flex-shrink-0" />
+                                        <div>
+                                            <strong>Você NÃO pode:</strong> Fazer alterações de cor, molde, arte, frases (salvo para a opção &quot;escreva sua mensagem&quot;), trocas, empréstimos, doações, revendas ou qualquer tipo de comercialização, seja o PDF ou impresso, mesmo se tiver montado.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="text-xs text-gray-700">
+                                    <p className="mb-2">Esse arquivo é protegido pela LEI Nº 9.610, DE 19 DE FEVEREIRO DE 1998. O crime de violação de direito autoral está previsto no art. 184 do Código Penal, que preceitua: “Violar direitos de autor e os que lhe são conexos: Pena – detenção, de 3 meses a 1 ano, ou multa”.</p>
+                                    <p className="mb-2">Arquivo exclusivo DIGITAL para IMPRESSÃO feito somente para USO PESSOAL. Necessário fazer download e salvar no google drive. Após a confirmação de pagamento, o arquivo ficará disponível para Download no email cadastrado na hora da compra ou aqui mesmo no site: (Área do cliente &gt; Downloads)</p>
+                                    <p>Esse arquivo é protegido pela LEI N° 9.610, DE 19 DE FEVEREIRO DE 1998. AUTORIZADO APENAS PARA USO PESSOAL. Enviar o arquivo para outras pessoas por email, whatsapp ou qualquer outro meio eletrônico é PROIBIDO. A cópia desse arquivo ou impressão com fins comerciais também NÃO é autorizada.</p>
                                 </div>
                             </CardContent>
                         </Card>
-                    )}
 
-                    {/* CTAs - abaixo da seleção (Comprar / Adicionar ao carrinho) */}
-                    <div className="mt-4 mb-4">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3 gap-2">
-                            <Button
-                                onClick={handleBuyNow}
-                                variant="default"
-                                size="default"
-                                className="w-full sm:w-auto min-h-[44px] md:min-h-[48px] text-black font-bold text-sm md:text-base rounded-md border-2 border-[#FD9555] shadow-md cursor-pointer bg-[#FED466] hover:bg-[#FD9555] uppercase"
-                            >
-                                {t('product.buyNow', 'COMPRAR AGORA')}
-                            </Button>
-                            <Button
-                                onClick={handleAddToCart}
-                                variant="default"
-                                size="default"
-                                className="w-full sm:w-auto min-h-[44px] md:min-h-[48px] text-white font-bold text-sm md:text-base rounded-md shadow-sm cursor-pointer bg-[#FD9555] hover:bg-[#E64D2B] border-2 border-[#FD9555]"
-                            >
-                                <ShoppingCart className="w-5 h-5 mr-2 text-white" />
-                                {t('product.addToCart', 'ADICIONAR AO CARRINHO')}
-                            </Button>
-                        </div>
-                    </div>
+                        {/* Mobile Tabs: descrição / specs - apenas mobile */}
+                        <div className="mt-4 lg:hidden">
+                            <Tabs defaultValue="description" className="w-full">
+                                <TabsList className="grid w-full grid-cols-2 h-10 text-sm">
+                                    <TabsTrigger value="description" className="text-sm font-semibold">
+                                        {t('product.tabs.description', 'Descrição')}
+                                    </TabsTrigger>
+                                    <TabsTrigger value="specifications" className="text-sm font-semibold">
+                                        {t('product.tabs.specifications', 'Especificações')}
+                                    </TabsTrigger>
+                                </TabsList>
 
-                    {/* Garantias / Descrição legal compacta */}
-                    <Card className="border-2 border-amber-200 bg-amber-50">
-                        <CardContent className="p-4 text-sm leading-relaxed text-gray-800">
-                            <h4 className="font-bold mb-4 flex justify-center items-center gap-2 text-xl">Descrição</h4>
+                                <TabsContent value="description" className="mt-3">
+                                    <Card>
+                                        <CardContent className="p-3">
+                                            <div
+                                                className="prose prose-sm max-w-none text-gray-800"
+                                                dangerouslySetInnerHTML={{
+                                                    __html: t(`productDescriptions.${product.slug}`, {
+                                                        defaultValue: product.longDescription
+                                                    })
+                                                }}
+                                            />
+                                        </CardContent>
+                                    </Card>
+                                </TabsContent>
 
-                            <div className="mb-2">
-                                <div className="flex items-start gap-2">
-                                    <Check className="w-4 h-4 text-green-600 flex-shrink-0" />
-                                    <div>
-                                        <strong>Você pode:</strong> Imprimir em casa ou em gráficas quantas vezes quiser, entregar o arquivo montado para presentear ou para uso próprio.
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="mb-2">
-                                <div className="flex items-start gap-2">
-                                    <X className="w-4 h-4 text-red-600 flex-shrink-0" />
-                                    <div>
-                                        <strong>Você NÃO pode:</strong> Fazer alterações de cor, molde, arte, frases (salvo para a opção &quot;escreva sua mensagem&quot;), trocas, empréstimos, doações, revendas ou qualquer tipo de comercialização, seja o PDF ou impresso, mesmo se tiver montado.
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="text-xs text-gray-700">
-                                <p className="mb-2">Esse arquivo é protegido pela LEI Nº 9.610, DE 19 DE FEVEREIRO DE 1998. O crime de violação de direito autoral está previsto no art. 184 do Código Penal, que preceitua: “Violar direitos de autor e os que lhe são conexos: Pena – detenção, de 3 meses a 1 ano, ou multa”.</p>
-                                <p className="mb-2">Arquivo exclusivo DIGITAL para IMPRESSÃO feito somente para USO PESSOAL. Necessário fazer download e salvar no google drive. Após a confirmação de pagamento, o arquivo ficará disponível para Download no email cadastrado na hora da compra ou aqui mesmo no site: (Área do cliente &gt; Downloads)</p>
-                                <p>Esse arquivo é protegido pela LEI N° 9.610, DE 19 DE FEVEREIRO DE 1998. AUTORIZADO APENAS PARA USO PESSOAL. Enviar o arquivo para outras pessoas por email, whatsapp ou qualquer outro meio eletrônico é PROIBIDO. A cópia desse arquivo ou impressão com fins comerciais também NÃO é autorizada.</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Mobile Tabs: descrição / specs - apenas mobile */}
-                    <div className="mt-4 lg:hidden">
-                        <Tabs defaultValue="description" className="w-full">
-                            <TabsList className="grid w-full grid-cols-2 h-10 text-sm">
-                                <TabsTrigger value="description" className="text-sm font-semibold">
-                                    {t('product.tabs.description', 'Descrição')}
-                                </TabsTrigger>
-                                <TabsTrigger value="specifications" className="text-sm font-semibold">
-                                    {t('product.tabs.specifications', 'Especificações')}
-                                </TabsTrigger>
-                            </TabsList>
-
-                            <TabsContent value="description" className="mt-3">
-                                <Card>
-                                    <CardContent className="p-3">
-                                        <div
-                                            className="prose prose-sm max-w-none text-gray-800"
-                                            dangerouslySetInnerHTML={{
-                                                __html: t(`productDescriptions.${product.slug}`, {
-                                                    defaultValue: product.longDescription
-                                                })
-                                            }}
-                                        />
-                                    </CardContent>
-                                </Card>
-                            </TabsContent>
-
-                            <TabsContent value="specifications" className="mt-3">
-                                <Card>
-                                    <CardContent className="p-3">
-                                        <div className="grid grid-cols-1 gap-3 text-sm">
-                                            <div>
-                                                <h4 className="font-bold mb-2 text-base text-gray-900">{t('productInfo.generalInformation', 'Informações Gerais')}</h4>
-                                                <div className="space-y-2">
-                                                    <div className="flex justify-between py-2 border-b border-gray-200">
-                                                        <span className="font-medium text-gray-600">{t('productInfo.categoryLabel', 'Categoria:')}</span>
-                                                        <span className="font-semibold text-gray-900">{t(`productCategories.${categoryKey}`, { defaultValue: product.category })}</span>
-                                                    </div>
-                                                    <div className="flex justify-between py-2 border-b border-gray-200">
-                                                        <span className="font-medium text-gray-600">{t('productInfo.variationsLabel', 'Variações:')}</span>
-                                                        <span className="font-semibold text-gray-900">{validVariations.length}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            {currentVariation && (
+                                <TabsContent value="specifications" className="mt-3">
+                                    <Card>
+                                        <CardContent className="p-3">
+                                            <div className="grid grid-cols-1 gap-3 text-sm">
                                                 <div>
-                                                    <h4 className="font-bold mb-2 text-base text-gray-900">{t('productInfo.selectedVariation', 'Variação Selecionada')}</h4>
+                                                    <h4 className="font-bold mb-2 text-base text-gray-900">{t('productInfo.generalInformation', 'Informações Gerais')}</h4>
                                                     <div className="space-y-2">
                                                         <div className="flex justify-between py-2 border-b border-gray-200">
-                                                            <span className="font-medium text-gray-600">{t('productInfo.fieldName', 'Nome:')}</span>
-                                                            <span className="font-semibold text-gray-900">{t(`variationNames.${currentVariation.name}`, { defaultValue: currentVariation.name })}</span>
+                                                            <span className="font-medium text-gray-600">{t('productInfo.categoryLabel', 'Categoria:')}</span>
+                                                            <span className="font-semibold text-gray-900">{t(`productCategories.${categoryKey}`, { defaultValue: product.category })}</span>
                                                         </div>
                                                         <div className="flex justify-between py-2 border-b border-gray-200">
-                                                            <span className="font-medium text-gray-600">{t('productInfo.fieldSize', 'Tamanho:')}</span>
-                                                            <span className="font-semibold text-gray-900">{currentVariation.fileSize}</span>
+                                                            <span className="font-medium text-gray-600">{t('productInfo.variationsLabel', 'Variações:')}</span>
+                                                            <span className="font-semibold text-gray-900">{validVariations.length}</span>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            )}
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </TabsContent>
-                        </Tabs>
-                    </div>
+                                                {currentVariation && (
+                                                    <div>
+                                                        <h4 className="font-bold mb-2 text-base text-gray-900">{t('productInfo.selectedVariation', 'Variação Selecionada')}</h4>
+                                                        <div className="space-y-2">
+                                                            <div className="flex justify-between py-2 border-b border-gray-200">
+                                                                <span className="font-medium text-gray-600">{t('productInfo.fieldName', 'Nome:')}</span>
+                                                                <span className="font-semibold text-gray-900">{t(`variationNames.${currentVariation.name}`, { defaultValue: currentVariation.name })}</span>
+                                                            </div>
+                                                            <div className="flex justify-between py-2 border-b border-gray-200">
+                                                                <span className="font-medium text-gray-600">{t('productInfo.fieldSize', 'Tamanho:')}</span>
+                                                                <span className="font-semibold text-gray-900">{currentVariation.fileSize}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                </TabsContent>
+                            </Tabs>
+                        </div>
 
+                    </div>
                 </div>
-            </div>
-            {/* Sheet de adicionar ao carrinho */}
-            <AddToCartSheet
-                open={showAddToCart}
-                onOpenChange={setShowAddToCart}
-                product={{
-                    id: product.id,
-                    name: product.name,
-                    slug: product.slug,
-                    price: product.basePrice,
-                    mainImage: product.images && product.images.length > 0 ? { data: product.images[0], alt: product.name } : null,
-                    variations: product.variations.map(v => ({
-                        id: v.id,
-                        name: v.name,
-                        slug: v.name ? v.name.toLowerCase().replace(/\s+/g, '-') : '',
-                        price: v.price,
-                        isActive: true,
-                        sortOrder: 0,
-                        attributeValues: v.attributeValues?.map(attr => ({
-                            attributeId: attr.attributeId,
-                            attributeName: attr.attributeName || '',
-                            valueId: attr.valueId,
-                            value: attr.value || ''
-                        })) || []
-                    }))
-                }}
-                onAddedToCart={() => {
-                    setShowAddToCart(false);
-                    openCartSheet();
-                }}
-            />
-        </section>
+                {/* Sheet de adicionar ao carrinho */}
+                <AddToCartSheet
+                    open={showAddToCart}
+                    onOpenChange={setShowAddToCart}
+                    product={{
+                        id: product.id,
+                        name: product.name,
+                        slug: product.slug,
+                        price: product.basePrice,
+                        mainImage: product.images && product.images.length > 0 ? { data: product.images[0], alt: product.name } : null,
+                        variations: product.variations.map(v => ({
+                            id: v.id,
+                            name: v.name,
+                            slug: v.name ? v.name.toLowerCase().replace(/\s+/g, '-') : '',
+                            price: v.price,
+                            isActive: true,
+                            sortOrder: 0,
+                            attributeValues: v.attributeValues?.map(attr => ({
+                                attributeId: attr.attributeId,
+                                attributeName: attr.attributeName || '',
+                                valueId: attr.valueId,
+                                value: attr.value || ''
+                            })) || []
+                        }))
+                    }}
+                    onAddedToCart={() => {
+                        setShowAddToCart(false);
+                        openCartSheet();
+                    }}
+                />
+            </section>
         </>
     )
 }
