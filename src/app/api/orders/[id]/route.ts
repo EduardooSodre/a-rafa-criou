@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/config';
 import { db } from '@/lib/db';
-import { 
-  orders, 
-  orderItems, 
+import {
+  orders,
+  orderItems,
   products,
-  productImages, 
-  variationAttributeValues, 
-  attributeValues, 
-  attributes 
+  productImages,
+  variationAttributeValues,
+  attributeValues,
+  attributes,
 } from '@/lib/db/schema';
 import { eq, asc } from 'drizzle-orm';
 
@@ -69,7 +69,7 @@ export async function GET(req: NextRequest, context: unknown) {
 
     // 5. Buscar imagens e variações para cada item
     const enrichedItems = await Promise.all(
-      items.map(async (item) => {
+      items.map(async item => {
         // Buscar nome do produto original (sem variação)
         const [product] = await db
           .select({ name: products.name })
@@ -79,7 +79,7 @@ export async function GET(req: NextRequest, context: unknown) {
 
         // Buscar imagem principal do produto ou da variação
         let imageUrl = null;
-        
+
         if (item.variationId) {
           // Buscar imagem da variação primeiro
           const [variationImage] = await db
@@ -88,12 +88,12 @@ export async function GET(req: NextRequest, context: unknown) {
             .where(eq(productImages.variationId, item.variationId))
             .orderBy(asc(productImages.sortOrder))
             .limit(1);
-          
+
           if (variationImage) {
             imageUrl = variationImage.url;
           }
         }
-        
+
         // Se não encontrou imagem da variação, buscar do produto
         if (!imageUrl) {
           const [productImage] = await db
@@ -102,7 +102,7 @@ export async function GET(req: NextRequest, context: unknown) {
             .where(eq(productImages.productId, item.productId))
             .orderBy(asc(productImages.sortOrder))
             .limit(1);
-          
+
           if (productImage) {
             imageUrl = productImage.url;
           }
@@ -122,10 +122,13 @@ export async function GET(req: NextRequest, context: unknown) {
             .where(eq(variationAttributeValues.variationId, item.variationId));
 
           if (variationAttrs.length > 0) {
-            variation = variationAttrs.reduce((acc, attr) => {
-              acc[attr.attributeName] = attr.attributeValue;
-              return acc;
-            }, {} as Record<string, string>);
+            variation = variationAttrs.reduce(
+              (acc, attr) => {
+                acc[attr.attributeName] = attr.attributeValue;
+                return acc;
+              },
+              {} as Record<string, string>
+            );
           }
         }
 

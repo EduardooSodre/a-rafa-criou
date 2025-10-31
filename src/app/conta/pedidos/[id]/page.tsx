@@ -687,9 +687,9 @@ export default function PedidoDetalhesPage() {
                                             {item.variation && (
                                                 <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-2">
                                                     {Object.entries(item.variation).map(([key, value]) => (
-                                                        <Badge 
-                                                            key={key} 
-                                                            variant="outline" 
+                                                        <Badge
+                                                            key={key}
+                                                            variant="outline"
                                                             className="text-xs bg-gray-50 border-gray-300"
                                                         >
                                                             <span className="font-medium">{key}:</span>
