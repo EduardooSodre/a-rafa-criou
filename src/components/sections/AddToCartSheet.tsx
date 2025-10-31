@@ -225,35 +225,35 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
-            <SheetContent side="bottom" className="max-h-[85vh] p-0 flex flex-col">
-                <SheetHeader className="p-3 border-b bg-gradient-to-br from-[#FD9555] to-[#FED466]">
-                    <div className="flex items-start gap-2">
+            <SheetContent side="bottom" className="max-h-[85vh] sm:max-h-[70vh] p-0 flex flex-col sm:mx-auto rounded-t-xl">
+                <SheetHeader className="p-3 sm:p-4 border-b bg-gradient-to-br from-[#FD9555] to-[#FED466] rounded-t-xl">
+                    <div className="flex items-start gap-2 sm:gap-3">
                         {allAvailableImages.length > 0 && (
-                            <div className="relative w-20 h-20 flex-shrink-0 bg-white rounded-lg overflow-hidden shadow-md">
+                            <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 bg-white rounded-lg overflow-hidden shadow-md">
                                 <Image
                                     src={allAvailableImages[currentImageIndex] || '/file.svg'}
                                     alt={product.name}
                                     fill
                                     className="object-cover"
-                                    sizes="80px"
+                                    sizes="(max-width: 640px) 80px, 96px"
                                 />
                                 {allAvailableImages.length > 1 && (
                                     <>
                                         <button
                                             onClick={handlePrevImage}
-                                            className="absolute left-0.5 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 rounded-full p-0.5 shadow-sm transition-all"
+                                            className="absolute left-0.5 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 rounded-full p-0.5 sm:p-1 shadow-sm transition-all"
                                             aria-label="Imagem anterior"
                                         >
-                                            <ChevronLeft className="w-3 h-3" strokeWidth={3} />
+                                            <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4" strokeWidth={3} />
                                         </button>
                                         <button
                                             onClick={handleNextImage}
-                                            className="absolute right-0.5 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 rounded-full p-0.5 shadow-sm transition-all"
+                                            className="absolute right-0.5 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 rounded-full p-0.5 sm:p-1 shadow-sm transition-all"
                                             aria-label="Próxima imagem"
                                         >
-                                            <ChevronRight className="w-3 h-3" strokeWidth={3} />
+                                            <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4" strokeWidth={3} />
                                         </button>
-                                        <div className="absolute bottom-0.5 left-1/2 -translate-x-1/2 bg-black/60 text-white px-1 py-0.5 rounded text-[9px] font-medium backdrop-blur-sm">
+                                        <div className="absolute bottom-0.5 left-1/2 -translate-x-1/2 bg-black/60 text-white px-1 py-0.5 rounded text-[9px] sm:text-xs font-medium backdrop-blur-sm">
                                             {currentImageIndex + 1}/{allAvailableImages.length}
                                         </div>
                                     </>
@@ -262,7 +262,7 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
                         )}
 
                         <div className="flex-1 min-w-0">
-                            <SheetTitle className="text-white text-left text-base sm:text-lg leading-tight">
+                            <SheetTitle className="text-white text-left text-base sm:text-xl leading-tight">
                                 {product.name}
                             </SheetTitle>
                             <p className="text-xs sm:text-sm text-white/90 mt-1">
@@ -272,7 +272,7 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
                     </div>
                 </SheetHeader>
 
-                <div className="flex-1 overflow-y-auto p-3 space-y-3">
+                <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4">
                     {!selectedVariation && (
                         <div className="text-center py-4 text-muted-foreground text-xs sm:text-sm">
                             Selecione as opções para verificar disponibilidade
@@ -289,13 +289,13 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
                         </div>
                     )}
 
-                    <div className="space-y-3">
+                    <div className="space-y-3 sm:space-y-4">
                         {attributeGroups.map((group) => (
-                            <div key={group.name} className="space-y-1.5">
-                                <label className="text-xs sm:text-sm font-medium text-gray-700">
+                            <div key={group.name} className="space-y-1.5 sm:space-y-2">
+                                <label className="text-xs sm:text-sm font-semibold text-gray-900">
                                     {group.name}
                                 </label>
-                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-2">
                                     {group.options.map((option) => {
                                         const isSelected = selection[group.name] === option.value
                                         const isDisabled = !option.isAvailable
@@ -306,7 +306,7 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
                                                 onClick={() => handleFilterClick(group.name, option.value)}
                                                 disabled={isDisabled}
                                                 className={cn(
-                                                    'relative px-2 py-1.5 rounded-lg border-2 text-xs sm:text-sm font-medium transition-all min-h-[44px]',
+                                                    'relative px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg border-2 text-xs sm:text-sm font-medium transition-all min-h-[44px]',
                                                     isSelected
                                                         ? 'border-[#FD9555] bg-[#FD9555]/10 text-[#FD9555]'
                                                         : isDisabled
@@ -324,11 +324,11 @@ export function AddToCartSheet({ open, onOpenChange, product, onAddedToCart }: A
                     </div>
                 </div>
 
-                <div className="border-t p-3 space-y-2 bg-white">
+                <div className="border-t p-3 sm:p-4 space-y-2 bg-white">
                     <Button
                         onClick={handleAddToCart}
                         disabled={!selectedVariation}
-                        className="w-full bg-[#FD9555] hover:bg-[#FD9555]/90 text-white min-h-[44px] text-sm sm:text-base"
+                        className="w-full bg-[#FD9555] hover:bg-[#FD9555]/90 text-white min-h-[44px] sm:min-h-[48px] text-sm sm:text-base font-semibold"
                     >
                         {!selectedVariation
                             ? 'Selecione as opções'
