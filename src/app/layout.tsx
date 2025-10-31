@@ -39,7 +39,7 @@ export default function RootLayout({
       >
         <Providers>
           <ConditionalHeader />
-          <main className="flex-1 pb-20 lg:pb-0">
+          <main className="flex-1">
             {children}
           </main>
           <Footer />

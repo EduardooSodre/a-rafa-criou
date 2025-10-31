@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Menu, Home, ShoppingCart, Search } from "lucide-react";
@@ -24,8 +24,42 @@ export default function MobileBottomMenu({
     const { totalItems, cartSheetOpen, setCartSheetOpen } = useCart();
     const [menuOpen, setMenuOpen] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
+    const [isAtBottom, setIsAtBottom] = useState(false);
     const pathname = usePathname();
     const router = useRouter();
+    const ticking = useRef(false);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        const checkIfAtBottom = () => {
+            if (!ticking.current) {
+                window.requestAnimationFrame(() => {
+                    const windowHeight = window.innerHeight;
+                    const documentHeight = document.documentElement.scrollHeight;
+                    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+                    
+                    // Considera "no final" quando está a 100px ou menos do fim
+                    const distanceFromBottom = documentHeight - (scrollTop + windowHeight);
+                    setIsAtBottom(distanceFromBottom <= 100);
+                    
+                    ticking.current = false;
+                });
+                ticking.current = true;
+            }
+        };
+
+        // Verificar inicialmente
+        checkIfAtBottom();
+
+        window.addEventListener('scroll', checkIfAtBottom, { passive: true });
+        window.addEventListener('resize', checkIfAtBottom, { passive: true });
+        
+        return () => {
+            window.removeEventListener('scroll', checkIfAtBottom);
+            window.removeEventListener('resize', checkIfAtBottom);
+        };
+    }, []);
 
     // Don't render on admin routes
     if (typeof pathname === 'string' && pathname.startsWith('/admin')) {
@@ -41,6 +75,8 @@ export default function MobileBottomMenu({
             <div className={cn(
                 "fixed bottom-0 left-0 right-0 z-50 bg-[#FD9555] lg:hidden shadow-2xl border-t border-[#FD9555]/20",
                 "mx-2 mb-2 rounded-2xl backdrop-blur-sm",
+                "transition-transform duration-300 ease-in-out",
+                !isAtBottom ? "translate-y-0" : "translate-y-full",
                 className
             )}>
                 <div className="grid grid-cols-4 h-18 items-center justify-center px-1 py-2">
