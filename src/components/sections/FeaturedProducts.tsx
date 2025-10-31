@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { getPreviewSrc } from '@/lib/r2-utils';
 import { useTranslation } from 'react-i18next';
 import { useCart } from '@/contexts/cart-context';
-import { useToast } from '@/components/ui/toast';
 import { AddToCartSheet } from '@/components/sections/AddToCartSheet';
 
 interface ProductVariation {
@@ -149,17 +148,17 @@ export default function FeaturedProducts({
                         {t('featured.allFiles', 'TODOS OS ARQUIVOS')}
                     </h1>
                 </div>
-                <div className="container mx-auto px-4 mb-22">
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5 lg:gap-6 max-w-7xl mx-auto">
+                <div className="container mx-auto px-4 mb-16">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 max-w-7xl mx-auto">
                         {Array.from({ length: 8 }).map((_, i) => (
                             <div key={i} className="bg-white rounded-lg shadow-md overflow-hidden animate-pulse">
-                                <div className="p-3 md:p-4">
+                                <div className="p-2 sm:p-3 md:p-4">
                                     <div className="aspect-square bg-gray-200 rounded-lg"></div>
                                 </div>
-                                <div className="px-3 md:px-4 lg:px-4 pb-3 md:pb-4 lg:pb-4">
+                                <div className="px-2 sm:px-3 md:px-4 pb-2 sm:pb-3 md:pb-4">
                                     <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                                    <div className="h-3 bg-gray-200 rounded mb-4"></div>
-                                    <div className="h-6 bg-gray-200 rounded mb-3"></div>
+                                    <div className="h-3 bg-gray-200 rounded mb-3"></div>
+                                    <div className="h-6 bg-gray-200 rounded mb-2"></div>
                                     <div className="h-10 bg-gray-200 rounded"></div>
                                 </div>
                             </div>
@@ -184,8 +183,8 @@ export default function FeaturedProducts({
                     {t('featured.allFiles', 'TODOS OS ARQUIVOS')}
                 </h1>
             </div>
-            <div className="container mx-auto px-4 mb-22">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5 lg:gap-6 max-w-7xl mx-auto">
+            <div className="container mx-auto px-4 mb-16">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 max-w-7xl mx-auto">
                     {displayProducts.map((product, index) => (
                         <div
                             key={product.id}
@@ -193,7 +192,7 @@ export default function FeaturedProducts({
                         >
                             <div>
                                 <Link href={`/produtos/${product.slug}`} className="block group focus:outline-none focus:ring-2 focus:ring-primary">
-                                    <div className="p-3 md:p-4">
+                                    <div className="p-2 sm:p-3 md:p-4">
                                         <div className="aspect-square bg-gray-100 relative overflow-hidden group rounded-lg">
                                             {product.mainImage && product.mainImage.data ? (
                                                 <Image
@@ -210,30 +209,30 @@ export default function FeaturedProducts({
                                             )}
                                             {/* Badge para os 2 produtos mais recentes */}
                                             {index < 2 && (
-                                                <div className="absolute top-2 right-2 bg-[#FED466] text-xs font-bold px-2 py-1 md:px-3 md:py-1 rounded-full shadow-md">
+                                                <div className="absolute top-1.5 right-1.5 bg-[#FED466] text-xs font-bold px-2 py-1 rounded-full shadow-md">
                                                     {t('product.new', 'NOVO')}
                                                 </div>
                                             )}
                                         </div>
                                     </div>
                                     {/* Nome do produto - título principal */}
-                                    <div className="px-3 md:px-4 lg:px-4 flex flex-col">
-                                        <div className="flex-grow-0 mb-2 md:mb-3">
-                                            <h3 className="font-bold text-gray-900 uppercase text-sm md:text-base lg:text-lg leading-tight text-center min-h-[2rem] md:min-h-[2.2rem] lg:min-h-[2.5rem] flex items-center justify-center line-clamp-2">
+                                    <div className="px-2 sm:px-3 md:px-4 flex flex-col">
+                                        <div className="flex-grow-0 mb-1.5 sm:mb-2">
+                                            <h3 className="font-bold text-gray-900 uppercase text-xs sm:text-sm md:text-base leading-tight text-center min-h-[1.75rem] sm:min-h-[2rem] md:min-h-[2.25rem] flex items-center justify-center line-clamp-2">
                                                 {t(`productNames.${product.slug}`, { defaultValue: product.name })}
                                             </h3>
                                         </div>
                                         {/* Categoria */}
-                                        <div className="flex-grow-0 mb-2 md:mb-2 lg:mb-3 text-center">
+                                        <div className="flex-grow-0 mb-2 text-center">
                                             {product.category && (
-                                                <span className="text-xs bg-orange-200 text-gray-700 px-2 md:px-3 py-1 rounded-full font-medium">
+                                                <span className="text-xs bg-orange-200 text-gray-700 px-2 py-0.5 rounded-full font-medium">
                                                     {t(`productCategories.${product.category.slug}`, { defaultValue: product.category.name })}
                                                 </span>
                                             )}
                                         </div>
                                         {/* Preço destacado */}
-                                        <div className="flex-grow-0 mb-3 md:mb-3 lg:mb-3 text-center">
-                                            <span className="text-lg md:text-xl lg:text-2xl font-bold text-[#FD9555] block">
+                                        <div className="flex-grow-0 mb-2 sm:mb-2.5 text-center">
+                                            <span className="text-base sm:text-lg md:text-xl font-bold text-[#FD9555] block">
                                                 {product.variations && product.variations.length > 1 ? (
                                                     (() => {
                                                         const prices = product.variations.map(v => v.price);
@@ -252,9 +251,9 @@ export default function FeaturedProducts({
                                 </Link>
                             </div>
                             {/* Botão full-width sempre alinhado na base, fora do link */}
-                            <div className="px-3 md:px-4 lg:px-4 pb-3 md:pb-4 lg:pb-4 mt-auto">
+                            <div className="px-2 sm:px-3 md:px-4 pb-2 sm:pb-3 md:pb-4 mt-auto">
                                 <Button
-                                    className="w-full bg-[#FD9555] hover:bg-[#FD9555]/90 text-white font-bold py-2 md:py-2 lg:py-3 text-xs md:text-xs lg:text-sm uppercase tracking-wide transition-all duration-200 hover:shadow-lg rounded-lg cursor-pointer"
+                                    className="w-full bg-[#FD9555] hover:bg-[#FD9555]/90 text-white font-bold py-2 text-xs sm:text-sm uppercase tracking-wide transition-all duration-200 hover:shadow-lg rounded-lg cursor-pointer"
                                     onClick={() => handleAddToCart(product)}
                                 >
                                     <span className="sm:hidden">{t('nav.cart', 'CARRINHO')}</span>
@@ -268,17 +267,17 @@ export default function FeaturedProducts({
                 {showViewAll && hasMore && (
                     <div
                         onClick={handleLoadMore}
-                        className="bg-[#8FBC8F] mt-12 flex items-center justify-center p-3 sm:p-4 w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl mx-auto rounded-full gap-2 sm:gap-4 hover:bg-[#7DAB7D] transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer shadow-lg hover:shadow-xl"
+                        className="bg-[#8FBC8F] mt-8 sm:mt-10 flex items-center justify-center p-2 sm:p-3 w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto rounded-full gap-2 sm:gap-3 hover:bg-[#7DAB7D] transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer shadow-lg hover:shadow-xl"
                     >
                         <Image
                             src="/arrow.png"
                             alt="Seta esquerda"
                             width={32}
                             height={32}
-                            className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 transition-transform duration-300 group-hover:animate-pulse"
+                            className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 transition-transform duration-300 group-hover:animate-pulse"
                         />
                         <div
-                            className="font-scripter uppercase text-center leading-none text-xl lg:text-2xl xl:text-3xl font-bold transition-all duration-300 hover:text-yellow-100 px-2 sm:px-4 text-white font-scripter"
+                            className="font-scripter uppercase text-center leading-none text-base sm:text-lg md:text-xl lg:text-2xl font-bold transition-all duration-300 hover:text-yellow-100 px-2 sm:px-3 text-white font-scripter"
                         >
                             {loading ? t('featured.loading', 'CARREGANDO...') : t('featured.viewMore', 'CLIQUE PARA VER MAIS ARQUIVOS')}
                         </div>
@@ -287,15 +286,15 @@ export default function FeaturedProducts({
                             alt="Seta direita"
                             width={32}
                             height={32}
-                            className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 transition-transform duration-300 group-hover:animate-pulse"
+                            className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 transition-transform duration-300 group-hover:animate-pulse"
                         />
                     </div>
                 )}
 
                 {showViewAll && !hasMore && !loading && products.length > 0 && (
-                    <div className="mt-12 text-center">
-                        <div className="bg-gray-200 inline-block px-6 py-3 rounded-full">
-                            <span className="text-gray-600 font-medium">
+                    <div className="mt-8 sm:mt-10 text-center">
+                        <div className="bg-gray-200 inline-block px-4 sm:px-6 py-2 sm:py-3 rounded-full">
+                            <span className="text-gray-600 font-medium text-sm sm:text-base">
                                 {t('featured.endMessage', '✨ Todos os arquivos foram exibidos! ✨')}
                             </span>
                         </div>

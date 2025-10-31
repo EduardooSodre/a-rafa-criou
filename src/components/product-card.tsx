@@ -31,10 +31,10 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <>
       <Card className='group h-full transition-all hover:shadow-lg'>
-        <CardHeader className='pb-3'>
+        <CardHeader className='pb-2'>
           {/* Imagem do produto */}
           {product.mainImage?.data && (
-            <div className='relative aspect-square w-full overflow-hidden rounded-lg mb-3'>
+            <div className='relative aspect-square w-full overflow-hidden rounded-lg mb-2'>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={product.mainImage.data}
@@ -45,23 +45,23 @@ export function ProductCard({ product }: ProductCardProps) {
           )}
 
           {product.isFeatured && (
-            <Badge className='mb-2 w-fit bg-secondary text-secondary-foreground'>
+            <Badge className='mb-2 w-fit bg-secondary text-secondary-foreground text-xs'>
               {t('product.featured', 'Destaque')}
             </Badge>
           )}
-          <CardTitle className='line-clamp-2 text-lg group-hover:text-primary'>
+          <CardTitle className='line-clamp-2 text-base sm:text-lg group-hover:text-primary'>
             {t(`productNames.${product.slug}`, product.name)}
           </CardTitle>
           {product.shortDescription && (
-            <CardDescription className='line-clamp-3'>
+            <CardDescription className='line-clamp-2 text-sm'>
               {product.shortDescription}
             </CardDescription>
           )}
         </CardHeader>
 
-        <CardContent className='flex flex-col justify-between gap-3'>
+        <CardContent className='flex flex-col justify-between gap-2 pt-0'>
           <div className='mb-1'>
-            <div className='mb-2 text-2xl font-bold text-primary'>
+            <div className='mb-2 text-lg sm:text-xl font-bold text-primary'>
               {product.variations && product.variations.length > 1 ? (
                 (() => {
                   const prices = product.variations.map(v => v.price);
@@ -81,12 +81,12 @@ export function ProductCard({ product }: ProductCardProps) {
             {hasVariations ? (
               <Button
                 onClick={() => setShowAddToCart(true)}
-                className='w-full bg-primary hover:bg-secondary'
+                className='w-full bg-primary hover:bg-secondary text-sm h-10'
               >
                 {t('product.addToCart', 'Adicionar ao Carrinho')}
               </Button>
             ) : (
-              <Button asChild className='w-full bg-primary hover:bg-secondary'>
+              <Button asChild className='w-full bg-primary hover:bg-secondary text-sm h-10'>
                 <Link href={`/produtos/${product.slug}`}>
                   {t('product.viewDetails', 'Ver detalhes')}
                 </Link>
