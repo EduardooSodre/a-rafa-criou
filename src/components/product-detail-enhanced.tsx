@@ -769,6 +769,7 @@ export function ProductDetailEnhanced({ product }: ProductDetailEnhancedProps) {
                                 size="default"
                                 className="w-full sm:w-auto min-h-[44px] md:min-h-[48px] text-white font-bold text-sm md:text-base rounded-md shadow-sm cursor-pointer bg-[#FD9555] hover:bg-[#E64D2B] border-2 border-[#FD9555]"
                             >
+                                <ShoppingCart className="w-5 h-5 mr-2 text-white" />
                                 {t('product.addToCart', 'ADICIONAR AO CARRINHO')}
                             </Button>
                         </div>
