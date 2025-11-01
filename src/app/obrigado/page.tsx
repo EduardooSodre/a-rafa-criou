@@ -279,12 +279,27 @@ export default function ObrigadoPage() {
                                     {orderData.order.paymentProvider === 'stripe' ? 'Cartão de Crédito' : orderData.order.paymentProvider?.toUpperCase()}
                                 </div>
                             </div>
-                            <div>
-                                <span className="text-gray-600">Total:</span>
-                                <div className="font-semibold text-[#FD9555]">
-                                    {formatPrice(orderData.order.total)}
-                                </div>
+                        </div>
+
+                        {/* Resumo de valores com desconto */}
+                        <div className="border-t pt-4 space-y-2">
+                            <div className="flex justify-between text-sm">
+                                <span className="text-gray-600">Subtotal:</span>
+                                <span>{formatPrice(orderData.order.subtotal)}</span>
                             </div>
+                            {orderData.order.discountAmount && parseFloat(orderData.order.discountAmount) > 0 && (
+                                <div className="flex justify-between text-sm text-green-600">
+                                    <span>Desconto aplicado:</span>
+                                    <span>-{formatPrice(orderData.order.discountAmount)}</span>
+                                </div>
+                            )}
+                            <div className="flex justify-between font-semibold text-base border-t pt-2">
+                                <span>Total pago:</span>
+                                <span className="text-[#FD9555]">{formatPrice(orderData.order.total)}</span>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4 text-sm border-t pt-4">
                             <div>
                                 <span className="text-gray-600">Status:</span>
                                 {(() => {
@@ -309,6 +324,7 @@ export default function ObrigadoPage() {
                                     return <Badge className="bg-gray-100 text-gray-800">{orderData.order.status}</Badge>
                                 })()}
                             </div>
+                            <div></div> {/* Espaço vazio para manter grid */}
                         </div>
                     </CardContent>
                 </Card>

@@ -31,6 +31,8 @@ interface OrderDetails {
     email: string;
     status: string;
     subtotal: number;
+    discountAmount?: number | null;
+    couponCode?: string | null;
     total: number;
     paymentProvider: string;
     paymentStatus: string;
@@ -768,8 +770,16 @@ export default function PedidoDetalhesPage() {
                                 <span className="text-gray-600">Subtotal</span>
                                 <span className="font-medium">{formatPrice(order.subtotal)}</span>
                             </div>
+                            {order.discountAmount && order.discountAmount > 0 && (
+                                <div className="flex justify-between text-sm sm:text-base text-green-600">
+                                    <span>
+                                        Desconto{order.couponCode ? ` (${order.couponCode})` : ''}
+                                    </span>
+                                    <span className="font-medium">-{formatPrice(order.discountAmount)}</span>
+                                </div>
+                            )}
                             <div className="flex justify-between text-base sm:text-lg font-bold border-t pt-2">
-                                <span>Total</span>
+                                <span>Total Pago</span>
                                 <span className="text-[#FD9555]">{formatPrice(order.total)}</span>
                             </div>
                         </div>

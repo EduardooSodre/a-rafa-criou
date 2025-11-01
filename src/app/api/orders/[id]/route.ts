@@ -152,6 +152,8 @@ export async function GET(req: NextRequest, context: unknown) {
       email: order.email,
       status: order.status,
       subtotal: parseFloat(order.subtotal),
+      discountAmount: order.discountAmount ? parseFloat(order.discountAmount) : null,
+      couponCode: order.couponCode || null,
       total: parseFloat(order.total),
       paymentProvider: order.paymentProvider,
       paymentStatus: order.paymentStatus,
