@@ -72,10 +72,10 @@ export default function OrdersTable({ search, statusFilter, onRefresh }: OrdersT
     const loadOrders = async () => {
         try {
             setLoading(true)
-            const url = statusFilter === 'all' 
-                ? '/api/admin/orders' 
+            const url = statusFilter === 'all'
+                ? '/api/admin/orders'
                 : `/api/admin/orders?status=${statusFilter}`
-            
+
             const response = await fetch(url)
             if (response.ok) {
                 const data = await response.json()
@@ -150,7 +150,7 @@ export default function OrdersTable({ search, statusFilter, onRefresh }: OrdersT
         }
 
         const config = variants[status] || variants.pending
-        
+
         const labels: Record<string, string> = {
             pending: 'Pendente',
             processing: 'Processando',
@@ -260,7 +260,7 @@ export default function OrdersTable({ search, statusFilter, onRefresh }: OrdersT
                             Informações completas do pedido
                         </DialogDescription>
                     </DialogHeader>
-                    
+
                     {orderDetails && (
                         <div className="space-y-4">
                             <div className="grid gap-4 sm:grid-cols-2">

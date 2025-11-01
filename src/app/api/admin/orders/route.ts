@@ -44,10 +44,7 @@ export async function GET(request: NextRequest) {
     // Buscar itens para cada pedido
     const ordersWithItems = await Promise.all(
       results.map(async ({ order, user }) => {
-        const items = await db
-          .select()
-          .from(orderItems)
-          .where(eq(orderItems.orderId, order.id));
+        const items = await db.select().from(orderItems).where(eq(orderItems.orderId, order.id));
 
         return {
           ...order,

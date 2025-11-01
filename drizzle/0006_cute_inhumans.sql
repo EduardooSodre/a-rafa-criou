@@ -1,0 +1,21 @@
+CREATE TABLE "site_settings" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"site_name" varchar(255) DEFAULT 'A Rafa Criou' NOT NULL,
+	"site_description" text,
+	"site_url" varchar(255),
+	"support_email" varchar(255),
+	"pix_enabled" boolean DEFAULT true NOT NULL,
+	"stripe_enabled" boolean DEFAULT true NOT NULL,
+	"maintenance_mode" boolean DEFAULT false NOT NULL,
+	"allow_guest_checkout" boolean DEFAULT true NOT NULL,
+	"max_downloads_per_product" integer DEFAULT 3 NOT NULL,
+	"download_link_expiration" integer DEFAULT 24 NOT NULL,
+	"enable_watermark" boolean DEFAULT false NOT NULL,
+	"meta_title" varchar(255),
+	"meta_description" text,
+	"meta_keywords" text,
+	"google_analytics_id" varchar(100),
+	"facebook_pixel_id" varchar(100),
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
+);

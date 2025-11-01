@@ -43,6 +43,13 @@
       "when": 1759806345271,
       "tag": "0005_nostalgic_famine",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1761969555439,
+      "tag": "0006_cute_inhumans",
+      "breakpoints": true
     }
   ]
 }

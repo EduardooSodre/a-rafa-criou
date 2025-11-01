@@ -50,7 +50,7 @@ export default function CouponsPageClient() {
             if (response.ok) {
                 const data = await response.json()
                 const coupons = data.coupons || []
-                
+
                 setStats({
                     total: coupons.length,
                     active: coupons.filter((c: { isActive: boolean }) => c.isActive).length,
@@ -214,7 +214,7 @@ export default function CouponsPageClient() {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <CouponsTable 
+                    <CouponsTable
                         key={refreshTrigger}
                         search={search}
                         onRefresh={handleRefresh}

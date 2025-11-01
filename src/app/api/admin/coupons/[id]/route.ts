@@ -22,10 +22,7 @@ const updateCouponSchema = z.object({
   endsAt: z.string().optional().nullable(),
 });
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -48,10 +45,7 @@ export async function GET(
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -87,7 +81,11 @@ export async function PUT(
     if (validatedData.endsAt !== undefined)
       updateData.endsAt = validatedData.endsAt ? new Date(validatedData.endsAt) : null;
 
-    const [updatedCoupon] = await db.update(coupons).set(updateData).where(eq(coupons.id, id)).returning();
+    const [updatedCoupon] = await db
+      .update(coupons)
+      .set(updateData)
+      .where(eq(coupons.id, id))
+      .returning();
 
     // Atualizar produtos associados
     if (validatedData.productIds !== undefined) {
@@ -118,7 +116,10 @@ export async function PUT(
     return NextResponse.json(updatedCoupon);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Dados inválidos', details: error.issues }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Dados inválidos', details: error.issues },
+        { status: 400 }
+      );
     }
 
     console.error('Erro ao atualizar cupom:', error);

@@ -30,10 +30,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    const allCoupons = await db
-      .select()
-      .from(coupons)
-      .orderBy(desc(coupons.createdAt));
+    const allCoupons = await db.select().from(coupons).orderBy(desc(coupons.createdAt));
 
     return NextResponse.json({ coupons: allCoupons });
   } catch (error) {
@@ -106,7 +103,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(newCoupon, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Dados inválidos', details: error.issues }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Dados inválidos', details: error.issues },
+        { status: 400 }
+      );
     }
 
     console.error('Erro ao criar cupom:', error);

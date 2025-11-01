@@ -517,3 +517,42 @@ export const accountsRelations = relations(accounts, ({ one }) => ({
 export const sessionsRelations = relations(sessions, ({ one }) => ({
   user: one(users, { fields: [sessions.userId], references: [users.id] }),
 }));
+
+export const contentPagesRelations = relations(contentPages, ({ many }) => ({
+  blocks: many(contentBlocks),
+}));
+
+export const contentBlocksRelations = relations(contentBlocks, ({ one, many }) => ({
+  page: one(contentPages, { fields: [contentBlocks.pageId], references: [contentPages.id] }),
+  versions: many(contentVersions),
+}));
+
+export const contentVersionsRelations = relations(contentVersions, ({ one }) => ({
+  block: one(contentBlocks, { fields: [contentVersions.blockId], references: [contentBlocks.id] }),
+}));
+
+// ============================================================================
+// CONFIGURAÇÕES DO SITE
+// ============================================================================
+
+export const siteSettings = pgTable('site_settings', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  siteName: varchar('site_name', { length: 255 }).notNull().default('A Rafa Criou'),
+  siteDescription: text('site_description'),
+  siteUrl: varchar('site_url', { length: 255 }),
+  supportEmail: varchar('support_email', { length: 255 }),
+  pixEnabled: boolean('pix_enabled').default(true).notNull(),
+  stripeEnabled: boolean('stripe_enabled').default(true).notNull(),
+  maintenanceMode: boolean('maintenance_mode').default(false).notNull(),
+  allowGuestCheckout: boolean('allow_guest_checkout').default(true).notNull(),
+  maxDownloadsPerProduct: integer('max_downloads_per_product').default(3).notNull(),
+  downloadLinkExpiration: integer('download_link_expiration').default(24).notNull(),
+  enableWatermark: boolean('enable_watermark').default(false).notNull(),
+  metaTitle: varchar('meta_title', { length: 255 }),
+  metaDescription: text('meta_description'),
+  metaKeywords: text('meta_keywords'),
+  googleAnalyticsId: varchar('google_analytics_id', { length: 100 }),
+  facebookPixelId: varchar('facebook_pixel_id', { length: 100 }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
