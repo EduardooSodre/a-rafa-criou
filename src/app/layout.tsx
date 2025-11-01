@@ -3,7 +3,7 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { ConditionalHeader } from "@/components/ConditionalHeader";
-import { Footer } from "@/components/Footer";
+import { ConditionalFooter } from "@/components/ConditionalFooter";
 import ToastProvider from "@/components/ToastProvider";
 import MobileBottomMenu from '@/components/sections/MobileBottomMenu';
 
@@ -42,7 +42,7 @@ export default function RootLayout({
           <main className="flex-1">
             {children}
           </main>
-          <Footer />
+          <ConditionalFooter />
           <ToastProvider />
           <MobileBottomMenu />
         </Providers>
