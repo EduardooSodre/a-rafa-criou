@@ -47,7 +47,6 @@ E-commerce moderno para venda de produtos digitais (PDFs) com foco em acessibili
 - ✅ **Atributos:** `attributes`, `attribute_values`, `product_attributes`, `variation_attribute_values`
 - ✅ **Pedidos:** `orders`, `order_items`, `downloads`
 - ✅ **Cupons:** `coupons`, `coupon_products`, `coupon_variations`, `coupon_redemptions`
-- ✅ **CMS:** `content_pages`, `content_blocks`, `content_versions`
 - ✅ **Outros:** `invites`, `url_map`
 - ❌ **Notificações:** `notifications`, `notification_settings` (FALTA)
 - ❌ **Afiliação:** `affiliates`, `affiliate_links`, `affiliate_commissions` (FALTA)
@@ -172,15 +171,6 @@ E-commerce moderno para venda de produtos digitais (PDFs) com foco em acessibili
 - ❌ Aplicar desconto e recalcular totais (FALTA)
 - ❌ Registro em `coupon_redemptions` (FALTA)
 - ❌ Limites de uso e datas (FALTA)
-
-### 🔴 **9. CMS EMBUTIDO** (NÃO INICIADO - 0%)
-
-- ✅ Estrutura no banco criada
-- ❌ Editor (TipTap/Editor.js) (FALTA)
-- ❌ Upload de imagens (FALTA)
-- ❌ Preview de conteúdo (FALTA)
-- ❌ Publicar e revalidate (FALTA)
-- ❌ Versionamento de conteúdo (FALTA)
 
 ### 🔴 **10. NOTIFICAÇÕES EXTERNAS** (NÃO INICIADO - 0%)
 
@@ -441,14 +431,6 @@ E-commerce moderno para venda de produtos digitais (PDFs) com foco em acessibili
 - [ ] Registrar comissões em pedidos
 - [ ] Painel do afiliado (`/afiliado`)
 - [ ] Rotina de pagamento mensal
-
-#### 5.3 CMS Embutido - OPCIONAL
-
-- [ ] Editor TipTap ou Editor.js
-- [ ] Upload de imagens (Cloudinary)
-- [ ] Preview de conteúdo
-- [ ] Publicar e revalidate
-- [ ] Versionamento (`content_versions`)
 
 #### 5.4 Proteção de PDFs - OPCIONAL
 

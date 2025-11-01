@@ -97,10 +97,6 @@
 
 - ✅ `url_map` (redirects 301)
 
-### CMS
-
-- ✅ `pages` (conteúdo customizado)
-
 **Status:** Todos os relacionamentos configurados, migrations aplicadas
 
 ---
@@ -361,7 +357,6 @@
 
 - Notificações avançadas
 - Afiliação
-- CMS
 - Proteção de PDFs
 
 ### Won't Have (Por enquanto)

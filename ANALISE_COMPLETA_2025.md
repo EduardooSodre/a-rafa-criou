@@ -252,7 +252,6 @@ Análise completa do e-commerce "A Rafa Criou" comparando o README.md com o cód
 | 7   | Checkout Stripe | 100%   | 100%     | ✅ COMPLETO  |
 | 8   | R2 Storage      | 70%    | **100%** | ✅ COMPLETO  |
 | 9   | Cupons          | 0%     | 0%       | ❌ FALTA     |
-| 10  | CMS             | 0%     | 0%       | ❌ FALTA     |
 | 11  | Notificações    | 0%     | **50%**  | 🟡 PARCIAL   |
 | 12  | Afiliados       | 0%     | 0%       | ❌ FALTA     |
 | 13  | Migração WC     | 0%     | 0%       | ❌ FALTA     |
@@ -296,7 +295,7 @@ Análise completa do e-commerce "A Rafa Criou" comparando o README.md com o cód
 
 - Cupons
 - Afiliados
-- CMS
+-
 - Migração WooCommerce
 - PWA
 

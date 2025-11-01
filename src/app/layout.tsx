@@ -7,14 +7,6 @@ import { ConditionalFooter } from "@/components/ConditionalFooter";
 import ToastProvider from "@/components/ToastProvider";
 import MobileBottomMenu from '@/components/sections/MobileBottomMenu';
 
-/**
- * Contexto do Copilot:
- * E-commerce de PDFs (Next.js, TS, Tailwind, Shadcn, Drizzle, Auth.js).
- * Requisitos: migração WooCommerce, phpass rehash, PDFs privados, cupons,
- * CMS embutido, notificações externas, afiliados, traduções, SEO/301, PWA opcional.
- * Padrões: acessibilidade, idempotência, validação com Zod.
- */
-
 const poppins = Poppins({
   variable: "--font-poppins",
   subsets: ["latin"],

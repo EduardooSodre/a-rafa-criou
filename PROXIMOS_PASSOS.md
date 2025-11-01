@@ -11,7 +11,7 @@
    - ESLint + Prettier
 
 2. **Banco de Dados**
-   - Schema completo (produtos, pedidos, cupons, CMS)
+   - Schema completo (produtos, pedidos, cupons)
    - Migrações aplicadas
    - Relacionamentos configurados
 
@@ -395,12 +395,6 @@
 - CRUD de afiliados
 - Links únicos (UTM tracking)
 - Painel do afiliado
-
-### CMS Embutido
-
-- Editor TipTap
-- Upload de imagens
-- Versionamento
 
 ### Proteção de PDFs
 

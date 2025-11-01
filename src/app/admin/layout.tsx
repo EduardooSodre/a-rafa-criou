@@ -10,7 +10,6 @@ import {
     Users,
     ShoppingCart,
     Settings,
-    FileText,
     PlusCircle,
     BarChart3,
     LogOut,
@@ -96,11 +95,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             title: 'Cupons',
             href: '/admin/cupons',
             icon: PlusCircle
-        },
-        {
-            title: 'CMS',
-            href: '/admin/cms',
-            icon: FileText
         },
         {
             title: 'Configurações',

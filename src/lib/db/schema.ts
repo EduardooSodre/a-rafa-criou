@@ -7,9 +7,7 @@ import {
   integer,
   decimal,
   boolean,
-  json,
   primaryKey,
-  unique,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -271,47 +269,6 @@ export const couponRedemptions = pgTable('coupon_redemptions', {
 });
 
 // ============================================================================
-// CMS EMBUTIDO
-// ============================================================================
-
-export const contentPages = pgTable(
-  'content_pages',
-  {
-    id: uuid('id').defaultRandom().primaryKey(),
-    slug: varchar('slug', { length: 100 }).notNull(), // home, sobre, contato, etc
-    lang: varchar('lang', { length: 2 }).notNull().default('pt'), // pt, en
-    isActive: boolean('is_active').default(true),
-    updatedBy: text('updated_by').references(() => users.id),
-    updatedAt: timestamp('updated_at').defaultNow().notNull(),
-  },
-  table => ({
-    uniqueSlugLang: unique().on(table.slug, table.lang),
-  })
-);
-
-export const contentBlocks = pgTable('content_blocks', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  pageId: uuid('page_id')
-    .notNull()
-    .references(() => contentPages.id, { onDelete: 'cascade' }),
-  key: varchar('key', { length: 100 }).notNull(), // hero_title, hero_subtitle, etc
-  type: varchar('type', { length: 20 }).notNull(), // text, richtext, image, list
-  valueJson: json('value_json').notNull(),
-  sortOrder: integer('sort_order').default(0),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
-
-export const contentVersions = pgTable('content_versions', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  blockId: uuid('block_id')
-    .notNull()
-    .references(() => contentBlocks.id, { onDelete: 'cascade' }),
-  valueJson: json('value_json').notNull(),
-  savedBy: text('saved_by').references(() => users.id),
-  savedAt: timestamp('saved_at').defaultNow().notNull(),
-});
-
-// ============================================================================
 // SEO E REDIRECIONAMENTOS
 // ============================================================================
 
@@ -516,19 +473,6 @@ export const accountsRelations = relations(accounts, ({ one }) => ({
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
   user: one(users, { fields: [sessions.userId], references: [users.id] }),
-}));
-
-export const contentPagesRelations = relations(contentPages, ({ many }) => ({
-  blocks: many(contentBlocks),
-}));
-
-export const contentBlocksRelations = relations(contentBlocks, ({ one, many }) => ({
-  page: one(contentPages, { fields: [contentBlocks.pageId], references: [contentPages.id] }),
-  versions: many(contentVersions),
-}));
-
-export const contentVersionsRelations = relations(contentVersions, ({ one }) => ({
-  block: one(contentBlocks, { fields: [contentVersions.blockId], references: [contentBlocks.id] }),
 }));
 
 // ============================================================================

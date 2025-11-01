@@ -212,7 +212,6 @@ ALTER TABLE order_items ADD COLUMN download_count INTEGER DEFAULT 0;
 | PIX Integration                     | 📋 Planejado | 0%        |
 | Cupons de Desconto                  | 📋 Planejado | 0%        |
 | Sistema de Afiliados                | 📋 Planejado | 0%        |
-| Admin CMS                           | 📋 Planejado | 0%        |
 
 ---
 

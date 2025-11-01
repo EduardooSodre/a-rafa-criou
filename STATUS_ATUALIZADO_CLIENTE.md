@@ -142,7 +142,6 @@ Carrinho → Checkout → Pagamento → Webhook → Pedido no Banco → E-mail �
   - Produtos (8): products, product_variations, product_images, product_attributes, files, categories, attributes, attribute_values
   - Pedidos (3): orders, order_items, downloads
   - Cupons (3): coupons, coupon_products, coupon_variations, coupon_redemptions
-  - CMS (3): content_pages, content_blocks, content_versions
   - Outros (3): invites, url_map, password_reset_tokens
 
 - ✅ **Migrations:** 3 migrations executadas com sucesso
@@ -295,21 +294,7 @@ Carrinho → Checkout → Pagamento → Webhook → Pedido no Banco → E-mail �
 
 ---
 
-### 6. CMS Embutido (0%)
-
-**Tabelas existem, mas sem interface:**
-
-- ❌ Editor (TipTap/Editor.js)
-- ❌ Upload de imagens
-- ❌ Preview de conteúdo
-- ❌ Publicar e revalidate
-- ❌ Versionamento
-
-**Impacto:** Não bloqueia vendas. Páginas estáticas podem ser criadas manualmente.
-
----
-
-### 7. Notificações Avançadas (0%)
+### 6. Notificações Avançadas (0%)
 
 **Apenas e-mail funciona. Falta:**
 
@@ -523,10 +508,9 @@ stripe trigger payment_intent.succeeded
 
 1. PayPal como método de pagamento
 2. Sistema de afiliados
-3. CMS para páginas customizadas
-4. WhatsApp/SMS notifications
-5. PWA (app installable)
-6. Migração WooCommerce (se necessário)
+3. WhatsApp/SMS notifications
+4. PWA (app installable)
+5. Migração WooCommerce (se necessário)
 
 ---
 
@@ -761,7 +745,6 @@ NEXT_PUBLIC_APP_URL=
 | 11. i18n           | 🟡 PARCIAL  | 60%        | Configurado, falta seletor            |
 | 12. Cupons         | ❌ FALTA    | 0%         | Opcional                              |
 | 13. Afiliados      | ❌ FALTA    | 0%         | Opcional                              |
-| 14. CMS            | ❌ FALTA    | 0%         | Opcional                              |
 | 15. Migração WC    | ❌ FALTA    | 0%         | Apenas se necessário                  |
 | 16. SEO Avançado   | ❌ FALTA    | 20%        | Básico funciona                       |
 | 17. PWA            | ❌ FALTA    | 0%         | Opcional                              |
@@ -785,7 +768,7 @@ Todos os módulos críticos estão funcionando:
 **Os itens faltantes são:**
 
 - Melhorias opcionais (cupons, afiliados, PWA)
-- Funcionalidades avançadas (CMS, migração)
+- Funcionalidades avançadas ( migração)
 - Infraestrutura de produção (deploy, monitoramento)
 
 **Próximo passo crítico:** Deploy para produção (Vercel + configurar webhooks)
