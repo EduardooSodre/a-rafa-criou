@@ -96,7 +96,7 @@ export default function CMSPageClient() {
         if (!selectedPage) return
 
         try {
-            const valueJson = blockForm.type === 'list' 
+            const valueJson = blockForm.type === 'list'
                 ? { items: blockForm.value.split('\n').filter(Boolean) }
                 : { text: blockForm.value }
 
@@ -109,10 +109,10 @@ export default function CMSPageClient() {
                 sortOrder: editingBlock?.sortOrder || 0,
             }
 
-            const url = editingBlock 
-                ? '/api/admin/cms/blocks' 
+            const url = editingBlock
+                ? '/api/admin/cms/blocks'
                 : '/api/admin/cms/blocks'
-            
+
             const method = editingBlock ? 'PUT' : 'POST'
 
             const response = await fetch(url, {
@@ -157,7 +157,7 @@ export default function CMSPageClient() {
         setBlockForm({
             key: block.key,
             type: block.type,
-            value: block.type === 'list' 
+            value: block.type === 'list'
                 ? (block.valueJson.items || []).join('\n')
                 : (block.valueJson.text || block.valueJson.html || ''),
         })
