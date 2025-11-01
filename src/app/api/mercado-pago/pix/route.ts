@@ -227,10 +227,10 @@ export async function POST(req: NextRequest) {
         // Buscar produto base
         const product = dbProducts.find(p => p.id === item.productId);
         const variation = dbVariations.find(v => v.id === item.variationId);
-        
+
         if (product && variation) {
           nomeProduto = product.name; // ✅ Nome do produto, não da variação
-          preco = variation.price;     // ✅ Preço da variação
+          preco = variation.price; // ✅ Preço da variação
         }
       } else {
         const product = dbProducts.find(p => p.id === item.productId);
