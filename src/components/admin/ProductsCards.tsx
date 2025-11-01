@@ -133,27 +133,27 @@ export default function ProductsCardsView({
             const prices = product.variations.map(v => Number(v.price))
             const minPrice = Math.min(...prices)
             const maxPrice = Math.max(...prices)
-            
+
             // Se todos os preços são iguais, retorna só o preço
             if (minPrice === maxPrice) {
                 return { min: minPrice, max: null, hasRange: false }
             }
-            
+
             // Se tem faixa de preço, retorna o range
             return { min: minPrice, max: maxPrice, hasRange: true }
         }
-        
+
         // Se não tem variações, retorna o preço base do produto
         return { min: Number(product.price), max: null, hasRange: false }
     }
 
     const formatProductPrice = (product: ProductData) => {
         const priceData = getProductPrice(product)
-        
+
         if (priceData.hasRange && priceData.max) {
             return `${formatPrice(priceData.min)} - ${formatPrice(priceData.max)}`
         }
-        
+
         return formatPrice(priceData.min)
     }
 
