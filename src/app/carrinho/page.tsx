@@ -405,8 +405,8 @@ export default function CarrinhoPage() {
                                                         Cupom {appliedCoupon.code} aplicado!
                                                     </p>
                                                     <p className="text-xs text-green-600">
-                                                        {appliedCoupon.type === 'percent' 
-                                                            ? `${appliedCoupon.value}% de desconto` 
+                                                        {appliedCoupon.type === 'percent'
+                                                            ? `${appliedCoupon.value}% de desconto`
                                                             : `R$ ${parseFloat(appliedCoupon.value).toFixed(2)} de desconto`}
                                                     </p>
                                                 </div>
@@ -477,14 +477,14 @@ export default function CarrinhoPage() {
                                     {/* Botões de Pagamento */}
                                     <div className="flex flex-col gap-3">
                                         {/* Pagamento Internacional */}
-                                        <InternationalCheckout 
+                                        <InternationalCheckout
                                             appliedCoupon={appliedCoupon}
                                             finalTotal={finalTotal}
                                         />
-                                        
+
                                         {/* PixCheckout: botão Pix e QR Code */}
                                         <div className="w-full">
-                                            <PixCheckout 
+                                            <PixCheckout
                                                 appliedCoupon={appliedCoupon}
                                                 finalTotal={finalTotal}
                                             />

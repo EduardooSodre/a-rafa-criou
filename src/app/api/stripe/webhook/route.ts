@@ -119,20 +119,32 @@ export async function POST(req: NextRequest) {
         // ⚠️ CRIAR pedido (fallback se não foi criado no create-pix)
         console.log('⚠️ Pedido não encontrado, criando novo...');
 
+        // Extrair dados do cupom dos metadados
+        const couponCode = paymentIntent.metadata.couponCode || null;
+        const originalTotal = paymentIntent.metadata.originalTotal 
+          ? parseFloat(paymentIntent.metadata.originalTotal)
+          : (paymentIntent.amount / 100);
+        const discount = paymentIntent.metadata.discount 
+          ? parseFloat(paymentIntent.metadata.discount)
+          : 0;
+        const finalTotal = paymentIntent.amount / 100;
+
         const newOrders = await db
           .insert(orders)
           .values({
             userId,
             email: customerEmail,
             status: 'completed',
-            subtotal: (paymentIntent.amount / 100).toString(),
-            total: (paymentIntent.amount / 100).toString(),
+            subtotal: originalTotal.toString(),
+            discountAmount: discount.toString(),
+            total: finalTotal.toString(),
             currency: paymentIntent.currency.toUpperCase(),
             paymentProvider: 'stripe',
             paymentId: paymentIntent.id,
             stripePaymentIntentId: paymentIntent.id,
             paymentStatus: 'paid',
             paidAt: new Date(),
+            ...(couponCode && { couponCode }),
           })
           .returning();
 

@@ -115,11 +115,7 @@ export async function POST(req: NextRequest) {
 
     if (couponCode && discount && discount > 0) {
       // Validar cupom no banco
-      const [coupon] = await db
-        .select()
-        .from(coupons)
-        .where(eq(coupons.code, couponCode))
-        .limit(1);
+      const [coupon] = await db.select().from(coupons).where(eq(coupons.code, couponCode)).limit(1);
 
       if (!coupon) {
         return Response.json({ error: 'Cupom inválido' }, { status: 400 });
@@ -141,9 +137,12 @@ export async function POST(req: NextRequest) {
 
       // Validar total mínimo
       if (coupon.minSubtotal && total < Number(coupon.minSubtotal)) {
-        return Response.json({ 
-          error: `Valor mínimo de R$ ${Number(coupon.minSubtotal).toFixed(2)} não atingido` 
-        }, { status: 400 });
+        return Response.json(
+          {
+            error: `Valor mínimo de R$ ${Number(coupon.minSubtotal).toFixed(2)} não atingido`,
+          },
+          { status: 400 }
+        );
       }
 
       // Aplicar desconto
