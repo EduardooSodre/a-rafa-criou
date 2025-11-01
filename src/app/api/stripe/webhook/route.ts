@@ -2,8 +2,8 @@ import { NextRequest } from 'next/server';
 import Stripe from 'stripe';
 import { stripe } from '@/lib/stripe';
 import { db } from '@/lib/db';
-import { orders, orderItems, products, productVariations, files } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { orders, orderItems, products, productVariations, files, coupons } from '@/lib/db/schema';
+import { eq, sql } from 'drizzle-orm';
 import { resend, FROM_EMAIL } from '@/lib/email';
 import { PurchaseConfirmationEmail } from '@/emails/purchase-confirmation';
 import { render } from '@react-email/render';
@@ -97,6 +97,23 @@ export async function POST(req: NextRequest) {
         order = updatedOrders[0];
         console.log(`✅ Pedido atualizado: ${order.id} (pending → completed)`);
 
+        // ✅ INCREMENTAR CONTADOR DO CUPOM (se houver)
+        if (order.couponCode) {
+          try {
+            await db
+              .update(coupons)
+              .set({
+                usedCount: sql`${coupons.usedCount} + 1`,
+                updatedAt: new Date(),
+              })
+              .where(eq(coupons.code, order.couponCode));
+            
+            console.log(`🎟️ Cupom ${order.couponCode} incrementado (usedCount +1)`);
+          } catch (err) {
+            console.error('Erro ao incrementar contador do cupom:', err);
+          }
+        }
+
         // Buscar itens do pedido já criados
         const existingItems = await db
           .select()
@@ -149,6 +166,23 @@ export async function POST(req: NextRequest) {
           .returning();
 
         order = newOrders[0];
+
+        // ✅ INCREMENTAR CONTADOR DO CUPOM (se houver)
+        if (couponCode) {
+          try {
+            await db
+              .update(coupons)
+              .set({
+                usedCount: sql`${coupons.usedCount} + 1`,
+                updatedAt: new Date(),
+              })
+              .where(eq(coupons.code, couponCode));
+            
+            console.log(`🎟️ Cupom ${couponCode} incrementado (usedCount +1)`);
+          } catch (err) {
+            console.error('Erro ao incrementar contador do cupom:', err);
+          }
+        }
 
         // Criar itens do pedido apenas se for um novo pedido
         for (const item of items) {

@@ -144,6 +144,7 @@ export default function CouponsTable({ search, onRefresh }: CouponsTableProps) {
                             <th className="text-left py-3 px-4 font-semibold text-gray-700">Código</th>
                             <th className="text-left py-3 px-4 font-semibold text-gray-700">Tipo</th>
                             <th className="text-left py-3 px-4 font-semibold text-gray-700">Valor</th>
+                            <th className="text-left py-3 px-4 font-semibold text-gray-700">Mín. Compra</th>
                             <th className="text-left py-3 px-4 font-semibold text-gray-700">Usos</th>
                             <th className="text-left py-3 px-4 font-semibold text-gray-700">Status</th>
                             <th className="text-left py-3 px-4 font-semibold text-gray-700">Validade</th>
@@ -176,11 +177,19 @@ export default function CouponsTable({ search, onRefresh }: CouponsTableProps) {
                                 <td className="py-3 px-4 font-semibold text-[#FD9555]">
                                     {formatValue(coupon)}
                                 </td>
+                                <td className="py-3 px-4 text-sm text-gray-600">
+                                    {coupon.minSubtotal 
+                                        ? `R$ ${parseFloat(coupon.minSubtotal).toFixed(2)}` 
+                                        : '-'}
+                                </td>
                                 <td className="py-3 px-4">
                                     <div className="text-sm">
                                         <span className="font-semibold">{coupon.usedCount}</span>
                                         {coupon.maxUses && (
                                             <span className="text-gray-500"> / {coupon.maxUses}</span>
+                                        )}
+                                        {!coupon.maxUses && (
+                                            <span className="text-gray-400"> / ∞</span>
                                         )}
                                     </div>
                                 </td>
@@ -190,9 +199,17 @@ export default function CouponsTable({ search, onRefresh }: CouponsTableProps) {
                                     </Badge>
                                 </td>
                                 <td className="py-3 px-4">
-                                    <div className="flex items-center gap-1 text-xs text-gray-600">
-                                        <Calendar className="w-3 h-3" />
-                                        {coupon.endsAt ? formatDate(coupon.endsAt) : 'Sem prazo'}
+                                    <div className="text-xs space-y-1">
+                                        {coupon.startsAt && (
+                                            <div className="flex items-center gap-1 text-gray-600">
+                                                <span>Início:</span>
+                                                <span className="font-medium">{formatDate(coupon.startsAt)}</span>
+                                            </div>
+                                        )}
+                                        <div className="flex items-center gap-1 text-gray-600">
+                                            <Calendar className="w-3 h-3" />
+                                            <span>{coupon.endsAt ? formatDate(coupon.endsAt) : 'Sem prazo'}</span>
+                                        </div>
                                     </div>
                                 </td>
                                 <td className="py-3 px-4 text-right">

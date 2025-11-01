@@ -19,23 +19,44 @@ interface CouponFormProps {
         code: string
         type: string
         value: string
+        minSubtotal?: string | null
+        maxUses?: number | null
+        maxUsesPerUser?: number
         isActive: boolean
+        startsAt?: string | null
+        endsAt?: string | null
     }
     onSuccess: () => void
 }
 
 export default function CouponForm({ coupon, onSuccess }: CouponFormProps) {
     const [loading, setLoading] = useState(false)
+    
+    // Função para formatar data do banco (ISO) para datetime-local input
+    const formatDateForInput = (dateString: string | null | undefined) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        // Formato: YYYY-MM-DDTHH:mm
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    };
+    
     const [formData, setFormData] = useState({
         code: coupon?.code || '',
         type: coupon?.type || 'percent',
         value: coupon?.value || '',
-        minSubtotal: '',
-        maxUses: '',
-        maxUsesPerUser: '1',
+        minSubtotal: coupon?.minSubtotal || '',
+        maxUses: coupon?.maxUses?.toString() || '',
+        maxUsesPerUser: coupon?.maxUsesPerUser?.toString() || '1',
         appliesTo: 'all',
         isActive: coupon?.isActive ?? true,
         stackable: false,
+        startsAt: formatDateForInput(coupon?.startsAt),
+        endsAt: formatDateForInput(coupon?.endsAt),
     })
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -55,6 +76,8 @@ export default function CouponForm({ coupon, onSuccess }: CouponFormProps) {
                     minSubtotal: formData.minSubtotal ? parseFloat(formData.minSubtotal) : null,
                     maxUses: formData.maxUses ? parseInt(formData.maxUses) : null,
                     maxUsesPerUser: parseInt(formData.maxUsesPerUser),
+                    startsAt: formData.startsAt || null,
+                    endsAt: formData.endsAt || null,
                 }),
             })
 
@@ -73,8 +96,13 @@ export default function CouponForm({ coupon, onSuccess }: CouponFormProps) {
     }
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
+        <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Seção: Informações Básicas */}
+            <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide border-b pb-2">
+                    Informações Básicas
+                </h3>
+                <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                     <Label htmlFor="code">Código do Cupom *</Label>
                     <Input
@@ -113,7 +141,7 @@ export default function CouponForm({ coupon, onSuccess }: CouponFormProps) {
                 </div>
 
                 <div className="space-y-2">
-                    <Label htmlFor="minSubtotal">Valor Mínimo (R$)</Label>
+                    <Label htmlFor="minSubtotal">Valor Mínimo da Compra (R$)</Label>
                     <Input
                         id="minSubtotal"
                         type="number"
@@ -122,17 +150,20 @@ export default function CouponForm({ coupon, onSuccess }: CouponFormProps) {
                         onChange={(e) => setFormData({ ...formData, minSubtotal: e.target.value })}
                         placeholder="0.00"
                     />
+                    <p className="text-xs text-gray-500">Valor mínimo do carrinho para usar o cupom</p>
                 </div>
 
                 <div className="space-y-2">
-                    <Label htmlFor="maxUses">Usos Máximos</Label>
+                    <Label htmlFor="maxUses">Usos Máximos Totais</Label>
                     <Input
                         id="maxUses"
                         type="number"
+                        min="1"
                         value={formData.maxUses}
                         onChange={(e) => setFormData({ ...formData, maxUses: e.target.value })}
                         placeholder="Ilimitado"
                     />
+                    <p className="text-xs text-gray-500">Quantas vezes o cupom pode ser usado (total)</p>
                 </div>
 
                 <div className="space-y-2">
@@ -140,34 +171,65 @@ export default function CouponForm({ coupon, onSuccess }: CouponFormProps) {
                     <Input
                         id="maxUsesPerUser"
                         type="number"
+                        min="1"
                         value={formData.maxUsesPerUser}
                         onChange={(e) => setFormData({ ...formData, maxUsesPerUser: e.target.value })}
                         required
                     />
+                    <p className="text-xs text-gray-500">Quantas vezes cada usuário pode usar</p>
+                </div>
+
+                <div className="space-y-2">
+                    <Label htmlFor="startsAt">Data de Início (Opcional)</Label>
+                    <Input
+                        id="startsAt"
+                        type="datetime-local"
+                        value={formData.startsAt}
+                        onChange={(e) => setFormData({ ...formData, startsAt: e.target.value })}
+                    />
+                    <p className="text-xs text-gray-500">Deixe vazio para ativar imediatamente</p>
+                </div>
+
+                <div className="space-y-2">
+                    <Label htmlFor="endsAt">Data de Término (Opcional)</Label>
+                    <Input
+                        id="endsAt"
+                        type="datetime-local"
+                        value={formData.endsAt}
+                        onChange={(e) => setFormData({ ...formData, endsAt: e.target.value })}
+                    />
+                    <p className="text-xs text-gray-500">Deixe vazio para não expirar</p>
+                </div>
+            </div>
+            </div>
+
+            {/* Seção: Configurações */}
+            <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide border-b pb-2">
+                    Configurações
+                </h3>
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                        <Switch
+                            id="isActive"
+                            checked={formData.isActive}
+                            onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
+                        />
+                        <Label htmlFor="isActive">Cupom Ativo</Label>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                        <Switch
+                            id="stackable"
+                            checked={formData.stackable}
+                            onCheckedChange={(checked) => setFormData({ ...formData, stackable: checked })}
+                        />
+                        <Label htmlFor="stackable">Acumulável</Label>
+                    </div>
                 </div>
             </div>
 
-            <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                    <Switch
-                        id="isActive"
-                        checked={formData.isActive}
-                        onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
-                    />
-                    <Label htmlFor="isActive">Cupom Ativo</Label>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                    <Switch
-                        id="stackable"
-                        checked={formData.stackable}
-                        onCheckedChange={(checked) => setFormData({ ...formData, stackable: checked })}
-                    />
-                    <Label htmlFor="stackable">Acumulável</Label>
-                </div>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-4">
+            <div className="flex justify-end gap-2 pt-4 border-t">
                 <Button type="submit" disabled={loading} className="bg-[#FED466] hover:bg-[#FD9555] text-gray-800">
                     {loading ? 'Salvando...' : coupon ? 'Atualizar Cupom' : 'Criar Cupom'}
                 </Button>

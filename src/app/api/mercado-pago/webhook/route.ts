@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { orders } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { orders, coupons } from '@/lib/db/schema';
+import { eq, sql } from 'drizzle-orm';
 import crypto from 'crypto';
 
 // Simples controle de idempotência (ideal: usar storage externo)
@@ -191,6 +191,23 @@ export async function POST(req: NextRequest) {
           console.log(
             `[Webhook] Pedido ${order.id} atualizado: ${order.status} -> ${newStatus} (paymentStatus: ${paymentStatus})`
           );
+
+          // ✅ INCREMENTAR CONTADOR DO CUPOM (se houver e pedido foi completado)
+          if (newStatus === 'completed' && order.status !== 'completed' && order.couponCode) {
+            try {
+              await db
+                .update(coupons)
+                .set({
+                  usedCount: sql`${coupons.usedCount} + 1`,
+                  updatedAt: new Date(),
+                })
+                .where(eq(coupons.code, order.couponCode));
+              
+              console.log(`🎟️ Cupom ${order.couponCode} incrementado (usedCount +1)`);
+            } catch (err) {
+              console.error('Erro ao incrementar contador do cupom:', err);
+            }
+          }
 
           // Enviar e-mail de confirmação se o pedido foi completado
           if (newStatus === 'completed' && order.status !== 'completed') {
