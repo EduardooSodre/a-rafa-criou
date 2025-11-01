@@ -121,10 +121,10 @@ export async function POST(req: NextRequest) {
 
         // Extrair dados do cupom dos metadados
         const couponCode = paymentIntent.metadata.couponCode || null;
-        const originalTotal = paymentIntent.metadata.originalTotal 
+        const originalTotal = paymentIntent.metadata.originalTotal
           ? parseFloat(paymentIntent.metadata.originalTotal)
-          : (paymentIntent.amount / 100);
-        const discount = paymentIntent.metadata.discount 
+          : paymentIntent.amount / 100;
+        const discount = paymentIntent.metadata.discount
           ? parseFloat(paymentIntent.metadata.discount)
           : 0;
         const finalTotal = paymentIntent.amount / 100;
