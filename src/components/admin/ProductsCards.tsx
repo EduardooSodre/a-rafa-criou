@@ -126,6 +126,37 @@ export default function ProductsCardsView({
         }).format(price)
     }
 
+    // Função para calcular o preço correto do produto (menor preço entre variações ou preço base)
+    const getProductPrice = (product: ProductData) => {
+        // Se tem variações, pegar o menor preço
+        if (product.variations && product.variations.length > 0) {
+            const prices = product.variations.map(v => Number(v.price))
+            const minPrice = Math.min(...prices)
+            const maxPrice = Math.max(...prices)
+            
+            // Se todos os preços são iguais, retorna só o preço
+            if (minPrice === maxPrice) {
+                return { min: minPrice, max: null, hasRange: false }
+            }
+            
+            // Se tem faixa de preço, retorna o range
+            return { min: minPrice, max: maxPrice, hasRange: true }
+        }
+        
+        // Se não tem variações, retorna o preço base do produto
+        return { min: Number(product.price), max: null, hasRange: false }
+    }
+
+    const formatProductPrice = (product: ProductData) => {
+        const priceData = getProductPrice(product)
+        
+        if (priceData.hasRange && priceData.max) {
+            return `${formatPrice(priceData.min)} - ${formatPrice(priceData.max)}`
+        }
+        
+        return formatPrice(priceData.min)
+    }
+
     const refreshProducts = async () => {
         const params = new URLSearchParams()
         if (search) params.append('search', search)
@@ -285,7 +316,7 @@ export default function ProductsCardsView({
                                         )}
                                     </div>
 
-                                    <div className="text-lg font-bold text-[#FD9555]">{formatPrice(product.price)}</div>
+                                    <div className="text-lg font-bold text-[#FD9555]">{formatProductPrice(product)}</div>
 
                                     <div className="flex items-center gap-1.5">
                                         <Button variant="outline" size="sm" className="h-8 px-2.5 text-xs font-medium bg-blue-50 text-blue-700 border-blue-200 hover:border-[#FED466] hover:shadow-md cursor-pointer transition-all duration-200" asChild>
@@ -344,7 +375,7 @@ export default function ProductsCardsView({
 
                                 <CardContent className="px-2 space-y-1">
                                     <div className="flex items-center justify-between">
-                                        <div className="text-base font-bold text-[#FD9555]">{formatPrice(product.price)}</div>
+                                        <div className="text-base font-bold text-[#FD9555]">{formatProductPrice(product)}</div>
                                         {product.variations && product.variations.length > 0 && (
                                             <Badge variant="secondary" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
                                                 {product.variations.length} var.
