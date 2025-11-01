@@ -152,23 +152,46 @@ export async function POST(req: NextRequest) {
 
         // Criar itens do pedido apenas se for um novo pedido
         for (const item of items) {
-          const [productData] = await db
+          // Buscar produto
+          const [product] = await db
             .select({
-              productId: products.id,
-              productName: products.name,
-              variationId: productVariations.id,
-              variationName: productVariations.name,
-              price: productVariations.price,
+              id: products.id,
+              name: products.name,
+              price: products.price,
             })
             .from(products)
-            .leftJoin(productVariations, eq(productVariations.productId, products.id))
             .where(eq(products.id, item.productId))
             .limit(1);
 
-          if (!productData || !productData.price) continue;
+          if (!product) continue;
 
-          const itemPrice = parseFloat(productData.price);
-          const itemTotal = itemPrice * item.quantity;
+          let itemPrice = parseFloat(product.price);
+          const productName = product.name;
+
+          // Se tem variação, buscar preço da variação
+          if (item.variationId) {
+            const [variation] = await db
+              .select({
+                price: productVariations.price,
+              })
+              .from(productVariations)
+              .where(eq(productVariations.id, item.variationId))
+              .limit(1);
+
+            if (variation) {
+              itemPrice = parseFloat(variation.price);
+            }
+          }
+
+          const itemSubtotal = itemPrice * item.quantity;
+
+          // Se houver desconto, aplicar proporcionalmente ao item
+          let itemTotal = itemSubtotal;
+          if (discount > 0 && originalTotal > 0) {
+            // Calcular desconto proporcional: (subtotal_item / subtotal_total) * desconto_total
+            const proportionalDiscount = (itemSubtotal / originalTotal) * discount;
+            itemTotal = itemSubtotal - proportionalDiscount;
+          }
 
           const createdItems = await db
             .insert(orderItems)
@@ -176,10 +199,10 @@ export async function POST(req: NextRequest) {
               orderId: order.id,
               productId: item.productId,
               variationId: item.variationId || null,
-              name: productData.productName || 'Produto',
+              name: productName,
               quantity: item.quantity,
-              price: productData.price,
-              total: itemTotal.toString(),
+              price: itemPrice.toString(),
+              total: itemTotal.toFixed(2),
             })
             .returning();
 
@@ -188,8 +211,8 @@ export async function POST(req: NextRequest) {
           orderItemsData.push({
             id: createdItem.id,
             productId: createdItem.productId,
-            productName: productData.productName || 'Produto',
-            variationName: productData.variationName || '',
+            productName: productName,
+            variationName: '',
             price: itemPrice,
             quantity: item.quantity,
             variationId: item.variationId,

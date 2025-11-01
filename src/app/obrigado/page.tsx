@@ -370,7 +370,12 @@ export default function ObrigadoPage() {
 
                                     {/* Informações do Produto */}
                                     <div className="flex-1 min-w-0">
-                                        <h3 className="font-semibold text-sm sm:text-lg leading-tight mb-2">{item.name}</h3>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h3 className="font-semibold text-sm sm:text-lg leading-tight pr-2">{item.name}</h3>
+                                            <p className="text-base sm:text-lg font-bold text-[#FD9555] whitespace-nowrap">
+                                                {formatPrice(parseFloat(item.price) * item.quantity)}
+                                            </p>
+                                        </div>
 
                                         {/* Variações em Badges */}
                                         {item.variation && (

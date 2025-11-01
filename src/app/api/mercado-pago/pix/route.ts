@@ -219,30 +219,46 @@ export async function POST(req: NextRequest) {
 
     // Criar itens do pedido
     for (const item of items) {
-      // Buscar nome e preço correto
-      let nome = description;
+      // Buscar nome do produto e preço da variação/produto
+      let nomeProduto = description;
       let preco = '0';
+
       if (item.variationId) {
+        // Buscar produto base
+        const product = dbProducts.find(p => p.id === item.productId);
         const variation = dbVariations.find(v => v.id === item.variationId);
-        if (variation) {
-          nome = variation.name;
-          preco = variation.price;
+        
+        if (product && variation) {
+          nomeProduto = product.name; // ✅ Nome do produto, não da variação
+          preco = variation.price;     // ✅ Preço da variação
         }
       } else {
         const product = dbProducts.find(p => p.id === item.productId);
         if (product) {
-          nome = product.name;
+          nomeProduto = product.name;
           preco = product.price;
         }
       }
+
+      // Calcular total do item (preço original * quantidade)
+      const itemSubtotal = Number(preco) * item.quantity;
+
+      // Se houver desconto, aplicar proporcionalmente ao item
+      let itemTotal = itemSubtotal;
+      if (appliedDiscount > 0 && amount > 0) {
+        // Calcular desconto proporcional: (subtotal_item / subtotal_total) * desconto_total
+        const proportionalDiscount = (itemSubtotal / amount) * appliedDiscount;
+        itemTotal = itemSubtotal - proportionalDiscount;
+      }
+
       await db.insert(orderItems).values({
         orderId: createdOrder.id,
         productId: item.productId,
         variationId: item.variationId,
-        name: nome,
+        name: nomeProduto, // ✅ Nome do produto
         price: preco.toString(),
         quantity: item.quantity,
-        total: (Number(preco) * item.quantity).toFixed(2),
+        total: itemTotal.toFixed(2),
         createdAt: new Date(),
       });
     }

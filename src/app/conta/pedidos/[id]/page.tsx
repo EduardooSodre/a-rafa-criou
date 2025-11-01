@@ -681,7 +681,7 @@ export default function PedidoDetalhesPage() {
                                             <div className="flex justify-between items-start mb-2">
                                                 <h3 className="font-semibold text-sm sm:text-lg leading-tight pr-2">{item.name}</h3>
                                                 <p className="text-base sm:text-lg font-bold text-[#FD9555] whitespace-nowrap">
-                                                    {formatPrice(item.total)}
+                                                    {formatPrice(item.price * item.quantity)}
                                                 </p>
                                             </div>
 
