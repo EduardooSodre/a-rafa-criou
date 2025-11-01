@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getServerSession } from 'next-auth';
 import { db } from '@/lib/db';
-import { products, productVariations } from '@/lib/db/schema';
+import { products, productVariations, coupons } from '@/lib/db/schema';
+import { eq } from 'drizzle-orm';
 
 // Rate limiting simples (pode ser aprimorado com Redis ou outro storage)
 let lastRequest = 0;
@@ -17,6 +18,8 @@ const PixSchema = z.object({
     })
   ),
   description: z.string().min(1),
+  couponCode: z.string().optional().nullable(),
+  discount: z.number().optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -37,7 +40,7 @@ export async function POST(req: NextRequest) {
     const userId = (session.user as { id?: string }).id || null; // ✅ Capturar userId da sessão (pode ser null para OAuth sem user no DB)
 
     const body = await req.json();
-    const { items, description } = PixSchema.parse(body);
+    const { items, description, couponCode, discount } = PixSchema.parse(body);
 
     // Buscar todos os produtos do carrinho
     const productIds = [...new Set(items.map(item => item.productId))];
@@ -97,10 +100,60 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Total inválido' }, { status: 400 });
     }
 
+    // Aplicar desconto de cupom se fornecido
+    let finalAmount = amount;
+    let appliedDiscount = 0;
+
+    if (couponCode && discount && discount > 0) {
+      // Validar cupom no banco
+      const [coupon] = await db
+        .select()
+        .from(coupons)
+        .where(eq(coupons.code, couponCode))
+        .limit(1);
+
+      if (!coupon) {
+        return NextResponse.json({ error: 'Cupom inválido' }, { status: 400 });
+      }
+
+      // Validar se cupom está ativo
+      if (!coupon.isActive) {
+        return NextResponse.json({ error: 'Cupom não está ativo' }, { status: 400 });
+      }
+
+      // Validar datas
+      const now = new Date();
+      if (coupon.startsAt && new Date(coupon.startsAt) > now) {
+        return NextResponse.json({ error: 'Cupom ainda não está válido' }, { status: 400 });
+      }
+      if (coupon.endsAt && new Date(coupon.endsAt) < now) {
+        return NextResponse.json({ error: 'Cupom expirado' }, { status: 400 });
+      }
+
+      // Validar total mínimo
+      if (coupon.minSubtotal && amount < Number(coupon.minSubtotal)) {
+        return NextResponse.json({ 
+          error: `Valor mínimo de R$ ${Number(coupon.minSubtotal).toFixed(2)} não atingido` 
+        }, { status: 400 });
+      }
+
+      // Aplicar desconto
+      appliedDiscount = Math.min(discount, amount); // Garantir que desconto não seja maior que total
+      finalAmount = amount - appliedDiscount;
+
+      console.log('[Pix] Cupom aplicado:', couponCode);
+      console.log('[Pix] Desconto:', appliedDiscount);
+      console.log('[Pix] Total final:', finalAmount);
+    }
+
+    if (finalAmount <= 0) {
+      return NextResponse.json({ error: 'Total inválido após desconto' }, { status: 400 });
+    }
+
     // Logging básico
-    console.log(`[Pix] Criando pagamento: ${email}, valor: ${amount}`); // Mercado Pago espera valor em reais, mas pode exigir inteiro (centavos)
+    console.log(`[Pix] Criando pagamento: ${email}, valor: ${finalAmount}`); // Mercado Pago espera valor em reais, mas pode exigir inteiro (centavos)
     // Stripe usa centavos, Mercado Pago geralmente usa reais, mas alguns erros podem ocorrer se não for inteiro
-    const transactionAmount = Math.round(amount * 100) / 100; // Garante 2 casas decimais
+    const transactionAmount = Math.round(finalAmount * 100) / 100; // Garante 2 casas decimais
     const payment_data = {
       transaction_amount: transactionAmount,
       description,
@@ -139,12 +192,13 @@ export async function POST(req: NextRequest) {
         email,
         status: 'pending',
         subtotal: amount.toString(),
-        discountAmount: '0',
-        total: amount.toString(),
+        discountAmount: appliedDiscount.toString(),
+        total: finalAmount.toString(),
         currency: 'BRL',
         paymentProvider: 'pix',
         paymentId: payment.id,
         paymentStatus: 'pending', // ✅ SEMPRE 'pending' na criação (será 'paid' quando completado)
+        ...(couponCode && { couponCode }), // ✅ Adicionar cupom se aplicado
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -156,7 +210,11 @@ export async function POST(req: NextRequest) {
     console.log('[Pix] Order ID:', createdOrder.id);
     console.log('[Pix] Payment ID (Mercado Pago):', payment.id);
     console.log('[Pix] Status inicial:', createdOrder.status);
-    console.log('[Pix] Total:', `R$ ${amount.toFixed(2)}`);
+    console.log('[Pix] Subtotal:', `R$ ${amount.toFixed(2)}`);
+    if (appliedDiscount > 0) {
+      console.log('[Pix] Desconto (', couponCode, '):', `R$ ${appliedDiscount.toFixed(2)}`);
+    }
+    console.log('[Pix] Total:', `R$ ${finalAmount.toFixed(2)}`);
     console.log('[Pix] IMPORTANTE: Este payment_id deve aparecer no webhook!');
     console.log('═══════════════════════════════════════════════════════');
 

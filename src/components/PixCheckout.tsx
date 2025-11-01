@@ -13,7 +13,17 @@ interface PixResponse {
     payment_id: string;
 }
 
-const PixCheckout: React.FC = () => {
+interface PixCheckoutProps {
+    appliedCoupon?: {
+        code: string
+        discount: number
+        type: string
+        value: string
+    } | null
+    finalTotal: number
+}
+
+const PixCheckout: React.FC<PixCheckoutProps> = ({ appliedCoupon, finalTotal }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [pix, setPix] = useState<PixResponse | null>(null);
@@ -48,6 +58,8 @@ const PixCheckout: React.FC = () => {
                 body: JSON.stringify({
                     items,
                     description,
+                    couponCode: appliedCoupon?.code || null,
+                    discount: appliedCoupon?.discount || 0,
                 }),
             });
             const data = await res.json();

@@ -2,8 +2,8 @@ import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { stripe } from '@/lib/stripe';
 import { db } from '@/lib/db';
-import { products, productVariations } from '@/lib/db/schema';
-import { inArray } from 'drizzle-orm';
+import { products, productVariations, coupons } from '@/lib/db/schema';
+import { inArray, eq } from 'drizzle-orm';
 
 const createPaymentIntentSchema = z.object({
   items: z.array(
@@ -15,6 +15,8 @@ const createPaymentIntentSchema = z.object({
   ),
   userId: z.string().optional(),
   email: z.string().email().optional(),
+  couponCode: z.string().optional().nullable(),
+  discount: z.number().optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -22,7 +24,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     console.log('[Stripe Payment Intent] Request recebido:', JSON.stringify(body, null, 2));
 
-    const { items, userId, email } = createPaymentIntentSchema.parse(body);
+    const { items, userId, email, couponCode, discount } = createPaymentIntentSchema.parse(body);
 
     // 1. Buscar produtos reais do banco (NUNCA confiar no frontend)
     // Usar Set para remover duplicatas quando há várias variações do mesmo produto
@@ -107,16 +109,62 @@ export async function POST(req: NextRequest) {
     console.log('[Stripe Payment Intent] Total calculado: R$', total.toFixed(2));
     console.log('[Stripe Payment Intent] Detalhes:', calculationDetails);
 
-    if (total <= 0) {
-      return Response.json({ error: 'Total inválido' }, { status: 400 });
+    // 3.5. Aplicar desconto de cupom se fornecido
+    let finalTotal = total;
+    let appliedDiscount = 0;
+
+    if (couponCode && discount && discount > 0) {
+      // Validar cupom no banco
+      const [coupon] = await db
+        .select()
+        .from(coupons)
+        .where(eq(coupons.code, couponCode))
+        .limit(1);
+
+      if (!coupon) {
+        return Response.json({ error: 'Cupom inválido' }, { status: 400 });
+      }
+
+      // Validar se cupom está ativo
+      if (!coupon.isActive) {
+        return Response.json({ error: 'Cupom não está ativo' }, { status: 400 });
+      }
+
+      // Validar datas
+      const now = new Date();
+      if (coupon.startsAt && new Date(coupon.startsAt) > now) {
+        return Response.json({ error: 'Cupom ainda não está válido' }, { status: 400 });
+      }
+      if (coupon.endsAt && new Date(coupon.endsAt) < now) {
+        return Response.json({ error: 'Cupom expirado' }, { status: 400 });
+      }
+
+      // Validar total mínimo
+      if (coupon.minSubtotal && total < Number(coupon.minSubtotal)) {
+        return Response.json({ 
+          error: `Valor mínimo de R$ ${Number(coupon.minSubtotal).toFixed(2)} não atingido` 
+        }, { status: 400 });
+      }
+
+      // Aplicar desconto
+      appliedDiscount = Math.min(discount, total); // Garantir que desconto não seja maior que total
+      finalTotal = total - appliedDiscount;
+
+      console.log('[Stripe Payment Intent] Cupom aplicado:', couponCode);
+      console.log('[Stripe Payment Intent] Desconto:', appliedDiscount);
+      console.log('[Stripe Payment Intent] Total final:', finalTotal);
+    }
+
+    if (finalTotal <= 0) {
+      return Response.json({ error: 'Total inválido após desconto' }, { status: 400 });
     }
 
     // Stripe requer mínimo de R$ 0.50
-    if (total < 0.5) {
-      console.error('[Stripe] Total abaixo do mínimo permitido:', total);
+    if (finalTotal < 0.5) {
+      console.error('[Stripe] Total abaixo do mínimo permitido:', finalTotal);
       return Response.json(
         {
-          error: `Total de R$ ${total.toFixed(2)} está abaixo do mínimo permitido pelo Stripe (R$ 0.50). Verifique os preços dos produtos no banco de dados.`,
+          error: `Total de R$ ${finalTotal.toFixed(2)} está abaixo do mínimo permitido pelo Stripe (R$ 0.50). Verifique os preços dos produtos no banco de dados.`,
           details: calculationDetails,
         },
         { status: 400 }
@@ -124,7 +172,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 4. Criar Payment Intent no Stripe
-    const amountInCents = Math.round(total * 100); // Converter R$ para centavos
+    const amountInCents = Math.round(finalTotal * 100); // Converter R$ para centavos
     console.log('[Stripe Payment Intent] Valor em centavos:', amountInCents);
 
     const paymentIntent = await stripe.paymentIntents.create({
@@ -134,6 +182,10 @@ export async function POST(req: NextRequest) {
       metadata: {
         userId: userId || '',
         items: JSON.stringify(items),
+        ...(couponCode && { couponCode }),
+        ...(appliedDiscount > 0 && { discount: appliedDiscount.toString() }),
+        originalTotal: total.toString(),
+        finalTotal: finalTotal.toString(),
       },
     });
 

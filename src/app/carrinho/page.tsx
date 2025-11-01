@@ -22,7 +22,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { EditCartItemSheet } from '@/components/sections/EditCartItemSheet'
 import { useTranslation } from 'react-i18next'
-import PixCheckout from '@/components/PixCheckout';
+import PixCheckout from '@/components/PixCheckout'
+import InternationalCheckout from '@/components/InternationalCheckout'
 
 export default function CarrinhoPage() {
     const { t, i18n } = useTranslation('common')
@@ -32,6 +33,15 @@ export default function CarrinhoPage() {
     const [pixDialogOpen, setPixDialogOpen] = useState(false)
     const [pixName, setPixName] = useState('')
     const [pixEmail, setPixEmail] = useState('')
+    const [couponCode, setCouponCode] = useState('')
+    const [appliedCoupon, setAppliedCoupon] = useState<{
+        code: string
+        discount: number
+        type: string
+        value: string
+    } | null>(null)
+    const [couponError, setCouponError] = useState('')
+    const [isApplyingCoupon, setIsApplyingCoupon] = useState(false)
     const [productData, setProductData] = useState<Map<string, {
         id: string
         name: string
@@ -101,6 +111,61 @@ export default function CarrinhoPage() {
             maximumFractionDigits: 2
         }).format(price)
     }
+
+    // Handler para aplicar cupom
+    const handleApplyCoupon = async () => {
+        if (!couponCode.trim()) {
+            setCouponError('Digite um código de cupom')
+            return
+        }
+
+        setIsApplyingCoupon(true)
+        setCouponError('')
+
+        try {
+            const response = await fetch('/api/coupons/validate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    code: couponCode.trim(),
+                    cartItems: items,
+                    cartTotal: totalPrice
+                })
+            })
+
+            const data = await response.json()
+
+            if (!response.ok) {
+                setCouponError(data.error || 'Erro ao aplicar cupom')
+                setAppliedCoupon(null)
+                return
+            }
+
+            setAppliedCoupon({
+                code: data.coupon.code,
+                discount: data.discount,
+                type: data.coupon.type,
+                value: data.coupon.value
+            })
+            setCouponError('')
+        } catch (error) {
+            console.error('Erro:', error)
+            setCouponError('Erro ao validar cupom')
+            setAppliedCoupon(null)
+        } finally {
+            setIsApplyingCoupon(false)
+        }
+    }
+
+    // Handler para remover cupom
+    const handleRemoveCoupon = () => {
+        setAppliedCoupon(null)
+        setCouponCode('')
+        setCouponError('')
+    }
+
+    // Calcular total final com desconto
+    const finalTotal = appliedCoupon ? totalPrice - appliedCoupon.discount : totalPrice
 
     // Handler para PIX
     const handlePixCheckout = () => {
@@ -303,24 +368,60 @@ export default function CarrinhoPage() {
                                         <div className="flex gap-2">
                                             <Input
                                                 id="coupon"
+                                                value={couponCode}
+                                                onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                                                 placeholder={t('cart.couponPlaceholder')}
                                                 className="flex-1 h-11 border-2 focus:border-[#FD9555]"
+                                                disabled={!!appliedCoupon}
                                             />
-                                            <Button
-                                                type="button"
-                                                size="sm"
-                                                className="h-11 px-4 !bg-white !text-gray-900 border-2 !border-gray-300 font-semibold hover:!bg-[#FD9555] hover:!text-white hover:!border-[#FD9555] transition-all duration-200 cursor-pointer"
-                                            >
-                                                {t('cart.apply')}
-                                            </Button>
+                                            {appliedCoupon ? (
+                                                <Button
+                                                    type="button"
+                                                    size="sm"
+                                                    onClick={handleRemoveCoupon}
+                                                    className="h-11 px-4 !bg-red-500 !text-white border-2 !border-red-500 font-semibold hover:!bg-red-600 transition-all duration-200 cursor-pointer"
+                                                >
+                                                    Remover
+                                                </Button>
+                                            ) : (
+                                                <Button
+                                                    type="button"
+                                                    size="sm"
+                                                    onClick={handleApplyCoupon}
+                                                    disabled={isApplyingCoupon}
+                                                    className="h-11 px-4 !bg-white !text-gray-900 border-2 !border-gray-300 font-semibold hover:!bg-[#FD9555] hover:!text-white hover:!border-[#FD9555] transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                                >
+                                                    {isApplyingCoupon ? 'Aplicando...' : t('cart.apply')}
+                                                </Button>
+                                            )}
                                         </div>
+                                        {couponError && (
+                                            <p className="text-sm text-red-600 font-medium">{couponError}</p>
+                                        )}
+                                        {appliedCoupon && (
+                                            <div className="flex items-center justify-between bg-green-50 p-3 rounded-lg border border-green-200">
+                                                <div>
+                                                    <p className="text-sm font-semibold text-green-700">
+                                                        Cupom {appliedCoupon.code} aplicado!
+                                                    </p>
+                                                    <p className="text-xs text-green-600">
+                                                        {appliedCoupon.type === 'percent' 
+                                                            ? `${appliedCoupon.value}% de desconto` 
+                                                            : `R$ ${parseFloat(appliedCoupon.value).toFixed(2)} de desconto`}
+                                                    </p>
+                                                </div>
+                                                <span className="text-green-700 font-bold">
+                                                    -{formatPrice(appliedCoupon.discount)}
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
 
                                     <Separator className="my-4" />
 
                                     <div className="flex justify-between items-center py-3 bg-[#FED466]/20 px-4 rounded-lg">
                                         <span className="font-bold text-gray-900 text-lg">{t('cart.total')}</span>
-                                        <span className="text-2xl font-bold text-[#FD9555]">{formatPrice(totalPrice)}</span>
+                                        <span className="text-2xl font-bold text-[#FD9555]">{formatPrice(finalTotal)}</span>
                                     </div>
 
 
@@ -373,20 +474,20 @@ export default function CarrinhoPage() {
                                         </DialogContent>
                                     </Dialog>
 
-                                    {/* Botão Pix direto no carrinho */}
+                                    {/* Botões de Pagamento */}
                                     <div className="flex flex-col gap-3">
-                                        <Button
-                                            asChild
-                                            className="w-full h-14 bg-gradient-to-r from-[#FD9555] to-[#FD9555]/90 hover:from-[#FD9555]/90 hover:to-[#FD9555] text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer"
-                                            size="lg"
-                                        >
-                                            <Link href="/checkout">
-                                                Comprar internacionalmente
-                                            </Link>
-                                        </Button>
+                                        {/* Pagamento Internacional */}
+                                        <InternationalCheckout 
+                                            appliedCoupon={appliedCoupon}
+                                            finalTotal={finalTotal}
+                                        />
+                                        
                                         {/* PixCheckout: botão Pix e QR Code */}
                                         <div className="w-full">
-                                            <PixCheckout />
+                                            <PixCheckout 
+                                                appliedCoupon={appliedCoupon}
+                                                finalTotal={finalTotal}
+                                            />
                                         </div>
                                     </div>
 
