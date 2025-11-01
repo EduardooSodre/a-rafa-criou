@@ -8,15 +8,18 @@ import { Badge } from '@/components/ui/badge'
 import { CheckCircle, Download, Mail, FileText, Star, ArrowRight, Loader2, XCircle } from 'lucide-react'
 import Link from 'next/link'
 import { useCart } from '@/contexts/cart-context'
+import Image from 'next/image'
 
 interface OrderItem {
     id: string
+    productId: string
+    variationId: string | null
     name: string
     price: string
     quantity: number
     total: string
-    variationName?: string | null
-    productSlug?: string | null
+    imageUrl?: string | null
+    variation?: Record<string, string> | null
 }
 
 interface OrderData {
@@ -341,20 +344,55 @@ export default function ObrigadoPage() {
                         {orderData.items.map((item) => (
                             <div
                                 key={item.id}
-                                className="flex items-center justify-between p-4 border rounded-lg bg-gray-50"
+                                className="border rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow bg-white"
                             >
-                                <div className="flex-1">
-                                    <h3 className="font-medium text-gray-900">{item.name}</h3>
-                                    {item.variationName && (
-                                        <p className="text-sm text-gray-600">{item.variationName}</p>
-                                    )}
-                                    <p className="text-xs text-gray-500 mt-1">
-                                        {item.quantity}x {formatPrice(item.price)} = {formatPrice(item.total)}
-                                    </p>
+                                <div className="flex gap-3 sm:gap-4 mb-3">
+                                    {/* Imagem do Produto */}
+                                    <div className="flex-shrink-0">
+                                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden bg-gray-100 border relative">
+                                            {item.imageUrl ? (
+                                                <Image
+                                                    src={item.imageUrl}
+                                                    alt={item.name}
+                                                    fill
+                                                    className="object-cover"
+                                                    sizes="(max-width: 640px) 80px, 96px"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                    </svg>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Informações do Produto */}
+                                    <div className="flex-1 min-w-0">
+                                        <h3 className="font-semibold text-sm sm:text-lg leading-tight mb-2">{item.name}</h3>
+
+                                        {/* Variações em Badges */}
+                                        {item.variation && (
+                                            <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                                                {Object.entries(item.variation).map(([key, value]) => (
+                                                    <Badge
+                                                        key={key}
+                                                        variant="outline"
+                                                        className="text-xs bg-gray-50 border-gray-300"
+                                                    >
+                                                        <span className="font-medium">{key}:</span>
+                                                        <span className="ml-1">{value}</span>
+                                                    </Badge>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                                {(orderData.order.status === 'completed' || orderData.order.paymentStatus === 'succeeded') ? (
+
+                                {(orderData.order.status === 'completed' || orderData.order.paymentStatus === 'succeeded' || orderData.order.paymentStatus === 'paid') ? (
                                     <Button
-                                        className="bg-[#FED466] hover:bg-[#FED466]/90 text-black cursor-pointer"
+                                        className="w-full bg-[#FED466] hover:bg-[#FED466]/90 text-black cursor-pointer font-bold"
                                         onClick={async () => {
                                             try {
                                                 setDownloadingItem(item.id)
@@ -393,14 +431,19 @@ export default function ObrigadoPage() {
                                         disabled={!!downloadingItem}
                                     >
                                         {downloadingItem === item.id ? (
-                                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                            <>
+                                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                                <span>Gerando...</span>
+                                            </>
                                         ) : (
-                                            <Download className="w-4 h-4 mr-2" />
+                                            <>
+                                                <Download className="w-4 h-4 mr-2" />
+                                                <span>Fazer Download</span>
+                                            </>
                                         )}
-                                        Download
                                     </Button>
                                 ) : (
-                                    <Button disabled variant="ghost" className="opacity-60 cursor-not-allowed">
+                                    <Button disabled variant="ghost" className="w-full opacity-60 cursor-not-allowed">
                                         <Download className="w-4 h-4 mr-2" />
                                         Aguardando pagamento
                                     </Button>

@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { orders, orderItems, products, productVariations } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import {
+  orders,
+  orderItems,
+  products,
+  productImages,
+  variationAttributeValues,
+  attributeValues,
+  attributes,
+} from '@/lib/db/schema';
+import { eq, asc } from 'drizzle-orm';
 
 export async function GET(req: NextRequest) {
   try {
@@ -48,23 +56,87 @@ export async function GET(req: NextRequest) {
 
     const order = orderResult[0];
 
-    // Buscar itens do pedido com detalhes dos produtos
-    const items = await db
-      .select({
-        id: orderItems.id,
-        name: orderItems.name,
-        price: orderItems.price,
-        quantity: orderItems.quantity,
-        total: orderItems.total,
-        productId: orderItems.productId,
-        variationId: orderItems.variationId,
-        productSlug: products.slug,
-        variationName: productVariations.name,
+    // Buscar itens do pedido
+    const items = await db.select().from(orderItems).where(eq(orderItems.orderId, order.id));
+
+    // Enriquecer itens com imagens e atributos
+    const enrichedItems = await Promise.all(
+      items.map(async item => {
+        // Buscar nome do produto original
+        const [product] = await db
+          .select({ name: products.name })
+          .from(products)
+          .where(eq(products.id, item.productId))
+          .limit(1);
+
+        // Buscar imagem principal do produto ou da variação
+        let imageUrl = null;
+
+        if (item.variationId) {
+          // Buscar imagem da variação primeiro
+          const [variationImage] = await db
+            .select()
+            .from(productImages)
+            .where(eq(productImages.variationId, item.variationId))
+            .orderBy(asc(productImages.sortOrder))
+            .limit(1);
+
+          if (variationImage) {
+            imageUrl = variationImage.url;
+          }
+        }
+
+        // Se não encontrou imagem da variação, buscar do produto
+        if (!imageUrl) {
+          const [productImage] = await db
+            .select()
+            .from(productImages)
+            .where(eq(productImages.productId, item.productId))
+            .orderBy(asc(productImages.sortOrder))
+            .limit(1);
+
+          if (productImage) {
+            imageUrl = productImage.url;
+          }
+        }
+
+        // Buscar atributos da variação
+        let variation = null;
+        if (item.variationId) {
+          const variationAttrs = await db
+            .select({
+              attributeName: attributes.name,
+              attributeValue: attributeValues.value,
+            })
+            .from(variationAttributeValues)
+            .innerJoin(attributes, eq(variationAttributeValues.attributeId, attributes.id))
+            .innerJoin(attributeValues, eq(variationAttributeValues.valueId, attributeValues.id))
+            .where(eq(variationAttributeValues.variationId, item.variationId));
+
+          if (variationAttrs.length > 0) {
+            variation = variationAttrs.reduce(
+              (acc, attr) => {
+                acc[attr.attributeName] = attr.attributeValue;
+                return acc;
+              },
+              {} as Record<string, string>
+            );
+          }
+        }
+
+        return {
+          id: item.id,
+          productId: item.productId,
+          variationId: item.variationId,
+          name: product?.name || item.name,
+          quantity: item.quantity,
+          price: item.price,
+          total: item.total,
+          imageUrl,
+          variation,
+        };
       })
-      .from(orderItems)
-      .leftJoin(products, eq(orderItems.productId, products.id))
-      .leftJoin(productVariations, eq(orderItems.variationId, productVariations.id))
-      .where(eq(orderItems.orderId, order.id));
+    );
 
     return NextResponse.json({
       order: {
@@ -80,15 +152,7 @@ export async function GET(req: NextRequest) {
         paidAt: order.paidAt,
         createdAt: order.createdAt,
       },
-      items: items.map(item => ({
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity,
-        total: item.total,
-        variationName: item.variationName,
-        productSlug: item.productSlug,
-      })),
+      items: enrichedItems,
     });
   } catch (error) {
     console.error('Erro ao buscar pedido:', error);
