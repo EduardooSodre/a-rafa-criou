@@ -194,9 +194,16 @@ export default function CouponsTable({ search, onRefresh }: CouponsTableProps) {
                                     </div>
                                 </td>
                                 <td className="py-3 px-4">
-                                    <Badge variant={coupon.isActive ? 'default' : 'secondary'}>
-                                        {coupon.isActive ? 'Ativo' : 'Inativo'}
-                                    </Badge>
+                                    <div className="flex flex-col gap-1">
+                                        <Badge variant={coupon.isActive ? 'default' : 'secondary'}>
+                                            {coupon.isActive ? 'Ativo' : 'Inativo'}
+                                        </Badge>
+                                        {coupon.stackable && (
+                                            <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-300">
+                                                Acumulável
+                                            </Badge>
+                                        )}
+                                    </div>
                                 </td>
                                 <td className="py-3 px-4">
                                     <div className="text-xs space-y-1">

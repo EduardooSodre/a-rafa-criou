@@ -23,6 +23,7 @@ interface CouponFormProps {
         maxUses?: number | null
         maxUsesPerUser?: number
         isActive: boolean
+        stackable?: boolean
         startsAt?: string | null
         endsAt?: string | null
     }
@@ -54,7 +55,7 @@ export default function CouponForm({ coupon, onSuccess }: CouponFormProps) {
         maxUsesPerUser: coupon?.maxUsesPerUser?.toString() || '1',
         appliesTo: 'all',
         isActive: coupon?.isActive ?? true,
-        stackable: false,
+        stackable: coupon?.stackable ?? false,
         startsAt: formatDateForInput(coupon?.startsAt),
         endsAt: formatDateForInput(coupon?.endsAt),
     })
@@ -71,11 +72,15 @@ export default function CouponForm({ coupon, onSuccess }: CouponFormProps) {
                 method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    ...formData,
+                    code: formData.code,
+                    type: formData.type,
                     value: parseFloat(formData.value),
                     minSubtotal: formData.minSubtotal ? parseFloat(formData.minSubtotal) : null,
                     maxUses: formData.maxUses ? parseInt(formData.maxUses) : null,
                     maxUsesPerUser: parseInt(formData.maxUsesPerUser),
+                    appliesTo: formData.appliesTo,
+                    isActive: formData.isActive,
+                    stackable: formData.stackable,
                     startsAt: formData.startsAt || null,
                     endsAt: formData.endsAt || null,
                 }),

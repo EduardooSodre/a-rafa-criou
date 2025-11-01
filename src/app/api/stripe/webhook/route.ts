@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import Stripe from 'stripe';
 import { stripe } from '@/lib/stripe';
 import { db } from '@/lib/db';
-import { orders, orderItems, products, productVariations, files, coupons } from '@/lib/db/schema';
+import { orders, orderItems, products, productVariations, files, coupons, couponRedemptions } from '@/lib/db/schema';
 import { eq, sql } from 'drizzle-orm';
 import { resend, FROM_EMAIL } from '@/lib/email';
 import { PurchaseConfirmationEmail } from '@/emails/purchase-confirmation';
@@ -109,6 +109,26 @@ export async function POST(req: NextRequest) {
               .where(eq(coupons.code, order.couponCode));
 
             console.log(`🎟️ Cupom ${order.couponCode} incrementado (usedCount +1)`);
+
+            // ✅ REGISTRAR USO DO CUPOM PELO USUÁRIO
+            if (order.userId) {
+              const [couponData] = await db
+                .select()
+                .from(coupons)
+                .where(eq(coupons.code, order.couponCode))
+                .limit(1);
+
+              if (couponData) {
+                await db.insert(couponRedemptions).values({
+                  couponId: couponData.id,
+                  userId: order.userId,
+                  orderId: order.id,
+                  amountDiscounted: order.discountAmount || '0',
+                });
+
+                console.log(`📝 Registro de resgate do cupom criado para userId: ${order.userId}`);
+              }
+            }
           } catch (err) {
             console.error('Erro ao incrementar contador do cupom:', err);
           }
@@ -179,6 +199,26 @@ export async function POST(req: NextRequest) {
               .where(eq(coupons.code, couponCode));
 
             console.log(`🎟️ Cupom ${couponCode} incrementado (usedCount +1)`);
+
+            // ✅ REGISTRAR USO DO CUPOM PELO USUÁRIO
+            if (userId) {
+              const [couponData] = await db
+                .select()
+                .from(coupons)
+                .where(eq(coupons.code, couponCode))
+                .limit(1);
+
+              if (couponData) {
+                await db.insert(couponRedemptions).values({
+                  couponId: couponData.id,
+                  userId: userId,
+                  orderId: order.id,
+                  amountDiscounted: discount.toString(),
+                });
+
+                console.log(`📝 Registro de resgate do cupom criado para userId: ${userId}`);
+              }
+            }
           } catch (err) {
             console.error('Erro ao incrementar contador do cupom:', err);
           }

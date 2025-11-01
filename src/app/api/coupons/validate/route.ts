@@ -1,15 +1,20 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { coupons, couponProducts, couponVariations } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { coupons, couponProducts, couponVariations, couponRedemptions } from '@/lib/db/schema';
+import { eq, and, sql } from 'drizzle-orm';
+import { getServerSession } from 'next-auth';
 
 export async function POST(request: Request) {
   try {
-    const { code, cartItems, cartTotal } = await request.json();
+    const { code, cartItems, cartTotal, userId } = await request.json();
 
     if (!code || !cartItems || !cartTotal) {
       return NextResponse.json({ error: 'Dados incompletos' }, { status: 400 });
     }
+
+    // Buscar sessão do usuário
+    const session = await getServerSession();
+    const sessionUserId = (session?.user as { id?: string })?.id || userId || null;
 
     // Buscar cupom pelo código
     const [coupon] = await db
@@ -37,10 +42,35 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Cupom expirado' }, { status: 400 });
     }
 
-    // Validar limite de uso
+    // Validar limite de uso total
     const usedCount = coupon.usedCount || 0;
     if (coupon.maxUses && usedCount >= coupon.maxUses) {
       return NextResponse.json({ error: 'Cupom atingiu o limite de uso' }, { status: 400 });
+    }
+
+    // ✅ VALIDAR LIMITE DE USO POR USUÁRIO
+    if (sessionUserId && coupon.maxUsesPerUser) {
+      // Contar quantas vezes este usuário já usou este cupom
+      const userRedemptions = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(couponRedemptions)
+        .where(
+          and(
+            eq(couponRedemptions.couponId, coupon.id),
+            eq(couponRedemptions.userId, sessionUserId)
+          )
+        );
+
+      const userUsageCount = Number(userRedemptions[0]?.count || 0);
+
+      if (userUsageCount >= coupon.maxUsesPerUser) {
+        return NextResponse.json(
+          { 
+            error: `Você já atingiu o limite de ${coupon.maxUsesPerUser} uso${coupon.maxUsesPerUser > 1 ? 's' : ''} deste cupom` 
+          },
+          { status: 400 }
+        );
+      }
     }
 
     // Validar valor mínimo

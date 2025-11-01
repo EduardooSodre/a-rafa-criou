@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { orders, coupons } from '@/lib/db/schema';
+import { orders, coupons, couponRedemptions } from '@/lib/db/schema';
 import { eq, sql } from 'drizzle-orm';
 import crypto from 'crypto';
 
@@ -204,6 +204,26 @@ export async function POST(req: NextRequest) {
                 .where(eq(coupons.code, order.couponCode));
 
               console.log(`🎟️ Cupom ${order.couponCode} incrementado (usedCount +1)`);
+
+              // ✅ REGISTRAR USO DO CUPOM PELO USUÁRIO
+              if (order.userId) {
+                const [couponData] = await db
+                  .select()
+                  .from(coupons)
+                  .where(eq(coupons.code, order.couponCode))
+                  .limit(1);
+
+                if (couponData) {
+                  await db.insert(couponRedemptions).values({
+                    couponId: couponData.id,
+                    userId: order.userId,
+                    orderId: order.id,
+                    amountDiscounted: order.discountAmount || '0',
+                  });
+
+                  console.log(`📝 Registro de resgate do cupom criado para userId: ${order.userId}`);
+                }
+              }
             } catch (err) {
               console.error('Erro ao incrementar contador do cupom:', err);
             }

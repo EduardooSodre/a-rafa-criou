@@ -24,11 +24,13 @@ import { EditCartItemSheet } from '@/components/sections/EditCartItemSheet'
 import { useTranslation } from 'react-i18next'
 import PixCheckout from '@/components/PixCheckout'
 import InternationalCheckout from '@/components/InternationalCheckout'
+import { useSession } from 'next-auth/react'
 
 export default function CarrinhoPage() {
     const { t, i18n } = useTranslation('common')
     const router = useRouter()
     const { items, totalItems, totalPrice, removeItem, clearCart } = useCart()
+    const { data: session } = useSession()
     const [editingItem, setEditingItem] = useState<string | null>(null)
     const [pixDialogOpen, setPixDialogOpen] = useState(false)
     const [pixName, setPixName] = useState('')
@@ -129,7 +131,8 @@ export default function CarrinhoPage() {
                 body: JSON.stringify({
                     code: couponCode.trim(),
                     cartItems: items,
-                    cartTotal: totalPrice
+                    cartTotal: totalPrice,
+                    userId: (session?.user as { id?: string })?.id || null
                 })
             })
 
