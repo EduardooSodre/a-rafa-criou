@@ -178,8 +178,8 @@ export default function CouponsTable({ search, onRefresh }: CouponsTableProps) {
                                     {formatValue(coupon)}
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-600">
-                                    {coupon.minSubtotal 
-                                        ? `R$ ${parseFloat(coupon.minSubtotal).toFixed(2)}` 
+                                    {coupon.minSubtotal
+                                        ? `R$ ${parseFloat(coupon.minSubtotal).toFixed(2)}`
                                         : '-'}
                                 </td>
                                 <td className="py-3 px-4">

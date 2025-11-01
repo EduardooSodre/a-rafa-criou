@@ -31,7 +31,7 @@ interface CouponFormProps {
 
 export default function CouponForm({ coupon, onSuccess }: CouponFormProps) {
     const [loading, setLoading] = useState(false)
-    
+
     // Função para formatar data do banco (ISO) para datetime-local input
     const formatDateForInput = (dateString: string | null | undefined) => {
         if (!dateString) return '';
@@ -44,7 +44,7 @@ export default function CouponForm({ coupon, onSuccess }: CouponFormProps) {
         const minutes = String(date.getMinutes()).padStart(2, '0');
         return `${year}-${month}-${day}T${hours}:${minutes}`;
     };
-    
+
     const [formData, setFormData] = useState({
         code: coupon?.code || '',
         type: coupon?.type || 'percent',
@@ -103,104 +103,104 @@ export default function CouponForm({ coupon, onSuccess }: CouponFormProps) {
                     Informações Básicas
                 </h3>
                 <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                    <Label htmlFor="code">Código do Cupom *</Label>
-                    <Input
-                        id="code"
-                        value={formData.code}
-                        onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                        placeholder="EX: DESCONTO10"
-                        required
-                    />
-                </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="code">Código do Cupom *</Label>
+                        <Input
+                            id="code"
+                            value={formData.code}
+                            onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                            placeholder="EX: DESCONTO10"
+                            required
+                        />
+                    </div>
 
-                <div className="space-y-2">
-                    <Label htmlFor="type">Tipo de Desconto *</Label>
-                    <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })}>
-                        <SelectTrigger>
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="percent">Percentual (%)</SelectItem>
-                            <SelectItem value="fixed">Valor Fixo (R$)</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="type">Tipo de Desconto *</Label>
+                        <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })}>
+                            <SelectTrigger>
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="percent">Percentual (%)</SelectItem>
+                                <SelectItem value="fixed">Valor Fixo (R$)</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
 
-                <div className="space-y-2">
-                    <Label htmlFor="value">Valor do Desconto *</Label>
-                    <Input
-                        id="value"
-                        type="number"
-                        step="0.01"
-                        value={formData.value}
-                        onChange={(e) => setFormData({ ...formData, value: e.target.value })}
-                        placeholder={formData.type === 'percent' ? '10' : '50.00'}
-                        required
-                    />
-                </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="value">Valor do Desconto *</Label>
+                        <Input
+                            id="value"
+                            type="number"
+                            step="0.01"
+                            value={formData.value}
+                            onChange={(e) => setFormData({ ...formData, value: e.target.value })}
+                            placeholder={formData.type === 'percent' ? '10' : '50.00'}
+                            required
+                        />
+                    </div>
 
-                <div className="space-y-2">
-                    <Label htmlFor="minSubtotal">Valor Mínimo da Compra (R$)</Label>
-                    <Input
-                        id="minSubtotal"
-                        type="number"
-                        step="0.01"
-                        value={formData.minSubtotal}
-                        onChange={(e) => setFormData({ ...formData, minSubtotal: e.target.value })}
-                        placeholder="0.00"
-                    />
-                    <p className="text-xs text-gray-500">Valor mínimo do carrinho para usar o cupom</p>
-                </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="minSubtotal">Valor Mínimo da Compra (R$)</Label>
+                        <Input
+                            id="minSubtotal"
+                            type="number"
+                            step="0.01"
+                            value={formData.minSubtotal}
+                            onChange={(e) => setFormData({ ...formData, minSubtotal: e.target.value })}
+                            placeholder="0.00"
+                        />
+                        <p className="text-xs text-gray-500">Valor mínimo do carrinho para usar o cupom</p>
+                    </div>
 
-                <div className="space-y-2">
-                    <Label htmlFor="maxUses">Usos Máximos Totais</Label>
-                    <Input
-                        id="maxUses"
-                        type="number"
-                        min="1"
-                        value={formData.maxUses}
-                        onChange={(e) => setFormData({ ...formData, maxUses: e.target.value })}
-                        placeholder="Ilimitado"
-                    />
-                    <p className="text-xs text-gray-500">Quantas vezes o cupom pode ser usado (total)</p>
-                </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="maxUses">Usos Máximos Totais</Label>
+                        <Input
+                            id="maxUses"
+                            type="number"
+                            min="1"
+                            value={formData.maxUses}
+                            onChange={(e) => setFormData({ ...formData, maxUses: e.target.value })}
+                            placeholder="Ilimitado"
+                        />
+                        <p className="text-xs text-gray-500">Quantas vezes o cupom pode ser usado (total)</p>
+                    </div>
 
-                <div className="space-y-2">
-                    <Label htmlFor="maxUsesPerUser">Usos por Usuário *</Label>
-                    <Input
-                        id="maxUsesPerUser"
-                        type="number"
-                        min="1"
-                        value={formData.maxUsesPerUser}
-                        onChange={(e) => setFormData({ ...formData, maxUsesPerUser: e.target.value })}
-                        required
-                    />
-                    <p className="text-xs text-gray-500">Quantas vezes cada usuário pode usar</p>
-                </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="maxUsesPerUser">Usos por Usuário *</Label>
+                        <Input
+                            id="maxUsesPerUser"
+                            type="number"
+                            min="1"
+                            value={formData.maxUsesPerUser}
+                            onChange={(e) => setFormData({ ...formData, maxUsesPerUser: e.target.value })}
+                            required
+                        />
+                        <p className="text-xs text-gray-500">Quantas vezes cada usuário pode usar</p>
+                    </div>
 
-                <div className="space-y-2">
-                    <Label htmlFor="startsAt">Data de Início (Opcional)</Label>
-                    <Input
-                        id="startsAt"
-                        type="datetime-local"
-                        value={formData.startsAt}
-                        onChange={(e) => setFormData({ ...formData, startsAt: e.target.value })}
-                    />
-                    <p className="text-xs text-gray-500">Deixe vazio para ativar imediatamente</p>
-                </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="startsAt">Data de Início (Opcional)</Label>
+                        <Input
+                            id="startsAt"
+                            type="datetime-local"
+                            value={formData.startsAt}
+                            onChange={(e) => setFormData({ ...formData, startsAt: e.target.value })}
+                        />
+                        <p className="text-xs text-gray-500">Deixe vazio para ativar imediatamente</p>
+                    </div>
 
-                <div className="space-y-2">
-                    <Label htmlFor="endsAt">Data de Término (Opcional)</Label>
-                    <Input
-                        id="endsAt"
-                        type="datetime-local"
-                        value={formData.endsAt}
-                        onChange={(e) => setFormData({ ...formData, endsAt: e.target.value })}
-                    />
-                    <p className="text-xs text-gray-500">Deixe vazio para não expirar</p>
+                    <div className="space-y-2">
+                        <Label htmlFor="endsAt">Data de Término (Opcional)</Label>
+                        <Input
+                            id="endsAt"
+                            type="datetime-local"
+                            value={formData.endsAt}
+                            onChange={(e) => setFormData({ ...formData, endsAt: e.target.value })}
+                        />
+                        <p className="text-xs text-gray-500">Deixe vazio para não expirar</p>
+                    </div>
                 </div>
-            </div>
             </div>
 
             {/* Seção: Configurações */}

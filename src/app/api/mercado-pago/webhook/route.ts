@@ -202,7 +202,7 @@ export async function POST(req: NextRequest) {
                   updatedAt: new Date(),
                 })
                 .where(eq(coupons.code, order.couponCode));
-              
+
               console.log(`🎟️ Cupom ${order.couponCode} incrementado (usedCount +1)`);
             } catch (err) {
               console.error('Erro ao incrementar contador do cupom:', err);
